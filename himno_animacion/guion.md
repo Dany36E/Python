@@ -4,9 +4,9 @@ Reparto de voces (Higgsfield · Text to Speech V2, motor ElevenLabs — el mismo
 
 | Personaje   | Voz      | Estado            |
 |-------------|----------|-------------------|
-| Narradora   | Elena    | por confirmar     |
-| Francisco   | Andre    | por confirmar     |
-| Lupita      | Pixie    | por confirmar     |
+| Narradora   | Elena    | confirmada        |
+| Francisco   | Leo      | confirmada        |
+| Lupita      | Pixie    | confirmada        |
 | Santa Anna  | Sterling | ya generado       |
 
 ## Líneas
