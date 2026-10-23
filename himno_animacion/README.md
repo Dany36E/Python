@@ -24,7 +24,8 @@ python3 tools/build_timeline.py               # línea de tiempo + mezcla de aud
 node tools/render.mjs stills 15,52,140        # cuadros sueltos en build/stills/
 node tools/render.mjs video                   # video completo en build/himno.mp4
 node tools/render.mjs video 128 153           # solo un tramo (segundos)
+VERTICAL=1 node tools/render.mjs video        # versión 9:16 en build/himno_vertical.mp4
 ```
 
 Para verla en el navegador con controles de reproducción, abre `anim/index.html`.
-Con `?captions=0` se ocultan los subtítulos.
+Con `?captions=0` se ocultan los subtítulos y con `?vertical=1` se ve el formato vertical.
