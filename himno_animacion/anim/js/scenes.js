@@ -5,10 +5,12 @@
   const INK = C.INK;
 
   // Cámara: nunca deja ver fuera del cuadro de 1920x1080 del mundo.
+  let lastCam = { cx: 960, cy: 540, s: 1 };
   const cam = (inner, cx, cy, s) => {
     s = Math.max(1, s);
     cx = clamp(cx, 960 / s, 1920 - 960 / s);
     cy = clamp(cy, 540 / s, 1080 - 540 / s);
+    lastCam = { cx, cy, s };
     return `<g transform="translate(960 540) scale(${f(s * 1000) / 1000}) translate(${f(-cx)} ${f(-cy)})">${inner}</g>`;
   };
   // Interpola la cámara entre llaves [t, cx, cy, s] con suavizado.
@@ -23,6 +25,9 @@
     }
     return keys[keys.length - 1].slice(1);
   }
+  // Encuadre vertical: x del mundo -> x de pantalla según la última cámara usada.
+  const vfocus = (X, wx) => X.focus((wx - lastCam.cx) * lastCam.s + 960);
+  const fk = (t, keys) => camKeys(t, keys)[0];
   const popIn = (t, start, inner, x, y, d = 0.45) => {
     const k = pop(t, start, d);
     return k <= 0 ? '' : g(`translate(${f(x)} ${f(y)}) scale(${f(Math.max(0.001, k) * 1000) / 1000})`, inner);
@@ -53,15 +58,22 @@
   const S = {};
 
   // ---------------------------------------------------------------- 0. portada
-  S.titulo = (t) => {
+  S.titulo = (t, sc, X) => {
     let s = P.sky() + P.clouds(t, 2, 6, 60, 360, 10);
     s += P.hills(760) + P.tree(170, 860, 1.1, Math.sin(t) * 2) + P.tree(1780, 880, 1.2, Math.sin(t + 1) * 2);
     s += P.flagpole(1480, 250, 640) + P.flag(1487, 262, 330, 210, t, 14);
     s += P.bush(1650, 900, 1.2) + P.bush(260, 930, 1.1);
     s += P.flowers(930, t, 3, 22);
     const k1 = pop(t, 0.3, 0.6), k2 = prog(t, 1.2, 1.8);
-    s += g(`translate(820 330) scale(${f(Math.max(0.001, k1) * 1000) / 1000})`, P.title(0, -60, 'El Himno Nacional', 128, '#1f4fa0', '#fff', 22) + P.title(0, 90, 'Mexicano', 150, '#c8312b', '#fff', 22));
-    s += op(k2, P.title(820, 560, 'Una historia de amor, poesía y mucho talento', 56, '#2b6b3f', '#fff', 14, 600));
+    const ks = `scale(${f(Math.max(0.001, k1) * 1000) / 1000})`;
+    if (X.vertical) {
+      s += X.place(g(ks, P.title(0, -170, 'El Himno', 160, '#1f4fa0', '#fff', 24) + P.title(0, 0, 'Nacional', 160, '#1f4fa0', '#fff', 24) + P.title(0, 190, 'Mexicano', 180, '#c8312b', '#fff', 24)), 0, 0, { vx: 540, vy: 420 });
+      s += X.place(op(k2, P.title(0, 0, 'Una historia de amor,', 64, '#2b6b3f', '#fff', 14, 600) + P.title(0, 80, 'poesía y mucho talento', 64, '#2b6b3f', '#fff', 14, 600)), 0, 0, { vx: 540, vy: 790 });
+    } else {
+      s += g(`translate(820 330) ${ks}`, P.title(0, -60, 'El Himno Nacional', 128, '#1f4fa0', '#fff', 22) + P.title(0, 90, 'Mexicano', 150, '#c8312b', '#fff', 22));
+      s += op(k2, P.title(820, 560, 'Una historia de amor, poesía y mucho talento', 56, '#2b6b3f', '#fff', 14, 600));
+    }
+    X.focus(670);
     const up = ease.back(prog(t, 0.8, 1.6));
     s += C.kid({ t, x: 520, y: 1260 - up * 260, s: 1.15, kind: 'boy', shirt: '#3aa35b', blinkSeed: 2, armR: [150 + Math.sin(t * 8) * 15, 20] });
     s += C.kid({ t, x: 820, y: 1280 - up * 260, s: 1.1, kind: 'girl', shirt: '#f48fb1', band: '#e94c6a', blinkSeed: 5, armL: [140 + Math.sin(t * 8 + 1) * 15, 25] });
@@ -111,9 +123,10 @@
     let s = cam(world, cx, cy, cs);
     // placa "1853" y nombre
     const plate = `<rect x="-190" y="-80" width="380" height="160" rx="26" fill="#fff6dc" stroke="#c99a2e" stroke-width="8"/><rect x="-176" y="-66" width="352" height="132" rx="18" fill="none" stroke="#e9c46a" stroke-width="3"/>` + P.title(0, 38, '1853', 110, '#8a4b14', '#fff6dc', 2);
-    s += fadeWin(t, X.ph('N01', 2), X.ph('N01', 3) + 2.5, popIn(t, X.ph('N01', 2), plate, 1500, 170));
-    s += fadeWin(t, X.ph('N01', 0) - 0.1, X.ph('N01', 1) + 0.6, P.title(960, 200, 'Había una vez…', 120, '#1f4fa0', '#fff', 18), 0.5);
-    s += fadeWin(t, X.ph('N01', 3) + 2.4, X.ph('N02', 0) + 0.5, popIn(t, X.ph('N01', 3) + 2.4, P.ribbon(0, 0, 'Antonio López de Santa Anna', 1, '#203a6e', 50), 960, 150));
+    s += X.place(fadeWin(t, X.ph('N01', 2), X.ph('N01', 3) + 2.5, popIn(t, X.ph('N01', 2), plate, 0, 0)), 1500, 170, { vy: 260 });
+    s += X.place(fadeWin(t, X.ph('N01', 0) - 0.1, X.ph('N01', 1) + 0.6, P.title(0, 0, 'Había una vez…', 120, '#1f4fa0', '#fff', 18), 0.5), 960, 200, { vy: 300, w: 880 });
+    s += X.place(fadeWin(t, X.ph('N01', 3) + 2.4, X.ph('N02', 0) + 0.5, popIn(t, X.ph('N01', 3) + 2.4, P.ribbon(0, 0, 'Antonio López de Santa Anna', 1, '#203a6e', 50), 0, 0)), 960, 150, { vy: 250, w: 1180 });
+    vfocus(X, fk(t, [[sc.start, 330], [X.ph('N01', 1), 1240], [showSA, 1240], [showSA + 1.2, 880], [X.ph('N03', 1) + 0.2, 880], [X.ph('N03', 1) + 1.0, 1300], [sc.end, 1300]]));
     return s + textureOverlay();
   };
 
@@ -148,20 +161,21 @@
     const q = 1 - prog(t, X.ph('N05', 0), X.ph('N05', 0) + 0.4);
     world += op(q * prog(t, X.ph('N04', 1) - 0.2, X.ph('N04', 1) + 0.3), P.question(900, 520 + Math.sin(t * 3) * 12, 1.4 + Math.sin(t * 4) * 0.05));
     world += P.floatingHearts(t, 1150, 520, 260, 8, 7, X.ph('N06', 3));
-    if (t >= X.ph('N06', 4) - 0.1) world += op(win(t, X.ph('N06', 4), n6.end + 0.5, 0.3, 0.3), popIn(t, X.ph('N06', 4), `<path d="M-90,-50 Q-45,-70 0,-50 Q45,-70 90,-50 L90,50 Q45,30 0,50 Q-45,30 -90,50 Z" fill="#fff8ec" stroke="${INK}" stroke-width="4"/><path d="M0,-50 L0,50" stroke="${INK}" stroke-width="3"/>` + `<path d="M-74,-20 l56,-6 M-74,0 l56,-6 M18,-26 l56,6 M18,-6 l56,6" stroke="#8a7aa0" stroke-width="4"/>`, 640, 360));
+    if (t >= X.ph('N06', 4) - 0.1) world += op(win(t, X.ph('N06', 4), n6.end + 0.5, 0.3, 0.3), popIn(t, X.ph('N06', 4), `<path d="M-90,-50 Q-45,-70 0,-50 Q45,-70 90,-50 L90,50 Q45,30 0,50 Q-45,30 -90,50 Z" fill="#fff8ec" stroke="${INK}" stroke-width="4"/><path d="M0,-50 L0,50" stroke="${INK}" stroke-width="3"/>` + `<path d="M-74,-20 l56,-6 M-74,0 l56,-6 M18,-26 l56,6 M18,-6 l56,6" stroke="#8a7aa0" stroke-width="4"/>`, X.vertical ? 760 : 640, 360));
     if (t >= X.ph('N06', 5)) {
       const words = ['versos', 'amor', 'patria', 'poesía'];
       words.forEach((w, i) => {
         const st = X.ph('N06', 5) + i * 0.35;
         const k = prog(t, st, st + 3);
-        if (k > 0 && k < 1) world += op(Math.sin(k * Math.PI), label(lerp(900, 560 + i * 260, k), lerp(820, 260 + (i % 2) * 80, ease.out(k)), w, 54, ['#c8312b', '#e0517f', '#2e7d5b', '#3a7ad0'][i]));
+        if (k > 0 && k < 1) world += op(Math.sin(k * Math.PI), label(lerp(900, X.vertical ? 760 + i * 95 : 560 + i * 260, k), lerp(820, 260 + (i % 2) * 80, ease.out(k)), w, 54, ['#c8312b', '#e0517f', '#2e7d5b', '#3a7ad0'][i]));
       });
     }
     const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 540, 1.0], [X.ph('N05', 0), 950, 540, 1.04], [X.ph('N06', 1), 900, 460, 1.22], [X.ph('N06', 2) + 0.5, 920, 560, 1.1], [sc.end, 940, 560, 1.14]]);
     let s = cam(world, cx, cy, cs);
-    s += fadeWin(t, X.ph('N05', 1) + 0.6, X.ph('N06', 0) + 0.2, popIn(t, X.ph('N05', 1) + 0.6, P.ribbon(0, 0, 'Francisco González Bocanegra', 1, '#7a4a2e', 50), 960, 130));
-    s += fadeWin(t, X.ph('N06', 0), X.ph('N06', 1) + 0.6, popIn(t, X.ph('N06', 0), P.ribbon(0, 0, '¡Poeta!', 1.1, '#c8312b', 64), 960, 130));
-    s += t >= X.ph('N06', 1) && t < X.ph('N06', 2) ? popIn(t, X.ph('N06', 1) + 0.3, P.question(0, 0, 0.6, '#e0a020'), 1280, 300) : '';
+    s += X.place(fadeWin(t, X.ph('N05', 1) + 0.6, X.ph('N06', 0) + 0.2, popIn(t, X.ph('N05', 1) + 0.6, P.ribbon(0, 0, 'Francisco González Bocanegra', 1, '#7a4a2e', 50), 0, 0)), 960, 130, { vy: 250, w: 1180 });
+    s += X.place(fadeWin(t, X.ph('N06', 0), X.ph('N06', 1) + 0.6, popIn(t, X.ph('N06', 0), P.ribbon(0, 0, '¡Poeta!', 1.1, '#c8312b', 64), 0, 0)), 960, 130, { vy: 250 });
+    s += t >= X.ph('N06', 1) && t < X.ph('N06', 2) ? X.place(popIn(t, X.ph('N06', 1) + 0.3, P.question(0, 0, 0.6, '#e0a020'), 0, 0), 1280, 300, { vx: 830, vy: 560 }) : '';
+    vfocus(X, 900);
     return s + textureOverlay();
   };
 
@@ -197,14 +211,17 @@
         armR: inL ? [64 + Math.sin(t * 3) * 4, 14] : [58, 18], armL: inL && t > X.ph('L01', 1) ? [70 + Math.sin(t * 5) * 10, 70] : [10, 6],
         browUp: inL ? 0.4 : 0, tilt: inL ? Math.sin(t * 2) * 3 : 0,
       });
-      world += fadeWin(t, X.ph('N07', 0) + 2.0, X.ph('N07', 1) + 1.5, popIn(t, X.ph('N07', 0) + 2.0, P.ribbon(0, 0, 'Lupita', 0.9, '#e0517f', 58), 720, 150));
+      world += X.place(fadeWin(t, X.ph('N07', 0) + 2.0, X.ph('N07', 1) + 1.5, popIn(t, X.ph('N07', 0) + 2.0, P.ribbon(0, 0, 'Lupita', 0.9, '#e0517f', 58), 0, 0)), 720, 150, { vy: 250 });
     }
     world += P.floatingHearts(t, 950, 420, 400, 13, 8, X.ph('N07', 0) + 1.6);
     world += P.sparkles(t, 1250, 760, 160, 3, 8, X.ph('N07', 1), 2.0);
     if (worried) world += `<path d="M1310,300 C1300,320 1296,332 1310,342 C1324,332 1320,320 1310,300 Z" fill="#9fd4f5" stroke="${INK}" stroke-width="3" opacity="${f(prog(t, X.ph('N08', 0) + 0.5, X.ph('N08', 0) + 0.9))}"/>`;
     world += popIn(t, ideaT, P.bulb(0, 0, 0.9, 0.8 + 0.2 * Math.sin(t * 6)), 720, 130) + P.sparkles(t, 720, 130, 140, 6, 8, ideaT, 1.3);
     const [cx, cy, cs] = camKeys(t, [[sc.start, 1100, 500, 1.15], [X.ph('N07', 0) + 1.0, 960, 540, 1.0], [l01.start, 920, 470, 1.12], [X.ph('N08', 0), 1060, 450, 1.18], [ideaT - 0.3, 860, 440, 1.12], [sc.end, 840, 440, 1.15]]);
-    return cam(world, cx, cy, cs) + textureOverlay();
+    const out = cam(world, cx, cy, cs);
+    vfocus(X, fk(t, [[sc.start, 1180], [X.ph('N07', 0) + 1.0, 1180], [X.ph('N07', 0) + 1.8, 760], [l01.end + 0.2, 760], [X.ph('N08', 0) + 0.3, 1180],
+      [X.ph('N08', 2) - 0.2, 1180], [X.ph('N08', 2) + 0.4, 760], [sc.end, 760]]));
+    return out + textureOverlay();
   };
 
   // ---------------------------------------------------------------- 4. encierro
@@ -218,23 +235,33 @@
       world += P.window(160, 170, 300, 260, t, false, '#e0607e');
       const doorOpen = 1 - ease.inOut(prog(t, closeT - 0.5, closeT));
       world += P.door(1420, 200, 330, 640, doorOpen, { inside: '#5a3a28' });
-      // mesa con papel y pluma
-      world += `<rect x="560" y="640" width="560" height="34" rx="10" fill="#a8653a" stroke="${INK}" stroke-width="4"/><rect x="600" y="674" width="26" height="170" fill="#8f5532" stroke="${INK}" stroke-width="3"/><rect x="1054" y="674" width="26" height="170" fill="#8f5532" stroke="${INK}" stroke-width="3"/>`;
-      world += P.paper(780, 600, -8, 0.5, 6, 0) + P.quill(900, 636, -60, 0.6) + P.inkwell(980, 640, 0.7);
-      world += P.sparkles(t, 840, 600, 140, 2, 8, X.ph('N09', 1), 1.6);
-      // caminata: entran por la puerta y van a la mesa
+      // entran por la puerta; Francisco queda detrás de la mesa y se sienta cuando Lupita sale
       const walk = prog(t, sc.start + 0.4, X.ph('N09', 0) + 2.6);
-      const fx = lerp(1500, 860, ease.inOut(walk));
+      const fx = lerp(1500, 840, ease.inOut(walk));
+      const sit = ease.inOut(prog(t, X.ph('N09', 2) - 0.3, X.ph('N09', 2) + 0.4));
       const lupBack = prog(t, X.ph('N09', 2) - 0.3, closeT - 0.4);
-      const lx = lerp(lerp(1700, 1120, ease.inOut(walk)), 1620, ease.inOut(lupBack));
+      const lx = lerp(lerp(1700, 1220, ease.inOut(walk)), 1620, ease.inOut(lupBack));
       const lupVisible = t < closeT - 0.25;
       const surprised = t > closeT ? 1 : 0;
-      world += C.francisco({ t, x: fx, y: 590, s: 0.82, full: true, step: walk > 0 && walk < 1 ? t * 8 : 0, blinkSeed: 2,
-        turn: surprised ? 0.6 : -0.3, look: surprised ? [0.9, 0] : [-0.6, 0], browUp: surprised, mouth: surprised ? 0.45 : 0, smile: surprised ? 0.1 : 0.5,
-        armR: walk < 1 ? [30, 10] : [12, 8] });
-      if (lupVisible) world += C.lupita({ t, x: lx, y: 600, s: 0.82, full: true, blinkSeed: 3, turn: lupBack > 0 ? 0.6 : -0.4, look: lupBack > 0 ? [0.8, 0] : [-0.8, 0],
-        armL: walk < 1 ? [60, 10] : [12, 8], smile: 0.9 });
+      const fr = { t, x: fx, y: 560 + sit * 75, s: 0.9, full: sit < 0.5, step: walk > 0 && walk < 1 ? t * 8 : 0, blinkSeed: 2,
+        turn: surprised ? 0.6 : walk < 1 ? -0.3 : 0.2, look: surprised ? [0.9, 0] : walk < 1 ? [-0.6, 0] : [0.3, 0.6], browUp: surprised,
+        mouth: surprised ? 0.45 : 0, smile: surprised ? 0.1 : 0.6,
+        ...(sit > 0 ? { armL: [10, lerp(6, -60, sit)], armR: [10, lerp(6, -60, sit)] } : {}) };
+      world += C.francisco({ ...fr, part: sit > 0 ? 'body' : 'all' });
+      // mesa con frente de madera (tapa las piernas de quien está detrás)
+      world += `<path d="M560,600 L1120,600 L1150,672 L530,672 Z" fill="#b8723f" stroke="${INK}" stroke-width="4"/>` +
+        `<rect x="530" y="672" width="620" height="168" fill="url(#woodDark)" stroke="${INK}" stroke-width="4"/>` +
+        `<rect x="560" y="700" width="260" height="110" rx="8" fill="none" stroke="#a5643a" stroke-width="4"/><rect x="860" y="700" width="260" height="110" rx="8" fill="none" stroke="#a5643a" stroke-width="4"/>` +
+        `<circle cx="690" cy="755" r="9" fill="#e2b444" stroke="${INK}" stroke-width="2.5"/><circle cx="990" cy="755" r="9" fill="#e2b444" stroke="${INK}" stroke-width="2.5"/>` +
+        `<ellipse cx="840" cy="846" rx="340" ry="14" fill="#000" opacity=".15"/>`;
+      world += paperFlat(800, 640, 220, 50, 0) + P.quill(930, 650, -62, 0.55) + P.inkwell(1040, 652, 0.7);
+      world += P.sparkles(t, 860, 620, 160, 2, 8, X.ph('N09', 1), 1.6);
+      if (sit > 0) world += C.francisco({ ...fr, part: 'arms' });
+      if (lupVisible) world += C.lupita({ t, x: lx, y: 570, s: 0.9, full: true, step: (walk > 0 && walk < 1) || (lupBack > 0 && lupBack < 1) ? t * 8 : 0, blinkSeed: 3,
+        turn: lupBack > 0 ? 0.6 : -0.4, look: lupBack > 0 ? [0.8, 0] : [-0.8, 0], smile: 0.9 });
       if (t > keyT - 0.1) world += popIn(t, keyT, P.key(0, 0, -20 + 70 * ease.out(prog(t, keyT, keyT + 0.5)), 0.8) + label(60, -60, '¡clic!', 60, '#c8312b'), 1585, 450);
+      const walkEnd = X.ph('N09', 0) + 2.6;
+      X._wx = walk < 1 ? (fx + lx) / 2 : fk(t, [[walkEnd, 1030], [X.ph('N09', 1) + 0.3, 860], [X.ph('N09', 2), 1100], [closeT - 0.4, 1560], [l02.start, 1560]]);
     } else {
       world = `<rect width="1920" height="1080" fill="url(#wallPink)"/><rect y="840" width="1920" height="240" fill="url(#floorWood)"/>`;
       world += P.door(620, 200, 360, 640, 0);
@@ -244,7 +271,9 @@
     }
     const [cx, cy, cs] = outside ? camKeys(t, [[l02.start - 0.5, 1000, 540, 1.05], [sc.end, 1080, 520, 1.15]])
       : camKeys(t, [[sc.start, 1100, 520, 1.0], [X.ph('N09', 1), 900, 560, 1.15], [X.ph('N09', 3) - 0.2, 1300, 520, 1.12], [l02.start - 0.5, 1340, 520, 1.15]]);
-    return cam(world, cx, cy, cs) + textureOverlay();
+    const out = cam(world, cx, cy, cs);
+    vfocus(X, outside ? 1150 : X._wx);
+    return out + textureOverlay();
   };
 
   // ---------------------------------------------------------------- 5. noche
@@ -271,7 +300,7 @@
     if (dots) {
       let d = '';
       for (let i = 0; i < dots; i++) d += `<circle cx="${80 + i * 70}" cy="80" r="${16 + Math.sin(t * 6 + i) * 2}" fill="#5a4a6a"/>`;
-      world += op(1 - prog(t, X.ph('N10', 3), X.ph('N10', 3) + 0.4), P.bubble(1030, 220, 300, 170, 1000, 420, d, true));
+      world += op(1 - prog(t, X.ph('N10', 3), X.ph('N10', 3) + 0.4), X.vertical ? P.bubble(930, 110, 260, 150, 960, 330, d, true) : P.bubble(1030, 220, 300, 170, 1000, 420, d, true));
     }
     if (t >= X.ph('N10', 3)) world += P.sparkles(t, 900, 350, 220, 11, 10, X.ph('N10', 3), 1.5);
     if (t >= X.ph('N10', 4) && t < X.ph('N11', 1) + 2) {
@@ -280,22 +309,26 @@
         const st = X.ph('N10', 4) + i * 0.18, k = prog(t, st, st + 3.2);
         if (k <= 0 || k >= 1) continue;
         const a = i * 0.9 + k * 2.4, r = 80 + k * 520;
-        const lx = 900 + Math.cos(a) * r, ly = 300 + Math.sin(a) * r * 0.45 - k * 120;
+        const lx = 900 + Math.cos(a) * r * (X.vertical ? 0.45 : 1), ly = 300 + Math.sin(a) * r * 0.45 - k * 120;
         world += op(Math.min(1, Math.sin(k * Math.PI) * 1.6), `<circle cx="${f(lx)}" cy="${f(ly - 30)}" r="60" fill="#fff3b0" opacity=".35" filter="url(#blur12)"/>` +
           `<text x="${f(lx)}" y="${f(ly)}" text-anchor="middle" font-family="Fredoka" font-weight="700" font-size="96" fill="${['#ffd84a', '#ff9fbf', '#8fdcff', '#b6ec8a'][i % 4]}" stroke="#3a2a50" stroke-width="10" stroke-linejoin="round" paint-order="stroke">${letters[i]}</text>`);
       }
     }
-    if (hours > 0) world += fadeWin(t, X.ph('N12', 1) - 0.2, X.ph('N12', 3), popIn(t, X.ph('N12', 1) - 0.2, P.clock(0, 0, 110, 9 + hours) + label(0, 190, `${Math.round(hours)} horas`, 56, '#c8312b'), 520, 380));
+    let clockUI = '';
+    if (hours > 0) clockUI = fadeWin(t, X.ph('N12', 1) - 0.2, X.ph('N12', 3), popIn(t, X.ph('N12', 1) - 0.2, P.clock(0, 0, 110, 9 + hours) + label(0, 190, `${Math.round(hours)} horas`, 56, '#c8312b'), 0, 0));
+    world += X.vertical ? '' : g(tr(520, 380), clockUI);
     if (done) {
       for (let i = 0; i < 10; i++) {
         const st = X.ph('N12', 3) + 0.4 + i * 0.22;
         const a = Math.PI * (1.08 + (i / 9) * 0.84);
-        world += popIn(t, st, P.paper(0, 0, (i - 4.5) * 7, 0.55, 6, 1) + label(0, 90, String(i + 1), 54, '#c8312b'), 900 + Math.cos(a) * 560, 640 + Math.sin(a) * 440);
+        world += popIn(t, st, P.paper(0, 0, (i - 4.5) * 7, 0.55, 6, 1) + label(0, 90, String(i + 1), 54, '#c8312b'), 900 + Math.cos(a) * (X.vertical ? 250 : 560), 640 + Math.sin(a) * (X.vertical ? 520 : 440));
       }
       world += P.sparkles(t, 900, 300, 500, 14, 14, X.ph('N12', 3) + 0.3, 2.5);
     }
     const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 540, 1.0], [X.ph('N10', 0), 960, 420, 1.15], [X.ph('N11', 0), 900, 560, 1.22], [X.ph('N12', 1) - 0.3, 900, 520, 1.05], [X.ph('N12', 3), 920, 470, 1.0], [sc.end, 920, 470, 1.04]]);
-    return cam(world, cx, cy, cs) + `<rect width="1920" height="1080" fill="#1a1440" opacity=".18"/>` + textureOverlay();
+    const out = cam(world, cx, cy, cs);
+    vfocus(X, 900);
+    return out + `<rect width="1920" height="1080" fill="#1a1440" opacity=".18"/>` + textureOverlay() + (X.vertical && clockUI ? X.place(clockUI, 0, 0, { vx: 540, vy: 360, vs: 0.85 }) : '');
   };
 
   // ---------------------------------------------------------------- 6. puerta
@@ -339,7 +372,10 @@
     world += fadeWin(t, f01.start - 0.1, f01.end + 0.6, popIn(t, f01.start - 0.1, P.bubble(-240, -70, 480, 140, -40, 120, label(240, 92, '¡Ya terminé!', 64, '#7a4a2e')), 680, 120));
     world += P.sparkles(t, 860, 560, 420, 7, 10, openT, 1.6);
     const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 540, 1.0], [f01.start, 860, 500, 1.08], [X.ph('N14', 2) - 0.4, 920, 650, 1.18], [X.ph('N15', 0), 1050, 560, 1.08], [openT, 900, 540, 1.0], [sc.end, 1000, 540, 1.0]]);
-    return cam(world, cx, cy, cs) + textureOverlay();
+    const out = cam(world, cx, cy, cs);
+    vfocus(X, fk(t, [[sc.start, 1260], [f01.start - 0.4, 1260], [f01.start, 700], [X.ph('N14', 2) - 0.2, 700], [X.ph('N14', 2) + 0.9, 950], [X.ph('N14', 4) + 0.9, 1150],
+      [X.ph('N15', 0), 1260], [openT - 0.5, 1260], [openT + 0.3, 760], [X.ph('N15', 2) + 0.6, 900], [n15.end + 1.2, 1700]]));
+    return out + textureOverlay();
   };
 
   // ---------------------------------------------------------------- 7. ganador
@@ -358,10 +394,12 @@
     world += `<rect x="300" y="880" width="1320" height="60" rx="10" fill="#b5242d" stroke="${INK}" stroke-width="4"/>`;
     world += P.crowd(900, t, 5, 16);
     world += won ? P.confetti(t, winT, 3, 120) : '';
-    if (won) world += popIn(t, winT + 0.1, P.ribbon(0, 0, '¡Ganador de la letra!', 1, '#0f8a4a', 56), 960, 140);
+    if (won) world += X.place(popIn(t, winT + 0.1, P.ribbon(0, 0, '¡Ganador de la letra!', 1, '#0f8a4a', 56), 0, 0), 960, 140, { vy: 250 });
     const spot = won ? 0 : 0.25 * prog(t, X.ph('N16', 0), X.ph('N16', 0) + 0.5);
     const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 540, 1.0], [winT - 0.5, 820, 500, 1.15], [winT + 0.3, 960, 540, 1.0], [sc.end, 960, 520, 1.03]]);
-    return cam(world, cx, cy, cs) + (spot ? `<rect width="1920" height="1080" fill="#000" opacity="${f(spot * 100) / 100}"/>` : '') + textureOverlay();
+    const out = cam(world, cx, cy, cs);
+    vfocus(X, fk(t, [[sc.start, 680], [X.ph('N16', 0) + 0.2, 680], [X.ph('N16', 0) + 0.8, 1250], [X.ph('N16', 1) + 0.8, 1250], [winT - 0.4, 680], [sc.end, 680]]));
+    return out + (spot ? `<rect width="1920" height="1080" fill="#000" opacity="${f(spot * 100) / 100}"/>` : '') + textureOverlay();
   };
 
   // ---------------------------------------------------------------- 8. Jaime Nunó
@@ -392,11 +430,12 @@
         armR: conduct ? [120 + swing * 25, 40 + swing * 20] : [12, 8], propR: conduct ? (x, y, a) => g(tr(x, y, 1, a - 60), `<rect x="0" y="-4" width="170" height="8" rx="4" fill="#f4ead2" stroke="${INK}" stroke-width="2"/>`) : null,
         armL: conduct ? [70 - swing * 10, 50] : [12, 8] }));
       world += P.sparkles(t, 960, 400, 400, 17, 12, appear, 1.6);
-      if (t >= X.ph('N19', 0)) world += popIn(t, X.ph('N19', 0) + 0.3, P.spainPennant(0, 0, 1.2, t) + label(110, -30, 'España', 56, '#c8102e'), 230, 120);
+      if (t >= X.ph('N19', 0)) world += popIn(t, X.ph('N19', 0) + 0.3, P.spainPennant(0, 0, 1.2, t) + label(110, -30, 'España', 56, '#c8102e'), X.vertical ? 690 : 230, X.vertical ? 170 : 120);
     }
     const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 540, 1.05], [appear, 960, 540, 1.0], [X.ph('N19', 2), 960, 540, 1.0], [sc.end, 960, 520, 1.03]]);
     let s = cam(world, cx, cy, cs);
-    s += fadeWin(t, X.ph('N18', 2), X.ph('N19', 0) + 0.8, popIn(t, X.ph('N18', 2), P.ribbon(0, 0, 'Jaime Nunó', 1.1, '#25262e', 62), 960, 130));
+    s += X.place(fadeWin(t, X.ph('N18', 2), X.ph('N19', 0) + 0.8, popIn(t, X.ph('N18', 2), P.ribbon(0, 0, 'Jaime Nunó', 1.1, '#25262e', 62), 0, 0)), 960, 130, { vy: 250 });
+    vfocus(X, 960);
     return s + textureOverlay();
   };
 
@@ -412,9 +451,10 @@
       const shake = Math.sin(t * 10) * 6;
       world += C.santaAnna({ t, x: 600, y: 990, s: 1.25, blinkSeed: 1, smile: 0.8, turn: 0.5, look: [0.9, 0], armR: [64, 26 + shake] });
       world += C.nuno({ t, x: 1330, y: 990, s: 1.25, blinkSeed: 4, smile: 0.7, turn: -0.5, look: [-0.9, 0], armL: [64, 26 - shake] });
-      world += popIn(t, X.ph('N20', 0) + 2.6, P.ribbon(0, 0, 'La Habana, Cuba', 1, '#1c6fa8', 56), 960, 140);
+      world += X.place(popIn(t, X.ph('N20', 0) + 2.6, P.ribbon(0, 0, 'La Habana, Cuba', 1, '#1c6fa8', 56), 0, 0), 960, 140, { vy: 250 });
       const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 520, 1.0], [sail - 0.2, 960, 560, 1.08]]);
       s = cam(world, cx, cy, cs);
+      vfocus(X, fk(t, [[sc.start, 640], [X.ph('N20', 0) + 2.0, 640], [X.ph('N20', 0) + 3.0, 1300], [sail, 1300]]));
     } else {
       const k = ease.inOut(prog(t, sail, sc.end));
       let world = P.sky() + P.clouds(t, 13, 6, 40, 300, 14) + P.sea(520, t);
@@ -425,6 +465,7 @@
       const sx = lerp(460, 1450, k), sy = 690 - Math.sin(k * Math.PI) * 110;
       world += P.smoke(sx, sy - 150, t) + P.ship(sx, sy, 0.42, t);
       s = world;
+      X.focus(lerp(sx + 120, 1640, prog(t, sc.end - 1.6, sc.end - 0.4)));
     }
     return s + textureOverlay();
   };
@@ -454,9 +495,10 @@
       world += g(tr(960, 850), sheet) + P.inkwell(1300, 845, 0.9);
       world += C.nuno({ t, x: 960, y: 820, s: 1.25, blinkSeed: 4, part: 'arms', ...pose });
       if (writing) world += P.floatingNotes(t, 960, 640, 900, 25, 12);
-      if (won) world += P.confetti(t, winT, 4, 110) + popIn(t, winT + 0.2, P.medal(0, 0, 0.6), 960, 630) + popIn(t, winT, P.ribbon(0, 0, '¡Ganador de la música!', 1, '#0f8a4a', 56), 960, 140);
+      if (won) world += P.confetti(t, winT, 4, 110) + popIn(t, winT + 0.2, P.medal(0, 0, 0.6), 960, 630) + X.place(popIn(t, winT, P.ribbon(0, 0, '¡Ganador de la música!', 1, '#0f8a4a', 56), 0, 0), 960, 140, { vy: 250 });
       const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 540, 1.0], [X.ph('N21', 2), 960, 460, 1.15], [winT, 960, 520, 1.0]]);
       s = cam(world, cx, cy, cs);
+      vfocus(X, 960);
     } else {
       const fr = t < X.ph('N22', 1) + 0.2 ? 1 : 0.5, nu = t >= X.ph('N22', 1) - 0.2 ? 1 : 0.6;
       let world = `<rect width="960" height="1080" fill="#f6dcc0"/><rect x="960" width="960" height="1080" fill="#e8d6f2"/>`;
@@ -467,8 +509,9 @@
       world += popIn(t, n22.start + 0.6, P.ribbon(0, 0, 'LETRA', 1, '#7a4a2e', 60), 480, 120);
       world += popIn(t, X.ph('N22', 1), P.ribbon(0, 0, 'MÚSICA', 1, '#5b3a8a', 60), 1440, 120);
       world += popIn(t, X.ph('N22', 2) + 0.8, P.heart(0, 0, 2.2), 960, 520);
-      world += popIn(t, X.ph('N22', 2) + 1.6, `<rect x="-560" y="-70" width="1120" height="130" rx="30" fill="#fffdf7" stroke="#c99a2e" stroke-width="7"/>` + P.title(0, 30, 'Himno Nacional Mexicano', 78, '#0f8a4a', '#fffdf7', 0), 960, 300);
+      world += X.place(popIn(t, X.ph('N22', 2) + 1.6, `<rect x="-560" y="-70" width="1120" height="130" rx="30" fill="#fffdf7" stroke="#c99a2e" stroke-width="7"/>` + P.title(0, 30, 'Himno Nacional Mexicano', 78, '#0f8a4a', '#fffdf7', 0), 0, 0), 960, 300, { vy: 300, w: 1140 });
       s = world;
+      X.focus(fk(t, [[n22.start, 480], [X.ph('N22', 1) - 0.2, 480], [X.ph('N22', 1) + 0.4, 1440], [X.ph('N22', 2) + 0.6, 1440], [X.ph('N22', 2) + 1.3, 960]]));
     }
     return s + textureOverlay();
   };
@@ -502,12 +545,16 @@
       who.forEach((fn, i) => {
         const st = X.ph('N23', 2) + i * 0.5;
         const inner = `<circle r="110" fill="#fff6e6" stroke="#c99a2e" stroke-width="8"/><clipPath id="med${i}"><circle r="104"/></clipPath><g clip-path="url(#med${i})">` + fn({ t, x: 0, y: 250, s: 0.95, blinkSeed: i + 1 }) + `</g>`;
-        world += fadeWin(t, st, X.ph('N24', 0) + 0.6, popIn(t, st, inner, 1180 + i * 260, 220 + (i % 2) * 70));
+        const med = fadeWin(t, st, X.ph('N24', 0) + 0.6, popIn(t, st, inner, 0, 0));
+        world += X.vertical ? '' : g(tr(1180 + i * 260, 220 + (i % 2) * 70), med);
+        if (X.vertical) X.place(med, 0, 0, { vx: 220 + i * 320, vy: 330 + (i % 2) * 60, vs: 0.85 });
       });
     }
-    if (t >= X.ph('N24', 2) && t < X.ph('N24', 3) + 0.8) world += popIn(t, X.ph('N24', 2), label(0, 0, 'Shhh…', 80, '#3a7ad0'), 1600, 520);
+    if (t >= X.ph('N24', 2) && t < X.ph('N24', 3) + 0.8) world += X.place(popIn(t, X.ph('N24', 2), label(0, 0, 'Shhh…', 80, '#3a7ad0'), 0, 0), 1600, 520, { vx: 800, vy: 560, hOnly: false });
     const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 520, 1.05], [X.ph('N24', 1), 960, 560, 1.0], [X.ph('N24', 3), 960, 640, 1.12], [sc.end, 960, 660, 1.16]]);
-    return cam(world, cx, cy, cs) + textureOverlay();
+    const out = cam(world, cx, cy, cs);
+    vfocus(X, fk(t, [[sc.start, 700], [X.ph('N24', 0), 1220], [X.ph('N24', 1) + 0.5, 960], [sc.end, 960]]));
+    return out + textureOverlay();
   };
 
   // ---------------------------------------------------------------- 12. final
@@ -533,20 +580,39 @@
       const n = Math.floor(clamp(prog(t, q0, q1)) * text.length);
       const box = `<rect x="-760" y="-90" width="1520" height="170" rx="40" fill="#fffdf7" stroke="#c99a2e" stroke-width="8"/>` + P.title(0, 25, text.slice(0, Math.max(1, n)), 84, '#8a4b14', '#fffdf7', 0, 600) +
         P.note(-700, -60, 0.7, '#0f8a4a') + P.note(660, -60, 0.7, '#c8312b', 0, 1);
-      world += fadeWin(t, q0 - 0.3, X.ph('N25', 3) + 0.4, popIn(t, q0 - 0.3, box, 960, 330));
+      let ui = box;
+      if (X.vertical) {
+        const l1 = '«Mexicanos al grito', l2 = 'de guerra…»';
+        ui = `<rect x="-480" y="-140" width="960" height="290" rx="44" fill="#fffdf7" stroke="#c99a2e" stroke-width="8"/>` +
+          P.title(0, -20, l1.slice(0, Math.max(1, n)), 88, '#8a4b14', '#fffdf7', 0, 600) + (n > l1.length ? P.title(0, 92, l2.slice(0, n - l1.length - 1), 88, '#8a4b14', '#fffdf7', 0, 600) : '') +
+          P.note(-420, -100, 0.7, '#0f8a4a') + P.note(380, -100, 0.7, '#c8312b', 0, 1);
+      }
+      world += X.place(fadeWin(t, q0 - 0.3, X.ph('N25', 3) + 0.4, popIn(t, q0 - 0.3, ui, 0, 0)), 960, 330, { vy: 360 });
     }
     if (cheer) world += P.confetti(t, X.ph('N26', 0), 7, 140) + P.floatingNotes(t, 960, 700, 1600, 51, 10);
-    if (t >= X.ph('N26', 1) && !end) world += popIn(t, X.ph('N26', 1), `<rect x="-600" y="-80" width="1200" height="150" rx="36" fill="#fffdf7" stroke="#0f8a4a" stroke-width="8"/>` + P.title(0, 25, '¡Himno Nacional Mexicano!', 84, '#0f8a4a', '#fffdf7', 0), 960, 300);
+    if (t >= X.ph('N26', 1) && !end) {
+      const hb = X.vertical
+        ? `<rect x="-460" y="-140" width="920" height="280" rx="44" fill="#fffdf7" stroke="#0f8a4a" stroke-width="8"/>` + P.title(0, -18, '¡Himno Nacional', 92, '#0f8a4a', '#fffdf7', 0) + P.title(0, 92, 'Mexicano!', 92, '#0f8a4a', '#fffdf7', 0)
+        : `<rect x="-600" y="-80" width="1200" height="150" rx="36" fill="#fffdf7" stroke="#0f8a4a" stroke-width="8"/>` + P.title(0, 25, '¡Himno Nacional Mexicano!', 84, '#0f8a4a', '#fffdf7', 0);
+      world += X.place(popIn(t, X.ph('N26', 1), hb, 0, 0), 960, 300, { vy: 360 });
+    }
     if (end) {
       const book = popIn(t, n27.start, `<rect x="-470" y="-200" width="940" height="360" rx="40" fill="#fff6dc" stroke="#c99a2e" stroke-width="10"/>` +
         P.title(0, -40, 'Colorín colorado…', 92, '#8a4b14', '#fff6dc', 0) +
-        (t >= X.ph('N27', 1) + 1.6 ? popIn(t, X.ph('N27', 1) + 1.6, P.title(0, 0, '¡Viva México!', 104, '#c8312b', '#fff6dc', 0), 0, 100) : ''), 960, 320);
-      world += book + P.sparkles(t, 960, 320, 520, 27, 14, X.ph('N27', 1) + 1.6, 2.4);
+        (t >= X.ph('N27', 1) + 1.6 ? popIn(t, X.ph('N27', 1) + 1.6, P.title(0, 0, '¡Viva México!', 104, '#c8312b', '#fff6dc', 0), 0, 100) : ''), 0, 0);
+      world += X.place(book, 960, 320, { vy: 400, w: 960 }) + P.sparkles(t, 960, 320, 520, 27, 14, X.ph('N27', 1) + 1.6, 2.4);
       if (t >= X.ph('N27', 1) + 2.2) world += P.confetti(t, X.ph('N27', 1) + 2.2, 9, 120);
     }
     const [cx, cy, cs] = camKeys(t, [[sc.start, 960, 600, 1.12], [X.ph('N25', 2) - 0.4, 960, 520, 1.0], [n26.start, 960, 540, 1.0], [sc.end, 960, 520, 1.02]]);
-    return cam(world, cx, cy, cs) + textureOverlay();
+    const out = cam(world, cx, cy, cs);
+    vfocus(X, fk(t, [[sc.start, 700], [X.ph('N25', 2), 960], [X.ph('N25', 3), 960], [n26.start + 0.5, 1150], [n27.start, 960], [sc.end, 960]]));
+    return out + textureOverlay();
   };
 
+  // Cada escena empieza con la cámara neutra (para el encuadre vertical).
+  for (const k of Object.keys(S)) {
+    const fn = S[k];
+    S[k] = (t, sc, X) => { lastCam = { cx: 960, cy: 540, s: 1 }; return fn(t, sc, X); };
+  }
   window.SCENES = S;
 })();

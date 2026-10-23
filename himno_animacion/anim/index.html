@@ -17,6 +17,8 @@
   #ui input[type=range] { width: min(60vw, 700px); }
   body.render #ui { display: none; }
   body.render #wrap { width: 1920px; height: 1080px; max-width: none; }
+  body.vertical #wrap { aspect-ratio: 9 / 16; max-width: 50vh; }
+  body.render.vertical #wrap { width: 1080px; height: 1920px; max-width: none; }
 </style>
 </head>
 <body>

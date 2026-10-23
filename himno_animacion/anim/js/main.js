@@ -6,7 +6,14 @@
   const params = new URLSearchParams(location.search);
   const RENDER = params.has('render');
   const CAPTIONS = params.get('captions') !== '0';
+  // Formato vertical 9:16: cada escena se encuadra con una ventana de 607.5 px de ancho
+  // del cuadro 16:9 que sigue la acción, escalada a 1080x1920 (todo es vectorial).
+  const VERTICAL = params.has('vertical');
+  const W = VERTICAL ? 1080 : 1920, H = VERTICAL ? 1920 : 1080;
+  const VK = 1920 / 1080, VW = 1080 / VK;
   if (RENDER) document.body.classList.add('render');
+  if (VERTICAL) document.body.classList.add('vertical');
+  stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
   const byId = Object.fromEntries(TL.lines.map((l) => [l.id, l]));
   const XF = 0.9; // duración del fundido entre escenas
@@ -33,11 +40,23 @@
       for (const id of ids) m = Math.max(m, ctx.mouth(id, t));
       return m;
     },
+    vertical: VERTICAL,
+    // Títulos y listones: en horizontal se dibujan en (x,y); en vertical van a la franja
+    // de arriba (vx, vy) y se reducen si son más anchos que la pantalla.
+    place(inner, x, y, o = {}) {
+      if (!VERTICAL || o.hOnly) return `<g transform="translate(${f(x)} ${f(y)})">${inner}</g>`;
+      if (!o.vSkip && inner) ctx._ui.push({ inner, vx: o.vx ?? 540, vy: o.vy ?? 300, k: o.w ? Math.min(o.vs ?? 1, 1000 / o.w) : o.vs ?? 1 });
+      return '';
+    },
+    // Centro horizontal (en coordenadas de pantalla 16:9) que debe seguir el encuadre vertical.
+    focus(x) { ctx._focus = x; },
+    _ui: [],
+    _focus: 960,
   };
 
   // ---------------------------------------------------------------- subtítulos
   const measure = document.createElement('canvas').getContext('2d');
-  const CAP_FONT = 46, CAP_MAX = 1480;
+  const CAP_FONT = VERTICAL ? 60 : 46, CAP_MAX = VERTICAL ? 900 : 1480;
   const wrapCache = new Map();
   function wrap(text) {
     if (wrapCache.has(text)) return wrapCache.get(text);
@@ -118,12 +137,13 @@
     const lh = CAP_FONT * 1.28;
     const h = rows.length * lh + 40;
     const w = Math.max(width + 90, 360);
-    const x = 960 - w / 2, y = 1080 - 40 - h;
+    const cxm = W / 2;
+    const x = cxm - w / 2, y = VERTICAL ? 1600 - h : 1080 - 40 - h;
     const segIn = segs.length > 1 ? clamp((t - seg.a + 0.1) / 0.18) : 1;
     let s = `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" rx="30" fill="#fffdf7" fill-opacity=".95" stroke="#7fb4e0" stroke-width="5"/>`;
     let txt = '';
     rows.forEach((r, i) => {
-      txt += `<text x="960" y="${f(y + 20 + lh * (i + 0.78))}" text-anchor="middle" font-family="Nunito" font-weight="800" font-size="${CAP_FONT}" fill="#26314d">${esc(r)}</text>`;
+      txt += `<text x="${cxm}" y="${f(y + 20 + lh * (i + 0.78))}" text-anchor="middle" font-family="Nunito" font-weight="800" font-size="${CAP_FONT}" fill="#26314d">${esc(r)}</text>`;
     });
     s += `<g opacity="${segIn.toFixed(3)}">${txt}</g>`;
     if (l.speaker) {
@@ -146,7 +166,15 @@
       if (t >= a && t <= b) {
         const fn = window.SCENES[sc.name];
         const alpha = i === 0 ? 1 : ease.inOut(prog(t, sc.start - XF / 2, sc.start + XF / 2));
-        out.push({ svg: fn ? fn(t, sc, ctx) : '', alpha });
+        ctx._ui = [];
+        ctx._focus = 960;
+        let svg = fn ? fn(t, sc, ctx) : '';
+        if (VERTICAL) {
+          const cx = clamp(ctx._focus, VW / 2, 1920 - VW / 2);
+          svg = `<g transform="scale(${VK.toFixed(5)}) translate(${f(-(cx - VW / 2))} 0)">${svg}</g>` +
+            ctx._ui.map((u) => `<g transform="translate(${f(u.vx)} ${f(u.vy)}) scale(${(u.k).toFixed(3)})">${u.inner}</g>`).join('');
+        }
+        out.push({ svg, alpha });
       }
     });
     return out.map((s) => (s.alpha >= 0.999 ? s.svg : `<g opacity="${s.alpha.toFixed(3)}">${s.svg}</g>`)).join('');
@@ -159,7 +187,7 @@
     const fadeOut = prog(t, TL.duration - 1.2, TL.duration);
     const fadeIn = 1 - prog(t, 0, 0.6);
     const black = Math.max(fadeOut, fadeIn);
-    if (black > 0) s += `<rect width="1920" height="1080" fill="#000" opacity="${black.toFixed(3)}"/>`;
+    if (black > 0) s += `<rect width="${W}" height="${H}" fill="#000" opacity="${black.toFixed(3)}"/>`;
     frame.innerHTML = s;
   }
 

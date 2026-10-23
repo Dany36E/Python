@@ -362,7 +362,9 @@
     const showBody = part !== 'arms', showArms = part !== 'body';
     let s = '';
     if (showBody && p.full) s += extra.lower ? extra.lower(p) : legs(extra.trousers || '#2a2226', extra.shoes || '#1d1416', p.step || 0);
-    const armL = p.armL || [8, 6], armR = p.armR || [8, 6];
+    // al caminar los brazos se balancean en contra de las piernas
+    const swing = p.full && p.step ? Math.sin(p.step) * 18 : 0;
+    const armL = p.armL || [8 + swing, 6 + Math.abs(swing) * 0.3], armR = p.armR || [8 - swing, 6 + Math.abs(swing) * 0.3];
     const sh = extra.shoulder || 118;
     const behind = (side) => (side < 0 ? p.armLBehind : p.armRBehind);
     const drawArm = (side, a) => arm(side, side * sh, -146, a[0], a[1], sleeve, { prop: side < 0 ? p.propL : p.propR, cuff: extra.cuff, width: extra.armW, l1: extra.l1, l2: extra.l2 });
@@ -372,6 +374,7 @@
     const hy = -206 - 72 * hs + bob;
     if (showBody) {
       s += hair.back ? g(tr(0, hy, hs, p.tilt || 0), hair.back) : '';
+      if (p.full && extra.tail) s += extra.tail;
       s += torso(breathe);
       s += extra.overTorso ? extra.overTorso(breathe) : '';
       s += neck(-206 + bob * 0.5, -160);
@@ -392,15 +395,20 @@
 
   const C = {
     francisco: (p) => base(p, (b) => suitTorso('coatBrown', 'vestBrown', b), hF, { w: 84 }, '#4b2d21',
-      { trousers: '#3a2620', shoes: '#22160f', headScale: 0.92, shoulder: 112 }),
+      { trousers: '#3a2620', shoes: '#22160f', headScale: 0.92, shoulder: 112,
+        tail: `<path d="M-132,0 L-126,84 Q-60,96 -8,92 L0,20 L8,92 Q60,96 126,84 L132,0 Z" fill="url(#coatBrown)" stroke="${INK}" stroke-width="${LW}" stroke-linejoin="round"/>` +
+        `<path d="M-100,10 L-96,80 M100,10 L96,80" stroke="#000" stroke-opacity=".18" stroke-width="5" stroke-linecap="round"/>` }),
     lupita: (p) => base(p, (b) => dressTorso(b), hL, { w: 84, lashes: true }, '#f28aae',
       { headScale: 0.92, lower: (q) => skirtShape(Math.sin((q.t || 0) * 2) * 4), cuff: '#fff8f5', shoulder: 106, armW: 32, l1: 96, l2: 92,
         overTorso: () => puffSleeve(-102, -140) + puffSleeve(102, -140) }),
     santaAnna: (p) => base(p, (b) => uniformTorso(b), hS, { w: 86, eyeStyle: 'adult', chin: 110, browW: 5.5, smile: 0.45 }, '#213d74',
       { trousers: '#f1ece0', shoes: '#151515', cuff: '#c8312b', headScale: 0.84,
+        tail: `<path d="M-136,10 L-128,90 Q0,104 128,90 L136,10 Z" fill="url(#navy)" stroke="${INK}" stroke-width="${LW}"/><path d="M-128,86 Q0,100 128,86" fill="none" stroke="#e5b84a" stroke-width="5"/>`,
         collar: highCollar, top: () => g('translate(-108 -150) scale(.85)', epaulette(0, 0, -1)) + g('translate(108 -150) scale(.85)', epaulette(0, 0, 1)) }),
     nuno: (p) => base(p, (b) => suitTorso('coatBlack', 'vestBlack', b), hN, { w: 84, eyeStyle: 'adult', chin: 110, browW: 6, mustache: mustacheNuno, mouthY: 66, smile: 0.4 }, '#2a2b34',
-      { trousers: '#25262e', shoes: '#111', headScale: 0.84 }),
+      { trousers: '#25262e', shoes: '#111', headScale: 0.84,
+        tail: `<path d="M-132,0 L-126,84 Q-60,96 -8,92 L0,20 L8,92 Q60,96 126,84 L132,0 Z" fill="url(#coatBlack)" stroke="${INK}" stroke-width="${LW}" stroke-linejoin="round"/>` +
+        `<path d="M-100,10 L-96,80 M100,10 L96,80" stroke="#000" stroke-opacity=".18" stroke-width="5" stroke-linecap="round"/>` }),
   };
 
   // Niños: kind 'boy' | 'girl'; shirt: color; uniform: camisa blanca con cuello marinero.

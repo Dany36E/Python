@@ -16,9 +16,14 @@ try { playwright = require('playwright'); } catch { playwright = require('/opt/n
 const ROOT = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '..');
 const PAGE = url.pathToFileURL(path.join(ROOT, 'anim', 'index.html')).href;
 const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
+// VERTICAL=1 renderiza el formato 9:16 (1080x1920).
+const VERTICAL = process.env.VERTICAL === '1';
+const VIEW = VERTICAL ? { width: 1080, height: 1920 } : { width: 1920, height: 1080 };
+const Q = VERTICAL ? 'render=1&vertical=1' : 'render=1';
+const SUFFIX = VERTICAL ? '_vertical' : '';
 
 async function openPage(browser, query) {
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+  const page = await browser.newPage({ viewport: VIEW });
   page.on('pageerror', (e) => console.error('page error:', e.message));
   await page.goto(`${PAGE}?${query}`);
   await page.waitForFunction(() => window.__ready === true, null, { timeout: 30000 });
@@ -36,7 +41,7 @@ async function launch() {
 
 async function still(t, out) {
   const browser = await launch();
-  const page = await openPage(browser, 'render=1');
+  const page = await openPage(browser, Q);
   fs.writeFileSync(out, await shot(page, Number(t)));
   await browser.close();
 }
@@ -70,9 +75,9 @@ async function video(from, to) {
   await Promise.all(Array.from({ length: workers }, async (_, w) => {
     const a = w * per, b = Math.min(total, a + per);
     if (a >= b) return;
-    const file = path.join(outDir, `parte_${w}.mp4`);
+    const file = path.join(outDir, `parte${SUFFIX}_${w}.mp4`);
     parts[w] = file;
-    const page = await openPage(browser, 'render=1');
+    const page = await openPage(browser, Q);
     const ff = ffmpegSink(file, fps);
     for (let i = a; i < b; i++) {
       const buf = await shot(page, start + i / fps, 'jpeg');
@@ -88,9 +93,9 @@ async function video(from, to) {
     await page.close();
   }));
   await browser.close();
-  const list = path.join(outDir, 'partes.txt');
+  const list = path.join(outDir, `partes${SUFFIX}.txt`);
   fs.writeFileSync(list, parts.filter(Boolean).map((p) => `file '${p}'`).join('\n'));
-  const name = from == null && to == null ? 'himno.mp4' : `tramo_${start}_${end}.mp4`;
+  const name = from == null && to == null ? `himno${SUFFIX}.mp4` : `tramo${SUFFIX}_${start}_${end}.mp4`;
   const final = path.join(outDir, name);
   await new Promise((resolve, reject) => {
     const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', list,
@@ -106,7 +111,7 @@ async function video(from, to) {
 async function stills(times, dir) {
   fs.mkdirSync(dir, { recursive: true });
   const browser = await launch();
-  const page = await openPage(browser, 'render=1');
+  const page = await openPage(browser, Q);
   for (const t of times) fs.writeFileSync(path.join(dir, `t_${Number(t).toFixed(2)}.jpg`), await shot(page, Number(t), 'jpeg'));
   await browser.close();
 }
