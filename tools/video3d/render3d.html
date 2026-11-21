@@ -280,8 +280,8 @@ function pose(P, o) {
     // Tiro: brazos arriba con el codo bajo el balón; la mano de tiro se extiende justo al soltar.
     const k = o.shoot <= 1 ? smooth(o.shoot / 0.62) : 1 - smooth((o.shoot - 1) / 0.5); const hand = o.shootHand || 1;
     const a = hand > 0 ? P.armR : P.armL; const b2 = hand > 0 ? P.armL : P.armR;
-    a.sh.rotation.set(-2.85 * k, 0, 0); a.el.rotation.x = lerp(-1.45, -0.08, smooth((Math.min(o.shoot, 1) - 0.42) / 0.2)) * Math.max(k, 0.3);
-    b2.sh.rotation.set(-2.3 * k, 0, 0); b2.el.rotation.x = -0.6;
+    a.sh.rotation.set(lerp(-0.95, -2.9, k), 0, 0); a.el.rotation.x = lerp(lerp(-1.2, -1.45, k), -0.05, smooth((Math.min(o.shoot, 1) - 0.42) / 0.2));
+    b2.sh.rotation.set(lerp(-0.95, -2.3, k), 0, 0); b2.el.rotation.x = lerp(-1.2, -0.6, k);
     if (!o.layup) hy -= 0.11 * Math.sin(clamp(o.shoot / 0.55, 0, 1) * Math.PI);
   }
   if (o.layup) {
@@ -461,7 +461,7 @@ function plan3d(ex, d, S, ch) {
       let t0p = t;
       if (passer && seqEnd.has(passer)) {
         const here = passer.chains.filter((c) => c.step === sNum && c.pts[c.pts.length - 1].distanceTo(from) < 0.9).pop();
-        t0p = Math.max(t, (here ? here.t1 : seqEnd.get(passer)) - 150);
+        if (here) t0p = Math.max(t, here.t1 - 150);
       }
       t0p += Number(it.dt) || 0;
       const seg = { type, t0: t0p, t1: t0p + dur, to, hoop, by: passer ? passer.i : null, rcv: receiver ? receiver.i : null, bounce: !!it.bounce, reb: it.reb || null, stop: !!it.stop };
@@ -794,7 +794,7 @@ function footAt(L, t) {
   const k = nx.kind; const v = nx.v || 0;
   let hp = smooth(u); let y; let back = 0;
   if (k === 'lad') y = 0.1 * Math.sin(Math.PI * u);
-  else if (k === 'rodillas') y = 0.36 * Math.pow(Math.sin(Math.PI * u), 1.2);
+  else if (k === 'rodillas') { y = 0.4 * Math.pow(Math.sin(Math.PI * u), 1.1); back = -0.3 * Math.sin(Math.PI * u); }
   else if (k === 'talones') { y = 0.4 * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.15)), 0.9); hp = Math.pow(smooth(u), 1.8); back = 0.18 * Math.sin(Math.PI * u); }
   else if (k === 'defensivo') y = 0.045 * Math.sin(Math.PI * u);
   else if (k === 'carioca') y = 0.09 * Math.sin(Math.PI * u);
@@ -901,9 +901,9 @@ function ballState(b, t, sport) {
         const own = ownedPos(shooter, t, sport, r);
         const k = smooth((t - g0) / Math.max(1, sg.t0 - g0));
         const hi = relAt(t);
-        return { p: new THREE.Vector3(lerp(own.x, hi.x, k * k), lerp(1.02, hi.y, k * k), lerp(own.z, hi.z, k * k)), visible, hand: true };
+        return { p: new THREE.Vector3(lerp(own.x, hi.x, k * k), lerp(1.02, hi.y, k * k), lerp(own.z, hi.z, k * k)), visible, hand: true, handBy: shooter };
       }
-      const rel = relAt(sg.t0);
+      const rel = sg.relP ? sg.relP.clone() : relAt(sg.t0);
       const bd = sg.hoop.dir;
       const spot = new THREE.Vector3(rim.x + (sg.hand > 0 ? -0.18 : 0.18), 3.34, sg.hoop.board.y - bd * 0.06);
       if (t < sg.t1) {
@@ -997,7 +997,7 @@ async function buildGround(ex, S, scene, v) {
     map: sport === 'basquet' ? null : canvasTex(256, 256, (c, w, h) => { c.fillStyle = '#2c8443'; c.fillRect(0, 0, w, h); c.fillStyle = '#33904b'; c.fillRect(0, 0, w, h / 2); noise(c, w, h, 14, 9); }, [400 / 6, 400 / 6]),
     color: sport === 'basquet' ? '#9a6a3f' : '#e6eedd', roughness: 0.95,
   }));
-  outer.rotation.x = -Math.PI / 2; outer.position.y = -0.005; outer.receiveShadow = true; scene.add(outer);
+  outer.rotation.x = -Math.PI / 2; outer.position.y = -0.06; outer.receiveShadow = true; scene.add(outer);
 }
 function addGear(scene, g, sport) {
   const grp = new THREE.Group(); grp.position.set(g.p.x, 0, g.p.y); scene.add(grp);
@@ -1112,7 +1112,7 @@ window.setup = async function (id, opts) {
     const by = P.players.find((p) => p.key === ch.tag.by); const who = P.players.find((p) => p.key === ch.tag.who);
     if (by && who) {
       const st = P.stepT[ch.tag.s] || { t0: 0, t1: P.end }; let best = st.t1; let bd = Infinity;
-      for (let tt = st.t0; tt <= st.t1 + 400; tt += 20) { const dd = playerState(by, tt).p.distanceTo(playerState(who, tt).p); if (dd < bd) { bd = dd; best = tt; } }
+      for (let tt = st.t0; tt <= st.t1 + 400; tt += 20) { const dd = playerState(by, tt).p.distanceTo(playerState(who, tt).p); if (dd < bd) { bd = dd; best = tt; } if (dd < (ch.tag.reach || 0.75)) break; }
       tag = { by, who, t: best, d: bd, touch: ch.tag.touch !== false };
     }
   }
@@ -1143,7 +1143,7 @@ window.setup = async function (id, opts) {
   const pad = cam.pad != null ? cam.pad : 0.8;
   const ex2 = { x0: ext.x0 - pad, x1: ext.x1 + pad, z0: ext.z0 - pad, z1: ext.z1 + pad };
   const sideStatic = cam.side === 'north' ? -1 : cam.side === 'south' ? 1 : ex.sport === 'basquet' && v === 'half' ? -1 : 1;
-  const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 300);
+  const camera = new THREE.PerspectiveCamera(40, W / H, 0.3, 320);
   const box = { x: [-0.88, 0.88], y: [-0.62, 0.36] };
   const target0 = new THREE.Vector3(X.center.x, 0.5, X.center.y);
   const deg = THREE.MathUtils.degToRad;
@@ -1231,6 +1231,11 @@ window.setup = async function (id, opts) {
   if (!ch.thumb && hero && hero.chains.length) { const c = hero.chains[0]; thumb = c.t0 + (c.t1 - c.t0) * 0.6; }
   if (follow) thumb = clamp(thumb, OPEN + DESC + 100, endAct);
   Object.assign(X, { ex, P, scene, camera, wide, follow, caps, cycle, total: cycle, coach, signals, counts, tag, mode, route, gym, rise: endAct, lead });
+  if (ex.sport === 'basquet') {
+    X.noRender = true;
+    P.balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type !== 'shot') return; drawScene(sg.t0 - 1); const q = handBall(b); if (q) sg.relP = q; }));
+    X.noRender = false;
+  }
   const capLog = caps.map((c, i) => c.text + ' ' + ((Math.min(caps[i + 1] ? caps[i + 1].t : cycle, c.t + c.dur) - c.t) / 1000).toFixed(1) + 's');
   return { total: cycle, cycle, poster: Math.min(endAct, cycle - 1), thumb, caps: capLog };
 };
@@ -1244,6 +1249,16 @@ function camState(t) {
   if (k <= 0) return wide;
   const f = follow(t);
   return { look: wide.look.clone().lerp(f.look, k), pitch: lerp(wide.pitch, f.pitch, k), dist: Math.exp(lerp(Math.log(wide.dist), Math.log(f.dist), k)), az: f.az, fov: lerp(wide.fov, f.fov, k), offX: lerp(wide.offX, f.offX, k), offY: lerp(wide.offY, f.offY, k) };
+}
+function handBall(b) {
+  const bs = b._bs; const owner = bs && (bs.handBy || bs.held);
+  if (!owner) return null;
+  const st = owner.rig.state; const hL = new THREE.Vector3(); const hR = new THREE.Vector3();
+  owner.rig.root.updateMatrixWorld(true);
+  owner.rig.armL.hand.getWorldPosition(hL); owner.rig.armR.hand.getWorldPosition(hR);
+  if (st.shoot != null && st.shoot > 0.3) { const h = (st.shootHand || 1) > 0 ? hR : hL; const k = smooth((st.shoot - 0.3) / 0.3); const mid = hL.clone().add(hR).multiplyScalar(0.5); return mid.lerp(h, k).add(new THREE.Vector3(0, 0.12 * k + 0.02, 0)); }
+  const f = fwdOf(owner.rig.root.rotation.y);
+  return hL.add(hR).multiplyScalar(0.5).add(new THREE.Vector3(f.x * 0.07, 0.02, f.y * 0.07));
 }
 function drawScene(t) {
   const { P, camera, ex, coach, signals, tag } = X;
@@ -1321,7 +1336,7 @@ function drawScene(t) {
   });
   // Balones (después de saber qué hace cada jugador)
   P.balls.forEach((b) => {
-    const bs = ballState(b, t, ex.sport);
+    const bs = ballState(b, t, ex.sport); b._bs = bs;
     b.mesh.visible = bs.visible;
     b.mesh.position.copy(bs.p);
     b.mesh.rotation.set(bs.spin || 0, 0.4, 0);
@@ -1333,6 +1348,8 @@ function drawScene(t) {
     if (bs.held && !bs.held.rig.state.shoot && !bs.held.rig.state.chest && !bs.held.rig.state.handoff) { bs.held.rig.state.hold = true; if (bs.catchHigh) bs.held.rig.state.catchHigh = true; }
   });
   P.players.forEach((pl) => pose(pl.rig, pl.rig.state));
+  // Básquetbol: el balón que se sostiene va en las manos (y en la mano de tiro al subir).
+  if (ex.sport === 'basquet') P.balls.forEach((b) => { const q = handBall(b); if (q) b.mesh.position.copy(q); });
   // El profe: mira a los alumnos y levanta la mano cuando grita.
   if (coach) {
     const c = X.center; coach.rig.root.rotation.y = Math.atan2(c.x - coach.p.x, c.y - coach.p.y);
@@ -1380,6 +1397,9 @@ window.__feet = (key, t0, t1, dt) => {
   for (let t = t0; t <= t1; t += dt) { drawScene(t); const st = playerState(pl, t); out.push([t, fp(pl.rig.legL), fp(pl.rig.legR), footAt(pl.feet[1], t).plant ? 1 : 0, footAt(pl.feet[-1], t).plant ? 1 : 0, +(st.cur ? st.cur.v : 0).toFixed(2), +pl.rig.hips.position.y.toFixed(3)]); }
   X.noRender = false; return out;
 };
+window.__ev = () => ({ cycle: Math.round(X.cycle), steps: Object.fromEntries(Object.entries(X.P.stepT).map(([k, v]) => [k, [Math.round(v.t0), Math.round(v.t1)]])), shots: X.P.balls.flatMap((b) => b.segs.filter((s) => s.type === 'shot').map((s) => ({ layup: s.layup, gather: s.gather ? Math.round(s.gather.a0) : null, jump: Math.round(s.jumpT), rel: Math.round(s.t0), in: Math.round(s.t1), stopAt: s.stopAt ? Math.round(s.stopAt) : null }))), passes: X.P.balls.flatMap((b) => b.segs.filter((s) => s.type !== 'shot' && s.type !== 'carry').map((s) => [s.type, Math.round(s.t0), Math.round(s.t1)])), tag: X.tag ? [Math.round(X.tag.t), +X.tag.d.toFixed(2)] : null });
+window.__hands = (ts, k) => { X.noRender = true; const out = ts.map((t) => { drawScene(t); const pl = X.P.players[k || 0]; const w = new THREE.Vector3(); const hs = [pl.rig.armL, pl.rig.armR].map((a) => { a.el.children[1].getWorldPosition(w); return [+w.x.toFixed(2), +w.y.toFixed(2), +w.z.toFixed(2)]; }); const b = X.P.balls[0].mesh.position; const hd = new THREE.Vector3(); pl.rig.headG.getWorldPosition(hd); return [t, 'ball', +b.x.toFixed(2), +b.y.toFixed(2), +b.z.toFixed(2), 'L', ...hs[0], 'R', ...hs[1], 'head', +hd.y.toFixed(2), 'hold', !!pl.rig.state.hold]; }); X.noRender = false; return out; };
+window.__ball = (ts) => ts.map((t) => { const b = X.P.balls[0]; const bs = ballState(b, t, X.ex.sport); const pl = X.P.players[0]; const st = playerState(pl, t); return [t, +bs.p.x.toFixed(2), +bs.p.y.toFixed(2), +bs.p.z.toFixed(2), '|', +st.p.x.toFixed(2), +st.p.y.toFixed(2), bs.carry ? 'carry' : bs.hand ? 'hand' : bs.held ? 'held' : '-', st.cur ? st.cur.m.mode : 'idle']; });
 window.__dbg = () => ({ gear: X.P.gear.map((g) => [g.t, +g.p.x.toFixed(2), +g.p.y.toFixed(2)]), lad: X.P.players.map((pl) => pl.moves.filter((m) => m.feet).map((m) => ({ pat: m.feet.pat, from: [m.from.x, m.from.y], C: m.feet.C.map((c) => [c.foot, +c.p.x.toFixed(2), +c.p.y.toFixed(2)]) }))) });
 window.ready3d = true;
 </script>
