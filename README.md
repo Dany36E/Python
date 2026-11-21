@@ -1,1 +1,50 @@
-# Python
+# Cancha
+
+Tu biblioteca de ejercicios de **fútbol** y **básquetbol** para preparar y dar clases. Graba o sube videos de cada ejercicio, dibújalos en la pizarra, arma clases por grupo y dalas con el cronómetro en la mano.
+
+Diseño: minimalismo nativo al estilo iOS (títulos grandes, listas agrupadas, hojas modales, barra de pestañas flotante de vidrio, modo claro y oscuro). El color de acento cambia según el deporte: verde cancha para fútbol y naranja para básquetbol.
+
+## Qué puedes hacer
+
+- **Biblioteca por deporte**: pestañas Fútbol y Básquetbol, con búsqueda, filtros por objetivo, favoritos y «Míos» cuando comparten varios profes.
+- **Grabar o subir**: en el celular, «Grabar» abre la cámara; «Subir» toma un video o foto de la galería.
+- **Pizarra táctica**: dibuja jugadores de dos equipos, conos, balón, pases, conducciones y desplazamientos sobre campo completo, medio campo, media cancha o cancha completa.
+- **Clases**: con fecha y grupo; añade ejercicios, ordénalos y ajusta los minutos. Cancha calcula el tiempo total y el minuto en que empieza cada bloque.
+- **Modo clase**: cronómetro por ejercicio con silbato al terminar, el video o la pizarra del ejercicio en pantalla, «+1 min», y la pantalla encendida mientras das la clase.
+- **Grupos**: cada grupo guarda su historial de clases, los minutos acumulados y los objetivos que ha trabajado.
+- **Asistencia**: lista de alumnos por grupo (puedes pegarla completa) y «Pasar lista» en cada clase con asistió, retardo o falta; cada alumno muestra su porcentaje de asistencia, y puedes sacar un reporte en PDF por mes, por dos meses o por fechas.
+- **Compartir una clase**: por WhatsApp, en PDF o copiando el texto.
+- **Exportar e importar**: guarda ejercicios, clases o toda la biblioteca (con videos) en un archivo .zip y mándalo a otro profe por AirDrop o WhatsApp; también sirve como respaldo en Archivos / iCloud Drive. Al importar no se duplica lo que ya tienes.
+- **Funciona sin internet** una vez instalada.
+
+## Cómo instalarla en tu celular
+
+Es una app web instalable (PWA): no necesita App Store ni Google Play.
+
+1. Publica este repositorio con **GitHub Pages**: en GitHub, *Settings → Pages → Build and deployment*, elige *Deploy from a branch*, rama `main` y carpeta `/ (root)`.
+2. Abre https://dany36e.github.io/Python/ en el celular o iPad.
+3. **iPhone** (Safari): botón Compartir → *Agregar a inicio*. **Android** (Chrome): menú ⋮ → *Instalar app*.
+
+## Dónde se guardan tus datos
+
+- **App instalada**: todo se guarda en el propio dispositivo, en IndexedDB. No sale de tu teléfono o iPad. Si borras los datos del navegador, se pierden, así que conviene exportar un respaldo de vez en cuando (Biblioteca → Exportar o respaldar).
+- **Abierta como Artifact en Claude**: se guarda en tu cuenta de Claude y la ves igual en el celular y en la computadora. Otros profes pueden ver y agregar ejercicios si los invitas como Editores desde el botón Compartir de Claude. Los videos de más de 20 MB se reducen automáticamente antes de subirse.
+
+## Estructura
+
+```
+index.html            Punto de entrada de la app
+app/styles.css        Estilos (tokens de color, modo claro/oscuro, componentes)
+app/app.js            Lógica: navegación, biblioteca, pizarra, clases, grupos, modo clase y almacenamiento
+manifest.webmanifest  Datos para instalarla como app
+sw.js                 Service worker (funciona sin conexión)
+icons/                Ícono de la app
+```
+
+No usa dependencias ni pasos de compilación (el PDF carga jsPDF desde cdnjs solo cuando lo pides). Para probarla en tu computadora:
+
+```
+python3 -m http.server 8000
+```
+
+y abre `http://localhost:8000`.
