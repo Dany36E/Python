@@ -15,14 +15,15 @@
   const SPORTS = {
     futbol: {
       name: 'Fútbol', noun: 'fútbol',
-      tags: ['Calentamiento', 'Pase', 'Conducción', 'Control', 'Tiro', 'Defensa', 'Táctica', 'Portero', 'Coordinación y físico', 'Juego reducido', 'Vuelta a la calma'],
+      tags: ['Calentamiento', 'Pase', 'Conducción', 'Control', 'Tiro', 'Defensa', 'Táctica', 'Portero', 'Coordinación', 'Velocidad y agilidad', 'Fuerza y resistencia', 'Juego reducido', 'Vuelta a la calma'],
     },
     basquet: {
       name: 'Básquetbol', noun: 'básquetbol',
-      tags: ['Calentamiento', 'Dribleo', 'Pase', 'Tiro', 'Entrada', 'Defensa', 'Rebote', 'Táctica', 'Coordinación y físico', 'Juego reducido', 'Vuelta a la calma'],
+      tags: ['Calentamiento', 'Dribleo', 'Pase', 'Tiro', 'Entrada', 'Defensa', 'Rebote', 'Táctica', 'Coordinación', 'Velocidad y agilidad', 'Fuerza y resistencia', 'Juego reducido', 'Vuelta a la calma'],
     },
   };
   const LEVELS = ['Inicial', 'Intermedio', 'Avanzado'];
+  const lvl = (l) => (l === 'Inicial' ? 'Básico' : l || '');
   const VARIANTS = {
     futbol: [['full', 'Campo completo'], ['half', 'Medio campo']],
     basquet: [['half', 'Media cancha'], ['full', 'Cancha completa']],
@@ -30,6 +31,7 @@
   const APP_NAME = 'Cancha';
   const PAUSES = ['Hidratación', 'Descanso', 'Preparar material'];
   const isPause = (it) => !!it && it.type === 'pause';
+  const pauseIc = (label) => (/hidrat|agua|tomar/i.test(label || '') ? 'drop' : 'timer');
   const itemMin = (it) => Math.max(0, Number(it && it.min) || 0);
   const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
   const CLOUD_LIMIT = Math.floor(19.5 * 1024 * 1024);
@@ -85,6 +87,9 @@
     download: '<path d="M12 4v11.5M7.2 10.7L12 15.5l4.8-4.8M5 15v3.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8V15"/>',
     info: '<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.2M12 7.8v.2"/>',
     drop: '<path d="M12 3.2c3.3 4 5.6 7.2 5.6 10.4a5.6 5.6 0 0 1-11.2 0c0-3.2 2.3-6.4 5.6-10.4z"/><path d="M9.4 14.6a2.7 2.7 0 0 0 2.2 2.4"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+    sliders: '<path d="M4 7.5h9M19 7.5h1M4 16.5h3M13 16.5h7"/><circle cx="16" cy="7.5" r="2.4"/><circle cx="10" cy="16.5" r="2.4"/>',
+    folder: '<path d="M3.5 7.2c0-1 .8-1.8 1.8-1.8h4.1l2 2.1h7.3c1 0 1.8.8 1.8 1.8v8.4c0 1-.8 1.8-1.8 1.8H5.3c-1 0-1.8-.8-1.8-1.8z"/>',
     copy: '<rect x="8.6" y="8.6" width="11" height="11" rx="2.2"/><path d="M15.4 8.6V6.2c0-.9-.7-1.6-1.6-1.6H6.2c-.9 0-1.6.7-1.6 1.6v7.6c0 .9.7 1.6 1.6 1.6h2.4"/>',
   };
 
@@ -244,6 +249,31 @@
         '<path d="M0-5.4L4.6 3.4h-9.2z" fill="' + P.cone + '" stroke="' + P.coneEdge + '" stroke-width="0.6" stroke-linejoin="round"/>' +
         '<path d="M-1.6-1.6h3.2" stroke="#FFFFFF" stroke-width="0.9" stroke-linecap="round" opacity="0.7"/><circle r="9" fill="transparent"/></g>';
     }
+    if (it.t === 'ladder') {
+      // Escalera de coordinación: n travesaños cada 7 unidades, 10 de ancho; r 0 = vertical, 90 = horizontal.
+      const n = Math.max(2, Math.min(14, Math.round(Number(it.n) || 6)));
+      const L = n * 7; const h = L / 2;
+      let rungs = '';
+      for (let k = 0; k <= n; k++) rungs += '<path d="M-5 ' + r1(-h + k * 7) + 'h10"/>';
+      return '<g class="bd-gear bd-ladder"' + di + ' transform="translate(' + r1(it.x) + ' ' + r1(it.y) + ') rotate(' + (Number(it.r) === 90 ? 90 : 0) + ')">' +
+        '<rect x="-5.6" y="' + r1(-h - 0.6) + '" width="11.2" height="' + r1(L + 1.2) + '" fill="rgba(0,0,0,0.12)" rx="1"/>' +
+        '<g stroke="#FFD23F" stroke-width="1.3" stroke-linecap="round">' + rungs + '<path d="M-5 ' + r1(-h) + 'V' + r1(h) + 'M5 ' + r1(-h) + 'V' + r1(h) + '"/></g>' +
+        '<rect x="-7" y="' + r1(-h - 2) + '" width="14" height="' + r1(L + 4) + '" fill="transparent"/></g>';
+    }
+    if (it.t === 'hurdle') {
+      return '<g class="bd-gear bd-hurdle"' + di + ' transform="translate(' + r1(it.x) + ' ' + r1(it.y) + ') rotate(' + (Number(it.r) === 90 ? 90 : 0) + ')">' +
+        '<rect x="-5.6" y="-0.4" width="12.4" height="3" rx="1.4" fill="rgba(0,0,0,0.22)"/>' +
+        '<rect x="-6.2" y="-1.4" width="12.4" height="2.8" rx="1.4" fill="#F25C2A" stroke="#A8360F" stroke-width="0.5"/>' +
+        '<path d="M-6.2-3v6M6.2-3v6" stroke="#A8360F" stroke-width="1.2" stroke-linecap="round"/><rect x="-9" y="-6" width="18" height="12" fill="transparent"/></g>';
+    }
+    if (it.t === 'ring') {
+      return '<g class="bd-gear bd-ring"' + di + tr + '><circle cx="0.4" cy="0.8" r="5" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="1.8"/>' +
+        '<circle r="5" fill="none" stroke="#E83E8C" stroke-width="1.6"/><circle r="8" fill="transparent"/></g>';
+    }
+    if (it.t === 'pole') {
+      return '<g class="bd-gear bd-pole"' + di + tr + '><ellipse cx="1.6" cy="1.4" rx="2.6" ry="1.4" fill="rgba(0,0,0,0.25)"/>' +
+        '<circle r="2.4" fill="#FFFFFF" stroke="#D62828" stroke-width="1.2"/><circle r="0.8" fill="#D62828"/><circle r="8" fill="transparent"/></g>';
+    }
     if (it.t === 'ball') {
       const inner = sport === 'basquet'
         ? '<circle r="3.6" fill="#E8701E" stroke="#3A1A05" stroke-width="0.7"/><path d="M-3.6 0h7.2M0-3.6v7.2M-2.5-2.6a3.6 3.6 0 0 1 0 5.2M2.5-2.6a3.6 3.6 0 0 0 0 5.2" fill="none" stroke="#3A1A05" stroke-width="0.5"/>'
@@ -271,13 +301,26 @@
     const P = BOARD[sport];
     const items = (d && d.items) || [];
     const size = opts.export ? ' xmlns="http://www.w3.org/2000/svg" width="' + opts.export[0] + '" height="' + opts.export[1] + '"' : '';
-    return '<svg' + size + ' viewBox="0 0 160 200" preserveAspectRatio="' + (opts.fit || 'xMidYMid slice') + '" aria-hidden="true" class="bd bd-' + sport + (opts.cls ? ' ' + opts.cls : '') + '">' +
+    return '<svg' + size + ' viewBox="' + (opts.crop ? cropBox(items) : '0 0 160 200') + '" preserveAspectRatio="' + (opts.fit || 'xMidYMid slice') + '" aria-hidden="true" class="bd bd-' + sport + (opts.cls ? ' ' + opts.cls : '') + '">' +
       turfSVG(sport, v) +
       '<g fill="none" stroke="' + P.line + '" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" color="' + P.line + '">' + (COURT[sport + '-' + v] || COURT['futbol-full']) + '</g>' +
       '<g class="bd-items">' + items.map((it, i) => (it.t === 'arrow' ? itemSVG(it, opts.interactive ? i : null, sport, { anim: opts.anim, idx: i }) : '')).join('') +
       items.map((it, i) => (it.t !== 'arrow' ? itemSVG(it, opts.interactive ? i : null, sport, { anim: opts.anim, idx: i }) : '')).join('') + '</g></svg>';
   }
   const fieldArt = (sport) => boardSVG(sport, null);
+  // Recorte 4:5 alrededor de las piezas (mínimo 60 % de la cancha) para miniaturas legibles.
+  function cropBox(items) {
+    if (!items || !items.length) return '0 0 160 200';
+    const xs = []; const ys = [];
+    items.forEach((it) => { xs.push(it.x); ys.push(it.y); if (it.t === 'arrow') { xs.push(it.x2); ys.push(it.y2); } });
+    const x0 = Math.min.apply(null, xs) - 18; const x1 = Math.max.apply(null, xs) + 18;
+    const y0 = Math.min.apply(null, ys) - 18; const y1 = Math.max.apply(null, ys) + 18;
+    let w = Math.max(96, x1 - x0); let h = Math.max(120, y1 - y0);
+    if (w / h > 0.8) h = w / 0.8; else w = h * 0.8;
+    if (w > 160 || h > 200) return '0 0 160 200';
+    const cx = Math.max(0, Math.min(160 - w, (x0 + x1) / 2 - w / 2)); const cy = Math.max(0, Math.min(200 - h, (y0 + y1) / 2 - h / 2));
+    return [cx, cy, w, h].map(r1).join(' ');
+  }
 
   // ---------------------------------------------------------------- la jugada en movimiento
   // Reproduce un diagrama paso a paso: el balón viaja por los pases y los jugadores corren por sus flechas.
@@ -295,6 +338,7 @@
     return Array.from(groups.keys()).sort((a, b) => a - b).map((k) => groups.get(k));
   }
   const canPlay = (d) => diagramSteps(d).length > 0;
+  const MOVERS = { a: 1, b: 1, ball: 1 };
 
   function playDiagram(host, d, opts) {
     opts = opts || {};
@@ -315,7 +359,7 @@
       items.forEach((it, i) => {
         const el = pieceEl(i);
         if (!el) return;
-        if (it.t === 'arrow') { el.style.transition = 'none'; el.style.opacity = '0'; } else el.setAttribute('transform', 'translate(' + r1(it.x) + ' ' + r1(it.y) + ')');
+        if (it.t === 'arrow') { el.style.transition = 'none'; el.style.opacity = '0'; } else if (MOVERS[it.t]) el.setAttribute('transform', 'translate(' + r1(it.x) + ' ' + r1(it.y) + ')');
       });
     }
     function nearest(type, x, y, max) {
@@ -390,7 +434,7 @@
           items.forEach((it, i) => {
             const el = pieceEl(i);
             if (!el) return;
-            if (it.t === 'arrow') { el.style.transition = 'none'; el.style.opacity = '1'; } else el.setAttribute('transform', 'translate(' + r1(it.x) + ' ' + r1(it.y) + ')');
+            if (it.t === 'arrow') { el.style.transition = 'none'; el.style.opacity = '1'; } else if (MOVERS[it.t]) el.setAttribute('transform', 'translate(' + r1(it.x) + ' ' + r1(it.y) + ')');
           });
         }
       },
@@ -400,7 +444,7 @@
 
   // ---------------------------------------------------------------- ejemplos (solo modo local)
   // Versión 2: ejemplos revisados por un profe (sesión con inicio, pausa, series y cierre).
-  const SEED_VERSION = 3;
+  const SEED_VERSION = 4;
   function nextWeekday(days) {
     const d = new Date();
     for (let i = 1; i <= 7; i++) {
@@ -411,10 +455,13 @@
   }
   function seedFromCatalog(cat) {
     const t = Date.now() - 864e5 * 3;
-    const fut = cat.sessions.find((x) => x.sport === 'futbol');
-    const bas = cat.sessions.find((x) => x.sport === 'basquet');
+    // Clases de ejemplo: las de coordinación (con videos); la biblioteca también trae las de pase y dribleo.
+    const pick = (sport, re) => cat.sessions.find((x) => x.sport === sport && re.test(x.name)) || cat.sessions.find((x) => x.sport === sport);
+    const fut = pick('futbol', /coordinaci/i);
+    const bas = pick('basquet', /pies r|coordinaci/i);
     if (!fut || !bas) return null;
-    const ids = new Set(fut.items.concat(bas.items).map((it) => it.exId).filter(Boolean));
+    const firsts = ['futbol', 'basquet'].map((sp) => cat.sessions.find((x) => x.sport === sp)).filter(Boolean);
+    const ids = new Set([fut, bas].concat(firsts).reduce((a, ses) => a.concat(ses.items.map((it) => it.exId).filter(Boolean)), []));
     let n = 0;
     const exercises = cat.exercises.filter((x) => ids.has(x.id)).map((x) => Object.assign({}, x, {
       id: 'ex3-' + x.id, catalogId: x.id, favorite: false, mediaType: null, mediaId: null, thumbId: null, mediaDuration: 0, mediaAspect: null,
@@ -437,6 +484,16 @@
           students: kids('b', ['Acosta Medina Andrea', 'Bautista Rojas Emilio', 'Cervantes Lara Fernanda', 'Delgado Núñez Sebastián', 'Escobar Ríos Mariana', 'Fuentes Salas Daniel', 'Guerrero Peña Paola', 'Ibarra Campos Rodrigo', 'Juárez Molina Natalia', 'Navarro Lozano Jesús', 'Orozco Trejo Daniela', 'Vázquez Ponce Alejandro']) },
       ],
     };
+  }
+  // Tres secciones de ejemplo que se llenan con los ejercicios de ejemplo.
+  function defaultSections(exs, t) {
+    const ids = (fn) => exs.filter(fn).map((e) => e.id);
+    const primaria = (e) => { const r = ageRange(e.age); return e.school && (!r || r[0] <= 12); };
+    return [
+      { id: 'sc4-ej1', name: 'Calentamientos', exIds: ids((e) => e.objective === 'Calentamiento'), order: 1 },
+      { id: 'sc4-ej2', name: 'Coordinación y velocidad', exIds: ids((e) => e.objective === 'Coordinación' || e.objective === 'Velocidad y agilidad'), order: 2 },
+      { id: 'sc4-ej3', name: 'Para primaria', exIds: ids(primaria), order: 3 },
+    ].map((x) => Object.assign(x, { example: true, createdAt: t, updatedAt: t }));
   }
   function seedData(cat) {
     const fromCat = cat ? seedFromCatalog(cat) : null;
@@ -580,9 +637,10 @@
     }
     if (replaced) {
       const seed = seedData(cat);
-      for (const x of seed.exercises) await st.put('exercises', x);
-      for (const c of seed.classes) await st.put('classes', c);
-      for (const g of seed.groups) await st.put('groups', g);
+      // Nunca se pisa lo que sigue ahí (un ejemplo que el profe cambió conserva su versión).
+      for (const x of seed.exercises) if (!(await st.get('exercises', x.id))) await st.put('exercises', x);
+      for (const c of seed.classes) if (!(await st.get('classes', c.id))) await st.put('classes', c);
+      for (const g of seed.groups) if (!(await st.get('groups', g.id))) await st.put('groups', g);
     }
   }
 
@@ -593,8 +651,8 @@
     let chain = Promise.resolve();
     let pending = 0;
     async function reload() {
-      const r = await Promise.all([st.all('exercises'), st.all('classes'), st.all('groups')]);
-      const snap = { exercises: r[0] || [], classes: r[1] || [], groups: r[2] || [], fromCache: false };
+      const r = await Promise.all([st.all('exercises'), st.all('classes'), st.all('groups'), st.get('meta', 'sections')]);
+      const snap = { exercises: r[0] || [], classes: r[1] || [], groups: r[2] || [], sections: Array.isArray(r[3]) ? r[3] : [], fromCache: false };
       listeners.forEach((fn) => fn(snap));
     }
     // Las escrituras van en fila; la pantalla se recarga desde la base solo cuando ya no hay pendientes.
@@ -624,6 +682,14 @@
         await migrateSeeds(st, cat);
         await st.put('meta', seedVersion, 'seed-version');
       }
+      // Secciones de ejemplo: se crean una vez; las que siguen intactas se rellenan con los ejemplos nuevos.
+      const secs = await st.get('meta', 'sections');
+      const exampleEx = (await st.all('exercises')).filter((e) => e.example);
+      const defs = defaultSections(exampleEx, Date.now() - 864e5 * 3);
+      if (!Array.isArray(secs)) await st.put('meta', defs, 'sections');
+      else if (version < seedVersion && secs.some((x) => x.example)) {
+        await st.put('meta', secs.map((x) => { const d = defs.find((y) => y.id === x.id); return x.example && d ? Object.assign({}, x, { exIds: d.exIds }) : x; }), 'sections');
+      }
       try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* opcional */ }
     }
     return {
@@ -636,6 +702,16 @@
       deleteClass: (id) => write(() => st.del('classes', id)),
       saveGroup: (g) => write(() => st.put('groups', plain(g))),
       deleteGroup: (id) => write(() => st.del('groups', id)),
+      saveSection: (sec) => write(async () => {
+        const list = (await st.get('meta', 'sections')) || [];
+        const i = list.findIndex((x) => x.id === sec.id);
+        if (i >= 0) list[i] = plain(sec); else list.push(plain(sec));
+        await st.put('meta', list, 'sections');
+      }),
+      deleteSection: (id) => write(async () => {
+        const list = (await st.get('meta', 'sections')) || [];
+        await st.put('meta', list.filter((x) => x.id !== id), 'sections');
+      }),
       me: null,
       profiles: async () => ({}),
       async putMedia(blob) {
@@ -713,8 +789,8 @@
         try { return (await user.profiles(ids)) || {}; } catch (e) { return {}; }
       },
       subscribe(fn, onError) {
-        let ex = null; let cl = null; let gr = null; let exC = true; let clC = true; let grC = true;
-        const emit = () => { if (ex && cl && gr) fn({ exercises: ex, classes: cl, groups: gr, fromCache: exC || clC || grC }); };
+        let ex = null; let cl = null; let gr = null; let sc = []; let exC = true; let clC = true; let grC = true;
+        const emit = () => { if (ex && cl && gr) fn({ exercises: ex, classes: cl, groups: gr, sections: sc, fromCache: exC || clC || grC }); };
         const u1 = db.collection('exercises').onSnapshot((s) => {
           ex = s.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); exC = s.metadata.fromCache; emit();
         }, (e) => onError && onError(e));
@@ -724,7 +800,11 @@
         const u3 = db.collection('groups').onSnapshot((s) => {
           gr = s.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); grC = s.metadata.fromCache; emit();
         }, (e) => onError && onError(e));
-        return () => { u1(); u2(); u3(); };
+        let u4 = () => {};
+        try {
+          u4 = db.collection('sections').onSnapshot((snp) => { sc = snp.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); emit(); }, () => {});
+        } catch (e) { /* sin secciones */ }
+        return () => { u1(); u2(); u3(); u4(); };
       },
       saveExercise: (x) => queue('e:' + x.id, () => withRetry(() => db.collection('exercises').doc(x.id).set(body(x)))),
       deleteExercise: (id) => queue('e:' + id, () => withRetry(() => db.collection('exercises').doc(id).delete())),
@@ -732,6 +812,8 @@
       deleteClass: (id) => queue('c:' + id, () => withRetry(() => db.collection('classes').doc(id).delete())),
       saveGroup: (g) => queue('g:' + g.id, () => withRetry(() => db.collection('groups').doc(g.id).set(body(g)))),
       deleteGroup: (id) => queue('g:' + id, () => withRetry(() => db.collection('groups').doc(id).delete())),
+      saveSection: (x) => queue('s:' + x.id, () => withRetry(() => db.collection('sections').doc(x.id).set(body(x)))),
+      deleteSection: (id) => queue('s:' + id, () => withRetry(() => db.collection('sections').doc(id).delete())),
       async putMedia(blob, type) {
         const r = await withRetry(() => assets.upload(blob, type ? { type } : undefined), 'store_unavailable');
         return r.id;
@@ -764,7 +846,8 @@
   // ---------------------------------------------------------------- estado
   const S = {
     backend: null, ready: false, canWrite: false, stale: false, error: null,
-    exercises: [], classes: [], groups: [],
+    exercises: [], classes: [], groups: [], sections: [],
+    fx: {},
     names: {}, namesAsked: new Set(),
     tab: 'clases',
     sport: 'futbol',
@@ -996,8 +1079,8 @@
         if (busy || closing) return;
         if (o.isDirty && o.isDirty()) {
           actionSheet({
-            title: o.discardTitle || '¿Descartar los cambios?',
-            actions: [{ label: 'Descartar cambios', danger: true, onClick: () => api.dismiss() }],
+            title: o.discardTitle || '¿Salir sin guardar?',
+            actions: [{ label: 'Salir sin guardar', danger: true, onClick: () => api.dismiss() }],
             cancel: 'Seguir editando',
           });
         } else api.dismiss();
@@ -1159,11 +1242,11 @@
     const code = e && e.code;
     const msg = e && e.message;
     if (msg === 'too-long') return 'El video es demasiado largo para guardarlo en la nube (máximo unos 3 minutos). Recórtalo y vuelve a intentarlo.';
-    if (msg === 'transcode-unsupported' || msg === 'transcode-failed') return 'El video pesa más de 20 MB y este dispositivo no pudo reducirlo. Prueba con un clip más corto o grábalo en 720p.';
-    if (e && e.name === 'QuotaExceededError') return 'El dispositivo no tiene espacio suficiente. Borra videos que ya no uses.';
+    if (msg === 'transcode-unsupported' || msg === 'transcode-failed') return 'El video es muy pesado. Prueba con uno más corto.';
+    if (e && e.name === 'QuotaExceededError') return 'Tu iPad no tiene espacio. Elimina videos que ya no uses.';
     switch (code) {
-      case 'too_large': return 'El archivo supera 20 MB. Prueba con un clip más corto.';
-      case 'unsupported_type': return 'Ese formato no es compatible. Usa un video MP4 o MOV, o una foto.';
+      case 'too_large': return 'El video es muy pesado. Prueba con uno más corto.';
+      case 'unsupported_type': return 'No se puede usar ese archivo. Elige un video o una foto.';
       case 'quota_or_state':
       case 'quota_exceeded': return 'Se llenó el espacio disponible. Borra ejercicios o videos que ya no uses.';
       case 'rate_limited':
@@ -1396,15 +1479,27 @@
     const u = S.backend ? S.backend.cachedURL(id) : null;
     return u ? 'src="' + esc(u) + '"' : 'data-media="' + esc(id) + '"';
   }
+  // Videos de Recomendados que ya no vienen con la app: se ignoran y el ejercicio muestra su pizarrón.
+  function liveMedia(ex) {
+    const c = CAT();
+    if (!ex || !ex.videoUrl || !c) return ex;
+    if (!c._media) { c._media = new Set(); c.exercises.forEach((x) => { if (x.videoUrl) c._media.add(x.videoUrl); }); }
+    if (c._media.has(ex.videoUrl)) return ex;
+    const out = Object.assign({}, ex); delete out.videoUrl; delete out.posterUrl; delete out.thumbUrl;
+    return out;
+  }
   function thumbHTML(ex, cls) {
-    const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>' : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram) : fieldArt(ex.sport)) + '</span>';
+    ex = liveMedia(ex);
+    const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>'
+      : !ex.mediaId && ex.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(ex.thumbUrl) + '">'
+        : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram, { crop: true }) : fieldArt(ex.sport)) + '</span>';
     let badge = '';
     if (cls !== 'mini') {
-      if (ex.mediaType === 'video') badge = '<span class="badge">' + ic('play') + (ex.mediaDuration ? fmtClock(ex.mediaDuration) : 'Video') + '</span>';
-      else if (ex.mediaType === 'image') badge = '<span class="badge">' + ic('photo') + 'Foto</span>';
-      else if (hasDiagram(ex)) badge = '<span class="badge">' + ic('board') + 'Pizarrón</span>';
+      if (ex.mediaType === 'video') badge = '<span class="badge vid' + (ex.mediaDuration ? ' dur' : '') + '">' + ic('play') + (ex.mediaDuration ? fmtClock(ex.mediaDuration) : '') + '<span class="sr">Con video</span></span>';
+      else if (!ex.mediaId && ex.videoUrl) badge = '<span class="badge vid">' + ic('play') + '<span class="sr">Con video</span></span>';
+      else if (ex.mediaType === 'image') badge = '<span class="badge vid">' + ic('photo') + '<span class="sr">Con foto</span></span>';
     }
-    const extra = cls === 'mini' ? '' : (ex.favorite ? '<span class="fav" aria-label="Favorito">' + ic('heart-fill') + '</span>' : '') + (ex.example ? '<span class="pill-ex">Ejemplo</span>' : '');
+    const extra = cls === 'mini' ? '' : (ex.favorite ? '<span class="fav" aria-label="Favorito">' + ic('heart-fill') + '</span>' : '');
     return '<span class="' + (cls || 'thumb') + '" data-tint="' + esc(ex.sport) + '">' + inner + badge + extra + '</span>';
   }
 
@@ -1444,14 +1539,16 @@
       '<input class="sr" type="file" id="in-import" accept=".zip,.json,application/zip,application/json" tabindex="-1" aria-hidden="true">';
     TABS.forEach((t) => {
       $('#screen-' + t).innerHTML =
-        '<header class="navbar"><span></span><span class="nav-title">' + title[t] + '</span>' +
+        '<header class="navbar"><span class="nav-left"><button class="glass-btn" data-act="settings" aria-label="Ajustes">' + ic('gear') + '</button></span><span class="nav-title">' + title[t] + '</span>' +
         '<span class="nav-right"><button class="glass-btn cap backup-btn" data-act="backup">Respaldo</button></span></header>' +
         '<div class="page">' +
         '<h1 class="large-title" id="h-' + t + '">' + title[t] + '</h1>' +
         '<p class="subtitle" data-ref="count">&nbsp;</p>' +
         (t === 'ejercicios'
           ? segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], S.sport) +
-            '<label class="search">' + ic('search') + '<input type="search" id="q-ejercicios" placeholder="Buscar ejercicios" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios"></label>' +
+            '<div class="search-row"><label class="search">' + ic('search') + '<input type="search" id="q-ejercicios" placeholder="Buscar ejercicios" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios"></label>' +
+            '<button class="filter-btn" data-act="filters" aria-label="Filtros">' + ic('sliders') + '<b data-ref="fcount"></b></button></div>' +
+            '<div class="chips active-filters" data-ref="afilters" aria-label="Filtros activos"></div>' +
             '<div class="chips" data-ref="chips" role="toolbar" aria-label="Filtrar por objetivo"></div>'
           : '') +
         '<div data-ref="note"></div><div data-ref="body"></div></div>';
@@ -1465,18 +1562,20 @@
     const k = S.backend ? S.backend.kind : '';
     if (k === 'memory') out.push('<div class="note warn">' + ic('warn') + '<span class="txt"><b>No se está guardando.</b> Lo que hagas se perderá al cerrar Cancha.</span></div>');
     if (S.stale) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>Sin conexión.</b> Puede que lo que ves no esté al día.</span></div>');
-    if (S.error) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>No se pudieron cargar tus datos.</b> Vuelve a abrir la app en un momento.</span></div>');
+    if (S.error) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>No se pudieron cargar tus datos.</b> Cierra Cancha y vuelve a abrirla.</span></div>');
     if (S.ready && !S.canWrite) out.push('<div class="note">' + ic('lock') + '<span class="txt"><b>Solo lectura.</b> Puedes ver esta biblioteca, pero solo su dueño puede editarla.</span></div>');
     if (S.ready && tab === 'clases' && k === 'local' && !framed && isAppleMobile() && !isStandalone()) {
-      out.push('<div class="note">' + ic('device') + '<span class="txt"><b>Instala Cancha</b> en tu pantalla de inicio para que Safari no borre tus datos.</span><button class="link" data-act="install-help">Ver cómo</button></div>');
+      out.push('<div class="note">' + ic('device') + '<span class="txt"><b>Agrega Cancha</b> a tu pantalla de inicio para no perder tus datos.</span><button class="link" data-act="install-help">Ver cómo</button></div>');
     }
     if (S.ready && tab === 'clases' && needsBackup()) {
       const last = Number(pref.get('last-backup')) || 0;
-      out.push('<div class="note">' + ic('box') + '<span class="txt"><b>Haz un respaldo.</b> ' + (last ? 'El último fue ' + fmtAgo(last) + '.' : 'Tus datos solo viven en este dispositivo.') + '</span><button class="link" data-act="backup-now">Respaldar</button></div>');
+      out.push('<div class="note">' + ic('box') + '<span class="txt"><b>Haz un respaldo.</b> ' + (last ? 'El último fue ' + fmtAgo(last) + '.' : 'Tus datos solo están en este iPad.') + '</span><button class="link" data-act="backup-now">Respaldar</button></div>');
     }
-    const hasEx = tab === 'clases' && (S.classes.some((c) => c.example) || S.exercises.some((e) => e.example) || S.groups.some((g) => g.example));
-    if (S.ready && S.canWrite && hasEx) out.push('<div class="note quiet"><span class="txt">Lo que dice «Ejemplo» es para que veas cómo funciona.</span><button class="link" data-act="clear-examples">Borrar ejemplos</button></div>');
     return out.join('');
+  }
+  function examplesNoteHTML() {
+    const hasEx = S.classes.some((c) => c.example) || S.exercises.some((e) => e.example) || S.groups.some((g) => g.example) || S.sections.some((x) => x.example);
+    return S.ready && S.canWrite && hasEx ? '<div class="note quiet ex-note"><span class="txt">Los ejemplos te muestran cómo funciona Cancha.</span><button class="link" data-act="clear-examples">Eliminar ejemplos</button></div>' : '';
   }
 
   // --- Ejercicios
@@ -1501,20 +1600,33 @@
     else if (f === 'mine') list = list.filter((e) => e.authorId === me);
     else if (f.indexOf('t:') === 0) list = list.filter((e) => e.objective === f.slice(2));
     const q = norm(S.q[sport]).trim();
-    if (q) list = list.filter((e) => norm([e.title, e.objective, e.description, e.keyPoints, e.material, e.level, e.age].join(' ')).indexOf(q) >= 0);
+    if (q) list = list.filter((e) => norm([e.title, e.objective, e.description, e.keyPoints, e.material, e.level, e.age, e.players, e.space, e.variations, sectionsOf(e.id).map((x) => x.name).join(' ')].join(' ')).indexOf(q) >= 0);
+    list = applyFilters(list, sport);
+    const nf = activeFilterCount(sport) + (fx(sport).sort !== 'recent' ? 1 : 0);
+    const plain0 = f === 'all' && !q && !nf;
 
     let body;
     if (!S.ready) body = '<div class="grid">' + [0, 1, 2, 3].map(() => '<div class="card"><span class="thumb shimmer"></span><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></div>').join('') + '</div>';
-    else if (!all.length) body = emptyExercisesHTML(sport) + catEntryHTML(sport);
-    else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '».' : 'No hay ejercicios con este filtro.') + '</p>' + catEntryHTML(sport);
-    else body = (f === 'all' && !q ? catEntryHTML(sport) : '') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
+    else if (!all.length) body = emptyExercisesHTML(sport);
+    else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '» en tus ejercicios.' : 'No hay ejercicios con estos filtros.') + (nf ? '<br><button class="link" data-act="clear-filters">Quitar filtros</button>' : '') + '</p>';
+    else body = (plain0 ? sectionsStripHTML() + catEntryHTML(sport) + shareCardHTML() : '<p class="result-count">' + plural(list.length, 'ejercicio', 'ejercicios') + (q ? ' tuyos' : '') + '</p>') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
+    if (q && S.ready) {
+      const recs = applyFilters(catExercises(sport).filter((cx) => !inLibrary(cx.id) && norm([cx.title, cx.objective, cx.description, cx.keyPoints, cx.material, cx.variations, cx.age].join(' ')).indexOf(q) >= 0), sport);
+      if (recs.length) body += '<p class="group-label">Recomendados</p><div class="grid">' + recs.map(catCardHTML).join('') + '</div>';
+      else if (!list.length) body += catEntryHTML(sport);
+    }
+    const afHTML = activeFiltersHTML(sport);
 
-    const sig = ['ej', sport, S.ready, S.canWrite, chipsHTML, body, noteHTML('ejercicios')].join('|');
+    const sig = ['ej', sport, S.ready, S.canWrite, chipsHTML, afHTML, body, noteHTML('ejercicios')].join('|');
     if (S.sig.ejercicios === sig) return;
     S.sig.ejercicios = sig;
     $('#screen-ejercicios .search').hidden = S.ready && !all.length;
     const chipsEl = ref('ejercicios', 'chips');
     if (chipsEl.innerHTML !== chipsHTML) chipsEl.innerHTML = chipsHTML;
+    ref('ejercicios', 'afilters').innerHTML = afHTML;
+    const fc = ref('ejercicios', 'fcount');
+    fc.textContent = activeFilterCount(sport) ? String(activeFilterCount(sport)) : '';
+    fc.closest('.filter-btn').classList.toggle('on', activeFilterCount(sport) > 0);
     ref('ejercicios', 'note').innerHTML = noteHTML('ejercicios');
     const b = ref('ejercicios', 'body');
     b.innerHTML = body;
@@ -1532,7 +1644,7 @@
     return '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt(sport) + '</span></div>' +
       '<h2>Aún no tienes ejercicios de ' + SPORTS[sport].noun + '</h2>' +
       '<p>' + (S.canWrite ? 'Agrega uno con video, foto o un dibujo en el pizarrón.' : 'Todavía no hay ejercicios aquí.') + '</p>' +
-      (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-ex">' + ic('plus') + 'Nuevo ejercicio</button></div>' : '') + '</div>';
+      (S.canWrite ? '<div class="actions">' + (catExercises(sport).length ? '<button class="btn filled" data-act="catalog">Ver ' + catExercises(sport).length + ' recomendados</button><button class="btn tinted" data-act="new-ex">' + ic('plus') + 'Nuevo ejercicio</button>' : '<button class="btn filled" data-act="new-ex">' + ic('plus') + 'Nuevo ejercicio</button>') + '</div>' : '') + '</div>';
   }
 
   // --- Clases
@@ -1540,14 +1652,14 @@
     const g = getGroup(c.groupId);
     const n = (c.items || []).filter((it) => !isPause(it)).length;
     const isToday = c.date === todayStr();
-    const canRoll = S.canWrite && g && studentsOf(g).length;
+    const canRoll = S.canWrite && isToday && g && studentsOf(g).length;
     const sp = SPORTS[c.sport] ? c.sport : 'futbol';
     return '<div class="today" data-tint="' + sp + '">' +
-      '<button class="today-main" data-open-class="' + esc(c.id) + '"><span class="today-band band-' + sp + '"><span class="today-when">' + (isToday ? 'Hoy' : esc(fmtDay(c.date))) + '</span><span class="today-min">' + fmtMin(classTotal(c)) + '′</span></span>' +
+      '<button class="today-main" data-open-class="' + esc(c.id) + '"><span class="today-band band-' + sp + '"><span class="today-when">' + (isToday ? 'Hoy' : esc(fmtDay(c.date))) + '</span>' + (n ? '<span class="today-min">' + fmtMin(classTotal(c)) + '′</span>' : '') + '</span>' +
       '<span class="today-body"><span class="today-name">' + esc(c.name || 'Clase sin nombre') + '</span>' +
       '<span class="today-meta">' + (g ? '<span class="mini-chip">' + ic('people') + esc(g.name) + '</span>' : '') + '<span>' + plural(n, 'ejercicio', 'ejercicios') + '</span></span></span></button>' +
       '<div class="today-actions">' +
-      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar</button>' : '') +
+      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar clase</button>' : S.canWrite ? '<button class="btn filled" data-act="plan-class" data-id="' + esc(c.id) + '">' + ic('plus') + 'Agregar ejercicios</button>' : '') +
       (canRoll ? '<button class="btn tinted" data-act="roll-class" data-id="' + esc(c.id) + '">' + ic('check') + 'Pasar lista</button>' : '') +
       '</div></div>';
   }
@@ -1565,16 +1677,17 @@
     else if (!list.length) {
       body = '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('futbol') + '</span></div><h2>Arma tu primera clase</h2>' +
         '<p>Elige ejercicios, ordénalos y ajusta los minutos. Luego la das con el cronómetro.</p>' +
-        (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' + (CAT() ? '<button class="btn tinted" data-act="catalog">Usar una clase lista</button>' : '') + '</div>' : '') + '</div>';
+        (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' + (CAT() ? '<button class="btn tinted" data-act="catalog">Ver clases recomendadas</button>' : '') + '</div>' : '') + '</div>';
     } else {
       const rest = list.filter((c) => c !== next);
       const up = rest.filter((c) => !c.date || c.date >= t);
       const past = rest.filter((c) => c.date && c.date < t);
       body = (next ? todayCardHTML(next) : '');
       if (up.length) body += '<p class="group-label">Próximas</p><div class="list">' + up.map((c) => classCellHTML(c)).join('') + '</div>';
-      if (past.length) body += '<p class="group-label">Historial</p><div class="list">' + past.map((c) => classCellHTML(c)).join('') + '</div>';
+      if (past.length) body += '<p class="group-label">Anteriores</p><div class="list">' + past.map((c) => classCellHTML(c)).join('') + '</div>';
     }
     if (S.ready && S.canWrite) body += templatesHTML();
+    body += examplesNoteHTML();
     const sig = ['cl', S.ready, S.canWrite, body, noteHTML('clases')].join('|');
     if (S.sig.clases === sig) return;
     S.sig.clases = sig;
@@ -1595,7 +1708,7 @@
     const done = c.lastRunAt || c.attendanceAt;
     return '<button class="cell" data-open-class="' + esc(c.id) + '" data-tint="' + sport + '">' + dateTileHTML(c.date) +
       '<span class="txt"><span class="t1">' + esc(c.name || 'Clase sin nombre') + (c.date === todayStr() ? '<span class="pill">Hoy</span>' : '') + '</span>' +
-      '<span class="t2">' + (inGroup ? '' : esc(first) + ', ') + plural(n, 'ejercicio', 'ejercicios') + ', ' + fmtMin(classTotal(c)) + ' min</span></span>' +
+      '<span class="t2">' + (inGroup ? '' : esc(first) + ' · ') + plural(n, 'ejercicio', 'ejercicios') + ' · ' + fmtMin(classTotal(c)) + ' min</span></span>' +
       (done ? '<span class="done-mark" title="Dada" aria-label="Dada">' + ic('check') + '</span>' : '') + ic('chevR', 'chev') + '</button>';
   }
 
@@ -1609,7 +1722,7 @@
       body = '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('basquet') + '</span></div><h2>Agrega tus grupos</h2>' +
         '<p>Un grupo por equipo o salón: ahí pasas lista y ves su historial.</p>' +
         (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-group">' + ic('plus') + 'Nuevo grupo</button></div>' : '') + '</div>';
-    } else body = '<div class="list">' + list.map(groupCellHTML).join('') + '</div>';
+    } else body = '<div class="g-grid">' + list.map(groupCellHTML).join('') + '</div>';
     const sig = ['gr', S.ready, S.canWrite, body, noteHTML('grupos')].join('|');
     if (S.sig.grupos === sig) return;
     S.sig.grupos = sig;
@@ -1660,12 +1773,12 @@
   function showStatus() {
     const k = S.backend ? S.backend.kind : 'cloud';
     if (S.backend && !S.canWrite) return alertBox('Solo lectura', 'Estás viendo una biblioteca compartida. Solo su dueño puede agregar o cambiar ejercicios.');
-    if (k === 'cloud') return alertBox('Dónde se guardan tus datos', 'En tu cuenta de Claude. Los ves en el celular y en la computadora.');
+    if (k === 'cloud') return alertBox('¿Dónde se guardan mis datos?', 'En tu cuenta de Claude. Los ves en el celular y en la computadora.');
     if (k === 'memory') return alertBox('No se está guardando', 'Este navegador no deja guardar datos (por ejemplo, en modo privado). Lo que agregues se perderá al cerrar.');
-    return alertBox('Dónde se guardan tus datos', 'Solo en este dispositivo, sin internet. Si se pierde o se borra, solo los recuperas con un respaldo: guárdalo en Archivos → iCloud Drive de vez en cuando.');
+    return alertBox('¿Dónde se guardan mis datos?', 'Solo en este iPad, no en internet. Si el iPad se pierde o se borra, solo los recuperas con un respaldo. Haz uno de vez en cuando.');
   }
   function showInstallHelp() {
-    alertBox('Instalar Cancha', 'En Safari toca el botón Compartir (el cuadrito con la flecha) y elige «Agregar a inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');
+    alertBox('Instalar Cancha', 'En Safari toca «Compartir» (el cuadrito con la flecha) y elige «Agregar a pantalla de inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');
   }
 
   // ---------------------------------------------------------------- flujos: ejercicios
@@ -1706,7 +1819,7 @@
   function autoGrow(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(88, ta.scrollHeight) + 'px'; }
 
   // Guarda primero y, si falla, regresa la pantalla a como estaba.
-  const SAVE = { exercises: 'saveExercise', classes: 'saveClass', groups: 'saveGroup' };
+  const SAVE = { exercises: 'saveExercise', classes: 'saveClass', groups: 'saveGroup', sections: 'saveSection' };
   async function commit(kind, obj, prev) {
     replaceLocal(kind, obj);
     renderAll(); refreshScreens();
@@ -1756,23 +1869,23 @@
     const row = (id, icon, label, ph, max, val) => '<label class="row"><span class="k">' + ic(icon) + label + '</span><input id="' + id + '" placeholder="' + esc(ph) + '" maxlength="' + max + '" value="' + esc(val || '') + '" aria-label="' + esc(label) + '"></label>';
     const body =
       '<div class="group"><input class="field-lg" id="ex-title" placeholder="Nombre del ejercicio" aria-label="Nombre del ejercicio" maxlength="120" autocomplete="off" enterkeyhint="done" value="' + esc(ex.title) + '"></div>' +
-      '<p class="group-label" id="lbl-obj">Objetivo</p><div class="group pad"><div class="chips wrap" data-ref="tags" role="group" aria-labelledby="lbl-obj"></div></div>' +
+      '<p class="group-label" id="lbl-obj">Tipo de ejercicio</p><div class="group pad"><div class="chips wrap" data-ref="tags" role="group" aria-labelledby="lbl-obj"></div></div>' +
       '<div data-ref="media"></div>' +
       '<div class="group"><div class="row"><span class="k">' + ic('clock') + 'Duración</span>' + stepperHTML('ex-duration', ex.duration || 10, false, 'Duración en minutos') + '</div></div>' +
       '<p class="group-label" id="lbl-desc">Cómo se hace</p><div class="group"><textarea id="ex-desc" aria-labelledby="lbl-desc" placeholder="Organización, reglas, series…" maxlength="4000">' + esc(ex.description) + '</textarea></div>' +
-      '<p class="group-label" id="lbl-pts">Puntos clave</p><div class="group"><textarea id="ex-points" aria-labelledby="lbl-pts" placeholder="Uno por línea" maxlength="2000">' + esc(ex.keyPoints) + '</textarea></div>' +
-      '<div class="group"><label class="row"><span class="k">' + ic('video') + 'Video</span><input id="ex-link" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Pega un link de YouTube" aria-label="Link de video de YouTube" maxlength="400" value="' + esc(ex.link || '') + '"></label></div>' +
+      '<p class="group-label" id="lbl-pts">Puntos clave</p><div class="group"><textarea id="ex-points" aria-labelledby="lbl-pts" placeholder="Uno por renglón" maxlength="2000">' + esc(ex.keyPoints) + '</textarea></div>' +
+      '<div class="group"><label class="row"><span class="k">' + ic('video') + 'YouTube</span><input id="ex-link" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Pega el link aquí" aria-label="Link de video de YouTube" maxlength="400" value="' + esc(ex.link || '') + '"></label></div>' +
       '<button type="button" class="more-btn" data-more aria-expanded="' + moreOpen + '">Más detalles' + ic('down') + '</button>' +
       '<div data-ref="more"' + (moreOpen ? '' : ' hidden') + '>' +
       '<p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], ex.sport, 'Deporte') +
-      '<p class="group-label">Nivel</p>' + segHTML('level', LEVELS.map((l) => [l, l]), ex.level || 'Inicial', 'Nivel') +
+      '<p class="group-label">Nivel</p>' + segHTML('level', LEVELS.map((l) => [l, lvl(l)]), ex.level || 'Inicial', 'Nivel') +
       '<div class="group">' +
       row('ex-players', 'people', 'Jugadores', 'Ej. 8 a 12', 60, ex.players) +
       row('ex-age', 'age', 'Edad', 'Ej. Sub-10 a Sub-12', 60, ex.age) +
       row('ex-space', 'flag', 'Espacio', 'Ej. 20 × 15 m', 60, ex.space) +
       row('ex-material', 'cone', 'Material', 'Conos, balones…', 200, ex.material) +
       '</div>' +
-      '<p class="group-label" id="lbl-var">Para ajustarlo</p><div class="group"><textarea id="ex-vars" aria-labelledby="lbl-var" placeholder="Más fácil: …&#10;Más difícil: …" maxlength="1500">' + esc(ex.variations || '') + '</textarea></div>' +
+      '<p class="group-label" id="lbl-var">Variantes (más fácil / más difícil)</p><div class="group"><textarea id="ex-vars" aria-labelledby="lbl-var" placeholder="Más fácil: …&#10;Más difícil: …" maxlength="1500">' + esc(ex.variations || '') + '</textarea></div>' +
       '</div>';
 
     const sheet = openSheet({
@@ -1830,8 +1943,8 @@
       }
       const hasBoard = diagram && diagram.items && diagram.items.length;
       box.innerHTML = '<div class="media-pick">' +
-        (isTouch ? '<button type="button" class="pick-tile" data-pick="capture"><span class="ico">' + ic('video') + '</span><b>Grabar</b></button>' : '') +
-        '<button type="button" class="pick-tile" data-pick="pick"><span class="ico">' + ic('upload') + '</span><b>' + (isTouch ? 'Subir' : 'Subir video o foto') + '</b></button>' +
+        (isTouch ? '<button type="button" class="pick-tile" data-pick="capture"><span class="ico">' + ic('video') + '</span><b>Grabar video</b></button>' : '') +
+        '<button type="button" class="pick-tile" data-pick="pick"><span class="ico">' + ic('upload') + '</span><b>' + (isTouch ? 'De tus fotos' : 'Elegir video o foto') + '</b></button>' +
         (hasBoard ? '' : boardTileHTML(true)) + '</div>' + (hasBoard ? boardTileHTML(false) : '');
     }
     async function useFile(file) {
@@ -1840,7 +1953,7 @@
       renderMedia();
       try { media = await processPicked(file); removeMedia = false; } catch (e) {
         media = null;
-        alertBox('No se pudo abrir el archivo', 'Elige un video (MP4 o MOV) o una foto.');
+        alertBox('No se pudo abrir el archivo', 'Elige un video o una foto de tu iPad.');
       }
       renderMedia();
     }
@@ -1904,6 +2017,7 @@
         updatedAt: Date.now(),
       });
       if (!editing && S.backend.me) nx.authorId = S.backend.me;
+      { const tmp = plain(ex); dropStaleVideo(tmp, nx.diagram); if (!tmp.videoUrl) { delete nx.videoUrl; delete nx.posterUrl; delete nx.thumbUrl; } }
       sheet.setBusy(true, 'Guardando…');
       const fresh = []; const old = [];
       try {
@@ -1911,7 +2025,7 @@
           let blob = media.file;
           let type = media.kind === 'image' ? 'image/jpeg' : null;
           if (media.kind === 'video' && S.backend.kind === 'cloud') {
-            const r = await prepareCloudVideo(media.file, (p) => sheet.progress(p, 'Reduciendo el video · ' + Math.round(p * 100) + '% · mantén la app abierta'));
+            const r = await prepareCloudVideo(media.file, (p) => sheet.progress(p, 'Reduciendo el video · ' + Math.round(p * 100) + '% · no cierres Cancha'));
             blob = r.blob; type = r.type;
           }
           sheet.progress(null, S.backend.kind === 'cloud' ? 'Subiendo ' + (media.kind === 'video' ? 'video' : 'foto') + '…' : 'Guardando…');
@@ -1958,15 +2072,20 @@
     if (ex.mediaType === 'image' && ex.mediaId) {
       return '<div class="d-frame"' + style + '><img alt="' + esc(ex.title) + '" data-media="' + esc(ex.mediaId) + '"></div>';
     }
+    if (liveMedia(ex).videoUrl) return coachVideoHTML(ex);
     if (hasDiagram(ex)) return boardFrameHTML(ex);
     if (!S.canWrite) return '';
     return '<button type="button" class="board-add" data-act="board"><span class="ico">' + ic('board') + '</span><span class="txt"><b>Dibujar en el pizarrón</b><span class="s">Jugadores, conos y flechas</span></span>' + ic('chevR', 'chev') + '</button>';
   }
+  // Video vertical generado para los ejercicios de entrenador (app/videos/…): se ve como un Short.
+  function coachVideoHTML(ex) {
+    return '<button type="button" class="d-frame coach-video" data-act="vtoggle" aria-label="Pausar o seguir el video"><video playsinline muted loop autoplay preload="metadata" src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video><span class="v-state" aria-hidden="true">' + ic('play') + '</span></button>';
+  }
   function boardSummary(ex) {
     const its = (ex.diagram && ex.diagram.items) || [];
     const a = its.filter((i) => i.t === 'a').length; const b = its.filter((i) => i.t === 'b').length;
-    const arrows = its.filter((i) => i.t === 'arrow').length; const cones = its.filter((i) => i.t === 'cone').length;
-    return 'Pizarrón: ' + [a ? plural(a, 'jugador del equipo A', 'jugadores del equipo A') : '', b ? plural(b, 'jugador del equipo B', 'jugadores del equipo B') : '', cones ? plural(cones, 'cono', 'conos') : '', arrows ? plural(arrows, 'flecha', 'flechas') : ''].filter(Boolean).join(', ');
+    const arrows = its.filter((i) => i.t === 'arrow').length; const cones = its.filter((i) => i.t !== 'arrow' && i.t !== 'a' && i.t !== 'b' && i.t !== 'ball').length;
+    return 'Pizarrón: ' + [a ? plural(a, 'jugador del equipo A', 'jugadores del equipo A') : '', b ? plural(b, 'jugador del equipo B', 'jugadores del equipo B') : '', cones ? plural(cones, 'pieza de material', 'piezas de material') : '', arrows ? plural(arrows, 'flecha', 'flechas') : ''].filter(Boolean).join(', ');
   }
   function boardFrameHTML(ex) {
     const playable = canPlay(ex.diagram);
@@ -2018,17 +2137,19 @@
     const points = String(ex.keyPoints || '').split('\n').map((s) => s.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
     const stats = [['clock', 'Duración', (Number(ex.duration) || 0) + ' min'], ['people', 'Jugadores', ex.players], ['age', 'Edad', ex.age], ['flag', 'Espacio', ex.space]].filter((s) => s[2]);
     const vars = String(ex.variations || '').split('\n').map((s) => s.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
-    const varHTML = vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + '</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('');
+    const varHTML = vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + ':</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('');
     let created = '';
     try { created = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ex.createdAt || Date.now())); } catch (e) { /* */ }
-    return '<div class="d-head"><p class="d-tags">' + (ex.objective ? '<span class="tag">' + esc(ex.objective) + '</span>' : '<span class="tag">' + esc(SPORTS[ex.sport].name) + '</span>') + (ex.level ? '<span class="tag ghost">' + esc(ex.level) + '</span>' : '') + '</p><h1 class="d-title">' + esc(ex.title || 'Sin título') + '</h1></div>' +
+    return '<div class="d-head"><p class="d-tags">' + (ex.objective ? '<span class="tag">' + esc(ex.objective) + '</span>' : '<span class="tag">' + esc(SPORTS[ex.sport].name) + '</span>') + (ex.level ? '<span class="tag ghost">' + esc(lvl(ex.level)) + '</span>' : '') + '</p><h1 class="d-title">' + esc(ex.title || 'Sin título') + '</h1>' + (ex.sharedBy && ex.sharedBy !== coachName() ? '<p class="shared-by">' + ic('people') + 'Te lo mandó ' + esc(ex.sharedBy) + '</p>' : '') + '</div>' +
       '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((s) => '<div class="stat"><span class="k">' + ic(s[0]) + s[1] + '</span><span class="v">' + esc(s[2]) + '</span></div>').join('') + '</div>' +
-      (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="add-to-class">' + ic('plus') + 'Añadir a una clase</button>' +
+      (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="add-to-class">' + ic('plus') + 'Agregar a una clase</button>' +
+        '<button class="btn icon tinted" data-act="sections" aria-label="Guardar en sección">' + ic('folder') + '</button>' +
         '<button class="btn icon tinted" data-act="fav" aria-pressed="' + !!ex.favorite + '" aria-label="Favorito">' + ic(ex.favorite ? 'heart-fill' : 'heart') + '</button></div>' : '') +
+      (sectionsOf(ex.id).length ? '<p class="in-sections">' + ic('folder') + sectionsOf(ex.id).map((x) => '<button class="link sm" data-open-section="' + esc(x.id) + '">' + esc(x.name) + '</button>').join('') + '</p>' : '') +
       (ex.mediaId && hasDiagram(ex) ? sec('Pizarrón', boardFrameHTML(ex)) : '') +
       (ex.description ? sec('Cómo se hace', '<p>' + esc(ex.description) + '</p>') : '') +
       (points.length ? sec('Puntos clave', '<ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>') : '') +
-      (vars.length ? sec('Para ajustarlo', '<ul class="vars">' + varHTML + '</ul>') : '') +
+      (vars.length ? sec('Variantes', '<ul class="vars">' + varHTML + '</ul>') : '') +
       (ex.link ? sec('Video de referencia', linkCardHTML(ex.link)) : '') +
       (ex.material ? sec('Material', '<p>' + esc(ex.material) + '</p>') : '') +
       (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row danger" data-act="delete">' + ic('trash') + 'Eliminar ejercicio</button></div>' : '') +
@@ -2055,13 +2176,18 @@
     return '<p class="foot">Agregado' + (who ? ' por ' + esc(who) : '') + (created ? ' el ' + esc(created) : '') + '</p>';
   }
 
+  // El video de un recomendado es su pizarrón en movimiento: si cambias el dibujo, deja de coincidir.
+  function dropStaleVideo(x, d) {
+    if (x.videoUrl && JSON.stringify(d || null) !== JSON.stringify(x.diagram || null)) { delete x.videoUrl; delete x.posterUrl; delete x.thumbUrl; }
+  }
   function openExercise(id) {
     const ex = getEx(id);
     if (!ex) return;
     if (backToScreen('ex:' + id)) return;
     haptic(4);
     const scr = pushScreen({ key: 'ex:' + id, tint: ex.sport, rightHTML: '<button class="glass-btn" data-act="share" aria-label="Compartir">' + ic('share') + '</button>' + (S.canWrite ? '<button class="glass-btn cap" data-act="edit">Editar</button>' : '') });
-    scr.body.innerHTML = '<div class="d-media" data-ref="media"></div><div data-ref="info"></div>';
+    scr.body.classList.add('wide');
+    scr.body.innerHTML = '<div class="ex-layout"><div class="d-media" data-ref="media"></div><div class="ex-info" data-ref="info"></div></div>';
     let mediaKey = null;
     let player = null;
     function play(delay) {
@@ -2096,6 +2222,8 @@
     scr.refresh = render;
     scr.onClose = () => { if (player) player.stop(); };
     scr.el.addEventListener('click', (ev) => {
+      const so = ev.target.closest('[data-open-section]');
+      if (so) { openSection(so.dataset.openSection); return; }
       const a = ev.target.closest('[data-act]');
       if (!a) return;
       const e = getEx(id);
@@ -2103,8 +2231,9 @@
       switch (a.dataset.act) {
         case 'edit': openExerciseEditor({ exercise: e }); break;
         case 'share': shareExercise(e); break;
-        case 'board': if (S.canWrite) { if (player) player.stop(); openBoard({ sport: e.sport, diagram: e.diagram, onDone: (d) => { mutateExercise(id, (x) => { x.diagram = d; }); } }); } break;
+        case 'board': if (S.canWrite) { if (player) player.stop(); openBoard({ sport: e.sport, diagram: e.diagram, onDone: (d) => { mutateExercise(id, (x) => { dropStaleVideo(x, d); x.diagram = d; }); } }); } break;
         case 'play': haptic(6); play(150); break;
+        case 'sections': openExerciseSections(id); break;
         case 'fav': mutateExercise(id, (x) => { x.favorite = !x.favorite; }); haptic(10); break;
         case 'add-to-class': addToClassFlow(e); break;
         case 'delete': confirmDeleteExercise(id); break;
@@ -2119,7 +2248,7 @@
     const uses = S.classes.filter((c) => (c.items || []).some((it) => it.exId === id)).length;
     actionSheet({
       title: '¿Eliminar «' + e.title + '»?',
-      message: [uses ? 'Se quitará de ' + plural(uses, 'clase', 'clases') + '; en las que ya diste se queda el nombre.' : '', e.mediaId ? 'También se borrará su ' + (e.mediaType === 'video' ? 'video' : 'foto') + '.' : ''].filter(Boolean).join(' ') || undefined,
+      message: [uses ? 'Se quitará de ' + plural(uses, 'clase', 'clases') + '. En las que ya diste solo quedará su nombre.' : '', e.mediaId ? 'También se borrará su ' + (e.mediaType === 'video' ? 'video' : 'foto') + '.' : ''].filter(Boolean).join(' ') || undefined,
       actions: [{ label: 'Eliminar ejercicio', danger: true, onClick: () => deleteExercise(id) }],
     });
   }
@@ -2169,16 +2298,16 @@
       sub: fmtDay(c.date) + ' · ' + fmtMin(classTotal(c)) + ' min',
       onClick: () => {
         if ((c.items || []).some((it) => it.exId === ex.id)) { toast('Ya está en «' + (c.name || 'la clase') + '»', 'check'); return; }
-        mutateClass(c.id, (cc) => { cc.items.push({ exId: ex.id, min }); }).then((ok) => { if (ok) toast('Añadido a «' + (c.name || 'la clase') + '»'); });
+        mutateClass(c.id, (cc) => { cc.items.push({ exId: ex.id, min }); }).then((ok) => { if (ok) toast('Agregado a «' + (c.name || 'la clase') + '»'); });
       },
     }));
     actions.push({ label: 'Nueva clase', icon: 'plus', onClick: () => openClassEditor({ sport: ex.sport, items: [{ exId: ex.id, min }] }) });
-    actionSheet({ title: 'Añadir a una clase de ' + SPORTS[ex.sport].noun, actions, tint: ex.sport });
+    actionSheet({ title: 'Agregar a una clase de ' + SPORTS[ex.sport].noun, actions, tint: ex.sport });
   }
 
   function exerciseText(ex) {
     const points = String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
-    const lines = ['*' + ex.title + '*', [ex.objective, ex.level, (Number(ex.duration) || 0) + ' min'].filter(Boolean).join(' · ')];
+    const lines = ['*' + ex.title + '*', [ex.objective, lvl(ex.level), (Number(ex.duration) || 0) + ' min'].filter(Boolean).join(' · ')];
     const facts = [ex.players ? 'Jugadores: ' + ex.players : '', ex.age ? 'Edad: ' + ex.age : '', ex.space ? 'Espacio: ' + ex.space : ''].filter(Boolean).join(' · ');
     if (facts) lines.push(facts);
     if (ex.material) lines.push('Material: ' + ex.material);
@@ -2192,11 +2321,29 @@
       title: 'Compartir «' + ex.title + '»',
       tint: ex.sport,
       actions: [
-        { label: 'Mandar por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) },
-        { label: 'Archivo para otro profe (con video)', icon: 'box', onClick: () => sendExercise(ex) },
+        { label: 'Mandar texto por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) },
+      ].concat(liveMedia(ex).videoUrl || ex.mediaType === 'video' ? [{ label: 'Mandar el video', icon: 'video', onClick: () => shareVideo(ex) }] : []).concat([
+        { label: 'Mandar a otro profe', sub: 'Le llega un archivo para abrir en su Cancha', icon: 'box', onClick: () => openShareCoaches({ exIds: [ex.id] }) },
         { label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) },
-      ],
+      ]),
     });
+  }
+  // El video del ejercicio (propio o de entrenador) como archivo: WhatsApp, AirDrop o Fotos.
+  async function shareVideo(ex) {
+    try {
+      const blob = ex.mediaType === 'video' && ex.mediaId ? await S.backend.mediaBlob(ex.mediaId) : await (await fetch(ex.videoUrl)).blob();
+      if (!blob) throw new Error('video');
+      const type = (blob.type || 'video/mp4').split(';')[0];
+      const name = safeName(ex.title || 'Ejercicio') + (type.indexOf('quicktime') >= 0 ? '.mov' : '.mp4');
+      const file = new File([blob], name, { type });
+      if (!framed && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: ex.title }); } catch (e) { if (!e || e.name !== 'AbortError') throw e; }
+        return;
+      }
+      await saveFile(file, name, 'Video');
+    } catch (e) {
+      alertBox('No se pudo preparar el video', 'Revisa tu conexión y vuelve a intentarlo.');
+    }
   }
 
   // ---------------------------------------------------------------- flujos: clases
@@ -2218,7 +2365,7 @@
       '<div data-ref="sport-box"><p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], c.sport, 'Deporte') + '</div>' +
       '<p class="group-label" id="lbl-notes">Notas</p><div class="group"><textarea id="cl-notes" aria-labelledby="lbl-notes" placeholder="Objetivo del día, recordatorios…" maxlength="2000">' + esc(c.notes) + '</textarea></div>' +
       (opts.templateNote ? '<p class="muted" style="margin:0 16px">' + esc(opts.templateNote) + '</p>'
-        : !editing && c.items.length && c.items[0].exId ? '<p class="muted" style="margin:0 16px">Se añadirá «' + esc((getEx(c.items[0].exId) || {}).title || 'el ejercicio') + '».</p>' : '');
+        : !editing && c.items.length && c.items[0].exId ? '<p class="muted" style="margin:0 16px">Se agregará «' + esc((getEx(c.items[0].exId) || {}).title || 'el ejercicio') + '».</p>' : '');
     const sheet = openSheet({
       title: editing ? 'Editar clase' : 'Nueva clase',
       tint: c.sport,
@@ -2245,7 +2392,7 @@
         sheet.dismiss();
         haptic(12);
         toast(editing ? 'Cambios guardados' : 'Clase creada');
-        if (!editing) setTimeout(() => openClass(c.id), 260);
+        if (!editing) setTimeout(() => { openClass(c.id); if (!c.items.length) setTimeout(() => openPicker(c.id), 480); }, 260);
       },
     });
     const root = sheet.body;
@@ -2291,7 +2438,7 @@
       const pause = isPause(it);
       const ex = it.exId ? getEx(it.exId) : null;
       const title = itemTitle(it);
-      const sub = pause ? 'Pausa' : [ex ? ex.objective : it.gone ? (it.gone.objective || '') + ' (ya no está en tu biblioteca)' : '', seriesText(it.series)].filter(Boolean).join(' · ');
+      const sub = pause ? 'Pausa' : [ex ? ex.objective : it.gone ? (it.gone.objective || '') + ' (ya no está en tus ejercicios)' : '', seriesText(it.series)].filter(Boolean).join(' · ');
       const mins = fmtMin(itemMin(it));
       if (edit) {
         return '<div class="plan-row edit' + (pause ? ' pause' : '') + '">' +
@@ -2303,7 +2450,7 @@
           '<span class="moves"><button class="mv" data-act="move" data-d="-1" data-i="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Subir ' + esc(title) + '">' + ic('up') + '</button><button class="mv" data-act="move" data-d="1" data-i="' + i + '"' + (i === items.length - 1 ? ' disabled' : '') + ' aria-label="Bajar ' + esc(title) + '">' + ic('down') + '</button></span></div>';
       }
       const inner = '<span class="time">' + fmtMin(start) + '′</span>' +
-        (pause ? '<span class="mini pause-ico">' + ic('drop') + '</span>' : ex ? thumbHTML(ex, 'mini') : '<span class="mini"></span>') +
+        (pause ? '<span class="mini pause-ico">' + ic(pauseIc(title)) + '</span>' : ex ? thumbHTML(ex, 'mini') : '<span class="mini"></span>') +
         '<span class="txt"><span class="t1">' + esc(title) + '</span><span class="t2">' + esc([sub, mins + ' min'].filter(Boolean).join(' · ')) + '</span></span>';
       return ex ? '<button class="plan-row" data-open-ex="' + esc(it.exId) + '">' + inner + ic('chevR', 'chev') + '</button>'
         : '<div class="plan-row' + (pause ? ' pause' : '') + '">' + inner + '</div>';
@@ -2331,17 +2478,17 @@
     }).join('');
     return '<div class="d-head"><p class="d-eyebrow">' + ic(sport) + esc(c.date ? longDate(c.date) : 'Sin fecha') + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1>' +
       (g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') + '</div>' +
-      '<div class="c-summary"><p class="c-line"><span class="c-total">' + fmtMin(total) + '<small> min</small></span><span class="c-sub">' + plural(nEx, 'ejercicio', 'ejercicios') + (nP ? ' y ' + plural(nP, 'pausa', 'pausas') : '') + '</span></p>' +
+      '<div class="c-layout"><div class="c-sum"><div class="c-summary"><p class="c-line"><span class="c-total">' + fmtMin(total) + '<small> min</small></span><span class="c-sub">' + plural(nEx, 'ejercicio', 'ejercicios') + (nP ? ' y ' + plural(nP, 'pausa', 'pausas') : '') + '</span></p>' +
       (items.length ? '<div class="tl" aria-hidden="true">' + segs + '<b class="tl-end">' + fmtMin(total) + '′</b></div>' : '') +
       (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar clase</button>' : '') +
-      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya la diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div>' +
-      '<div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Editar plan') + '</button>' : '') + '</div>' +
+      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya la diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div></div>' +
+      '<div class="c-plan"><div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Cambiar plan') + '</button>' : '') + '</div>' +
       '<div class="list">' + planRowsHTML(c, edit) +
-      (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Añadir ejercicios</span></button><button class="cell add-row" data-act="add-pause">' + ic('drop') + '<span>Añadir pausa</span></button>' : '') +
-      (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div>' +
-      attendanceSectionHTML(c) +
+      (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Agregar ejercicios</span></button><button class="cell add-row" data-act="add-pause">' + ic('drop') + '<span>Agregar pausa</span></button>' : '') +
+      (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div></div>' +
+      '<div class="c-rest">' + attendanceSectionHTML(c) +
       (c.notes ? '<section class="sec"><h2>Notas</h2><p>' + esc(c.notes) + '</p></section>' : '') +
-      (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar clase</button></div>' : '');
+      (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar clase</button></div>' : '') + '</div></div>';
   }
 
   function openClass(id) {
@@ -2407,7 +2554,7 @@
         case 'delete-class':
           actionSheet({
             title: '¿Eliminar «' + (cc.name || 'esta clase') + '»?',
-            message: cc.attendance && Object.keys(cc.attendance).length ? 'También se borra la lista que pasaste en esta clase. Los ejercicios siguen en tu biblioteca.' : 'Los ejercicios siguen en tu biblioteca.',
+            message: cc.attendance && Object.keys(cc.attendance).length ? 'También se elimina su asistencia. Tus ejercicios se quedan.' : 'Tus ejercicios se quedan.',
             actions: [{ label: 'Eliminar clase', danger: true, onClick: () => deleteClassWithUndo(id) }],
           });
           break;
@@ -2432,9 +2579,9 @@
   function addPauseFlow(classId) {
     const opts = [['Hidratación', 3], ['Descanso', 2], ['Preparar material', 3]];
     actionSheet({
-      title: 'Añadir pausa',
-      message: 'Cuenta en el tiempo de la clase y el cronómetro la incluye.',
-      actions: opts.map((o) => ({ label: o[0] + ' · ' + o[1] + ' min', icon: 'drop', onClick: () => { mutateClass(classId, (x) => { x.items.push({ type: 'pause', label: o[0], min: o[1] }); }).then((ok) => { if (ok) toast('Pausa añadida'); }); } })),
+      title: 'Agregar pausa',
+      message: 'Se suma al tiempo de la clase.',
+      actions: opts.map((o) => ({ label: o[0] + ' · ' + o[1] + ' min', icon: 'drop', onClick: () => { mutateClass(classId, (x) => { x.items.push({ type: 'pause', label: o[0], min: o[1] }); }).then((ok) => { if (ok) toast('Pausa agregada'); }); } })),
     });
   }
 
@@ -2445,7 +2592,7 @@
     const fitSeries = (m) => { for (let n = 4; n >= 2; n--) { const w = Math.floor((m - (n - 1)) / n); if (w >= 2) return { n, work: Math.min(30, w), rest: 1 }; } return { n: 2, work: Math.max(1, Math.floor(m / 2) || 1), rest: 0 }; };
     const s0 = it.series || fitSeries(itemMin(it));
     const st = { n: s0.n, work: s0.work, rest: s0.rest };
-    const rests = [['0', 'Sin'], ['0.5', '30 s'], ['1', '1 min'], ['2', '2 min']];
+    const rests = [['0', 'Sin descanso'], ['0.5', '30 s'], ['1', '1 min'], ['2', '2 min']];
     const counter = (k, label, val, unit) => '<div class="row"><span class="k">' + label + '</span><span class="stepper"><button type="button" class="st-btn" data-k="' + k + '" data-d="-1" aria-label="Menos">' + ic('minus') + '</button><span class="st-val" data-v="' + k + '">' + val + unit + '</span><button type="button" class="st-btn" data-k="' + k + '" data-d="1" aria-label="Más">' + ic('plus') + '</button></span></div>';
     const sheet = openSheet({
       title: 'Series',
@@ -2459,7 +2606,7 @@
         (it.series ? '<button type="button" class="btn tinted wide-btn" data-act="no-series">Quitar series</button>' : ''),
       onConfirm: async () => {
         const total = st.n * st.work + (st.n - 1) * st.rest;
-        if (total > 240) { toast('Máximo 240 min por bloque', 'clock'); return; }
+        if (total > 240) { toast('Máximo 240 min por ejercicio', 'clock'); return; }
         const ok = await mutateClass(classId, (x) => {
           const y = x.items[i];
           if (st.n <= 1) { delete y.series; y.min = st.work; delete y.minBefore; } else { if (!y.series && y.minBefore == null) y.minBefore = y.min; y.series = { n: st.n, work: st.work, rest: st.rest }; y.min = total; }
@@ -2504,7 +2651,7 @@
       tint: c.sport,
       confirmLabel: 'Duplicar',
       bodyHTML:
-        '<p class="att-head">Se copia el plan de <b>' + esc(c.name || 'la clase') + '</b>, sin la lista.</p>' +
+        '<p class="att-head">Se copia el plan de <b>' + esc(c.name || 'la clase') + '</b>, sin la asistencia.</p>' +
         '<div class="group"><button type="button" class="row row-btn" data-act="pick-group"><span class="k">' + ic('people') + 'Grupo</span><span class="val" data-ref="group-val"></span>' + ic('chevR', 'chev') + '</button>' +
         '<label class="row"><span class="k">' + ic('calendar') + 'Fecha</span><input id="dp-date" type="date" aria-label="Fecha" value="' + esc(date) + '"></label></div>',
       onConfirm: async () => {
@@ -2540,13 +2687,13 @@
     const all = exOf(sport);
     const inClass = new Set((c.items || []).map((it) => it.exId).filter(Boolean));
     const sheet = openSheet({
-      title: 'Añadir ejercicios',
+      title: 'Agregar ejercicios',
       tint: sport,
-      confirmLabel: 'Añadir',
+      confirmLabel: 'Agregar',
       bodyHTML: (all.length ? '<label class="search">' + ic('search') + '<input type="search" id="pk-q" placeholder="Buscar en ' + SPORTS[sport].noun + '" autocomplete="off" aria-label="Buscar ejercicios"></label>' : '<p class="att-head">Aún no tienes ejercicios de ' + SPORTS[sport].noun + '.</p>') +
         '<div class="list pick-list" data-ref="list"></div>',
       isDirty: () => sel.length > 0,
-      discardTitle: '¿Descartar la selección?',
+      discardTitle: '¿Salir sin agregar?',
       onConfirm: async () => {
         const add = sel.slice();
         const ok = await mutateClass(classId, (x) => { add.forEach((id) => x.items.push({ exId: id, min: (getEx(id) || {}).duration || 10 })); });
@@ -2554,7 +2701,7 @@
         sel.length = 0;
         sheet.dismiss();
         haptic(12);
-        toast(add.length === 1 ? 'Ejercicio añadido' : add.length + ' ejercicios añadidos');
+        toast(add.length === 1 ? 'Ejercicio agregado' : add.length + ' ejercicios agregados');
       },
     });
     sheet.setConfirm(false);
@@ -2578,7 +2725,7 @@
     if (qi) qi.addEventListener('input', (e) => { q = e.target.value; render(); });
     root.addEventListener('click', (e) => {
       if (e.target.closest('[data-act="new-ex"]')) {
-        openExerciseEditor({ sport, afterCreate: (nx) => { all.unshift(nx); sel.push(nx.id); render(); sheet.setConfirm(true, 'Añadir (' + sel.length + ')'); } });
+        openExerciseEditor({ sport, afterCreate: (nx) => { all.unshift(nx); sel.push(nx.id); render(); sheet.setConfirm(true, 'Agregar (' + sel.length + ')'); } });
         return;
       }
       const b = e.target.closest('[data-pick-ex]');
@@ -2588,7 +2735,7 @@
       if (i >= 0) sel.splice(i, 1); else sel.push(id);
       b.setAttribute('aria-checked', String(i < 0));
       haptic(5);
-      sheet.setConfirm(sel.length > 0, sel.length ? 'Añadir (' + sel.length + ')' : 'Añadir');
+      sheet.setConfirm(sel.length > 0, sel.length ? 'Agregar (' + sel.length + ')' : 'Agregar');
     });
   }
 
@@ -2604,13 +2751,16 @@
     const parts = [exs.length ? plural(exs.length, 'ejercicio', 'ejercicios') : '', cls.length ? plural(cls.length, 'clase', 'clases') : '', grs.length ? plural(grs.length, 'grupo', 'grupos') : ''].filter(Boolean);
     const joined = parts.length > 1 ? parts.slice(0, -1).join(', ') + ' y ' + parts[parts.length - 1] : parts.join('');
     actionSheet({
-      title: '¿Borrar los ejemplos?',
-      message: (joined ? 'Se borrarán ' + joined + ' de ejemplo. ' : '') + 'Lo que agregaste, editaste o usaste en tus clases se queda.',
-      actions: [{ label: 'Borrar ejemplos', danger: true, onClick: async () => {
+      title: '¿Eliminar los ejemplos?',
+      message: (joined ? 'Se eliminarán ' + joined + ' de ejemplo. ' : '') + 'Lo que agregaste, editaste o usaste en tus clases se queda.',
+      actions: [{ label: 'Eliminar ejemplos', danger: true, onClick: async () => {
         const snap = { exs: exs.map(plain), cls: cls.map(plain), grs: grs.map(plain) };
         S.exercises = S.exercises.filter((e) => exs.indexOf(e) < 0);
         S.classes = S.classes.filter((c) => !c.example);
         S.groups = S.groups.filter((g) => grs.indexOf(g) < 0);
+        const secs = S.sections.filter((x) => x.example);
+        snap.secs = secs.map(plain);
+        S.sections = S.sections.filter((x) => !x.example);
         adopt.forEach((p) => { const x = plain(p[1]); x.example = false; replaceLocal(p[0], x); });
         renderAll(); refreshScreens();
         try {
@@ -2618,14 +2768,16 @@
           for (const c of cls) await S.backend.deleteClass(c.id);
           for (const g of grs) await S.backend.deleteGroup(g.id);
           for (const e of exs) await S.backend.deleteExercise(e.id);
-        } catch (e) { showError(e, 'No se pudieron borrar'); return; }
-        toast('Ejemplos borrados', 'trash', {
+          for (const x of snap.secs) await S.backend.deleteSection(x.id);
+        } catch (e) { showError(e, 'No se pudieron eliminar'); return; }
+        toast('Ejemplos eliminados', 'trash', {
           label: 'Deshacer',
           onClick: async () => {
             try {
               for (const e of snap.exs) { replaceLocal('exercises', e); await S.backend.saveExercise(e); }
               for (const g of snap.grs) { replaceLocal('groups', g); await S.backend.saveGroup(g); }
               for (const c of snap.cls) { replaceLocal('classes', c); await S.backend.saveClass(c); }
+              for (const x of snap.secs || []) { replaceLocal('sections', x); await S.backend.saveSection(x); }
               renderAll(); refreshScreens();
             } catch (e) { showError(e); }
           },
@@ -2633,6 +2785,294 @@
         });
       } }],
     });
+  }
+
+  // ---------------------------------------------------------------- secciones de la biblioteca
+  // Carpetas que arma el profe («Calentamientos», «Para primaria»…). Un ejercicio puede estar en varias.
+  const getSection = (id) => S.sections.find((x) => x.id === id) || null;
+  const sectionExercises = (sec) => (sec ? sec.exIds.map(getEx).filter(Boolean) : []);
+  const sectionsOf = (exId) => S.sections.filter((x) => x.exIds.indexOf(exId) >= 0);
+  function mutateSection(id, fn) {
+    const cur = getSection(id);
+    if (!cur) return Promise.resolve(false);
+    const x = plain(cur);
+    x.exIds = (x.exIds || []).slice();
+    fn(x);
+    x.exIds = Array.from(new Set(x.exIds));
+    x.example = false;
+    x.updatedAt = Date.now();
+    return commit('sections', x, cur);
+  }
+  function mosaicHTML(exs) {
+    const three = exs.slice(0, 3);
+    if (!three.length) return '<span class="mo-empty">' + ic('board') + '</span>';
+    return three.map(liveMedia).map((e) => '<span class="mo-cell">' + (e.thumbId ? '<img alt="" loading="lazy" ' + srcAttr(e.thumbId) + '>' : e.thumbUrl ? '<img alt="" loading="lazy" src="' + esc(e.thumbUrl) + '">' : boardSVG(e.sport, hasDiagram(e) ? e.diagram : null, { crop: true })) + '</span>').join('');
+  }
+  function sectionsStripHTML() {
+    const list = S.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+    if (!list.length && !S.canWrite) return '';
+    return '<div class="section-head"><h2>Secciones</h2>' + (S.canWrite ? '<button class="link" data-act="new-section">' + ic('plus') + 'Nueva</button>' : '') + '</div>' +
+      '<div class="sec-strip" role="list">' + list.map((sec) => {
+        const exs = sectionExercises(sec);
+        const pics = exs.filter((e) => e.sport === S.sport).concat(exs.filter((e) => e.sport !== S.sport));
+        return '<button class="sec-card" role="listitem" data-open-section="' + esc(sec.id) + '"><span class="sec-mosaic n' + Math.min(3, exs.length) + '">' + mosaicHTML(pics) + '</span>' +
+          '<span class="sec-name">' + esc(sec.name) + '</span><span class="sec-count">' + plural(exs.length, 'ejercicio', 'ejercicios') + '</span></button>';
+      }).join('') +
+      (S.canWrite && !list.length ? '<button class="sec-card sec-new" data-act="new-section"><span class="sec-mosaic">' + ic('plus') + '</span><span class="sec-name">Nueva sección</span><span class="sec-count">Agrupa tus ejercicios</span></button>' : '') +
+      '</div>';
+  }
+  function openSectionEditor(opts) {
+    const editing = !!opts.section;
+    const sec = editing ? plain(opts.section) : { id: uid(), name: '', exIds: opts.exIds || [], createdAt: Date.now(), order: Date.now() };
+    const sheet = openSheet({
+      title: editing ? 'Editar sección' : 'Nueva sección',
+      confirmLabel: editing ? 'Guardar' : 'Crear',
+      isDirty: () => $('#sec-name', sheet.body).value.trim() !== (opts.section ? opts.section.name : ''),
+      bodyHTML: '<div class="group"><input class="field-lg" id="sec-name" placeholder="Ej. Calentamientos, Para 3.º B, Torneo" aria-label="Nombre de la sección" maxlength="40" autocomplete="off" enterkeyhint="done" value="' + esc(sec.name) + '"></div>' +
+        (editing ? '<div class="group" style="margin-top:28px"><button type="button" class="row danger" data-act="del-section">' + ic('trash') + 'Eliminar sección</button></div><p class="muted small" style="margin:0 16px">Solo se elimina la sección. Tus ejercicios se quedan.</p>' : ''),
+      onConfirm: async () => {
+        const inp = $('#sec-name', sheet.body);
+        const name = inp.value.replace(/\s+/g, ' ').trim();
+        if (!name) { shake(inp); return; }
+        Object.assign(sec, { name, example: false, updatedAt: Date.now() });
+        const ok = await commit('sections', plain(sec), editing ? opts.section : null);
+        if (!ok) return;
+        sheet.dismiss();
+        haptic(10);
+        toast(editing ? 'Sección guardada' : 'Sección creada');
+        if (!editing && !opts.exIds) setTimeout(() => openSection(sec.id), 280);
+        if (opts.onDone) opts.onDone(sec);
+      },
+    });
+    sheet.body.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-act="del-section"]')) return;
+      const prev = plain(opts.section);
+      sheet.dismiss();
+      S.sections = S.sections.filter((x) => x.id !== prev.id);
+      renderAll(); refreshScreens();
+      S.backend.deleteSection(prev.id).then(() => {
+        toast('Sección eliminada', 'trash', { label: 'Deshacer', onClick: () => commit('sections', prev, null) });
+      }).catch((err) => { replaceLocal('sections', prev); renderAll(); refreshScreens(); showError(err, 'No se pudo eliminar'); });
+    });
+    setTimeout(() => { try { $('#sec-name', sheet.body).focus({ preventScroll: true }); } catch (e) { /* */ } }, 420);
+  }
+  function openSection(id) {
+    const sec0 = getSection(id);
+    if (!sec0) return;
+    if (backToScreen('sec:' + id)) return;
+    haptic(4);
+    let editing = false;
+    const scr = pushScreen({ key: 'sec:' + id, tint: 'clases', rightHTML: S.canWrite ? '<button class="glass-btn" data-act="sec-share" aria-label="Compartir con otros profes">' + ic('share') + '</button><button class="glass-btn cap" data-act="sec-edit">Editar</button>' : '' });
+    function render() {
+      const sec = getSection(id);
+      if (!sec) { popLayer(scr); return; }
+      const exs = sectionExercises(sec);
+      scr.setTitle(sec.name);
+      const bySport = ['futbol', 'basquet'].map((sp) => [sp, exs.filter((e) => e.sport === sp)]).filter((x) => x[1].length);
+      scr.body.innerHTML =
+        '<div class="d-head"><h1 class="d-title">' + esc(sec.name) + '</h1><p class="sec-sub">' + plural(exs.length, 'ejercicio', 'ejercicios') + '</p></div>' +
+        (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="sec-add">' + ic('plus') + 'Agregar ejercicios</button>' +
+          (exs.length ? '<button class="btn tinted" data-act="sec-toggle-edit">' + (editing ? 'Listo' : 'Quitar ejercicios') + '</button>' : '') + '</div>' : '') +
+        (editing ? '<p class="hint">Toca − en un ejercicio para sacarlo de esta sección. No se elimina de tus ejercicios.</p>' : '') +
+        (!exs.length ? '<p class="muted center">Esta sección está vacía. Toca «Agregar ejercicios».</p>' : '') +
+        bySport.map((x) => (bySport.length > 1 ? '<p class="group-label">' + SPORTS[x[0]].name + '</p>' : '') +
+          '<div class="grid' + (editing ? ' editing' : '') + '">' + x[1].map((e) => (editing
+            ? '<div class="card-wrap">' + cardHTML(e) + '<button class="card-rm" data-rm-ex="' + esc(e.id) + '" aria-label="Quitar «' + esc(e.title) + '» de la sección">' + ic('minus') + '</button></div>'
+            : cardHTML(e))).join('') + '</div>').join('');
+      hydrate(scr.body);
+    }
+    render();
+    scr.refresh = render;
+    scr.el.addEventListener('click', (e) => {
+      const rm = e.target.closest('[data-rm-ex]');
+      if (rm) {
+        const exId = rm.dataset.rmEx;
+        const sec = getSection(id);
+        const idx = sec ? sec.exIds.indexOf(exId) : -1;
+        mutateSection(id, (x) => { x.exIds = x.exIds.filter((y) => y !== exId); }).then((ok) => {
+          if (ok) toast('Quitado de la sección', 'trash', { label: 'Deshacer', onClick: () => mutateSection(id, (x) => { if (x.exIds.indexOf(exId) < 0) x.exIds.splice(Math.max(0, idx), 0, exId); }) });
+        });
+        return;
+      }
+      const card = e.target.closest('[data-open-ex]');
+      if (card && !editing) { openExercise(card.dataset.openEx); return; }
+      const a = e.target.closest('[data-act]');
+      if (!a) return;
+      if (a.dataset.act === 'sec-edit') openSectionEditor({ section: getSection(id) });
+      else if (a.dataset.act === 'sec-toggle-edit') { editing = !editing; render(); }
+      else if (a.dataset.act === 'sec-add') openSectionPicker(id);
+      else if (a.dataset.act === 'sec-share') { const x = getSection(id); if (x) openShareCoaches({ exIds: sectionExercises(x).map((y) => y.id) }); }
+    });
+  }
+  // Elegir ejercicios de la biblioteca para una sección (los dos deportes).
+  function openSectionPicker(id) {
+    const sec = getSection(id);
+    if (!sec) return;
+    const chosen = new Set(sec.exIds);
+    let sport = S.sport;
+    let q = '';
+    const sheet = openSheet({
+      title: 'Agregar a «' + sec.name + '»',
+      confirmLabel: 'Listo',
+      bodyHTML: segHTML('pksport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], sport, 'Deporte') +
+        '<label class="search">' + ic('search') + '<input type="search" id="sp-q" placeholder="Buscar ejercicios" autocomplete="off" aria-label="Buscar ejercicios"></label>' +
+        '<div class="list pick-list" data-ref="list"></div>',
+      onConfirm: async () => {
+        const ok = await mutateSection(id, (x) => { x.exIds = x.exIds.filter((y) => chosen.has(y)).concat(Array.from(chosen).filter((y) => x.exIds.indexOf(y) < 0)); });
+        if (!ok) return;
+        sheet.dismiss();
+        toast('Sección actualizada');
+      },
+    });
+    const root = sheet.body;
+    function paint() {
+      const nq = norm(q).trim();
+      const list = exOf(sport).filter((e) => !nq || norm(e.title + ' ' + (e.objective || '')).indexOf(nq) >= 0);
+      $('[data-ref="list"]', root).innerHTML = list.length ? list.map((e) => '<button type="button" class="cell" role="checkbox" aria-checked="' + chosen.has(e.id) + '" data-pick-sec="' + esc(e.id) + '">' + thumbHTML(e, 'mini') +
+        '<span class="txt"><span class="t1">' + esc(e.title) + '</span><span class="t2">' + esc([e.objective, e.duration ? e.duration + ' min' : ''].filter(Boolean).join(', ')) + '</span></span><span class="check">' + ic('check') + '</span></button>').join('')
+        : '<p class="muted pad">No hay ejercicios' + (nq ? ' con esa búsqueda' : ' de ' + SPORTS[sport].noun) + '.</p>';
+      hydrate(root);
+    }
+    bindSeg(root, 'pksport', (v) => { sport = v; paint(); });
+    $('#sp-q', root).addEventListener('input', (e) => { q = e.target.value; paint(); });
+    root.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-pick-sec]');
+      if (!b) return;
+      const x = b.dataset.pickSec;
+      if (chosen.has(x)) chosen.delete(x); else chosen.add(x);
+      b.setAttribute('aria-checked', String(chosen.has(x)));
+      haptic(4);
+    });
+    paint();
+  }
+  // Desde un ejercicio: en qué secciones está.
+  function openExerciseSections(exId) {
+    const ex = getEx(exId);
+    if (!ex) return;
+    const sheet = openSheet({
+      title: 'Guardar en sección',
+      cancelLabel: 'Listo',
+      bodyHTML: '<p class="att-head"><b>' + esc(ex.title) + '</b></p><div class="group" data-ref="list"></div>' +
+        '<button type="button" class="btn tinted wide-btn" data-act="new-sec">' + ic('plus') + 'Nueva sección</button>',
+    });
+    const root = sheet.body;
+    function paint() {
+      const list = S.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+      $('[data-ref="list"]', root).innerHTML = list.length ? list.map((sec) => switchRow('sx-' + sec.id, ic('box'), esc(sec.name), plural(sectionExercises(sec).length, 'ejercicio', 'ejercicios'), sec.exIds.indexOf(exId) >= 0, false)).join('')
+        : '<p class="muted pad">Todavía no tienes secciones.</p>';
+    }
+    root.addEventListener('change', (e) => {
+      const inp = e.target.closest('input[id^="sx-"]');
+      if (!inp) return;
+      const secId = inp.id.slice(3);
+      mutateSection(secId, (x) => { if (inp.checked) x.exIds.push(exId); else x.exIds = x.exIds.filter((y) => y !== exId); });
+      haptic(6);
+    });
+    root.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-act="new-sec"]')) return;
+      openSectionEditor({ exIds: [exId], onDone: () => paint() });
+    });
+    paint();
+  }
+
+  // ---------------------------------------------------------------- filtros de la biblioteca
+  const AGE_BANDS = [['', 'Cualquiera'], ['6-8', '6 a 8'], ['9-10', '9 a 10'], ['11-12', '11 a 12'], ['13-14', '13 a 14'], ['15-18', '15 o más']];
+  const DUR_BANDS = [['', 'Cualquiera'], ['0-10', 'Hasta 10 min'], ['11-20', '11 a 20 min'], ['21-999', 'Más de 20 min']];
+  const SORTS = [['recent', 'Recientes'], ['az', 'A–Z'], ['short', 'Más cortos']];
+  const fx = (sport) => (S.fx[sport] = S.fx[sport] || { levels: [], age: '', dur: '', video: false, school: false, sort: 'recent' });
+  const hasVideo = (e) => e.mediaType === 'video' || !!liveMedia(e).videoUrl || !!e.link;
+  // «Sub-12» → 11 a 12; «9 a 15 años» → 9 a 15; sin edad → sirve para todos.
+  function ageRange(txtAge) {
+    const s = String(txtAge || '');
+    const nums = [];
+    s.replace(/sub-?\s*(\d{1,2})/gi, (m, n) => { nums.push(Number(n) - 1, Number(n)); return m; });
+    s.replace(/(\d{1,2})\s*(?:a|-|–)\s*(\d{1,2})\s*años/gi, (m, a, b) => { nums.push(Number(a), Number(b)); return m; });
+    s.replace(/(\d{1,2})\s*años/gi, (m, a) => { nums.push(Number(a)); return m; });
+    if (!nums.length) return null;
+    return [Math.min.apply(null, nums), /en adelante|o más|\+/i.test(s) ? 99 : Math.max.apply(null, nums)];
+  }
+  function activeFilterCount(sport) {
+    const f = fx(sport);
+    return f.levels.length + (f.age ? 1 : 0) + (f.dur ? 1 : 0) + (f.video ? 1 : 0) + (f.school ? 1 : 0);
+  }
+  function applyFilters(list, sport) {
+    const f = fx(sport);
+    let out = list;
+    if (f.levels.length) out = out.filter((e) => f.levels.indexOf(e.level || 'Inicial') >= 0);
+    if (f.age) { const [lo, hi] = f.age.split('-').map(Number); out = out.filter((e) => { const r = ageRange(e.age); return !r || (r[0] <= hi && r[1] >= lo); }); }
+    if (f.dur) { const [lo, hi] = f.dur.split('-').map(Number); out = out.filter((e) => (Number(e.duration) || 0) >= lo && (Number(e.duration) || 0) <= hi); }
+    if (f.video) out = out.filter(hasVideo);
+    if (f.school) out = out.filter((e) => e.school);
+    if (f.sort === 'az') out = out.slice().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es'));
+    else if (f.sort === 'short') out = out.slice().sort((a, b) => (Number(a.duration) || 0) - (Number(b.duration) || 0));
+    return out;
+  }
+  function activeFiltersHTML(sport) {
+    const f = fx(sport);
+    const chips = [];
+    f.levels.forEach((l) => chips.push(['lvl:' + l, l]));
+    if (f.age) chips.push(['age', (AGE_BANDS.find((x) => x[0] === f.age) || [])[1] + ' años']);
+    if (f.dur) chips.push(['dur', (DUR_BANDS.find((x) => x[0] === f.dur) || [])[1]]);
+    if (f.video) chips.push(['video', 'Con video']);
+    if (f.school) chips.push(['school', 'Grupos grandes']);
+    if (f.sort !== 'recent') chips.push(['sort', 'Orden: ' + (SORTS.find((x) => x[0] === f.sort) || [])[1]]);
+    return chips.map((c) => '<button class="chip on-chip" data-unfilter="' + esc(c[0]) + '" aria-label="Quitar filtro ' + esc(c[1]) + '">' + esc(c[1]) + ic('xmark') + '</button>').join('');
+  }
+  function removeFilter(sport, key) {
+    const f = fx(sport);
+    if (key.indexOf('lvl:') === 0) f.levels = f.levels.filter((l) => l !== key.slice(4));
+    else if (key === 'age') f.age = '';
+    else if (key === 'dur') f.dur = '';
+    else if (key === 'video') f.video = false;
+    else if (key === 'school') f.school = false;
+    else if (key === 'sort') f.sort = 'recent';
+  }
+  function openFilters(sport) {
+    const f = fx(sport);
+    const draft = JSON.parse(JSON.stringify(f));
+    const chipGroup = (name, opts, isOn) => '<div class="chips wrap static fchips" data-fgroup="' + name + '">' + opts.map((o) => '<button type="button" class="chip" data-fval="' + esc(o[0]) + '" aria-pressed="' + isOn(o[0]) + '">' + esc(o[1]) + '</button>').join('') + '</div>';
+    const sheet = openSheet({
+      title: 'Filtros',
+      tint: sport,
+      confirmLabel: 'Ver',
+      bodyHTML:
+        '<p class="group-label">Nivel</p>' + chipGroup('levels', LEVELS.map((l) => [l, lvl(l)]), (v) => draft.levels.indexOf(v) >= 0) +
+        '<p class="group-label">Edad de tus alumnos</p>' + chipGroup('age', AGE_BANDS, (v) => draft.age === v) +
+        '<p class="group-label">Duración</p>' + chipGroup('dur', DUR_BANDS, (v) => draft.dur === v) +
+        '<div class="group" style="margin-top:20px">' + switchRow('f-video', ic('video'), 'Con video', 'Tuyo, de Recomendados o de YouTube', draft.video, false) +
+        switchRow('f-school', ic('people'), 'Grupos grandes', 'De 25 a 35 alumnos', draft.school, false) + '</div>' +
+        '<p class="group-label">Ordenar</p>' + segHTML('fsort', SORTS, draft.sort, 'Ordenar') +
+        (activeFilterCount(sport) || fx(sport).sort !== 'recent' ? '<button type="button" class="btn tinted wide-btn" data-act="f-clear">Quitar filtros</button>' : ''),
+      onConfirm: () => { S.fx[sport] = draft; S.sig = {}; renderEjercicios(); sheet.dismiss(); },
+    });
+    const root = sheet.body;
+    function count() {
+      const saved = S.fx[sport]; S.fx[sport] = draft;
+      const n = applyFilters(exOf(sport), sport).length;
+      S.fx[sport] = saved;
+      $('[data-sh="ok"]', sheet.el).textContent = 'Ver ' + n;
+    }
+    root.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-fval]');
+      if (b) {
+        const g = b.closest('[data-fgroup]').dataset.fgroup; const v = b.dataset.fval;
+        if (g === 'levels') draft.levels = draft.levels.indexOf(v) >= 0 ? draft.levels.filter((x) => x !== v) : draft.levels.concat(v);
+        else draft[g] = v;
+        $$('[data-fval]', b.parentNode).forEach((x) => x.setAttribute('aria-pressed', String(g === 'levels' ? draft.levels.indexOf(x.dataset.fval) >= 0 : draft[g] === x.dataset.fval)));
+        haptic(4); count(); return;
+      }
+      if (e.target.closest('[data-act="f-clear"]')) {
+        Object.assign(draft, { levels: [], age: '', dur: '', video: false, school: false, sort: 'recent' });
+        S.fx[sport] = draft; S.sig = {}; renderEjercicios(); sheet.dismiss();
+      }
+    });
+    root.addEventListener('change', (e) => {
+      if (e.target.id === 'f-video') draft.video = e.target.checked;
+      if (e.target.id === 'f-school') draft.school = e.target.checked;
+      count();
+    });
+    bindSeg(root, 'fsort', (v) => { draft.sort = v; count(); });
+    count();
   }
 
   // ---------------------------------------------------------------- grupos
@@ -2654,12 +3094,20 @@
     return ((w[0] || '·').slice(0, w.length > 1 ? 1 : 2) + (w[1] ? w[1][0] : '')).toUpperCase();
   }
   function groupCellHTML(g) {
-    const n = groupClasses(g.id).length;
     const ns = studentsOf(g).length;
-    const meta = [g.schedule || g.category, ns ? plural(ns, 'alumno', 'alumnos') : 'Sin alumnos'].filter(Boolean).join(', ');
-    const initials = groupShort(g.name);
-    return '<button class="cell" data-open-group="' + esc(g.id) + '" data-tint="' + groupTint(g) + '"><span class="group-badge band-' + (SPORTS[g.sport] ? g.sport : 'futbol') + '" aria-hidden="true">' + esc(initials) + '</span>' +
-      '<span class="txt"><span class="t1">' + esc(g.name) + '</span><span class="t2">' + esc(meta) + '</span></span>' + ic('chevR', 'chev') + '</button>';
+    const rate = groupRate(g);
+    const t = todayStr();
+    const next = groupClasses(g.id).filter((c) => c.date && c.date >= t).sort(byUpcoming)[0];
+    const sp = SPORTS[g.sport] ? g.sport : 'futbol';
+    const sub = [SPORTS[g.sport] ? SPORTS[g.sport].name : 'Fútbol y básquetbol', g.category].filter(Boolean).join(' · ');
+    const facts = ['<span><b>' + ns + '</b>' + (ns === 1 ? 'alumno' : 'alumnos') + '</span>'];
+    if (rate != null) facts.push('<span><b' + (rate < 75 ? ' class="low"' : '') + '>' + rate + '%</b>asistencia</span>');
+    if (next) facts.push('<span><b>' + esc(fmtDay(next.date)) + '</b>próxima clase</span>');
+    return '<button class="g-card" data-open-group="' + esc(g.id) + '" data-tint="' + groupTint(g) + '">' +
+      '<span class="g-top"><span class="group-badge band-' + sp + '" aria-hidden="true">' + esc(groupShort(g.name)) + '</span>' +
+      '<span class="g-name"><b>' + esc(g.name) + '</b><small>' + esc(sub) + '</small></span>' + ic('chevR', 'chev') + '</span>' +
+      '<span class="g-facts">' + facts.join('') + '</span>' +
+      (g.schedule ? '<span class="g-when">' + ic('clock') + esc(g.schedule) + '</span>' : '') + '</button>';
   }
   function openGroupEditor(opts) {
     const editing = !!opts.group;
@@ -2676,7 +3124,7 @@
         '<p class="group-label">Deporte</p>' + segHTML('gsport', [['ambos', 'Ambos'], ['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], SPORTS[g.sport] ? g.sport : 'ambos', 'Deporte') +
         '<div class="group">' +
         '<label class="row"><span class="k">' + ic('age') + 'Categoría</span><input id="gr-cat" placeholder="Ej. Sub-12, 4.º de primaria" aria-label="Categoría" maxlength="60" value="' + esc(g.category) + '"></label>' +
-        '<label class="row"><span class="k">' + ic('clock') + 'Horario</span><input id="gr-sched" placeholder="Ej. Lun y Mié 16:00" aria-label="Horario" maxlength="60" value="' + esc(g.schedule) + '"></label>' +
+        '<label class="row"><span class="k">' + ic('clock') + 'Horario</span><input id="gr-sched" placeholder="Ej. lunes y miércoles 16:00" aria-label="Horario" maxlength="60" value="' + esc(g.schedule) + '"></label>' +
         '<label class="row"><span class="k">' + ic('flag') + 'Lugar</span><input id="gr-place" placeholder="Ej. Cancha 2" aria-label="Lugar" maxlength="60" value="' + esc(g.place) + '"></label>' +
         '</div>',
       onConfirm: async () => {
@@ -2725,7 +3173,7 @@
       (S.canWrite ? '<div class="g-actions">' +
         (hasStudents ? '<button class="btn filled" data-act="roll-today">' + ic('check') + 'Pasar lista hoy</button>' : '<button class="btn filled" data-act="add-students">' + ic('plus') + 'Agregar alumnos</button>') +
         '<button class="btn tinted" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' +
-        (hasStudents ? '<button class="btn tinted" data-act="report">' + ic('doc') + 'Reporte</button>' : '') + '</div>'
+        (hasStudents ? '<button class="btn tinted" data-act="report">' + ic('doc') + 'Reporte de asistencia</button>' : '') + '</div>'
         : hasStudents ? '<div class="g-actions"><button class="btn tinted" data-act="report">' + ic('doc') + 'Reporte de asistencia</button></div>' : '') +
       '</div>' +
       (up.length ? '<p class="group-label">Próximas</p><div class="list">' + up.map((c) => classCellHTML(c, true)).join('') + '</div>' : '') +
@@ -2770,7 +3218,7 @@
               const idx = studentsOf(gPrev).findIndex((y) => y.id === sid);
               const removed = plain(st);
               mutateGroup(id, (x) => { x.students = x.students.filter((y) => y.id !== sid); }).then((ok) => {
-                if (ok) toast(st.name + ' quitado', 'trash', { label: 'Deshacer', onClick: () => mutateGroup(id, (x) => { if (!x.students.some((y) => y.id === removed.id)) x.students.splice(Math.max(0, idx), 0, removed); }) });
+                if (ok) toast('Quitaste a ' + st.name, 'trash', { label: 'Deshacer', onClick: () => mutateGroup(id, (x) => { if (!x.students.some((y) => y.id === removed.id)) x.students.splice(Math.max(0, idx), 0, removed); }) });
               });
             } },
           ],
@@ -2924,14 +3372,15 @@
       wide: true,
       z,
       isDirty: () => dirty,
-      discardTitle: '¿Descartar la lista?',
+      discardTitle: '¿Salir sin guardar la lista?',
       bodyHTML:
         '<p class="att-head"><b>' + esc(g.name) + '</b> · ' + esc(fmtDay(c.date)) + '</p>' +
         '<p class="att-legend"><span>' + ic('check') + ' asistió</span><span><b>R</b> retardo</span><span>' + ic('xmark') + ' falta</span></p>' +
+        '<p class="hint">Si casi todos vinieron, toca «Todos asistieron» y luego marca a los que faltaron.</p>' +
         '<button type="button" class="btn tinted att-all" data-att-all>' + ic('check') + 'Todos asistieron</button>' +
         '<p class="att-sum" data-ref="sum" aria-live="polite"></p>' +
-        '<div class="list att-list">' + list.map((s, n) =>
-          '<div class="att-row" data-sid="' + esc(s.id) + '"><span class="att-n">' + (n + 1) + '</span><span class="att-name">' + esc(s.name) + '</span>' +
+        '<div class="list att-list" style="--rows:' + Math.ceil(list.length / 2) + '">' + list.map((s, n) =>
+          '<div class="att-row' + (n === Math.ceil(list.length / 2) ? ' col-top' : '') + '" data-sid="' + esc(s.id) + '"><span class="att-n">' + (n + 1) + '</span><span class="att-name">' + esc(s.name) + '</span>' +
           '<span class="att-btns" role="group" aria-label="' + esc(s.name) + '">' +
           ['p', 't', 'f'].map((v) => '<button type="button" class="att-b att-' + v + '" data-v="' + v + '" aria-pressed="false" aria-label="' + esc(s.name) + ': ' + ATT[v].label.toLowerCase() + '">' + (ATT[v].glyph ? ic(ATT[v].glyph) : 'R') + '</button>').join('') +
           '</span></div>').join('') + '</div>',
@@ -2990,7 +3439,7 @@
       confirmLabel: 'Agregar',
       isDirty: () => !!$('#st-names', sheet.body).value.trim(),
       bodyHTML:
-        '<p class="group-label" id="lbl-st">Un nombre por línea, en el orden de tu lista</p>' +
+        '<p class="group-label" id="lbl-st">Un nombre por renglón, en el orden de tu lista</p>' +
         '<div class="group"><textarea id="st-names" aria-labelledby="lbl-st" placeholder="Ana Martínez&#10;Diego López&#10;Valeria Ruiz" style="min-height:220px" autocapitalize="words"></textarea></div>' +
         '<p class="muted" style="margin:0 16px">Puedes pegar la lista completa de tu grupo.</p>',
       onConfirm: async () => {
@@ -3042,9 +3491,10 @@
       const r = studentRate(g, s.id);
       return '<button class="cell st-row" data-student="' + esc(s.id) + '"' + (S.canWrite ? '' : ' disabled') + '><span class="att-n">' + (n + 1) + '</span>' +
         '<span class="txt"><span class="t1">' + esc(s.name) + '</span></span>' +
-        (r == null ? '<span class="st-rate none">—</span>' : '<span class="st-rate' + (r < 75 ? ' low' : '') + '">' + r + '%' + (r < 75 ? ' ' + ic('warn') : '') + '</span>') + '</button>';
+        (r == null ? '' : '<span class="st-rate' + (r < 75 ? ' low' : '') + '">' + r + '%' + (r < 75 ? ' ' + ic('warn') : '') + '</span>') + '</button>';
     }).join('');
-    return '<div class="section-head"><h2>Alumnos</h2><span class="muted">' + (list.length ? list.length : '') + '</span></div>' +
+    const anyRate = list.some((x) => studentRate(g, x.id) != null);
+    return '<div class="section-head"><h2>Alumnos' + (list.length ? ' <small class="muted">' + list.length + '</small>' : '') + '</h2><span class="muted small">' + (anyRate ? 'Asistencia' : '') + '</span></div>' +
       '<div class="list st-list">' + rows +
       (limit < list.length ? '<button class="cell add-row" data-act="show-all">' + ic('down') + '<span>Ver los ' + list.length + ' alumnos</span></button>' : '') +
       (S.canWrite ? '<button class="cell add-row" data-act="add-students">' + ic('plus') + '<span>Agregar alumnos</span></button>' : '') +
@@ -3126,7 +3576,7 @@
       confirmLabel: 'Crear PDF',
       bodyHTML:
         '<p class="att-head"><b>' + esc(g.name) + '</b> · ' + plural(studentsOf(g).length, 'alumno', 'alumnos') + '</p>' +
-        '<p class="group-label">Periodo</p>' + segHTML('period', [['mes', 'Este mes'], ['anterior', 'Mes pasado'], ['trimestre', 'Trimestre'], ['fechas', 'Fechas']], kind, 'Periodo') +
+        '<p class="group-label">Periodo</p>' + segHTML('period', [['mes', 'Este mes'], ['anterior', 'Mes pasado'], ['trimestre', 'Trimestre'], ['fechas', 'Otras fechas']], kind, 'Periodo') +
         '<div data-ref="tri" hidden>' + segHTML('tri', tr.map((x) => [x[0], x[1]]), tri, 'Trimestre') + '</div>' +
         '<div class="group" data-ref="dates" hidden>' +
         '<label class="row"><span class="k">' + ic('calendar') + 'Desde</span><input id="rp-from" type="date" aria-label="Desde" value="' + monthRange(0)[0] + '"></label>' +
@@ -3396,6 +3846,7 @@
 
   async function buildExport(opt, onProgress) {
     const exercises = S.exercises.filter((e) => opt.exIds.has(e.id)).map((e) => plain(e));
+    if (opt.from) exercises.forEach((e) => { if (!e.sharedBy) e.sharedBy = opt.from; e.example = false; });
     const classes = S.classes.filter((c) => opt.classIds.has(c.id)).map((c) => {
       const x = plain(c);
       if (!opt.groupIds.has(x.groupId)) { delete x.attendance; delete x.attendanceAt; delete x.groupId; }
@@ -3417,7 +3868,8 @@
       media[want[i]] = { path, type, size: blob.size };
       files.push({ name: path, data: blob });
     }
-    const manifest = { format: 'cancha', version: 2, app: APP_NAME, kind: opt.kind, title: opt.title, exportedAt: Date.now(), exercises, classes, groups, media };
+    const sections = opt.kind === 'respaldo' ? S.sections.map((x) => plain(x)) : [];
+    const manifest = { format: 'cancha', version: 3, app: APP_NAME, kind: opt.kind, title: opt.title, from: opt.from || undefined, exportedAt: Date.now(), exercises, classes, groups, sections, media };
     files.unshift({ name: 'cancha.json', data: JSON.stringify(manifest) });
     const zip = await buildZip(files, (p) => onProgress && onProgress(0.5 + p * 0.5, 'Armando el archivo · ' + Math.round(p * 100) + '%'));
     return new File([zip], APP_NAME + ' - ' + safeName(opt.title) + ' - ' + shortDate() + '.zip', { type: 'application/zip' });
@@ -3426,7 +3878,9 @@
   function markBackup() { pref.set('last-backup', String(Date.now())); S.sig = {}; renderAll(); }
 
   // Comparte el archivo ya creado: en Claude se descarga; en iPad abre el menú de compartir (AirDrop, WhatsApp, Archivos).
-  async function deliverFile(file, what, isBackup) {
+  async function deliverFile(file, what, isBackup, opt) {
+    const shared = !!(opt && opt.kind === 'compartido');
+    const msg = shared ? 'Te mando ' + what + ' de Cancha. Guarda el archivo, abre Cancha y toca Ejercicios → «Abrir los que me mandaron».' + (appLink() ? ' Si no tienes Cancha: ' + appLink() : '') : '';
     const cl = window.claude;
     if (framed && cl && typeof cl.use === 'function') { if (await saveFile(file, file.name, 'Archivo') && isBackup) markBackup(); return; }
     const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch (e) { return false; } })();
@@ -3437,14 +3891,14 @@
         '<div class="file-card"><span class="file-ico">' + ic('box') + '</span><span class="txt"><b>' + esc(file.name) + '</b><span>' + esc(what) + ' · ' + fmtSize(file.size) + '</span></span></div>' +
         '<button type="button" class="btn filled wide-btn" data-file-share>' + ic('share') + (canShare ? (isBackup ? 'Guardar respaldo' : 'Compartir') : 'Descargar archivo') + '</button>' +
         '<div class="help">' + (isBackup
-          ? (canShare ? '<p>Elige <b>Guardar en Archivos</b> → <b>iCloud Drive</b>. Así lo recuperas aunque cambies de iPad.</p>' : '<p>Descarga el archivo y guárdalo en un lugar seguro (por ejemplo, tu nube).</p>')
-          : (canShare ? '<p>Elige <b>AirDrop</b> o <b>WhatsApp</b> y mándalo al otro profe.</p>' : '<p>Descarga el archivo y mándalo por AirDrop, WhatsApp o correo.</p>')) +
-        '<p>Para abrirlo en otro iPad: guarda el archivo, abre Cancha y toca <b>Respaldo → Importar archivo</b>.</p></div>',
+          ? (canShare ? '<p>Elige <b>AirDrop</b> o <b>Guardar en Archivos</b> → <b>iCloud Drive</b>. Así lo recuperas si cambias de iPad.</p>' : '<p>Descarga el archivo y guárdalo en un lugar seguro (por ejemplo, tu nube).</p>')
+          : (canShare ? '<p>Elige <b>WhatsApp</b> (puede ser el grupo de profes) o <b>AirDrop</b>.</p>' : '<p>Descarga el archivo y mándalo por WhatsApp, AirDrop o correo.</p>')) +
+        (shared ? '<p>Quien lo reciba guarda el archivo, abre Cancha y toca <b>Ejercicios → Abrir los que me mandaron</b>.</p>' : '<p>Para abrirlo en otro iPad: guarda el archivo, abre Cancha y toca <b>Respaldo → Abrir archivo de Cancha</b>.</p>') + '</div>',
     });
     sheet.body.addEventListener('click', async (e) => {
       if (!e.target.closest('[data-file-share]')) return;
       if (canShare) {
-        try { await navigator.share({ files: [file], title: file.name }); if (isBackup) markBackup(); sheet.dismiss(); toast(isBackup ? 'Respaldo guardado' : 'Archivo enviado'); return; } catch (err) { if (err && err.name === 'AbortError') return; }
+        try { await navigator.share(msg ? { files: [file], title: file.name, text: msg } : { files: [file], title: file.name }); if (isBackup) markBackup(); sheet.dismiss(); toast(isBackup ? 'Respaldo guardado' : 'Archivo enviado'); return; } catch (err) { if (err && err.name === 'AbortError') return; }
       }
       const a = document.createElement('a');
       a.href = URL.createObjectURL(file);
@@ -3465,14 +3919,14 @@
       const file = await buildExport(opt, (p, label) => { sheet.progress(p, label); });
       sheet.setBusy(false);
       sheet.dismiss();
-      setTimeout(() => deliverFile(file, what, opt.kind === 'respaldo'), 350);
+      setTimeout(() => deliverFile(file, what, opt.kind === 'respaldo', opt), 350);
     } catch (e) {
       sheet.setBusy(false);
       sheet.dismiss();
       alertBox('No se pudo crear el archivo',
-        e && e.code === 'too-big' ? 'Los videos pesan más de 4 GB. Haz el respaldo sin videos o manda los ejercicios por partes.'
+        e && e.code === 'too-big' ? 'Hay demasiados videos para un solo archivo. En «Mandar a otro profe» apaga «Videos y fotos» o manda por partes.'
           : e && e.name === 'QuotaExceededError' ? 'No hay espacio suficiente en el dispositivo.'
-            : 'Vuelve a intentarlo. Si tienes muchos videos, prueba sin videos.');
+            : 'Vuelve a intentarlo en un momento.');
     }
   }
   function backupAll(withMedia) {
@@ -3497,14 +3951,14 @@
       title: 'Mandar a otro profe',
       confirmLabel: 'Crear archivo',
       bodyHTML:
-        '<p class="att-head">Elige qué mandar. El otro profe lo abre en su iPad con «Importar archivo».</p>' +
+        '<p class="att-head">Elige qué mandar. El otro profe lo abre en su Cancha, en «Respaldo».</p>' +
         '<div class="group">' +
         switchRow('xp-f', ic('futbol'), 'Ejercicios de fútbol', plural(nF, 'ejercicio', 'ejercicios'), nF > 0, !nF) +
         switchRow('xp-b', ic('basquet'), 'Ejercicios de básquetbol', plural(nB, 'ejercicio', 'ejercicios'), nB > 0, !nB) +
         switchRow('xp-c', ic('clases'), 'Clases', plural(nC, 'clase', 'clases') + ' con sus ejercicios', nC > 0, !nC) +
         switchRow('xp-g', ic('people'), 'Grupos y asistencia', nG ? 'Incluye nombres de alumnos' : 'Sin grupos', false, !nG) +
         '</div><div class="group">' +
-        switchRow('xp-m', ic('video'), 'Videos y fotos', 'Sin ellos el archivo pesa muy poco', true, false) +
+        switchRow('xp-m', ic('video'), 'Videos y fotos', 'Si los quitas, el archivo pesa mucho menos', true, false) +
         '</div><p class="muted xp-sum" data-ref="sum"></p>',
       onConfirm: () => {
         const o = collect();
@@ -3558,10 +4012,12 @@
   const dayOk = (v) => { if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return ''; const d = parseDay(v); return d && dayStr(d) === v ? v : ''; };
   function cleanDiagram(d) {
     if (!d || typeof d !== 'object' || !Array.isArray(d.items)) return null;
-    const items = d.items.slice(0, 300).filter((it) => it && typeof it === 'object' && ['a', 'b', 'cone', 'ball', 'arrow'].indexOf(it.t) >= 0).map((it) => {
+    const items = d.items.slice(0, 300).filter((it) => it && typeof it === 'object' && ['a', 'b', 'cone', 'ball', 'arrow', 'ladder', 'hurdle', 'ring', 'pole'].indexOf(it.t) >= 0).map((it) => {
       const o = { t: it.t, x: numIn(it.x, 0, 160, 80), y: numIn(it.y, 0, 200, 100) };
+      if (it.t === 'ladder' || it.t === 'hurdle') o.r = Number(it.r) === 90 ? 90 : 0;
+      if (it.t === 'ladder') o.n = Math.round(numIn(it.n, 2, 14, 6));
       if (it.t === 'arrow') { o.k = ['pase', 'conduccion', 'mov'].indexOf(it.k) >= 0 ? it.k : 'pase'; o.x2 = numIn(it.x2, 0, 160, o.x); o.y2 = numIn(it.y2, 0, 200, o.y); }
-      if (it.n != null) o.n = Math.round(numIn(it.n, 0, 99, 1));
+      if (it.n != null && it.t !== 'ladder') o.n = Math.round(numIn(it.n, 0, 99, 1));
       if (it.t === 'arrow' && it.s != null) o.s = Math.round(numIn(it.s, 1, 50, 1));
       return o;
     });
@@ -3585,6 +4041,11 @@
       mediaType: mt, mediaId: mt && isId(x.mediaId) ? x.mediaId : null, thumbId: isId(x.thumbId) ? x.thumbId : null,
       mediaDuration: numIn(x.mediaDuration, 0, 36000, 0), mediaAspect: x.mediaAspect == null ? null : numIn(x.mediaAspect, 0.1, 10, null), diagram: cleanDiagram(x.diagram),
       catalogId: isId(x.catalogId) ? x.catalogId : undefined,
+      sharedBy: txt(x.sharedBy, 40).trim() || undefined,
+      school: x.school === true,
+      videoUrl: typeof x.videoUrl === 'string' && /^app\/videos\/[\w-]+\.mp4$/.test(x.videoUrl) ? x.videoUrl : undefined,
+      posterUrl: typeof x.posterUrl === 'string' && /^app\/videos\/[\w-]+\.jpg$/.test(x.posterUrl) ? x.posterUrl : undefined,
+      thumbUrl: typeof x.thumbUrl === 'string' && /^app\/videos\/[\w-]+-t\.jpg$/.test(x.thumbUrl) ? x.thumbUrl : undefined,
     });
   }
   function cleanItem(it) {
@@ -3613,6 +4074,10 @@
     }
     if (x.lastRunAt) o.lastRunAt = numIn(x.lastRunAt, 0, 9e15, 0);
     return o;
+  }
+  function cleanSection(x) {
+    if (!x || typeof x !== 'object' || !isId(x.id)) return null;
+    return cleanBase(x, { name: txt(x.name, 40).trim() || 'Sección', exIds: (Array.isArray(x.exIds) ? x.exIds : []).filter(isId).slice(0, 500), order: numIn(x.order, 0, 9e15, 0) });
   }
   function cleanGroup(x) {
     if (!x || typeof x !== 'object' || !isId(x.id)) return null;
@@ -3650,10 +4115,11 @@
     const ex = bucket(m.exercises, cleanEx, getEx);
     const cl = bucket(m.classes, cleanClass, getClass);
     const gr = bucket(m.groups, cleanGroup, getGroup);
+    const sc = bucket(m.sections, cleanSection, getSection);
     const media = new Set();
     const mediaOk = (k) => k && m.media && m.media[k] && typeof m.media[k].path === 'string';
     ex.nuevos.concat(ex.actualiza, ex.copias).forEach((x) => { [x.mediaId, x.thumbId].forEach((k) => { if (mediaOk(k)) media.add(k); }); });
-    return { ex, cl, gr, media: Array.from(media) };
+    return { ex, cl, gr, sc, media: Array.from(media) };
   }
   function importLine(b, one, many, fem) {
     const n = b.nuevos.length + b.actualiza.length + b.iguales.length + b.copias.length;
@@ -3670,54 +4136,61 @@
       else { zip = await readZip(file); const mb = await zip.blobOf('cancha.json', 'application/json'); m = mb ? JSON.parse(await mb.text()) : null; }
     } catch (e) { m = null; damaged = !(e && e.message === 'not-zip') || /^Cancha/i.test(file.name || ''); }
     if (damaged && !m) { alertBox('El archivo está dañado o incompleto', 'Vuelve a descargarlo o pide que te lo manden otra vez.'); return; }
-    if (!m || typeof m !== 'object' || m.format !== 'cancha') { alertBox('Ese archivo no es de Cancha', 'Elige un archivo .zip que hayas exportado desde Cancha.'); return; }
+    if (!m || typeof m !== 'object' || m.format !== 'cancha') { alertBox('Ese archivo no es de Cancha', 'Elige un respaldo o un archivo que te mandaron desde Cancha.'); return; }
     const plan = planImport(m);
     const mediaSize = plan.media.reduce((s, k) => s + (Number(m.media[k].size) || 0), 0);
     const mainMedia = plan.ex.nuevos.concat(plan.ex.actualiza, plan.ex.copias).filter((x) => x.mediaId && plan.media.indexOf(x.mediaId) >= 0).length;
     const changes = (b) => b.nuevos.length + b.actualiza.length + b.copias.length;
-    const nothing = !changes(plan.ex) && !changes(plan.cl) && !changes(plan.gr);
+    const nothing = !changes(plan.ex) && !changes(plan.cl) && !changes(plan.gr) && !changes(plan.sc);
     const copies = plan.ex.copias.length + plan.cl.copias.length + plan.gr.copias.length;
     let when = '';
     try { when = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(m.exportedAt)); } catch (e) { /* */ }
+    const from = txt(m.from, 40).trim();
+    const incoming = plan.ex.nuevos.concat(plan.ex.actualiza, plan.ex.copias);
     const sheet = openSheet({
-      title: 'Importar',
-      confirmLabel: 'Importar',
+      title: from ? 'Ejercicios de ' + from : 'Abrir archivo',
+      confirmLabel: 'Agregar',
       bodyHTML:
-        '<p class="att-head"><b>' + esc(txt(m.title, 80) || 'Archivo de Cancha') + '</b>' + (when ? ' · del ' + esc(when) : '') + '</p>' +
+        (from
+          ? '<p class="att-head"><b>' + esc(from) + '</b> te mandó ' + plural((m.exercises || []).length, 'ejercicio', 'ejercicios') + (when ? ' el ' + esc(when) : '') + '.</p>' +
+            (incoming.length ? '<ul class="imp-names">' + incoming.slice(0, 6).map((x) => '<li>' + esc(x.title) + '</li>').join('') + (incoming.length > 6 ? '<li class="muted">y ' + (incoming.length - 6) + ' más</li>' : '') + '</ul>' : '')
+          : '<p class="att-head"><b>' + esc(txt(m.title, 80) || 'Archivo de Cancha') + '</b>' + (when ? ' · del ' + esc(when) : '') + '</p>') +
         '<div class="att-card imp-card">' +
-        importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') +
+        importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') + importLine(plan.sc, 'sección', 'secciones', true) +
         (mainMedia ? '<div class="imp-line"><b>' + plural(mainMedia, 'video o foto', 'videos y fotos') + '</b><span>' + fmtMB(mediaSize) + '</span></div>' : '') +
         '</div>' +
-        '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? 'Ya tienes todo lo que trae este archivo.' : 'Si el archivo trae una versión más nueva de algo que no cambiaste aquí, se actualiza.' + (copies ? ' Lo que cambiaron los dos se guarda como copia: no pierdes tu versión.' : '')) + '</p>',
+        '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? (from ? 'Ya tienes estos ejercicios. Se juntan en la sección «De ' + esc(from) + '».' : 'Ya tienes todo lo que trae este archivo.') : 'Lo que venga más nuevo en el archivo se actualiza aquí.' + (copies ? ' Si tú también lo cambiaste, se agrega como copia y no pierdes tu versión.' : '')) + '</p>',
       onConfirm: async () => {
-        sheet.setBusy(true, 'Importando…');
+        sheet.setBusy(true, 'Agregando…');
         try {
           const r = await applyImport(m, zip, plan, (p, label) => sheet.progress(p, label));
           sheet.setBusy(false);
           sheet.dismiss();
           haptic(14);
           const parts = [r.ex ? plural(r.ex, 'ejercicio', 'ejercicios') : '', r.cl ? plural(r.cl, 'clase', 'clases') : '', r.gr ? plural(r.gr, 'grupo', 'grupos') : ''].filter(Boolean);
-          toast(parts.length ? 'Se importaron ' + parts.join(', ') : 'Importación lista');
+          const secId = from ? await fileIntoSharedSection(from, r.exIds).catch(() => null) : null;
+          if (secId) toast('Se agregaron ' + plural(r.ex, 'ejercicio', 'ejercicios') + ' de ' + from, 'check', { label: 'Ver', onClick: () => openSection(secId) });
+          else toast(parts.length ? 'Se agregaron ' + parts.join(', ') : 'Listo');
         } catch (e) {
           sheet.setBusy(false);
           renderAll(); refreshScreens();
-          showError(e, 'No se pudo importar todo');
+          showError(e, 'No se pudo agregar todo');
         }
       },
     });
-    sheet.setConfirm(!nothing);
+    sheet.setConfirm(!nothing || !!(from && (m.exercises || []).length));
   }
   async function applyImport(m, zip, plan, onProgress) {
     const idMap = {};
     for (let i = 0; i < plan.media.length; i++) {
       const key = plan.media[i];
       const info = m.media[key];
-      onProgress(i / Math.max(1, plan.media.length), 'Importando videos y fotos · ' + (i + 1) + ' de ' + plan.media.length);
+      onProgress(i / Math.max(1, plan.media.length), 'Copiando videos y fotos · ' + (i + 1) + ' de ' + plan.media.length);
       let blob = zip ? await zip.blobOf(info.path, info.type).catch(() => null) : null;
       if (!blob || !blob.size) continue;
       let type = typeof info.type === 'string' ? info.type : '';
       if (S.backend.kind === 'cloud' && type.indexOf('video/') === 0) {
-        const r = await prepareCloudVideo(new File([blob], info.path.split('/').pop(), { type }), (p) => onProgress(i / plan.media.length, 'Reduciendo video ' + (i + 1) + ' de ' + plan.media.length + ' · ' + Math.round(p * 100) + '% · mantén la app abierta'));
+        const r = await prepareCloudVideo(new File([blob], info.path.split('/').pop(), { type }), (p) => onProgress(i / plan.media.length, 'Reduciendo video ' + (i + 1) + ' de ' + plan.media.length + ' · ' + Math.round(p * 100) + '% · no cierres Cancha'));
         blob = r.blob; type = r.type;
       }
       idMap[key] = await S.backend.putMedia(blob, type);
@@ -3729,6 +4202,7 @@
     plan.gr.copias.forEach((x) => { grRe[x.id] = uid(); });
     const now = Date.now();
     let nEx = 0; let nCl = 0; let nGr = 0;
+    const exIds = [];
     for (const x of plan.gr.nuevos.concat(plan.gr.actualiza, plan.gr.copias)) {
       const g = plain(x);
       if (grRe[x.id]) { g.id = grRe[x.id]; g.name = g.name + ' (copia)'; g.example = false; } else g.syncedAt = g.updatedAt;
@@ -3749,6 +4223,7 @@
       replaceLocal('exercises', nx);
       await S.backend.saveExercise(nx);
       old.filter((id) => id !== nx.mediaId && id !== nx.thumbId).forEach((id) => S.backend.deleteMedia(id).catch(() => {}));
+      exIds.push(nx.id);
       nEx++;
     }
     const clRe = {};
@@ -3766,15 +4241,58 @@
       await S.backend.saveClass(nc);
       nCl++;
     }
+    for (const x of plan.sc.nuevos.concat(plan.sc.actualiza, plan.sc.copias)) {
+      const sec = plain(x);
+      sec.exIds = sec.exIds.map((y) => exRe[y] || y);
+      if (plan.sc.copias.indexOf(x) >= 0) { sec.id = uid(); sec.name = sec.name + ' (copia)'; sec.example = false; } else sec.syncedAt = sec.updatedAt;
+      replaceLocal('sections', sec);
+      await S.backend.saveSection(sec);
+    }
+    if (m.from) (m.exercises || []).forEach((x) => { if (x && isId(x.id) && exIds.indexOf(exRe[x.id] || x.id) < 0 && getEx(exRe[x.id] || x.id)) exIds.push(exRe[x.id] || x.id); });
     renderAll(); refreshScreens();
-    return { ex: nEx, cl: nCl, gr: nGr };
+    return { ex: nEx, cl: nCl, gr: nGr, exIds };
+  }
+
+  // --- Apariencia: «Automático» sigue al iPad (modo oscuro de noche si así está); «Claro» y «Oscuro» la fijan.
+  const prefersDark = () => { try { return matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return false; } };
+  function applyTheme(t) {
+    const root = document.documentElement;
+    if (t === 'light' || t === 'dark') root.dataset.theme = t; else delete root.dataset.theme;
+    const dark = t === 'dark' || (t !== 'light' && prefersDark());
+    $$('meta[name="theme-color"]').forEach((m) => m.remove());
+    const m = document.createElement('meta');
+    m.name = 'theme-color';
+    m.content = dark ? '#000000' : '#F2F2F7';
+    document.head.appendChild(m);
+  }
+  function openSettings() {
+    const cur = pref.get('theme') || 'auto';
+    const sheet = openSheet({
+      title: 'Ajustes',
+      cancelLabel: 'Cerrar',
+      bodyHTML:
+        '<p class="group-label">Apariencia</p>' + segHTML('theme', [['auto', 'Automático'], ['light', 'Claro'], ['dark', 'Oscuro']], cur, 'Apariencia') +
+        '<p class="muted small" style="margin:-12px 16px 22px">«Automático» usa el mismo modo que tu iPad o celular.</p>' +
+        '<div class="group">' +
+        '<button type="button" class="row row-act" data-st="backup">' + ic('box') + '<span>Respaldo</span>' + ic('chevR', 'chev') + '</button>' +
+        '<button type="button" class="row row-act" data-st="where">' + ic('info') + '<span>¿Dónde se guardan mis datos?</span>' + ic('chevR', 'chev') + '</button>' +
+        '<button type="button" class="row row-act" data-st="tutorial">' + ic('sparkle') + '<span>Ver el tutorial</span>' + ic('chevR', 'chev') + '</button>' +
+        '</div>',
+    });
+    bindSeg(sheet.body, 'theme', (v) => { pref.set('theme', v); applyTheme(v); });
+    sheet.body.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-st]');
+      if (!b) return;
+      sheet.dismiss();
+      setTimeout(() => (b.dataset.st === 'backup' ? openBackupSheet() : b.dataset.st === 'tutorial' ? showTutorial() : showStatus()), 320);
+    });
   }
 
   // --- Respaldo: un toque para guardarlo todo; también mandar a otro profe e importar.
   function openBackupSheet() {
     const k = S.backend ? S.backend.kind : 'cloud';
     const last = Number(pref.get('last-backup')) || 0;
-    const where = !S.canWrite ? 'Estás viendo una biblioteca compartida.' : k === 'cloud' ? 'Tus datos se guardan en tu cuenta de Claude.' : k === 'memory' ? 'Este navegador no está guardando tus datos.' : 'Tus datos solo viven en este iPad o celular.';
+    const where = !S.canWrite ? 'Estás viendo una biblioteca compartida.' : k === 'cloud' ? 'Tus datos se guardan en tu cuenta de Claude.' : k === 'memory' ? 'Este navegador no está guardando tus datos.' : 'Tus datos solo están en este ' + devWord() + '.';
     const sheet = openSheet({
       title: 'Respaldo',
       cancelLabel: 'Cerrar',
@@ -3782,12 +4300,12 @@
         (S.canWrite
           ? '<div class="att-card bk-card"><p class="att-line">' + esc(where) + '</p>' +
             '<p class="muted">' + (last ? 'Último respaldo: ' + esc(fmtAgo(last)) + '.' : 'Todavía no has hecho ningún respaldo.') + '</p>' +
-            '<button type="button" class="btn filled wide-btn" data-bk="full">' + ic('box') + 'Hacer respaldo completo</button>' +
-            '<p class="muted small">Guarda ejercicios, clases, grupos, listas y videos en un archivo. Guárdalo en Archivos → iCloud Drive.</p></div>'
+            '<button type="button" class="btn filled wide-btn" data-bk="full">' + ic('box') + 'Hacer respaldo</button>' +
+            '<p class="muted small">Junta ejercicios, clases, grupos, asistencia y videos en un archivo. Mándalo por AirDrop o guárdalo en iCloud Drive.</p></div>'
           : '<p class="att-head">' + esc(where) + '</p>') +
         '<div class="group">' +
         '<button type="button" class="row row-act" data-bk="send">' + ic('upload') + '<span>Mandar a otro profe</span>' + ic('chevR', 'chev') + '</button>' +
-        (S.canWrite ? '<button type="button" class="row row-act" data-bk="import">' + ic('download') + '<span>Importar archivo</span>' + ic('chevR', 'chev') + '</button>' : '') +
+        (S.canWrite ? '<button type="button" class="row row-act" data-bk="import">' + ic('download') + '<span class="row-2"><span>Abrir archivo de Cancha</span><small>Tu respaldo o lo que te mandó otro profe</small></span>' + ic('chevR', 'chev') + '</button>' : '') +
         '<button type="button" class="row row-act" data-bk="where">' + ic('info') + '<span>¿Dónde se guardan mis datos?</span>' + ic('chevR', 'chev') + '</button>' +
         '</div>',
     });
@@ -3839,20 +4357,26 @@
   function catCardHTML(cx) {
     const have = inLibrary(cx.id);
     const meta = [cx.duration ? cx.duration + ' min' : '', cx.age].filter(Boolean).join(', ');
-    return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb"><span class="art">' + boardSVG(cx.sport, cx.diagram) + '</span>' +
-      (have ? '<span class="badge in-lib">' + ic('check') + 'En tus ejercicios</span>' : cx.school ? '<span class="badge">Para escuela</span>' : '') + '</span>' +
+    return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb">' + (cx.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(cx.thumbUrl) + '"><span class="badge vid">' + ic('play') + '<span class="sr">Con video</span></span>' : '<span class="art">' + boardSVG(cx.sport, cx.diagram, { crop: true }) + '</span>') +
+      (have ? '<span class="badge in-lib">' + ic('check') + 'En tus ejercicios</span>' : cx.school ? '<span class="badge">Grupos grandes</span>' : '') + '</span>' +
       '<span class="card-body"><span class="title">' + esc(cx.title) + '</span><span class="meta">' + esc(meta) + '</span></span></button>';
   }
   function catEntryHTML(sport) {
-    const n = catExercises(sport).length;
-    const sample = catExercises(sport).find((x) => x.diagram && x.diagram.items && x.diagram.items.length > 6);
-    return '<button class="cat-entry" data-act="catalog"><span class="cat-art art-mini">' + boardSVG(sport, sample ? sample.diagram : null) + '</span>' +
-      '<span class="txt"><b>De entrenadores</b><span>' + (n ? n + ' ejercicios de ' + SPORTS[sport].noun + ' listos para usar' : 'Ejercicios listos para usar') + '</span></span>' + ic('chevR', 'chev') + '</button>';
+    const all = catExercises(sport);
+    const n = all.length;
+    const pics = all.filter((x) => x.thumbUrl).slice(0, 3);
+    const sample = all.find((x) => x.diagram && x.diagram.items && x.diagram.items.length > 6);
+    const art = pics.length === 3
+      ? pics.map((x, i) => '<img class="ce-p' + i + '" alt="" loading="lazy" decoding="async" src="' + esc(x.thumbUrl) + '">').join('')
+      : '<span class="ce-board">' + boardSVG(sport, sample ? sample.diagram : null) + '</span>';
+    return '<button class="cat-entry" data-act="catalog" data-tint="' + sport + '"><span class="txt"><b>Recomendados</b>' +
+      '<span class="ce-sub">' + (n ? n + ' ejercicios de ' + SPORTS[sport].noun + (all.some((x) => x.videoUrl) ? ', ' + all.filter((x) => x.videoUrl).length + ' con video' : '') : 'Ejercicios listos para usar') + '</span><span class="ce-cta">Ver ejercicios' + ic('chevR') + '</span></span>' +
+      '<span class="ce-art" aria-hidden="true">' + art + '</span></button>';
   }
   function templatesHTML() {
     const list = catSessions();
     if (!list.length) return '';
-    return '<p class="group-label">Clases listas para usar</p><div class="list">' + list.map((t) => {
+    return '<p class="group-label">Clases recomendadas</p><div class="list">' + list.map((t) => {
       const nEx = t.items.filter((it) => !isPause(it)).length;
       const total = t.items.reduce((sum, it) => sum + itemMin(it), 0);
       return '<button class="cell" data-open-template="' + esc(t.id) + '" data-tint="' + t.sport + '"><span class="group-badge band-' + t.sport + '" aria-hidden="true">' + total + '′</span>' +
@@ -3867,7 +4391,7 @@
     const scr = pushScreen({ key: 'cat', tint: sport });
     function render() {
       scr.el.dataset.tint = sport;
-      scr.setTitle('De entrenadores');
+      scr.setTitle('Recomendados');
       if (!CAT()) { scr.body.innerHTML = '<div class="empty"><span class="spinner"></span><p>Cargando…</p></div>'; return; }
       const all = catExercises(sport);
       const objs = SPORTS[sport].tags.filter((t) => all.some((x) => x.objective === t));
@@ -3875,13 +4399,13 @@
       const groups = objs.filter((o) => list.some((x) => x.objective === o));
       const sessions = catSessions(sport);
       scr.body.innerHTML =
-        '<div class="d-head"><h1 class="d-title">De entrenadores</h1><p class="cat-lead">Ejercicios que se usan en clubes y escuelas. Agrega los que te sirvan y cámbialos a tu gusto.</p></div>' +
+        '<div class="d-head"><h1 class="d-title">Recomendados</h1><p class="cat-lead">Ejercicios y clases armados con base en FIFA, FIBA y otras federaciones. Agrega los que te sirvan y cámbialos a tu gusto.</p></div>' +
         segHTML('csport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], sport, 'Deporte') +
-        (sessions.length ? '<p class="group-label">Clases listas</p><div class="list">' + sessions.map((t) => {
+        (sessions.length ? '<p class="group-label">Clases recomendadas</p><div class="list">' + sessions.map((t) => {
           const total = t.items.reduce((sum, it) => sum + itemMin(it), 0);
           return '<button class="cell" data-open-template="' + esc(t.id) + '"><span class="group-badge band-' + t.sport + '" aria-hidden="true">' + total + '′</span><span class="txt"><span class="t1">' + esc(t.name) + '</span><span class="t2">' + esc(t.notes || '') + '</span></span>' + ic('chevR', 'chev') + '</button>';
         }).join('') + '</div>' : '') +
-        '<div class="chips" role="toolbar" aria-label="Filtrar">' + [['all', 'Todos'], ['school', 'Para escuela']].concat(objs.map((o) => [o, o])).map((c) => '<button class="chip" data-cf="' + esc(c[0]) + '" aria-pressed="' + (c[0] === filter) + '">' + esc(c[1]) + '</button>').join('') + '</div>' +
+        '<div class="chips" role="toolbar" aria-label="Filtrar">' + [['all', 'Todos'], ['school', 'Grupos grandes']].concat(objs.map((o) => [o, o])).map((c) => '<button class="chip" data-cf="' + esc(c[0]) + '" aria-pressed="' + (c[0] === filter) + '">' + esc(c[1]) + '</button>').join('') + '</div>' +
         groups.map((o) => '<p class="group-label">' + esc(o) + '</p><div class="grid">' + list.filter((x) => x.objective === o).map(catCardHTML).join('') + '</div>').join('');
       bindSeg(scr.body, 'csport', (v) => { sport = v; filter = 'all'; render(); scr.scroller.scrollTo({ top: 0 }); });
     }
@@ -3911,18 +4435,20 @@
       const points = String(cx.keyPoints || '').split('\n').filter(Boolean);
       const vars = String(cx.variations || '').split('\n').filter(Boolean);
       scr.setTitle(cx.title);
+      scr.body.classList.add('wide');
       scr.body.innerHTML =
-        '<div class="d-media"><div class="d-frame board-frame"><span class="art" role="img" aria-label="Pizarrón del ejercicio">' + boardSVG(cx.sport, cx.diagram, { fit: 'xMidYMid meet', anim: canPlay(cx.diagram) }) + '</span>' +
-        '<div class="bf-ctrls">' + (canPlay(cx.diagram) ? '<button type="button" class="bf-btn" data-act="play">' + ic('play') + '<span>Ver jugada</span></button>' : '') + '</div></div></div>' +
-        '<div class="d-head"><p class="d-tags"><span class="tag">' + esc(cx.objective) + '</span><span class="tag ghost">' + esc(cx.level) + '</span>' + (cx.school ? '<span class="tag ghost">Para escuela</span>' : '') + '</p><h1 class="d-title">' + esc(cx.title) + '</h1></div>' +
+        '<div class="ex-layout"><div class="d-media">' + (cx.videoUrl ? coachVideoHTML(cx) : '<div class="d-frame board-frame"><span class="art" role="img" aria-label="Pizarrón del ejercicio">' + boardSVG(cx.sport, cx.diagram, { fit: 'xMidYMid meet', anim: canPlay(cx.diagram) }) + '</span>' +
+        '<div class="bf-ctrls">' + (canPlay(cx.diagram) ? '<button type="button" class="bf-btn" data-act="play">' + ic('play') + '<span>Ver jugada</span></button>' : '') + '</div></div>') + '</div>' +
+        '<div class="ex-info"><div class="d-head"><p class="d-tags"><span class="tag">' + esc(cx.objective) + '</span><span class="tag ghost">' + esc(lvl(cx.level)) + '</span>' + (cx.school ? '<span class="tag ghost">Grupos grandes</span>' : '') + '</p><h1 class="d-title">' + esc(cx.title) + '</h1></div>' +
         '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((x) => '<div class="stat"><span class="k">' + ic(x[0]) + x[1] + '</span><span class="v">' + esc(x[2]) + '</span></div>').join('') + '</div>' +
         (S.canWrite ? '<div class="d-actions">' + (have
-          ? '<button class="btn tinted grow" data-act="open-mine">' + ic('check') + 'Ya está en tus ejercicios</button>'
-          : '<button class="btn filled grow" data-act="adopt">' + ic('plus') + 'Agregar a mis ejercicios</button>') + '</div>' : '') +
+          ? '<button class="btn tinted grow" data-act="open-mine">' + ic('check') + 'Ver en tus ejercicios</button>'
+          : '<button class="btn filled grow" data-act="adopt">' + ic('plus') + 'Agregar a tus ejercicios</button>') +
+          '<button class="btn tinted" data-act="adopt-class">' + ic('clases') + 'Agregar a una clase</button></div>' : '') +
         '<section class="sec"><h2>Cómo se hace</h2><p>' + esc(cx.description) + '</p></section>' +
         (points.length ? '<section class="sec"><h2>Puntos clave</h2><ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul></section>' : '') +
-        (vars.length ? '<section class="sec"><h2>Para ajustarlo</h2><ul class="vars">' + vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + '</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('') + '</ul></section>' : '') +
-        (cx.material ? '<section class="sec"><h2>Material</h2><p>' + esc(cx.material) + '</p></section>' : '');
+        (vars.length ? '<section class="sec"><h2>Variantes</h2><ul class="vars">' + vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + ':</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('') + '</ul></section>' : '') +
+        (cx.material ? '<section class="sec"><h2>Material</h2><p>' + esc(cx.material) + '</p></section>' : '') + '</div></div>';
     }
     function play(delay) {
       const frame = $('.board-frame', scr.body);
@@ -3932,7 +4458,7 @@
       player = playDiagram(frame, cx.diagram, { delay, onEnd: () => frame.classList.remove('playing') });
     }
     render();
-    if (!reduceMotion()) play(650);
+    if (!reduceMotion() && !cx.videoUrl) play(650);
     scr.refresh = () => { if (player) player.stop(); render(); };
     scr.onClose = () => { if (player) player.stop(); };
     scr.el.addEventListener('click', async (e) => {
@@ -3940,6 +4466,7 @@
       if (!a) return;
       if (a.dataset.act === 'play') { play(150); return; }
       if (a.dataset.act === 'open-mine') { const m = inLibrary(id); if (m) openExercise(m.id); return; }
+      if (a.dataset.act === 'adopt-class') { const ex = await adoptCatalogEx(cx, true); if (ex) addToClassFlow(ex); return; }
       if (a.dataset.act === 'adopt') {
         a.disabled = true;
         const ex = await adoptCatalogEx(cx);
@@ -3963,9 +4490,9 @@
     let mt = 0;
     const rows = t.items.map((it) => {
       const start = mt; mt += itemMin(it);
-      if (isPause(it)) return '<div class="plan-row"><span class="time">' + fmtMin(start) + '′</span><span class="mini pause-ico">' + ic('drop') + '</span><span class="txt"><span class="t1">' + esc(it.label) + '</span><span class="t2">Pausa, ' + fmtMin(it.min) + ' min</span></span></div>';
+      if (isPause(it)) return '<div class="plan-row"><span class="time">' + fmtMin(start) + '′</span><span class="mini pause-ico">' + ic(pauseIc(it.label)) + '</span><span class="txt"><span class="t1">' + esc(it.label) + '</span><span class="t2">Pausa, ' + fmtMin(it.min) + ' min</span></span></div>';
       const cx = catEx(it.exId);
-      return '<button class="plan-row" data-open-cat="' + esc(it.exId) + '"><span class="time">' + fmtMin(start) + '′</span><span class="mini"><span class="art">' + boardSVG(t.sport, cx && cx.diagram) + '</span></span>' +
+      return '<button class="plan-row" data-open-cat="' + esc(it.exId) + '"><span class="time">' + fmtMin(start) + '′</span><span class="mini">' + (cx && cx.thumbUrl ? '<img alt="" loading="lazy" src="' + esc(cx.thumbUrl) + '">' : '<span class="art">' + boardSVG(t.sport, cx && cx.diagram, { crop: true }) + '</span>') + '</span>' +
         '<span class="txt"><span class="t1">' + esc(cx ? cx.title : 'Ejercicio') + '</span><span class="t2">' + esc([cx ? cx.objective : '', fmtMin(it.min) + ' min', seriesText(it.series)].filter(Boolean).join(', ')) + '</span></span>' + ic('chevR', 'chev') + '</button>';
     }).join('');
     scr.setTitle(t.name);
@@ -3983,7 +4510,7 @@
       openClassEditor({
         sport: t.sport, name: t.name, notes: t.notes || '',
         items: t.items.map((it) => Object.assign({}, it)),
-        templateNote: 'Se agregan ' + plural(nEx, 'ejercicio', 'ejercicios') + ' a tu biblioteca y el plan completo.',
+        templateNote: 'Se copia el plan completo. Sus ' + plural(nEx, 'ejercicio', 'ejercicios') + ' también quedan en Ejercicios.',
         prepare: async () => {
           const out = [];
           for (const it of t.items) {
@@ -4004,12 +4531,13 @@
 
   // ---------------------------------------------------------------- pizarra táctica
   // Pocas herramientas: poner piezas, una flecha (con su tipo) y borrar. Arrastrar siempre mueve.
-  const BOARD_TOOLS = [['a', 'Equipo A'], ['b', 'Equipo B'], ['cone', 'Cono'], ['ball', 'Balón'], ['arrow', 'Flecha'], ['erase', 'Borrar']];
-  const ARROW_KINDS = (sport) => [['pase', 'Pase'], ['conduccion', sport === 'basquet' ? 'Dribleo' : 'Conducción'], ['mov', 'Sin balón']];
+  const BOARD_TOOLS = [['a', 'Equipo A'], ['b', 'Equipo B'], ['cone', 'Material'], ['ball', 'Balón'], ['arrow', 'Flecha'], ['erase', 'Borrar']];
+  const GEAR_KINDS = [['cone', 'Cono'], ['ladder', 'Escalera'], ['hurdle', 'Valla'], ['ring', 'Aro'], ['pole', 'Poste']];
+  const ARROW_KINDS = (sport) => [['pase', 'Pase o tiro'], ['conduccion', sport === 'basquet' ? 'Dribleo' : 'Conducción'], ['mov', 'Sin balón']];
   const BOARD_HINT = {
     a: 'Toca la cancha para poner un jugador. Arrastra para moverlo.',
     b: 'Toca la cancha para poner un rival. Arrastra para moverlo.',
-    cone: 'Toca la cancha para poner un cono. Arrastra para moverlo.',
+    cone: 'Toca para poner material. Toca una escalera o valla para girarla.',
     ball: 'Toca la cancha para poner el balón. Arrastra para moverlo.',
     arrow: 'Arrastra el dedo para dibujar la flecha.',
     erase: 'Toca lo que quieras borrar.',
@@ -4022,9 +4550,10 @@
     const hist = [];
     let tool = 'a';
     let arrowKind = 'pase';
+    let gearKind = 'cone';
     let changed = false;
     let drag = null;
-    const toolIcon = (t) => (t === 'a' || t === 'b' ? '<span class="dot dot-' + t + '">' + t.toUpperCase() + '</span>' : ic(t === 'ball' ? sport : t === 'arrow' ? 'arrowPass' : t));
+    const toolIcon = (t) => (t === 'a' || t === 'b' ? '<span class="dot" style="background:' + BOARD[sport][t] + ';color:' + BOARD[sport][t + 'Ink'] + (t === 'b' && sport === 'basquet' ? ';box-shadow:inset 0 0 0 1.5px ' + BOARD[sport].ring : '') + '">' + t.toUpperCase() + '</span>' : ic(t === 'ball' ? sport : t === 'arrow' ? 'arrowPass' : t));
     const wrap = document.createElement('div');
     wrap.className = 'board-wrap';
     wrap.dataset.tint = sport;
@@ -4035,13 +4564,14 @@
       '<div class="board-head"><button type="button" class="cap" data-bd="cancel">Cancelar</button><span class="sh-title">Pizarrón</span><button type="button" class="cap filled" data-bd="done">Listo</button></div>' +
       '<div class="board-sub">' + segHTML('variant', VARIANTS[sport], d.v, 'Cancha') + '</div>' +
       '<div class="board-stage"><div class="board-canvas art"></div></div>' +
-      '<div class="board-kind" data-ref="kind" hidden>' + segHTML('akind', ARROW_KINDS(sport), arrowKind, 'Tipo de flecha') + '</div>' +
+      '<div class="board-kinds"><div class="board-kind" data-ref="kind" hidden>' + segHTML('akind', ARROW_KINDS(sport), arrowKind, 'Tipo de flecha') + '</div>' +
+      '<div class="board-kind" data-ref="gear" hidden>' + segHTML('gkind', GEAR_KINDS, gearKind, 'Material') + '</div></div>' +
       '<p class="board-hint" aria-live="polite"></p>' +
       '<div class="board-tools" role="toolbar" aria-label="Herramientas">' +
       BOARD_TOOLS.map((t) => '<button type="button" class="bt" data-tool="' + t[0] + '" aria-pressed="false">' + toolIcon(t[0]) + '<span>' + t[1] + '</span></button>').join('') +
       '<span class="bt-sep" aria-hidden="true"></span>' +
       '<button type="button" class="bt" data-bd="undo">' + ic('undo') + '<span>Deshacer</span></button>' +
-      '<button type="button" class="bt" data-bd="clear">' + ic('trash') + '<span>Limpiar</span></button></div>';
+      '<button type="button" class="bt" data-bd="clear">' + ic('trash') + '<span>Borrar todo</span></button></div>';
     document.body.appendChild(wrap);
     const canvas = $('.board-canvas', wrap);
 
@@ -4055,6 +4585,7 @@
       $$('[data-tool]', wrap).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tool === t)));
       $('.board-hint', wrap).textContent = BOARD_HINT[t] || '';
       $('[data-ref="kind"]', wrap).hidden = t !== 'arrow';
+      $('[data-ref="gear"]', wrap).hidden = t !== 'cone';
       canvas.dataset.tool = t;
     }
     const snapshot = () => { hist.push(JSON.stringify({ v: d.v, items: d.items })); if (hist.length > 60) hist.shift(); changed = true; };
@@ -4105,7 +4636,9 @@
         return;
       }
       snapshot();
-      const it = { t: tool, x: clampX(p.x), y: clampY(p.y) };
+      const it = { t: tool === 'cone' ? gearKind : tool, x: clampX(p.x), y: clampY(p.y) };
+      if (it.t === 'ladder') { it.r = 0; it.n = 6; it.y = Math.min(194 - 21, Math.max(6 + 21, it.y)); }
+      if (it.t === 'hurdle') it.r = 0;
       if (tool === 'a' || tool === 'b') it.n = nextNum(tool);
       d.items.push(it);
       haptic(5);
@@ -4136,7 +4669,10 @@
         arrows.forEach((x, n) => { if (!(Number(x.s) > 0)) x.s = n + 1; });
         it.s = arrows.reduce((mx, x) => Math.max(mx, Number(x.s) || 0), 0) + 1;
       }
-      if (drag.kind === 'move' && !drag.moved) hist.pop();
+      if (drag.kind === 'move' && !drag.moved) {
+        // Un toque (sin arrastrar) sobre una escalera o valla la gira 90°.
+        if (it && (it.t === 'ladder' || it.t === 'hurdle')) { it.r = Number(it.r) === 90 ? 0 : 90; haptic(5); } else hist.pop();
+      }
       drag = null;
       render();
     };
@@ -4150,7 +4686,7 @@
     };
     function cancel() {
       if (!changed) { popLayer(layer); return; }
-      actionSheet({ title: '¿Descartar los cambios del pizarrón?', actions: [{ label: 'Descartar cambios', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir dibujando' });
+      actionSheet({ title: '¿Salir sin guardar el dibujo?', actions: [{ label: 'Salir sin guardar', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir dibujando' });
     }
     wrap.addEventListener('click', (e) => {
       const t = e.target.closest('[data-tool]');
@@ -4161,12 +4697,13 @@
         case 'cancel': cancel(); break;
         case 'done': popLayer(layer); o.onDone(d.items.length ? { v: d.v, items: d.items } : null); break;
         case 'undo': if (hist.length) restore(); break;
-        case 'clear': if (d.items.length) { snapshot(); d.items = []; render(); toast('Pizarrón limpio', 'trash', { label: 'Deshacer', onClick: () => { if (hist.length) restore(); } }); } break;
+        case 'clear': if (d.items.length) { snapshot(); d.items = []; render(); toast('Pizarrón borrado', 'trash', { label: 'Deshacer', onClick: () => { if (hist.length) restore(); } }); } break;
         default: break;
       }
     });
     bindSeg(wrap, 'variant', (v) => { if (v === d.v) return; snapshot(); d.v = v; render(); });
     bindSeg(wrap, 'akind', (v) => { arrowKind = v; });
+    bindSeg(wrap, 'gkind', (v) => { gearKind = v; });
     setTool(tool);
     render();
     pushLayer(layer);
@@ -4255,7 +4792,21 @@
     return { k, n, rest: true, left: cyc - within, len: rest };
   }
 
-  function runClass(id) {
+  function saveRun(id, st) { pref.set('run', JSON.stringify({ id, i: st.i, acc: st.acc, extra: st.extra, started: st.started, running: st.running, since: st.since, savedAt: Date.now() })); }
+  function clearRun() { pref.set('run', ''); }
+  function savedRun() { try { const r = JSON.parse(pref.get('run') || 'null'); return r && r.id && Date.now() - r.savedAt < 4 * 3600e3 ? r : null; } catch (e) { return null; } }
+  function offerResume() {
+    const r = savedRun();
+    const c = r && getClass(r.id);
+    if (!c) { if (r) clearRun(); return; }
+    actionSheet({
+      title: 'Tienes una clase sin terminar',
+      message: (c.name || 'Clase') + (() => { const it = (c.items || [])[r.i]; const nm = !it ? '' : isPause(it) ? (it.label || 'Pausa') : ((getEx(it.exId) || {}).title || ''); return nm ? ' · ibas en «' + nm + '»' : ''; })(),
+      tint: SPORTS[c.sport] ? c.sport : 'futbol',
+      actions: [{ label: 'Seguir con la clase', icon: 'play', onClick: () => runClass(r.id, r) }, { label: 'No seguir', danger: true, onClick: clearRun }],
+    });
+  }
+  function runClass(id, resume) {
     const c = getClass(id);
     if (!c) return;
     const items = (c.items || []).map((it) => (isPause(it) ? Object.assign({}, it, { pause: true }) : Object.assign({}, it, { ex: getEx(it.exId) }))).filter((it) => it.pause || it.ex);
@@ -4272,7 +4823,7 @@
     wrap.setAttribute('aria-modal', 'true');
     wrap.setAttribute('aria-label', 'Clase en curso');
     wrap.innerHTML =
-      '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir del modo clase">' + ic('xmark') + '</button>' +
+      '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir de la clase">' + ic('xmark') + '</button>' +
       '<div class="run-hd"><span class="run-step" data-ref="step" aria-live="polite"></span><span class="run-class">' + esc(c.name || 'Clase') + '</span></div>' +
       '<button type="button" class="glass-btn" data-run="whistle" aria-label="Tocar el silbato">' + ic('whistle') + '</button></header>' +
       '<div class="run-body" data-ref="body"></div>';
@@ -4291,10 +4842,13 @@
     function mediaHTML(ex) {
       if (ex.mediaType === 'video' && ex.mediaId) return '<video muted playsinline loop autoplay preload="auto" data-media="' + esc(ex.mediaId) + '"' + (ex.thumbId ? ' data-poster="' + esc(ex.thumbId) + '"' : '') + '></video>';
       if (ex.mediaType === 'image' && ex.mediaId) return '<img alt="" data-media="' + esc(ex.mediaId) + '">';
-      return '<span class="art">' + boardSVG(ex.sport, hasDiagram(ex) ? ex.diagram : null, { fit: 'xMidYMid meet', anim: hasDiagram(ex) && canPlay(ex.diagram) }) + '</span>';
+      if (liveMedia(ex).videoUrl && !hasDiagram(ex)) return '<video muted playsinline loop autoplay preload="auto" src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video>';
+      // En el modo clase, el pizarrón acercado a la jugada (se lee mejor que el video vertical en la franja ancha).
+      return '<span class="art">' + boardSVG(ex.sport, hasDiagram(ex) ? ex.diagram : null, { fit: 'xMidYMid meet', crop: true, anim: hasDiagram(ex) && canPlay(ex.diagram) }) + '</span>';
     }
     let runPlayer = null;
     let dir = '';
+    let lastSave = 0;
     function renderBlock() {
       if (runPlayer) { runPlayer.stop(); runPlayer = null; }
       body.classList.remove('go-next', 'go-prev');
@@ -4306,16 +4860,17 @@
       const points = ex ? String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean).slice(0, 3) : [];
       body.innerHTML =
         (it.pause
-          ? '<div class="run-media run-pause">' + ic('drop') + '</div><div class="run-ex"><h2>' + esc(title(it)) + '</h2></div>'
+          ? '<div class="run-media run-pause">' + ic(pauseIc(it.label)) + '</div><div class="run-ex"><h2>' + esc(title(it)) + '</h2></div>'
           : '<div class="run-media">' + mediaHTML(ex) + '</div><div class="run-ex"><p class="d-eyebrow">' + esc([ex.objective, ex.space].filter(Boolean).join(' · ') || SPORTS[ex.sport].name) + '</p><h2>' + esc(ex.title) + '</h2></div>') +
         '<div class="run-ring"><svg viewBox="0 0 220 220" aria-hidden="true"><circle class="rr-track" cx="110" cy="110" r="96"/><circle class="rr-bar" cx="110" cy="110" r="96" stroke-dasharray="' + RING.toFixed(1) + '" transform="rotate(-90 110 110)"/></svg>' +
         '<div class="rr-txt"><span class="rr-time" data-ref="time">0:00</span><span class="rr-sub" data-ref="sub"></span></div></div>' +
         (it.series && it.series.n > 1 ? '<div class="run-series" data-ref="dots" aria-hidden="true"></div>' : '') +
         '<div class="run-ctrls"><button type="button" class="rc" data-run="prev" aria-label="Anterior"' + (st.i === 0 ? ' disabled' : '') + '>' + ic('prev') + '</button>' +
         '<button type="button" class="rc big" data-run="toggle" aria-label="Empezar"></button>' +
-        '<button type="button" class="rc" data-run="next" aria-label="' + (nxt ? 'Siguiente' : 'Terminar la clase') + '">' + ic(nxt ? 'next' : 'flag') + '</button></div>' +
-        '<div class="run-sec"><button type="button" class="cap" data-run="plus" aria-label="Agregar un minuto">+1 min</button><span class="run-next">' +
-        (nxt ? 'Sigue: <b>' + esc(title(nxt)) + '</b> · ' + esc(fmtMin(itemMin(nxt))) + ' min' : 'Es lo último de la clase') + '</span></div>' +
+        '<button type="button" class="rc" data-run="next" aria-label="' + (nxt ? 'Siguiente' : 'Terminar la clase') + '">' + ic(nxt ? 'next' : 'flag') + '<span class="rc-lbl" aria-hidden="true">' + (nxt ? 'Siguiente' : 'Terminar') + '</span></button></div>' +
+        '<div class="run-sec"><span class="run-adj"><button type="button" class="cap" data-run="minus" aria-label="Quitar un minuto">−1 min</button><button type="button" class="cap" data-run="plus" aria-label="Agregar un minuto">+1 min</button></span>' +
+        '<button type="button" class="cap skip-rest" data-run="skiprest" hidden>Saltar descanso</button><span class="run-next">' +
+        (nxt ? 'Después: <b>' + esc(title(nxt)) + '</b> · ' + esc(fmtMin(itemMin(nxt))) + ' min' : 'Es lo último de la clase') + '</span></div>' +
         (points.length ? '<ul class="points run-points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
         '<div class="run-foot"><div class="tl-bar" data-ref="bar">' + items.map((x, i) => '<i style="flex-grow:' + Math.max(1, itemMin(x)) + '" class="' + (x.pause ? 'pz ' : '') + (i < st.i ? 'past' : i === st.i ? 'cur' : '') + '"></i>').join('') + '</div>' +
         '<p class="run-total" data-ref="total"></p></div>';
@@ -4327,8 +4882,8 @@
       const tot = totalElapsed();
       const cc = getClass(id);
       const rolled = cc && cc.attendance && Object.keys(cc.attendance).length;
-      return '<div class="run-done"><div class="empty-art icon">' + ic('check') + '</div><h2>¡Clase terminada!</h2>' +
-        '<p>Duró ' + Math.max(1, Math.round(tot / 60000)) + ' min (planeados: ' + Math.round(plannedMs() / 60000) + ').</p>' +
+      return '<div class="run-done"><div class="empty-art icon">' + ic('check') + '</div><h2>Clase terminada</h2>' +
+        '<p>Duró ' + Math.max(1, Math.round(tot / 60000)) + ' de ' + Math.round(plannedMs() / 60000) + ' min planeados.</p>' +
         (canRoll() && !rolled ? '<button type="button" class="btn filled" data-run="roll">' + ic('check') + 'Pasar lista</button><button type="button" class="btn tinted" data-run="exit">Listo</button>' : '<button type="button" class="btn filled" data-run="exit">Listo</button>') + '</div>';
     }
     function canRoll() {
@@ -4353,8 +4908,8 @@
       t.textContent = ph ? fmtTimer(ph.left) : over ? '+' + fmtTimer(-rem) : fmtTimer(rem);
       const mins = esc(fmtMin(baseMin(st.i) + st.extra[st.i]));
       $('[data-ref="sub"]', body).textContent = ph
-        ? (st.running ? '' : 'Pausado · ') + (ph.rest ? 'Descanso · sigue serie ' + (ph.k + 2) : 'Serie ' + (ph.k + 1) + ' de ' + ph.n)
-        : over ? 'Tiempo cumplido' : (st.running ? 'de ' : st.started ? 'Pausado · ' : 'Listo · ') + mins + ' min';
+        ? (st.running ? '' : 'Pausado · ') + (ph.rest ? 'Descanso · luego serie ' + (ph.k + 2) : 'Serie ' + (ph.k + 1) + ' de ' + ph.n)
+        : over ? 'Tiempo cumplido' : (st.running ? 'de ' : st.started ? 'Pausado · ' : 'Dura ') + mins + ' min';
       wrap.classList.toggle('over', over);
       wrap.classList.toggle('running', st.running);
       wrap.classList.toggle('resting', !!(ph && ph.rest) || !!it.pause);
@@ -4378,10 +4933,13 @@
         }
         tg.classList.toggle('wide', !st.started);
       }
-      $('[data-ref="total"]', body).textContent = 'Clase ' + fmtTimer(totalElapsed()) + ' / ' + fmtTimer(plannedMs());
+      $('[data-ref="total"]', body).textContent = 'Llevas ' + fmtTimer(totalElapsed()) + ' de ' + fmtTimer(plannedMs());
       const curBar = $('[data-ref="bar"] .cur', body);
       if (curBar) curBar.style.setProperty('--p', Math.min(100, Math.round((el / dur) * 100)) + '%');
       // Silbato al cambiar de serie o de descanso, y al terminar el tiempo.
+      const sk = $('[data-run="skiprest"]', body);
+      if (sk) sk.hidden = !(ph && ph.rest);
+      if (st.started && Date.now() - lastSave > 1000) { lastSave = Date.now(); saveRun(id, st); }
       const pk = ph ? ph.k + (ph.rest ? 'r' : 'w') : over ? 'over' : 'x';
       if (st.running && st.phase[st.i] !== null && pk !== st.phase[st.i] && ph) alarm(ph.rest ? 'short' : 'start');
       st.phase[st.i] = pk;
@@ -4405,6 +4963,7 @@
       st.done = true;
       $('[data-ref="step"]', wrap).textContent = 'Terminada';
       wrap.classList.remove('over', 'running', 'resting');
+      clearRun();
       whistle('end');
       renderBlock();
       if (S.canWrite && totalElapsed() >= 60000) mutateClass(id, (x) => { x.lastRunAt = Date.now(); });
@@ -4428,7 +4987,7 @@
     };
     function exit() {
       if (st.done || !st.started) { popLayer(layer); return; }
-      actionSheet({ title: '¿Salir del modo clase?', message: 'Se pierde el tiempo que llevas.', actions: [{ label: 'Salir', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir con la clase' });
+      actionSheet({ title: '¿Salir de la clase?', message: 'Se borra el avance y no contará como dada.', actions: [{ label: 'Salir', danger: true, onClick: () => { clearRun(); popLayer(layer); } }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint });
     }
     wrap.addEventListener('click', (e) => {
       const b = e.target.closest('[data-run]');
@@ -4450,9 +5009,20 @@
         case 'prev': go(st.i - 1); break;
         case 'next':
           if (st.i < items.length - 1) { go(st.i + 1); break; }
-          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir del modo clase', onClick: () => popLayer(layer) }], cancel: 'Seguir aquí' }); break; }
-          actionSheet({ title: '¿Terminar la clase?', actions: [{ label: 'Terminar clase', onClick: finish }], cancel: 'Seguir con la clase' });
+          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir', onClick: () => popLayer(layer) }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint }); break; }
+          actionSheet({ title: '¿Terminar la clase?', actions: [{ label: 'Terminar clase', onClick: finish }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint });
           break;
+        case 'minus':
+          st.extra[st.i] = Math.max(1 - baseMin(st.i), st.extra[st.i] - 1);
+          haptic(6);
+          update();
+          break;
+        case 'skiprest': {
+          const it = items[st.i];
+          const ph = it.series ? seriesPhase(it.series, elapsed(st.i)) : null;
+          if (ph && ph.rest) { pin(); st.acc[st.i] += ph.left + 1; haptic(8); update(); }
+          break;
+        }
         case 'plus':
           st.extra[st.i] += 1;
           if (durMs(st.i) - elapsed(st.i) > 0) st.whistled[st.i] = false;
@@ -4462,6 +5032,16 @@
         default: break;
       }
     });
+    if (resume && Array.isArray(resume.acc) && resume.acc.length === items.length) {
+      st.i = Math.max(0, Math.min(items.length - 1, Number(resume.i) || 0));
+      st.acc = resume.acc.map((x) => Number(x) || 0);
+      st.extra = (resume.extra || []).map((x) => Number(x) || 0).concat(items.map(() => 0)).slice(0, items.length);
+      st.started = !!resume.started;
+      st.running = !!resume.running;
+      st.since = st.running ? Number(resume.since) || Date.now() : 0;
+      st.whistled = items.map((x, k) => k < st.i || st.acc[k] >= durMs(k));
+      if (st.started) keepAwake();
+    }
     renderBlock();
     pushLayer(layer);
     requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('open')));
@@ -4522,9 +5102,9 @@
       title: 'Compartir «' + (c.name || 'la clase') + '»',
       tint: SPORTS[c.sport] ? c.sport : 'futbol',
       actions: [
-        { label: 'Mandar por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) },
-        { label: 'PDF para imprimir', icon: 'doc', onClick: () => exportPDF(c) },
-        { label: 'Mandar a otro profe (con videos)', icon: 'box', onClick: () => sendClass(c) },
+        { label: 'Mandar texto por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) },
+        { label: 'Crear PDF para imprimir', icon: 'doc', onClick: () => exportPDF(c) },
+        { label: 'Mandar a otro profe', sub: 'Le llega un archivo para abrir en su Cancha', icon: 'box', onClick: () => sendClass(c) },
         { label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) },
       ],
     });
@@ -4595,6 +5175,7 @@
     });
   }
   async function exImage(ex) {
+    if (!ex.thumbId && ex.posterUrl && !hasDiagram(ex)) { const r = await imageToDataURL(ex.posterUrl, 240, 300); if (r) return r; }
     if (ex.thumbId) {
       const u = await S.backend.mediaURL(ex.thumbId).catch(() => null);
       if (u) { const r = await imageToDataURL(u, 240, 300); if (r) return r; }
@@ -4731,6 +5312,313 @@
     }
   }
 
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act="vtoggle"]');
+    if (!b) return;
+    const v = $('video', b);
+    if (!v) return;
+    if (v.paused) { v.play().catch(() => {}); b.classList.remove('paused'); } else { v.pause(); b.classList.add('paused'); }
+  });
+
+  // ---------------------------------------------------------------- entre profes (compartir ejercicios)
+  // Sin servidores: se arma un archivo con los ejercicios (y sus videos) y se manda por WhatsApp o AirDrop.
+  // Quien lo recibe lo abre en su Cancha y le aparecen en una sección «De …» con el nombre de quien lo mandó.
+  const coachName = () => (pref.get('coach-name') || '').trim();
+  const appLink = () => (framed ? '' : location.href.split('#')[0].replace(/index\.html$/, ''));
+  function shareCardHTML() {
+    if (!S.canWrite) return '';
+    return '<div class="share-card"><span class="sc-ico" aria-hidden="true">' + ic('people') + '</span>' +
+      '<span class="txt"><b>Entre profes</b><span>Manda tus ejercicios a otros entrenadores o abre los que te mandaron.</span></span>' +
+      '<span class="sc-actions"><button class="btn filled" data-act="share-coaches">' + ic('share') + 'Compartir</button>' +
+      '<button class="btn tinted" data-act="open-shared">' + ic('download') + 'Abrir los que me mandaron</button></span></div>';
+  }
+  function openShareCoaches(opts) {
+    opts = opts || {};
+    const own = S.exercises.filter((e) => !e.example && !e.catalogId);
+    const chosen = new Set((opts.exIds || own.map((e) => e.id)).filter((id) => getEx(id)));
+    let sport = opts.exIds && opts.exIds.length && getEx(opts.exIds[0]) ? getEx(opts.exIds[0]).sport : S.sport;
+    let q = '';
+    const secs = S.sections.filter((x) => sectionExercises(x).length);
+    const sheet = openSheet({
+      title: 'Compartir con otros profes',
+      confirmLabel: 'Crear archivo',
+      bodyHTML:
+        '<p class="group-label">Tu nombre</p><div class="group"><input class="field-lg" id="sh-name" placeholder="Ej. Profe Toño" aria-label="Tu nombre" maxlength="40" autocomplete="name" enterkeyhint="done" value="' + esc(coachName()) + '"></div>' +
+        '<p class="hint">Así sabrán quién lo manda.</p>' +
+        (secs.length ? '<p class="group-label">Una sección completa</p><div class="chips wrap" data-ref="secs">' + secs.map((x) => '<button type="button" class="chip" data-sh-sec="' + esc(x.id) + '" aria-pressed="false">' + ic('folder') + esc(x.name) + '</button>').join('') + '</div>' : '') +
+        '<p class="group-label">Ejercicios</p>' + segHTML('shsport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], sport, 'Deporte') +
+        '<label class="search">' + ic('search') + '<input type="search" id="sh-q" placeholder="Buscar ejercicios" autocomplete="off" aria-label="Buscar ejercicios"></label>' +
+        '<div class="list pick-list" data-ref="list"></div>' +
+        '<div class="group">' + switchRow('sh-media', ic('video'), 'Con videos y fotos', 'Los tuyos van dentro del archivo', true, false) + '</div>' +
+        '<p class="muted xp-sum" data-ref="sum"></p>',
+      onConfirm: () => {
+        const nameEl = $('#sh-name', sheet.body);
+        const name = nameEl.value.trim();
+        if (!name) { shake(nameEl); nameEl.focus(); toast('Escribe tu nombre', 'pencil'); return; }
+        const ids = Array.from(chosen).filter((id) => getEx(id));
+        if (!ids.length) { toast('Elige al menos un ejercicio', 'check'); return; }
+        pref.set('coach-name', name);
+        const withMedia = $('#sh-media', sheet.body).checked;
+        sheet.dismiss();
+        const what = plural(ids.length, 'ejercicio', 'ejercicios');
+        setTimeout(() => runExport({ exIds: new Set(ids), classIds: new Set(), groupIds: new Set(), withMedia, kind: 'compartido', title: 'Ejercicios de ' + name, from: name }, what), 300);
+      },
+    });
+    const root = sheet.body;
+    function paint() {
+      const nq = norm(q).trim();
+      const list = exOf(sport).filter((e) => !nq || norm(e.title + ' ' + (e.objective || '')).indexOf(nq) >= 0);
+      $('[data-ref="list"]', root).innerHTML = list.length ? list.map((e) => '<button type="button" class="cell" role="checkbox" aria-checked="' + chosen.has(e.id) + '" data-sh-ex="' + esc(e.id) + '">' + thumbHTML(e, 'mini') +
+        '<span class="txt"><span class="t1">' + esc(e.title) + '</span><span class="t2">' + esc([e.objective, e.duration ? e.duration + ' min' : '', e.example ? 'Ejemplo' : e.catalogId ? 'Recomendado' : ''].filter(Boolean).join(' · ')) + '</span></span><span class="check">' + ic('check') + '</span></button>').join('')
+        : '<p class="muted pad">No hay ejercicios' + (nq ? ' con esa búsqueda' : ' de ' + SPORTS[sport].noun) + '.</p>';
+      hydrate(root);
+      sum();
+    }
+    function sum() {
+      const n = Array.from(chosen).filter((id) => getEx(id)).length;
+      $('[data-ref="sum"]', root).textContent = n ? 'Vas a mandar ' + plural(n, 'ejercicio', 'ejercicios') + '.' : 'Elige los ejercicios que quieres mandar.';
+      $$('[data-sh-sec]', root).forEach((b) => { const x = getSection(b.dataset.shSec); b.setAttribute('aria-pressed', String(!!x && sectionExercises(x).every((e) => chosen.has(e.id)))); });
+      sheet.setConfirm(n > 0);
+    }
+    bindSeg(root, 'shsport', (v) => { sport = v; paint(); });
+    $('#sh-q', root).addEventListener('input', (e) => { q = e.target.value; paint(); });
+    root.addEventListener('click', (e) => {
+      const sb = e.target.closest('[data-sh-sec]');
+      if (sb) {
+        const x = getSection(sb.dataset.shSec);
+        if (!x) return;
+        const exs = sectionExercises(x);
+        const all = exs.every((y) => chosen.has(y.id));
+        exs.forEach((y) => { if (all) chosen.delete(y.id); else chosen.add(y.id); });
+        haptic(6); paint();
+        return;
+      }
+      const b = e.target.closest('[data-sh-ex]');
+      if (!b) return;
+      const id = b.dataset.shEx;
+      if (chosen.has(id)) chosen.delete(id); else chosen.add(id);
+      b.setAttribute('aria-checked', String(chosen.has(id)));
+      haptic(4); sum();
+    });
+    paint();
+  }
+  // Al abrir un archivo que mandó otro profe: sus ejercicios quedan juntos en la sección «De …».
+  async function fileIntoSharedSection(from, exIds) {
+    if (!from || !exIds.length) return null;
+    const name = ('De ' + from).slice(0, 40);
+    const cur = S.sections.find((x) => norm(x.name) === norm(name));
+    if (cur) {
+      await mutateSection(cur.id, (x) => { exIds.forEach((id) => { if (x.exIds.indexOf(id) < 0) x.exIds.push(id); }); });
+      return cur.id;
+    }
+    const sec = { id: uid(), name, exIds: exIds.slice(), createdAt: Date.now(), updatedAt: Date.now(), order: -Date.now() };
+    replaceLocal('sections', sec);
+    renderAll();
+    await S.backend.saveSection(sec);
+    return sec.id;
+  }
+
+  // ---------------------------------------------------------------- tutorial (la primera vez)
+  // Cinco pasos cortos con dibujos que se mueven. Se puede saltar y se vuelve a ver desde Ajustes.
+  const TUT_BOARD = { v: 'full', items: [
+    { t: 'cone', x: 50, y: 70 }, { t: 'cone', x: 110, y: 70 }, { t: 'cone', x: 110, y: 130 }, { t: 'cone', x: 50, y: 130 },
+    { t: 'a', x: 80, y: 66, n: 1 }, { t: 'a', x: 114, y: 100, n: 2 }, { t: 'a', x: 80, y: 134, n: 3 }, { t: 'a', x: 46, y: 100, n: 4 },
+    { t: 'b', x: 66, y: 80, n: 1 }, { t: 'ball', x: 88, y: 72 },
+    { t: 'arrow', x: 80, y: 66, k: 'pase', x2: 114, y2: 100, s: 1 }, { t: 'arrow', x: 66, y: 80, k: 'mov', x2: 100, y2: 114, s: 1 },
+    { t: 'arrow', x: 114, y: 100, k: 'pase', x2: 46, y2: 100, s: 2 }, { t: 'arrow', x: 100, y: 114, k: 'mov', x2: 62, y2: 88, s: 2 },
+    { t: 'arrow', x: 46, y: 100, k: 'pase', x2: 80, y2: 134, s: 3 },
+  ] };
+  const devWord = () => (/iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'iPad'
+    : /iPhone|iPod|Android.*Mobile/.test(navigator.userAgent) ? 'celular' : 'computadora');
+  const needsTutorial = () => !!S.canWrite && !pref.get('onboarded');
+
+  function tutorialSlides() {
+    const cloud = S.backend && S.backend.kind === 'cloud';
+    const n = CAT() ? CAT().exercises.length : 0;
+    const nv = CAT() ? CAT().exercises.filter((x) => x.videoUrl).length : 0;
+    return [
+      { art: 'board', title: 'Bienvenido a Cancha', text: 'Aquí preparas y das tus clases de fútbol y básquetbol.' },
+      { art: 'cards', title: 'Ejercicios listos', text: (n ? n + ' ejercicios' : 'Ejercicios') + ' para usar, ' + (nv ? 'algunos con video. ' : '') + 'Están en «Ejercicios» y también puedes crear los tuyos.' },
+      { art: 'timer', title: 'El cronómetro lleva el tiempo', text: 'Toca «Iniciar clase» y luego «Empezar». Al acabar el tiempo suena el silbato y tocas «Siguiente».' },
+      { art: 'roll', title: 'Pasa lista', text: 'En tu grupo toca «Pasar lista hoy». Luego saca el reporte de asistencia en PDF.' },
+      cloud
+        ? { art: 'safe', title: 'Todo se guarda en tu cuenta', text: 'Todo queda en tu cuenta de Claude. Lo ves en el celular y en la computadora.' }
+        : { art: 'safe', title: 'Todo se guarda en tu ' + devWord(), text: 'No necesitas cuenta ni internet. Cada semana toca «Respaldo» para guardar una copia.' },
+    ];
+  }
+
+  function tutArtHTML(kind) {
+    const cx = (id) => (CAT() ? CAT().exercises.find((e) => e.id === id) : null);
+    if (kind === 'board') return '<div class="ta-board"><span class="art">' + boardSVG('futbol', TUT_BOARD, { crop: true }) + '</span></div>';
+    if (kind === 'cards') {
+      return '<div class="ta-cards">' + [['cf-15', 'Escalera de coordinación', 'futbol'], ['cf-02', 'Rondo 4 contra 1', 'futbol'], ['cb-15', 'Escalera y tiro cercano', 'basquet']].map((c, i) => {
+        const x = cx(c[0]);
+        const meta = x ? [x.objective, x.duration ? x.duration + ' min' : ''].filter(Boolean).join(' · ') : SPORTS[c[2]].name;
+        return '<span class="ta-card c' + i + '" data-tint="' + c[2] + '"><span class="ta-img"><img alt="" decoding="async" src="' + esc((x && x.thumbUrl) || 'app/videos/' + c[0] + '-t.jpg') + '"><span class="ta-play">' + ic('play') + '</span></span>' +
+          '<b>' + esc(c[1]) + '</b><small>' + esc(meta) + '</small></span>';
+      }).join('') + '</div>';
+    }
+    if (kind === 'timer') {
+      return '<div class="ta-timer" data-tint="futbol"><span class="tt-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="tt-track" cx="60" cy="60" r="52"/><circle class="tt-bar" cx="60" cy="60" r="52" pathLength="100"/></svg>' +
+        '<span class="tt-txt"><b class="tt-time">0:05</b><small class="tt-name">Rondo 4 contra 1</small></span></span>' +
+        '<span class="tt-whistle">' + ic('whistle') + '<i></i><i></i></span><span class="tt-next">Siguiente' + ic('next') + '</span></div>';
+    }
+    if (kind === 'roll') {
+      const kids = [['Ana', 'p'], ['Luis', 'p'], ['Sofía', 't'], ['Diego', 'p'], ['Mateo', 'f']];
+      return '<div class="ta-roll" data-tint="clases"><div class="tr-head"><b>5.º A</b><span class="tr-count"><b>0</b> de ' + kids.length + '</span></div>' +
+        kids.map((k, i) => '<div class="tr-row" style="--d:' + (0.35 + i * 0.42).toFixed(2) + 's" data-st="' + k[1] + '"><span class="avatar">' + esc(k[0][0]) + '</span><span class="tr-name">' + esc(k[0]) + '</span>' +
+          '<span class="tr-mark">' + (k[1] === 'p' ? ic('check') : k[1] === 't' ? '<b>R</b>' : ic('xmark')) + '</span></div>').join('') +
+        '<span class="tr-pdf">' + ic('doc') + 'Reporte de asistencia.pdf</span></div>';
+    }
+    return '<div class="ta-safe" data-tint="clases"><span class="ts-dev"><span class="ts-cam"></span><span class="ts-app">' + ic('clases') + '</span></span>' +
+      '<span class="ts-file">' + ic('box') + 'Respaldo</span><span class="ts-ok">' + ic('check') + '</span></div>';
+  }
+
+  // Lo que se mueve en cada paso (la jugada, el reloj, el pase de lista). Regresa cómo pararlo.
+  function tutAnimate(slide, kind) {
+    const still = reduceMotion();
+    if (kind === 'board') {
+      const host = $('.ta-board', slide);
+      if (still) return () => {};
+      const pl = playDiagram(host, TUT_BOARD, { loop: true, delay: 500 });
+      return () => pl.stop();
+    }
+    if (kind === 'timer') {
+      const bar = $('.tt-bar', slide); const time = $('.tt-time', slide); const name = $('.tt-name', slide); const wrap = $('.ta-timer', slide);
+      const names = ['Rondo 4 contra 1', 'Escalera de coordinación', 'Tiros libres'];
+      const tints = ['futbol', 'futbol', 'basquet'];
+      let k = 0; let left = 5; let iv = 0; let to = 0; let to2 = 0;
+      const paint = () => { time.textContent = '0:0' + left; bar.style.strokeDashoffset = String(100 - left * 20); };
+      if (still) { paint(); return () => {}; }
+      const tick = () => {
+        left--;
+        paint();
+        if (left > 0) return;
+        clearInterval(iv);
+        wrap.classList.add('blow');
+        to = setTimeout(() => { wrap.classList.add('tap'); }, 1100);
+        to2 = setTimeout(() => {
+          wrap.classList.remove('blow', 'tap');
+          k = (k + 1) % names.length;
+          name.textContent = names[k];
+          wrap.dataset.tint = tints[k];
+          left = 5; paint();
+          iv = setInterval(tick, 1000);
+        }, 1700);
+      };
+      paint();
+      iv = setInterval(tick, 1000);
+      return () => { clearInterval(iv); clearTimeout(to); clearTimeout(to2); };
+    }
+    if (kind === 'roll') {
+      const box = $('.ta-roll', slide); const cnt = $('.tr-count b', slide);
+      const rows = $$('.tr-row', slide);
+      let tos = [];
+      const run = () => {
+        box.classList.remove('go'); void box.offsetWidth; box.classList.add('go');
+        cnt.textContent = '0';
+        tos = rows.map((r, i) => setTimeout(() => { cnt.textContent = String(rows.slice(0, i + 1).filter((x) => x.dataset.st !== 'f').length); }, (0.35 + i * 0.42) * 1000 + 150));
+        tos.push(setTimeout(run, 6200));
+      };
+      if (still) { box.classList.add('go', 'still'); cnt.textContent = String(rows.filter((x) => x.dataset.st !== 'f').length); return () => {}; }
+      run();
+      return () => tos.forEach(clearTimeout);
+    }
+    return () => {};
+  }
+
+  function showTutorial(done) {
+    if ($('.onb-wrap')) return;
+    const slides = tutorialSlides();
+    const last = slides.length - 1;
+    let i = 0;
+    let stopArt = () => {};
+    const wrap = document.createElement('div');
+    wrap.className = 'onb-wrap';
+    wrap.dataset.tint = 'clases';
+    wrap.setAttribute('role', 'dialog');
+    wrap.setAttribute('aria-modal', 'true');
+    wrap.setAttribute('aria-label', 'Cómo funciona Cancha');
+    wrap.innerHTML =
+      '<div class="onb" tabindex="-1">' +
+      '<div class="onb-top"><span class="onb-step" aria-live="polite"></span><button type="button" class="onb-skip" data-onb="skip">Saltar</button></div>' +
+      '<div class="onb-view"><div class="onb-track">' +
+      slides.map((s, k) => '<section class="onb-slide" data-k="' + k + '" aria-hidden="true"><div class="onb-art">' + tutArtHTML(s.art) + '</div>' +
+        '<h2>' + esc(s.title) + '</h2><p>' + esc(s.text) + '</p></section>').join('') +
+      '</div></div>' +
+      '<div class="onb-dots" role="tablist" aria-label="Pasos">' + slides.map((s, k) => '<button type="button" role="tab" data-dot="' + k + '" aria-label="Paso ' + (k + 1) + '"></button>').join('') + '</div>' +
+      '<button type="button" class="btn filled onb-next" data-onb="next"><span></span>' + ic('chevR') + '</button>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    const track = $('.onb-track', wrap);
+    const nextBtn = $('[data-onb="next"]', wrap);
+    function go(n, quiet) {
+      i = Math.max(0, Math.min(last, n));
+      stopArt();
+      track.style.transform = 'translateX(' + (-i * 100) + '%)';
+      $$('.onb-slide', wrap).forEach((s, k) => { s.setAttribute('aria-hidden', String(k !== i)); s.classList.toggle('on', k === i); });
+      $$('[data-dot]', wrap).forEach((d, k) => d.setAttribute('aria-selected', String(k === i)));
+      $('.onb-step', wrap).textContent = 'Paso ' + (i + 1) + ' de ' + slides.length;
+      $('span', nextBtn).textContent = i === last ? 'Empezar' : 'Siguiente';
+      nextBtn.classList.toggle('end', i === last);
+      $('.onb-skip', wrap).style.visibility = i === last ? 'hidden' : '';
+      const slide = $$('.onb-slide', wrap)[i];
+      stopArt = tutAnimate(slide, slides[i].art);
+      if (!quiet) haptic(4);
+    }
+    let closed = false;
+    function finish() {
+      if (closed) return;
+      closed = true;
+      pref.set('onboarded', '1');
+      popLayer(layer);
+      if (done) setTimeout(done, 450);
+    }
+    const layer = {
+      kind: 'tutorial', el: wrap,
+      focusEl() { return $('.onb', wrap); },
+      close() { stopArt(); wrap.classList.remove('open'); setTimeout(() => wrap.remove(), 450); },
+      onBack() { if (i > 0) go(i - 1); else finish(); },
+    };
+    wrap.addEventListener('click', (e) => {
+      const d = e.target.closest('[data-dot]');
+      if (d) { go(Number(d.dataset.dot)); return; }
+      const b = e.target.closest('[data-onb]');
+      if (!b) return;
+      if (b.dataset.onb === 'skip' || i === last) finish(); else go(i + 1);
+    });
+    wrap.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); if (i < last) go(i + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); if (i > 0) go(i - 1); }
+    });
+    // Deslizar con el dedo para pasar de paso
+    const view = $('.onb-view', wrap);
+    let x0 = null; let y0 = 0; let dx = 0; let horiz = null;
+    view.addEventListener('pointerdown', (e) => { x0 = e.clientX; y0 = e.clientY; dx = 0; horiz = null; });
+    view.addEventListener('pointermove', (e) => {
+      if (x0 == null) return;
+      dx = e.clientX - x0;
+      if (horiz == null && (Math.abs(dx) > 8 || Math.abs(e.clientY - y0) > 8)) horiz = Math.abs(dx) > Math.abs(e.clientY - y0);
+      if (!horiz) return;
+      const edge = (i === 0 && dx > 0) || (i === last && dx < 0) ? 0.3 : 1;
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(calc(' + (-i * 100) + '% + ' + Math.round(dx * edge) + 'px))';
+    });
+    const up = () => {
+      if (x0 == null) return;
+      x0 = null;
+      track.style.transition = '';
+      if (horiz && dx < -50 && i < last) go(i + 1);
+      else if (horiz && dx > 50 && i > 0) go(i - 1);
+      else track.style.transform = 'translateX(' + (-i * 100) + '%)';
+    };
+    view.addEventListener('pointerup', up);
+    view.addEventListener('pointercancel', up);
+    go(0, true);
+    pushLayer(layer);
+    requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('open')));
+  }
+
   // ---------------------------------------------------------------- eventos globales
   function bindGlobal() {
     $('#in-capture').addEventListener('change', onFileInput);
@@ -4760,6 +5648,7 @@
       if (a) {
         switch (a.dataset.act) {
           case 'backup': openBackupSheet(); return;
+          case 'settings': openSettings(); return;
           case 'backup-now': backupAll(true); return;
           case 'install-help': showInstallHelp(); return;
           case 'clear-examples': clearExamples(); return;
@@ -4768,7 +5657,13 @@
           case 'new-group': openGroupEditor({}); return;
           case 'start-class': runClass(a.dataset.id); return;
           case 'roll-class': openAttendance(a.dataset.id); return;
+          case 'plan-class': openClass(a.dataset.id); setTimeout(() => openPicker(a.dataset.id), 450); return;
           case 'catalog': openCatalog(S.sport); return;
+          case 'new-section': openSectionEditor({}); return;
+          case 'share-coaches': openShareCoaches({}); return;
+          case 'open-shared': pickFile('import', startImport); return;
+          case 'filters': openFilters(S.sport); return;
+          case 'clear-filters': S.fx[S.sport] = null; S.sig = {}; renderEjercicios(); return;
           default: break;
         }
       }
@@ -4778,6 +5673,12 @@
       if (gr) { openGroup(gr.dataset.openGroup); return; }
       const tp = e.target.closest('[data-open-template]');
       if (tp) { openTemplate(tp.dataset.openTemplate); return; }
+      const oc = e.target.closest('[data-open-cat]');
+      if (oc) { openCatalogEx(oc.dataset.openCat); return; }
+      const sc = e.target.closest('[data-open-section]');
+      if (sc) { openSection(sc.dataset.openSection); return; }
+      const uf = e.target.closest('[data-unfilter]');
+      if (uf) { removeFilter(S.sport, uf.dataset.unfilter); haptic(4); S.sig = {}; renderEjercicios(); return; }
       const chip = e.target.closest('[data-chip]');
       if (chip) {
         S.f[S.sport] = chip.dataset.chip;
@@ -4812,6 +5713,8 @@
   }
 
   async function boot() {
+    applyTheme(pref.get('theme') || 'auto');
+    try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(pref.get('theme') || 'auto')); } catch (e) { /* navegador viejo */ }
     S.sport = pref.get('sport') === 'basquet' ? 'basquet' : 'futbol';
     buildShell();
     bindGlobal();
@@ -4837,9 +5740,11 @@
       S.exercises = data.exercises.slice();
       S.classes = data.classes.slice();
       S.groups = (data.groups || []).slice();
+      S.sections = (data.sections || []).slice();
       S.ready = true;
       if (!data.fromCache) { S.definitive = true; S.stale = false; clearTimeout(timer); }
       // Una vez al abrir: borra videos que ya no usa ningún ejercicio (antes de que empieces a editar).
+      if (S.definitive && !S.resumeAsked) { S.resumeAsked = true; setTimeout(() => (needsTutorial() ? showTutorial(offerResume) : offerResume()), 600); }
       if (!cleaned && S.definitive && backend.cleanOrphans && S.canWrite) {
         cleaned = true;
         const used = new Set();
@@ -4862,13 +5767,15 @@
   function watchUpdates() {
     const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (hadController) toast('Cancha se actualizó', 'sparkle', { label: 'Recargar', onClick: () => location.reload() });
+      if (hadController) toast('Hay una versión nueva de Cancha', 'sparkle', { label: 'Actualizar', onClick: () => location.reload() });
     });
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
     });
   }
 
+  // Herramienta de videos (tools/video): usa el mismo dibujo del pizarrón sin arrancar la app.
+  if (window.CANCHA_RENDER_ONLY) { window.CanchaRender = { boardSVG, itemSVG, diagramSteps, r1 }; return; }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();

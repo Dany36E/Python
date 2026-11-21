@@ -8,18 +8,20 @@ Diseño: estructura nativa de iOS con identidad de cancha: pizarrón magnético 
 
 La app tiene tres pestañas: **Clases**, **Ejercicios** y **Grupos**. Arriba a la derecha está **Respaldo**.
 
+La primera vez que se abre, un **tutorial de 5 pasos** con dibujos animados explica lo básico (se puede saltar y se vuelve a ver en Ajustes → «Ver el tutorial»).
+
 - **Clases**: arriba aparece la clase de hoy o la próxima, con «Iniciar» y «Pasar lista» a un toque. Cada clase tiene fecha, grupo y un plan de ejercicios con sus minutos; Cancha calcula el total y el minuto en que empieza cada bloque.
-- **Pausas y series**: añade pausas al plan (hidratación, descanso, montar material) y divide un ejercicio en series de juego y descanso (por ejemplo 5 × 3′ con 1′ de descanso).
+- **Pausas y series**: agrega pausas al plan (hidratación, descanso, montar material) y divide un ejercicio en series de juego y descanso (por ejemplo 5 × 3′ con 1′ de descanso).
 - **Duplicar una clase** para otro grupo o fecha.
-- **Modo clase**: cronómetro por bloque con silbato, el video o la pizarra del ejercicio en pantalla, «+1 min», series con silbato al cambiar de juego a descanso, y la pantalla encendida mientras das la clase. Para terminar pide confirmación.
-- **Ejercicios**: de fútbol y de básquetbol, con búsqueda, filtros por objetivo y favoritos. Graba o sube un video o foto, pega un **link de YouTube**, o dibújalo en el **pizarrón** (jugadores, conos, balón y flechas de pase, conducción/dribleo o desplazamiento sin balón).
+- **Modo clase**: cronómetro por bloque con silbato (suena aunque el iPad esté en silencio), la jugada animada en pantalla, «−1» y «+1 min», series con silbato al cambiar de juego a descanso y «Saltar descanso», y la pantalla encendida. Si iOS cierra la app, al volver a abrirla ofrece seguir la clase donde iba.
+- **Ejercicios**: de fútbol y de básquetbol, con búsqueda (también en los Recomendados), filtros (objetivo, nivel, edad, duración, con video, para escuela), orden y favoritos. **Secciones** que tú creas (como carpetas), con tres de ejemplo: Calentamientos, Coordinación y velocidad, y Para primaria. Graba o sube un video o foto, pega un **link de YouTube**, o dibújalo en el **pizarrón** (jugadores, conos, balón y flechas de pase, conducción/dribleo o desplazamiento sin balón).
 - **La jugada se mueve**: el pizarrón reproduce el ejercicio paso a paso (el balón viaja por los pases y los jugadores corren por sus flechas). En el modo clase se repite mientras corre el bloque.
-- **De entrenadores**: 28 ejercicios reales (14 de fútbol y 14 de básquetbol, basados en FIFA 11+ Kids, The FA, US Soccer, FIBA, Jr. NBA y otras fuentes de entrenadores) y 4 clases completas para escuela y club. Agrega a tu biblioteca solo los que te sirvan o crea una clase desde una plantilla con un toque.
+- **Recomendados**: 50 ejercicios (26 de fútbol y 24 de básquetbol, incluidos coordinación con escalera, vallas, aros y picas; velocidad y agilidad; y fuerza con peso corporal), basados en FIFA 11+ Kids, The FA, US Soccer, FIBA, Jr. NBA, NSCA y otras fuentes, y 6 clases completas para escuela y club. **12 traen video vertical** (tipo Short) en 3D, 2 por sección en cada deporte: jugadores que corren, conducen, botan y tiran siguiendo exactamente las flechas del pizarrón, con el título y las frases clave; se puede mandar por WhatsApp. Los demás muestran su pizarrón animado. Agrega a tus ejercicios solo los que te sirvan o usa una clase lista con un toque.
 - **Grupos**: lista de alumnos en el orden de tu lista oficial (con número), «Pasar lista hoy» (en iPad, en dos columnas), historial de clases y objetivos trabajados.
 - **Asistencia**: asistió, retardo o falta; cada alumno muestra su porcentaje.
 - **Reporte de asistencia en PDF** tamaño carta: este mes, mes pasado, **trimestre** (aproximado al calendario de la SEP) o fechas; con número de lista, totales por alumno, nombre de la escuela y del profe, y espacio para firma.
 - **Compartir una clase**: por WhatsApp, en PDF para imprimir, copiando el texto o como archivo para otro profe.
-- **Respaldo**: un toque guarda todo (ejercicios, clases, grupos, listas y videos) en un archivo .zip para guardarlo en Archivos / iCloud Drive. También puedes **mandar** ejercicios o clases a otro profe por AirDrop o WhatsApp e **importar** archivos: no se borra nada tuyo, y si los dos cambiaron el mismo ejemplo se guarda una copia.
+- **Respaldo**: un toque guarda todo (ejercicios, clases, grupos, listas y videos) en un archivo .zip para guardarlo en Archivos / iCloud Drive. También puedes **mandar** ejercicios o clases a otro profe por AirDrop o WhatsApp y **abrir** los archivos que te manden: no se borra nada tuyo, y si los dos cambiaron el mismo ejemplo se guarda una copia.
 - **Funciona sin internet** una vez instalada.
 
 ## Cómo instalarla en tu celular
@@ -49,6 +51,9 @@ app/styles.css        Estilos (tokens de color, modo claro/oscuro, componentes)
 app/app.js            Lógica: navegación, biblioteca, pizarrón, clases, grupos, modo clase y almacenamiento
 app/catalog.js        Ejercicios y clases de entrenadores («De entrenadores»)
 app/fonts/            Letra de estadio (Big Shoulders Display, OFL)
+app/videos/           Videos de los ejercicios recomendados (generados con tools/video3d)
+tools/video3d/        Generador de los videos 3D: lee el pizarrón de cada ejercicio y anima jugadores con three.js (Playwright + ffmpeg)
+tools/video/          Generador anterior (pizarrón animado en 2D)
 manifest.webmanifest  Datos para instalarla como app
 sw.js                 Service worker (funciona sin conexión; sube VERSION en cada cambio publicado)
 icons/                Ícono de la app

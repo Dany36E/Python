@@ -8,6 +8,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
 (async () => {
   const b = await chromium.launch();
   const ctx = await b.newContext({ ...devices['iPhone 13'], deviceScaleFactor: 1, serviceWorkers: 'block' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('cancha:onboarded', '1'); } catch (e) { /* */ } });
   await ctx.addInitScript(() => {
     const cols = {}; const subs = {};
     const snap = (n) => ({ docs: Object.entries(cols[n] || {}).map(([id, d]) => ({ id, exists: true, data: () => Object.freeze(JSON.parse(JSON.stringify(d))), metadata: { fromCache: false, hasPendingWrites: false } })), metadata: { fromCache: false, hasPendingWrites: false } });
@@ -75,7 +76,9 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   await sheet().locator('#cl-name').fill('Clase de pase');
   await sheet().locator('[data-sh="ok"]').click(); await W(1200);
   ok((await p.locator('.stack-screen.in').count()) >= 1, 'nube: clase creada');
-  await scr().locator('[data-act="add-ex"]').click(); await W(700);
+  // Al crear una clase vacía, el selector de ejercicios se abre solo.
+  if (!(await p.locator('.sheet-wrap.open [data-pick-ex]').count())) { await scr().locator('[data-act="add-ex"]').click(); await W(700); }
+  ok(await p.locator('.sheet-wrap.open [data-pick-ex]').count() > 0, 'nube: al crear la clase se abre «Añadir ejercicios»');
   await sheet().locator('[data-pick-ex]').first().click();
   await sheet().locator('[data-sh="ok"]').click(); await W(900);
   await scr().locator('[data-act="add-pause"]').click(); await W(500);

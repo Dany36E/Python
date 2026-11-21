@@ -4,11 +4,15 @@ const fs = require('fs');
 const COACH = __dirname + '/';
 const OUT = require('path').join(__dirname, '..', '..', 'app', 'catalog.js');
 const exercises = []; const sessions = [];
-const FIELDS = ['id', 'sport', 'title', 'objective', 'level', 'duration', 'players', 'age', 'space', 'material', 'description', 'keyPoints', 'variations', 'school', 'diagram'];
+const FIELDS = ['id', 'sport', 'title', 'objective', 'level', 'duration', 'players', 'age', 'space', 'material', 'description', 'keyPoints', 'variations', 'school', 'video', 'diagram'];
+const VIDEOS = require('path').join(__dirname, '..', '..', 'app', 'videos');
 for (const sport of ['futbol', 'basquet']) {
   const f = COACH + sport + '.json';
   if (!fs.existsSync(f)) { console.log('falta', f); continue; }
   const data = JSON.parse(fs.readFileSync(f, 'utf8'));
+  // Ejercicios agregados después (coordinación, velocidad…): futbol2.json, basquet2.json
+  const more = COACH + sport + '2.json';
+  if (fs.existsSync(more)) { const d2 = JSON.parse(fs.readFileSync(more, 'utf8')); data.exercises = data.exercises.concat(d2.exercises || []); data.sessions = data.sessions.concat(d2.sessions || []); }
   data.exercises.forEach((x) => {
     const o = {};
     FIELDS.forEach((k) => { if (x[k] !== undefined) o[k] = x[k]; });
@@ -16,9 +20,12 @@ for (const sport of ['futbol', 'basquet']) {
     o.diagram = { v: x.diagram.v, items: x.diagram.items.map((it) => {
       const r = { t: it.t, x: it.x, y: it.y };
       if (it.n != null) r.n = it.n;
+      if (it.r != null) r.r = it.r;
       if (it.t === 'arrow') Object.assign(r, { k: it.k, x2: it.x2, y2: it.y2, s: it.s });
       return r;
     }) };
+    // Video generado (tools/video/make-videos.js): se enlaza si ya existe.
+    if (fs.existsSync(VIDEOS + '/' + o.id + '.mp4')) { o.videoUrl = 'app/videos/' + o.id + '.mp4'; o.posterUrl = 'app/videos/' + o.id + '.jpg'; o.thumbUrl = 'app/videos/' + o.id + '-t.jpg'; }
     exercises.push(o);
   });
   data.sessions.forEach((t, i) => {

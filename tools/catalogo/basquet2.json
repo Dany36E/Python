@@ -1,0 +1,1537 @@
+{
+  "exercises": [
+    {
+      "id": "cb-15",
+      "sport": "basquet",
+      "title": "Escalera de coordinación y tiro cercano",
+      "objective": "Coordinación",
+      "level": "Inicial",
+      "duration": 10,
+      "players": "8 a 35 alumnos, 2 filas por canasta",
+      "age": "9 a 15 años",
+      "space": "Media cancha por canasta",
+      "material": "2 escaleras de coordinación por canasta (o dibujadas con gis o cinta en el piso), 1 balón por fila",
+      "description": "Cada fila tiene enfrente una escalera de coordinación que apunta a la canasta. El alumno pasa la escalera con el patrón que marca el profesor (un pie en cada cuadro, dos pies en cada cuadro o lateral dentro-fuera) mientras dribla a un costado con la mano de afuera; al salir da dos dribleos, hace parada en un tiempo y tira cerca del tablero. Recoge su rebote, le pasa el balón al siguiente de su fila y se forma al final; cada patrón se hace primero sin balón y luego driblando.",
+      "keyPoints": "Primero pies precisos, después rápidos\nPisa con la punta del pie, sin pisar las líneas\nDribla a un lado, con la vista al frente\nParada en un tiempo equilibrada antes de tirar",
+      "variations": "Más fácil: pasar la escalera sin balón y recibir un pase al salir\nMás difícil: un cambio de mano por delante en cada cuadro y terminar con entrada\nSin escaleras: dibujarlas con gis o usar las líneas de la cancha",
+      "school": true,
+      "video": {
+        "captions": [
+          "Pies rápidos en la escalera",
+          "Dribla con la mano de afuera",
+          "Parada en un tiempo",
+          "Tiro cerca del tablero"
+        ],
+        "reps": "4 patrones × 2 pasadas por alumno"
+      },
+      "diagram": {
+        "v": "half",
+        "items": [
+          {
+            "t": "a",
+            "x": 52,
+            "y": 30,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 52,
+            "y": 15,
+            "n": 2
+          },
+          {
+            "t": "ball",
+            "x": 44,
+            "y": 34
+          },
+          {
+            "t": "a",
+            "x": 108,
+            "y": 30,
+            "n": 3
+          },
+          {
+            "t": "a",
+            "x": 108,
+            "y": 15,
+            "n": 4
+          },
+          {
+            "t": "ball",
+            "x": 116,
+            "y": 34
+          },
+          {
+            "t": "ladder",
+            "x": 52,
+            "y": 72,
+            "r": 0,
+            "n": 8
+          },
+          {
+            "t": "ladder",
+            "x": 108,
+            "y": 72,
+            "r": 0,
+            "n": 8
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 52,
+            "y": 30,
+            "x2": 52,
+            "y2": 50,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 52,
+            "y": 50,
+            "x2": 52,
+            "y2": 72,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 52,
+            "y": 72,
+            "x2": 52,
+            "y2": 96,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 52,
+            "y": 96,
+            "x2": 64,
+            "y2": 146,
+            "s": 4
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 64,
+            "y": 146,
+            "x2": 80,
+            "y2": 170.5,
+            "s": 5
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 108,
+            "y": 30,
+            "x2": 108,
+            "y2": 50,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 108,
+            "y": 50,
+            "x2": 108,
+            "y2": 72,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 108,
+            "y": 72,
+            "x2": 108,
+            "y2": 96,
+            "s": 4
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 108,
+            "y": 96,
+            "x2": 96,
+            "y2": 146,
+            "s": 5
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 96,
+            "y": 146,
+            "x2": 80,
+            "y2": 170.5,
+            "s": 6
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-16",
+      "sport": "basquet",
+      "title": "Dribleo con dos balones y entrada",
+      "objective": "Coordinación",
+      "level": "Avanzado",
+      "duration": 10,
+      "players": "6 a 18, en tríos con 2 balones",
+      "age": "11 a 16 años",
+      "space": "Media cancha",
+      "material": "2 balones por trío (el segundo puede ser de vóleibol o de hule), 2 conos por fila",
+      "description": "Primero, en su lugar, el alumno dribla dos balones a la vez (botan juntos) y después alternados (uno sube mientras el otro baja), en tres alturas: bajo, a la rodilla y a la cintura. Luego avanza caminando y después trotando con los dos balones hasta el último cono, le entrega uno en la mano al compañero que espera ahí y ataca la canasta driblando el otro para terminar con entrada. Trabajan en tríos y rotan en cada repetición: uno dribla, uno espera en el cono para recibir y el otro recoge el rebote.",
+      "keyPoints": "Simultáneo: que se oiga un solo bote\nAlternado: un balón arriba y el otro abajo\nEmpuja el balón con las yemas, no con la palma\nVista al frente: mira la canasta, no los balones",
+      "variations": "Más fácil: un balón y luego dos, solo en su lugar y sin avanzar\nMás difícil: cambios de mano por delante con los dos balones durante el recorrido\nPocos balones: usar uno de vóleibol o de hule como segundo balón",
+      "school": false,
+      "video": {
+        "captions": [
+          "Dos balones a la vez",
+          "Ahora alternados",
+          "Avanza con la vista arriba",
+          "Entrega uno y entrada"
+        ],
+        "reps": "3 series × 30 s por alumno"
+      },
+      "diagram": {
+        "v": "half",
+        "items": [
+          {
+            "t": "a",
+            "x": 36,
+            "y": 26,
+            "n": 1
+          },
+          {
+            "t": "ball",
+            "x": 42,
+            "y": 31
+          },
+          {
+            "t": "ball",
+            "x": 28,
+            "y": 32
+          },
+          {
+            "t": "a",
+            "x": 18,
+            "y": 14,
+            "n": 3
+          },
+          {
+            "t": "cone",
+            "x": 24,
+            "y": 62
+          },
+          {
+            "t": "cone",
+            "x": 24,
+            "y": 100
+          },
+          {
+            "t": "a",
+            "x": 52,
+            "y": 112,
+            "n": 2
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 36,
+            "y": 26,
+            "x2": 36,
+            "y2": 62,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 36,
+            "y": 62,
+            "x2": 36,
+            "y2": 100,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 36,
+            "y": 100,
+            "x2": 52,
+            "y2": 112,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 36,
+            "y": 100,
+            "x2": 60,
+            "y2": 146,
+            "s": 4
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 60,
+            "y": 146,
+            "x2": 80,
+            "y2": 170.5,
+            "s": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-17",
+      "sport": "basquet",
+      "title": "Aros en el piso: pies rápidos y entrada",
+      "objective": "Coordinación",
+      "level": "Inicial",
+      "duration": 10,
+      "players": "8 a 35 alumnos, 1 o 2 filas por canasta",
+      "age": "8 a 13 años",
+      "space": "Media cancha por canasta",
+      "material": "6 aros por recorrido, 1 o 2 balones por fila",
+      "description": "Se colocan cuatro aros en zigzag para los pies rápidos y dos más hacia la canasta que marcan los dos pasos de la entrada. El alumno cruza los primeros aros con el patrón que pide el profesor (un pie en cada aro, dos pies juntos o como en el avión) y al salir recibe el pase de un compañero; da un dribleo y pisa los dos últimos aros (derecha y luego izquierda, por el lado derecho) para despegar hacia el tablero. Quien tira recoge su rebote y pasa a dar el pase; el que pasaba se forma en la fila.",
+      "keyPoints": "Pies ligeros: apoya con la punta y sin ruido\nLos brazos ayudan al ritmo de los pies\nEntrada: derecha, izquierda y arriba con la derecha\nSube la rodilla derecha al despegar",
+      "variations": "Más fácil: sin dribleo; recibe y da los dos pasos con el balón en las manos\nMás difícil: cruzar los aros driblando y hacer la entrada por la izquierda (izquierda-derecha)\nGrupo grande: dos recorridos por canasta, uno de cada lado",
+      "school": true,
+      "video": {
+        "captions": [
+          "Pies rápidos en los aros",
+          "Recibe el pase",
+          "Derecha, izquierda y arriba",
+          "Entrada suave al tablero"
+        ],
+        "reps": "2 series × 4 min, cambiando de lado"
+      },
+      "diagram": {
+        "v": "half",
+        "items": [
+          {
+            "t": "a",
+            "x": 28,
+            "y": 30,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 28,
+            "y": 14,
+            "n": 3
+          },
+          {
+            "t": "a",
+            "x": 74,
+            "y": 100,
+            "n": 2
+          },
+          {
+            "t": "ball",
+            "x": 68,
+            "y": 96
+          },
+          {
+            "t": "ring",
+            "x": 36,
+            "y": 50
+          },
+          {
+            "t": "ring",
+            "x": 50,
+            "y": 62
+          },
+          {
+            "t": "ring",
+            "x": 36,
+            "y": 74
+          },
+          {
+            "t": "ring",
+            "x": 50,
+            "y": 86
+          },
+          {
+            "t": "ring",
+            "x": 50,
+            "y": 134
+          },
+          {
+            "t": "ring",
+            "x": 60,
+            "y": 148
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 28,
+            "y": 30,
+            "x2": 36,
+            "y2": 50,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 36,
+            "y": 50,
+            "x2": 50,
+            "y2": 62,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 50,
+            "y": 62,
+            "x2": 36,
+            "y2": 74,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 36,
+            "y": 74,
+            "x2": 50,
+            "y2": 86,
+            "s": 4
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 50,
+            "y": 86,
+            "x2": 42,
+            "y2": 104,
+            "s": 5
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 74,
+            "y": 100,
+            "x2": 42,
+            "y2": 104,
+            "s": 5
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 42,
+            "y": 104,
+            "x2": 50,
+            "y2": 134,
+            "s": 6
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 50,
+            "y": 134,
+            "x2": 60,
+            "y2": 148,
+            "s": 7
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 60,
+            "y": 148,
+            "x2": 80,
+            "y2": 170.5,
+            "s": 8
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-18",
+      "sport": "basquet",
+      "title": "Circuito: escalera, conos y entrada",
+      "objective": "Coordinación",
+      "level": "Intermedio",
+      "duration": 12,
+      "players": "8 a 35 alumnos, 1 circuito por canasta (7 a 9 por circuito)",
+      "age": "10 a 16 años",
+      "space": "Media cancha por circuito",
+      "material": "1 escalera de coordinación, 1 aro, 3 conos y 2 balones por circuito",
+      "description": "El alumno pasa la escalera de coordinación sin balón con el patrón del día, toma el balón que espera dentro del aro al final y dribla en zigzag entre tres conos con un cambio de mano por delante en cada uno. Después del último cono ataca la canasta y termina con entrada. Recoge su rebote y regresa driblando por fuera para dejar el balón en el aro; el siguiente sale cuando su compañero llega a los conos.",
+      "keyPoints": "Escalera: precisión primero, velocidad después\nPrimer dribleo largo y hacia adelante\nCambio de mano bajo y cerca del cono\nEntrada con dos pasos y vista en el tablero",
+      "variations": "Más fácil: sin cambios de mano, driblando por fuera de los conos con la mano de afuera\nMás difícil: con cronómetro, sin tirar conos ni pisar la escalera y entrada por los dos lados\nSin escalera: seis aros en línea o cuadros dibujados con gis",
+      "school": true,
+      "video": {
+        "captions": [
+          "Pies rápidos en la escalera",
+          "Toma el balón del aro",
+          "Zigzag con cambio de mano",
+          "Termina con entrada"
+        ],
+        "reps": "2 series × 6 min (5 a 6 vueltas)"
+      },
+      "diagram": {
+        "v": "half",
+        "items": [
+          {
+            "t": "a",
+            "x": 28,
+            "y": 24,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 46,
+            "y": 14,
+            "n": 2
+          },
+          {
+            "t": "ladder",
+            "x": 28,
+            "y": 60,
+            "r": 0,
+            "n": 6
+          },
+          {
+            "t": "ring",
+            "x": 28,
+            "y": 94
+          },
+          {
+            "t": "ball",
+            "x": 28,
+            "y": 94
+          },
+          {
+            "t": "cone",
+            "x": 52,
+            "y": 100
+          },
+          {
+            "t": "cone",
+            "x": 80,
+            "y": 100
+          },
+          {
+            "t": "cone",
+            "x": 108,
+            "y": 100
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 28,
+            "y": 24,
+            "x2": 28,
+            "y2": 44,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 28,
+            "y": 44,
+            "x2": 28,
+            "y2": 64,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 28,
+            "y": 64,
+            "x2": 28,
+            "y2": 86,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 28,
+            "y": 86,
+            "x2": 52,
+            "y2": 112,
+            "s": 4
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 52,
+            "y": 112,
+            "x2": 80,
+            "y2": 88,
+            "s": 5
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 80,
+            "y": 88,
+            "x2": 108,
+            "y2": 112,
+            "s": 6
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 108,
+            "y": 112,
+            "x2": 100,
+            "y2": 146,
+            "s": 7
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 100,
+            "y": 146,
+            "x2": 80,
+            "y2": 170.5,
+            "s": 8
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-19",
+      "sport": "basquet",
+      "title": "Desplazamiento defensivo entre conos",
+      "objective": "Velocidad y agilidad",
+      "level": "Intermedio",
+      "duration": 8,
+      "players": "10 a 35 alumnos, en 3 o 4 filas",
+      "age": "9 a 16 años",
+      "space": "Media cancha",
+      "material": "4 o 5 conos por fila; no se necesitan balones",
+      "description": "Cada fila tiene cuatro conos en zigzag, separados unos 3 metros. El alumno, en posición defensiva, se desplaza de lado de un cono al siguiente sin cruzar los pies; en cada cono abre la cadera con un paso hacia atrás y cambia de dirección. Después del último cono corre de frente hasta la línea de fondo y regresa trotando por fuera; el siguiente sale cuando su compañero llega al segundo cono.",
+      "keyPoints": "Pies más abiertos que los hombros y cadera baja\nEmpuja con el pie de atrás; no cruces los pies\nAbre la cadera con un paso atrás para cambiar\nManos activas y vista al frente",
+      "variations": "Más fácil: hacer el recorrido caminando en posición defensiva antes de hacerlo rápido\nMás difícil: un atacante dribla en zigzag y el defensor lo acompaña con las manos atrás\nCompetencia por filas: gana la que termine con mejor técnica",
+      "school": true,
+      "video": {
+        "captions": [
+          "Posición defensiva baja",
+          "Desliza sin cruzar los pies",
+          "Abre la cadera y cambia",
+          "Sprint al final"
+        ],
+        "reps": "2 series × 3 recorridos"
+      },
+      "diagram": {
+        "v": "half",
+        "items": [
+          {
+            "t": "a",
+            "x": 32,
+            "y": 26,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 128,
+            "y": 26,
+            "n": 2
+          },
+          {
+            "t": "cone",
+            "x": 52,
+            "y": 48
+          },
+          {
+            "t": "cone",
+            "x": 24,
+            "y": 72
+          },
+          {
+            "t": "cone",
+            "x": 52,
+            "y": 96
+          },
+          {
+            "t": "cone",
+            "x": 24,
+            "y": 120
+          },
+          {
+            "t": "cone",
+            "x": 108,
+            "y": 48
+          },
+          {
+            "t": "cone",
+            "x": 136,
+            "y": 72
+          },
+          {
+            "t": "cone",
+            "x": 108,
+            "y": 96
+          },
+          {
+            "t": "cone",
+            "x": 136,
+            "y": 120
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 32,
+            "y": 26,
+            "x2": 44,
+            "y2": 48,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 44,
+            "y": 48,
+            "x2": 32,
+            "y2": 72,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 32,
+            "y": 72,
+            "x2": 44,
+            "y2": 96,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 44,
+            "y": 96,
+            "x2": 32,
+            "y2": 120,
+            "s": 4
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 32,
+            "y": 120,
+            "x2": 32,
+            "y2": 172,
+            "s": 5
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 128,
+            "y": 26,
+            "x2": 116,
+            "y2": 48,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 116,
+            "y": 48,
+            "x2": 128,
+            "y2": 72,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 128,
+            "y": 72,
+            "x2": 116,
+            "y2": 96,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 116,
+            "y": 96,
+            "x2": 128,
+            "y2": 120,
+            "s": 4
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 128,
+            "y": 120,
+            "x2": 128,
+            "y2": 172,
+            "s": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-20",
+      "sport": "basquet",
+      "title": "Salidas de reacción a la señal",
+      "objective": "Velocidad y agilidad",
+      "level": "Inicial",
+      "duration": 8,
+      "players": "10 a 35 alumnos, en 3 a 6 filas",
+      "age": "8 a 15 años",
+      "space": "Media cancha",
+      "material": "2 conos por fila; 1 balón por fila para la variante con dribleo",
+      "description": "Las filas se colocan en la línea central y el primero de cada una toma la posición de salida que indica el profesor: de pie, en posición defensiva, sentado o acostado boca abajo. El profesor señala con el brazo a la derecha o a la izquierda y los alumnos arrancan lo más rápido posible hacia el cono de ese lado, a 5 o 6 metros; regresan trotando por fuera y se forman al final. Cada salida dura menos de 5 segundos y se descansa mientras pasa el resto de la fila para llegar fresco a la siguiente.",
+      "keyPoints": "Atentos a la señal, no adivinen\nPrimer paso corto y explosivo hacia el cono\nBrazos rápidos y cuerpo inclinado al arrancar\nFrena con pasos cortos antes del cono",
+      "variations": "Más fácil: señal con la voz o el silbato y un solo cono al frente\nMás difícil: salir driblando con la mano del lado de la señal\nPor parejas: dos filas juntas, gana quien toque primero su cono",
+      "school": true,
+      "video": {
+        "captions": [
+          "Atento a la señal",
+          "¡Arranca hacia el cono!",
+          "Primer paso explosivo",
+          "Menos de 5 segundos"
+        ],
+        "reps": "2 series × 6 salidas, descanso completo"
+      },
+      "diagram": {
+        "v": "half",
+        "items": [
+          {
+            "t": "a",
+            "x": 36,
+            "y": 26,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 80,
+            "y": 26,
+            "n": 2
+          },
+          {
+            "t": "a",
+            "x": 124,
+            "y": 26,
+            "n": 3
+          },
+          {
+            "t": "a",
+            "x": 36,
+            "y": 11,
+            "n": 4
+          },
+          {
+            "t": "a",
+            "x": 80,
+            "y": 11,
+            "n": 5
+          },
+          {
+            "t": "a",
+            "x": 124,
+            "y": 11,
+            "n": 6
+          },
+          {
+            "t": "cone",
+            "x": 22,
+            "y": 64
+          },
+          {
+            "t": "cone",
+            "x": 50,
+            "y": 64
+          },
+          {
+            "t": "cone",
+            "x": 66,
+            "y": 64
+          },
+          {
+            "t": "cone",
+            "x": 94,
+            "y": 64
+          },
+          {
+            "t": "cone",
+            "x": 110,
+            "y": 64
+          },
+          {
+            "t": "cone",
+            "x": 138,
+            "y": 64
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 36,
+            "y": 26,
+            "x2": 25,
+            "y2": 55,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 80,
+            "y": 26,
+            "x2": 69,
+            "y2": 55,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 124,
+            "y": 26,
+            "x2": 113,
+            "y2": 55,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 36,
+            "y": 11,
+            "x2": 36,
+            "y2": 26,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 80,
+            "y": 11,
+            "x2": 80,
+            "y2": 26,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 124,
+            "y": 11,
+            "x2": 124,
+            "y2": 26,
+            "s": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-21",
+      "sport": "basquet",
+      "title": "Prueba de agilidad en la pintura",
+      "objective": "Velocidad y agilidad",
+      "level": "Intermedio",
+      "duration": 12,
+      "players": "10 a 35 alumnos, en grupos de 4 a 6 por recorrido",
+      "age": "11 a 16 años",
+      "space": "La pintura o un rectángulo de 5 × 6 m marcado con conos",
+      "material": "4 conos por recorrido y un cronómetro (o un celular) por grupo",
+      "description": "Con un cono en cada esquina de la pintura, el alumno sale de la esquina izquierda de la línea de fondo: corre de frente hasta la línea de tiro libre, se desplaza de lado hasta la otra esquina, regresa de espaldas hasta la línea de fondo y se desplaza de lado hasta la salida. Toca el piso y repite el recorrido en sentido contrario mientras un compañero toma el tiempo. Primero se practica a media velocidad y luego se hacen dos intentos cronometrados con descanso completo; cada alumno anota su mejor tiempo para compararlo consigo mismo al final del bimestre.",
+      "keyPoints": "Mira siempre al frente, sin girar el cuerpo\nDe lado sin cruzar los pies y con la cadera baja\nDe espaldas con pasos cortos y el peso adelante\nRodea los conos sin tocarlos",
+      "variations": "Más fácil: una sola vuelta y sin cronómetro, cuidando la técnica\nMás difícil: el profesor cambia el sentido con una palmada en cualquier momento\nEvaluación: repetir la prueba cada bimestre y registrar la mejora de cada alumno",
+      "school": true,
+      "video": {
+        "captions": [
+          "Sprint de frente",
+          "Desplazamiento lateral",
+          "De espaldas a la línea de fondo",
+          "Compite contra tu tiempo"
+        ],
+        "reps": "2 intentos cronometrados, 2 min de descanso"
+      },
+      "diagram": {
+        "v": "half",
+        "items": [
+          {
+            "t": "a",
+            "x": 50,
+            "y": 188,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 34,
+            "y": 188,
+            "n": 2
+          },
+          {
+            "t": "a",
+            "x": 134,
+            "y": 150,
+            "n": 3
+          },
+          {
+            "t": "cone",
+            "x": 64,
+            "y": 178
+          },
+          {
+            "t": "cone",
+            "x": 64,
+            "y": 130
+          },
+          {
+            "t": "cone",
+            "x": 96,
+            "y": 130
+          },
+          {
+            "t": "cone",
+            "x": 96,
+            "y": 178
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 50,
+            "y": 188,
+            "x2": 50,
+            "y2": 118,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 50,
+            "y": 118,
+            "x2": 110,
+            "y2": 118,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 110,
+            "y": 118,
+            "x2": 110,
+            "y2": 188,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 110,
+            "y": 188,
+            "x2": 50,
+            "y2": 188,
+            "s": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-22",
+      "sport": "basquet",
+      "title": "Relevos de velocidad con dribleo",
+      "objective": "Velocidad y agilidad",
+      "level": "Inicial",
+      "duration": 8,
+      "players": "12 a 35 alumnos, en 4 a 6 equipos de 5 o 6",
+      "age": "9 a 15 años",
+      "space": "Cancha completa",
+      "material": "1 balón y 2 conos por equipo (para marcar las filas)",
+      "description": "Cada equipo se divide en dos filas, una frente a la otra en cada línea de fondo. El primero dribla a toda velocidad hasta la fila contraria y le entrega el balón en la mano al primero de esa fila, que sale de inmediato hacia el otro lado; quien entregó se forma al final de esa fila. Gana el equipo que termina primero cuando todos hicieron dos recorridos sin perder el control del balón ni cometer pasos.",
+      "keyPoints": "Empuja el balón adelante y corre detrás de él\nBota firme a la altura de la cintura\nVista al frente, no al balón\nEntrega en la mano, no lo avientes",
+      "variations": "Más fácil: hasta media cancha y una primera ronda sin balón\nMás difícil: el regreso con la mano débil o terminar con entrada en la canasta del fondo\nPocos balones: equipos más grandes con descanso más largo entre salidas",
+      "school": true,
+      "video": {
+        "captions": [
+          "Dribleo de velocidad",
+          "Empuja el balón adelante",
+          "Entrega en la mano",
+          "¡Sale el siguiente!"
+        ],
+        "reps": "3 rondas × 2 recorridos, 1 min de descanso"
+      },
+      "diagram": {
+        "v": "full",
+        "items": [
+          {
+            "t": "a",
+            "x": 48,
+            "y": 172,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 48,
+            "y": 187,
+            "n": 2
+          },
+          {
+            "t": "ball",
+            "x": 54,
+            "y": 166
+          },
+          {
+            "t": "a",
+            "x": 48,
+            "y": 28,
+            "n": 3
+          },
+          {
+            "t": "a",
+            "x": 48,
+            "y": 13,
+            "n": 4
+          },
+          {
+            "t": "a",
+            "x": 112,
+            "y": 172,
+            "n": 5
+          },
+          {
+            "t": "a",
+            "x": 112,
+            "y": 187,
+            "n": 6
+          },
+          {
+            "t": "ball",
+            "x": 118,
+            "y": 166
+          },
+          {
+            "t": "a",
+            "x": 112,
+            "y": 28,
+            "n": 7
+          },
+          {
+            "t": "a",
+            "x": 112,
+            "y": 13,
+            "n": 8
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 48,
+            "y": 172,
+            "x2": 48,
+            "y2": 100,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 48,
+            "y": 100,
+            "x2": 48,
+            "y2": 44,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 48,
+            "y": 44,
+            "x2": 48,
+            "y2": 28,
+            "s": 3
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 112,
+            "y": 172,
+            "x2": 112,
+            "y2": 100,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 112,
+            "y": 100,
+            "x2": 112,
+            "y2": 44,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "pase",
+            "x": 112,
+            "y": 44,
+            "x2": 112,
+            "y2": 28,
+            "s": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-23",
+      "sport": "basquet",
+      "title": "Circuito de fuerza con peso corporal",
+      "objective": "Fuerza y resistencia",
+      "level": "Inicial",
+      "duration": 14,
+      "players": "12 a 35 alumnos, 6 estaciones con 2 a 6 por estación",
+      "age": "9 a 15 años",
+      "space": "Media cancha",
+      "material": "Conos para marcar 6 estaciones, 2 minivallas (o líneas de la cancha) y 2 aros; solo el peso del cuerpo",
+      "description": "Seis estaciones en media cancha: 1) sentadilla, 2) salto y caída sobre minivallas, 3) plancha, 4) saltos a un pie de aro en aro, 5) desplantes alternos y 6) lagartijas con las rodillas apoyadas. Por parejas o tríos, uno trabaja 30 segundos mientras otro cuenta y revisa su técnica; luego cambian y el grupo rota a la siguiente estación. Solo se usa el peso del cuerpo y la prioridad es la calidad: el profesor corrige la caída de los saltos antes de pedir más repeticiones o velocidad.",
+      "keyPoints": "Cae suave, con las rodillas dobladas, como resorte\nRodillas en línea con la punta del pie, nunca hacia adentro\nEspalda recta y abdomen firme en plancha y lagartijas\nSi se pierde la técnica, se para y se descansa",
+      "variations": "Más fácil: 20 segundos de trabajo y saltar una línea en lugar de las minivallas\nMás difícil: dos vueltas al circuito y caer en un pie aguantando 2 segundos\nSin material: marcar las estaciones con gis y usar las líneas de la cancha",
+      "school": true,
+      "video": {
+        "captions": [
+          "Sentadilla con la espalda recta",
+          "Cae suave, como resorte",
+          "Rodillas alineadas",
+          "Plancha firme"
+        ],
+        "reps": "1 a 2 vueltas × 6 estaciones de 30 s"
+      },
+      "diagram": {
+        "v": "half",
+        "items": [
+          {
+            "t": "a",
+            "x": 32,
+            "y": 30,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 80,
+            "y": 24,
+            "n": 2
+          },
+          {
+            "t": "a",
+            "x": 128,
+            "y": 30,
+            "n": 3
+          },
+          {
+            "t": "a",
+            "x": 128,
+            "y": 110,
+            "n": 4
+          },
+          {
+            "t": "a",
+            "x": 80,
+            "y": 96,
+            "n": 5
+          },
+          {
+            "t": "a",
+            "x": 32,
+            "y": 110,
+            "n": 6
+          },
+          {
+            "t": "hurdle",
+            "x": 80,
+            "y": 42,
+            "r": 0
+          },
+          {
+            "t": "hurdle",
+            "x": 80,
+            "y": 58,
+            "r": 0
+          },
+          {
+            "t": "ring",
+            "x": 128,
+            "y": 128
+          },
+          {
+            "t": "ring",
+            "x": 116,
+            "y": 142
+          },
+          {
+            "t": "cone",
+            "x": 32,
+            "y": 46
+          },
+          {
+            "t": "cone",
+            "x": 128,
+            "y": 46
+          },
+          {
+            "t": "cone",
+            "x": 80,
+            "y": 112
+          },
+          {
+            "t": "cone",
+            "x": 32,
+            "y": 126
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 80,
+            "y": 24,
+            "x2": 80,
+            "y2": 50,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 80,
+            "y": 50,
+            "x2": 80,
+            "y2": 70,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 128,
+            "y": 110,
+            "x2": 128,
+            "y2": 128,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 128,
+            "y": 128,
+            "x2": 116,
+            "y2": 142,
+            "s": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "cb-24",
+      "sport": "basquet",
+      "title": "Ladrones de balones",
+      "objective": "Fuerza y resistencia",
+      "level": "Inicial",
+      "duration": 12,
+      "players": "16 a 35 alumnos, en 4 equipos",
+      "age": "8 a 14 años",
+      "space": "Cancha completa",
+      "material": "4 aros (las bases), todos los balones disponibles (8 a 12) y chalecos de 4 colores",
+      "description": "Cada equipo tiene su base (un aro) en una esquina de la cancha y todos los balones empiezan en el círculo central. A la señal, los alumnos salen por un balón, lo llevan driblando hasta su base y lo dejan dentro del aro; cada quien lleva un solo balón a la vez y nadie puede cuidar su base. Cuando el centro se vacía se pueden robar balones de las otras bases; tras 2 o 3 minutos de juego continuo gana el equipo con más balones, se descansa un minuto caminando y se repite.",
+      "keyPoints": "Ritmo constante: trota y no te detengas\nDribla con la cabeza arriba para no chocar\nUn balón a la vez y siempre driblando\nEn la pausa, camina y respira hondo",
+      "variations": "Más fácil: rondas de 90 segundos y sin robar de las bases\nMás difícil: driblar solo con la mano débil; un balón robado de otra base vale doble\nMás resistencia: 4 rondas de 3 minutos con 1 minuto de pausa caminando",
+      "school": true,
+      "video": {
+        "captions": [
+          "Todos los balones al centro",
+          "Uno a la vez, driblando",
+          "Roba de las otras bases",
+          "Gana el que junte más"
+        ],
+        "reps": "3 a 4 rondas × 2 a 3 min, 1 min de pausa"
+      },
+      "diagram": {
+        "v": "full",
+        "items": [
+          {
+            "t": "a",
+            "x": 22,
+            "y": 46,
+            "n": 1
+          },
+          {
+            "t": "a",
+            "x": 138,
+            "y": 46,
+            "n": 2
+          },
+          {
+            "t": "a",
+            "x": 22,
+            "y": 154,
+            "n": 3
+          },
+          {
+            "t": "a",
+            "x": 138,
+            "y": 154,
+            "n": 4
+          },
+          {
+            "t": "ring",
+            "x": 24,
+            "y": 24
+          },
+          {
+            "t": "ring",
+            "x": 136,
+            "y": 24
+          },
+          {
+            "t": "ring",
+            "x": 24,
+            "y": 176
+          },
+          {
+            "t": "ring",
+            "x": 136,
+            "y": 176
+          },
+          {
+            "t": "ball",
+            "x": 72,
+            "y": 94
+          },
+          {
+            "t": "ball",
+            "x": 88,
+            "y": 94
+          },
+          {
+            "t": "ball",
+            "x": 72,
+            "y": 106
+          },
+          {
+            "t": "ball",
+            "x": 88,
+            "y": 106
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 22,
+            "y": 46,
+            "x2": 66,
+            "y2": 88,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 138,
+            "y": 46,
+            "x2": 94,
+            "y2": 88,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 22,
+            "y": 154,
+            "x2": 66,
+            "y2": 112,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "mov",
+            "x": 138,
+            "y": 154,
+            "x2": 94,
+            "y2": 112,
+            "s": 1
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 66,
+            "y": 88,
+            "x2": 40,
+            "y2": 26,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 94,
+            "y": 88,
+            "x2": 120,
+            "y2": 26,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 66,
+            "y": 112,
+            "x2": 40,
+            "y2": 174,
+            "s": 2
+          },
+          {
+            "t": "arrow",
+            "k": "conduccion",
+            "x": 94,
+            "y": 112,
+            "x2": 120,
+            "y2": 174,
+            "s": 2
+          }
+        ]
+      }
+    }
+  ],
+  "sessions": [
+    {
+      "name": "Secundaria · Pies rápidos y coordinación",
+      "sport": "basquet",
+      "age": "Secundaria (12 a 15 años)",
+      "notes": "Objetivo: pies rápidos, cambios de dirección y coordinación con balón que terminan en entrada. Para 30 alumnos: 4 circuitos de 7 u 8 (uno por canasta; con 2 canastas, un circuito por lado) y 1 balón cada 3 o 4 alumnos; las escaleras pueden dibujarse con gis. Las salidas de reacción (menos de 5 segundos) y los relevos (6 a 8 segundos por recorrido) son esfuerzos cortos con recuperación completa mientras esperan su turno.",
+      "items": [
+        {
+          "exId": "cb-01",
+          "min": 7
+        },
+        {
+          "exId": "cb-20",
+          "min": 5,
+          "series": {
+            "n": 2,
+            "work": 2,
+            "rest": 1
+          }
+        },
+        {
+          "type": "pause",
+          "label": "Preparar material",
+          "min": 2
+        },
+        {
+          "exId": "cb-18",
+          "min": 14,
+          "series": {
+            "n": 2,
+            "work": 6,
+            "rest": 2
+          }
+        },
+        {
+          "type": "pause",
+          "label": "Hidratación",
+          "min": 2
+        },
+        {
+          "exId": "cb-19",
+          "min": 6,
+          "series": {
+            "n": 2,
+            "work": 2.5,
+            "rest": 1
+          }
+        },
+        {
+          "exId": "cb-22",
+          "min": 8,
+          "series": {
+            "n": 3,
+            "work": 2,
+            "rest": 1
+          }
+        },
+        {
+          "exId": "cb-14",
+          "min": 6
+        }
+      ]
+    }
+  ]
+}

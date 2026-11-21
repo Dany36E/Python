@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cancha · video de ejercicio</title>
+<style>
+@font-face { font-family: 'Big Shoulders Display'; src: url('../../app/fonts/big-shoulders-display.woff2') format('woff2'); font-weight: 100 900; }
+html, body { margin: 0; width: 720px; height: 1280px; overflow: hidden; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #fff; }
+.v { position: relative; width: 720px; height: 1280px; display: flex; flex-direction: column; align-items: center; }
+.v.futbol { background: linear-gradient(180deg, #14472a 0%, #0b2716 100%); }
+.v.basquet { background: linear-gradient(180deg, #4a2810 0%, #1f1006 100%); }
+.top { width: 100%; box-sizing: border-box; padding: 64px 52px 26px; }
+.kicker { display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 20px; border-radius: 23px; background: rgba(255,255,255,0.16); font-weight: 700; font-size: 25px; }
+.title { margin: 18px 0 0; font: 800 82px/0.92 'Big Shoulders Display', 'Arial Narrow', sans-serif; letter-spacing: 0; text-wrap: balance; text-shadow: 0 2px 0 rgba(0,0,0,0.18); }
+.board { position: relative; width: 616px; height: 770px; border-radius: 38px; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,0.45); flex: none; }
+.board svg { width: 100%; height: 100%; display: block; }
+.cap { height: 120px; display: flex; align-items: center; justify-content: center; padding: 0 40px; }
+.cap span { display: inline-block; background: #fff; color: #101410; font: 800 46px/1.02 'Big Shoulders Display', 'Arial Narrow', sans-serif; padding: 15px 28px 13px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.foot { position: absolute; left: 52px; right: 52px; bottom: 44px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 26px; }
+.brand { font: 800 34px/1 'Big Shoulders Display', 'Arial Narrow', sans-serif; letter-spacing: 0.02em; opacity: 0.9; }
+.reps { opacity: 0.9; }
+.bar { position: absolute; left: 0; bottom: 0; height: 10px; background: rgba(255,255,255,0.9); }
+</style>
+</head>
+<body>
+<div class="v" id="v">
+  <div class="top"><span class="kicker" id="kicker"></span><h1 class="title" id="title"></h1></div>
+  <div class="board" id="board"></div>
+  <div class="cap"><span id="cap"></span></div>
+  <div class="foot"><span class="reps" id="reps"></span><span class="brand">CANCHA</span></div>
+  <div class="bar" id="bar"></div>
+</div>
+<script>window.CANCHA_RENDER_ONLY = true;</script>
+<script src="../../app/app.js"></script>
+<script src="../../app/catalog.js"></script>
+<script>
+// Reproduce la jugada de forma determinista: frameAt(ms) deja la pantalla exactamente como va en ese instante.
+(function () {
+  const R = window.CanchaRender;
+  const SP = { futbol: 'Fútbol', basquet: 'Básquetbol' };
+  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  let X = null;
+
+  function plan(d) {
+    const items = d.items;
+    const pos = items.map((it) => ({ x: it.x, y: it.y }));
+    const ghosts = [];
+    const moves = []; const arrowsAt = [];
+    const steps = R.diagramSteps(d);
+    let t = 700;
+    const isBall = (x) => x.t === 'ball';
+    const isPlayer = (x) => x.t === 'a' || x.t === 'b';
+    function nearest(pred, x, y, max) {
+      let best = null; let bd = max;
+      items.forEach((it, i) => { if (it.t === 'arrow' || !pred(it)) return; const q = pos[i]; const dd = Math.hypot(q.x - x, q.y - y); if (dd < bd) { bd = dd; best = { key: 'i' + i, p: q }; } });
+      ghosts.forEach((g) => { const dd = Math.hypot(g.p.x - x, g.p.y - y); if (dd < bd) { bd = dd; best = { key: g.key, p: g.p }; } });
+      return best;
+    }
+    steps.forEach((group) => {
+      const dur = Math.max.apply(null, group.map(({ it }) => Math.min(1300, 520 + Math.hypot(it.x2 - it.x, it.y2 - it.y) * 9)));
+      group.forEach(({ it, i }) => {
+        arrowsAt.push({ i, t0: t });
+        const actors = [];
+        if (it.k === 'pase') {
+          let b = nearest(isBall, it.x, it.y, 13);
+          if (!b) { const g = { key: 'g' + ghosts.length, p: { x: it.x, y: it.y }, t0: t }; ghosts.push(g); b = { key: g.key, p: g.p }; }
+          actors.push(b);
+        } else {
+          const pl = nearest(isPlayer, it.x, it.y, 13); if (pl) actors.push(pl);
+          if (it.k === 'conduccion') { const b = nearest(isBall, it.x, it.y, 13); if (b) actors.push(b); }
+        }
+        const dx = it.x2 - it.x; const dy = it.y2 - it.y;
+        actors.forEach((a) => { moves.push({ key: a.key, x0: a.p.x, y0: a.p.y, x1: a.p.x + dx, y1: a.p.y + dy, t0: t, t1: t + dur }); a.p.x += dx; a.p.y += dy; });
+      });
+      t += dur + 260;
+    });
+    return { moves, arrowsAt, ghosts: ghosts.map((g) => ({ key: g.key, t0: g.t0, x: g.p.x, y: g.p.y })), end: t };
+  }
+
+  window.setup = function (id) {
+    const cat = window.CANCHA_CATALOG;
+    const ex = cat.exercises.find((x) => x.id === id);
+    if (!ex) throw new Error('no existe ' + id);
+    document.getElementById('v').className = 'v ' + ex.sport;
+    document.getElementById('kicker').textContent = SP[ex.sport] + ' · ' + ex.objective;
+    document.getElementById('title').textContent = ex.title;
+    const video = ex.video || {};
+    const caps = (video.captions && video.captions.length ? video.captions : String(ex.keyPoints || '').split('\n').filter(Boolean).slice(0, 4));
+    document.getElementById('reps').textContent = video.reps || (ex.duration + ' min');
+    const board = document.getElementById('board');
+    board.innerHTML = R.boardSVG(ex.sport, ex.diagram, { fit: 'xMidYMid meet', anim: true });
+    const svg = board.querySelector('svg');
+    const layer = svg.querySelector('.bd-items');
+    const P = plan(ex.diagram);
+    // Balones «fantasma» para pases que no salen de un balón dibujado.
+    P.ghosts.forEach((g) => {
+      const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      tmp.innerHTML = R.itemSVG({ t: 'ball', x: g.x, y: g.y }, null, ex.sport);
+      const el = tmp.firstChild; el.dataset.ghost = g.key; layer.appendChild(el);
+    });
+    // Cámara: acerca la vista a la zona donde pasa la jugada (como en un Short), sin salirse de la cancha.
+    const xs = []; const ys = [];
+    ex.diagram.items.forEach((it) => { xs.push(it.x); ys.push(it.y); if (it.t === 'arrow') { xs.push(it.x2); ys.push(it.y2); } if (it.t === 'ladder') { const L = (it.n || 6) * 3.5 + 2; if (Number(it.r) === 90) { xs.push(it.x - L, it.x + L); } else { ys.push(it.y - L, it.y + L); } } });
+    P.moves.forEach((m) => { xs.push(m.x1); ys.push(m.y1); });
+    let vx0 = Math.min.apply(null, xs) - 18; let vx1 = Math.max.apply(null, xs) + 18;
+    let vy0 = Math.min.apply(null, ys) - 18; let vy1 = Math.max.apply(null, ys) + 18;
+    let vw = Math.max(88, vx1 - vx0); let vh = Math.max(110, vy1 - vy0);
+    if (vw / vh > 0.8) vh = vw / 0.8; else vw = vh * 0.8;
+    if (vw > 160 || vh > 200) { vw = 160; vh = 200; }
+    let cx = (vx0 + vx1) / 2 - vw / 2; let cy = (vy0 + vy1) / 2 - vh / 2;
+    cx = Math.max(0, Math.min(160 - vw, cx)); cy = Math.max(0, Math.min(200 - vh, cy));
+    svg.setAttribute('viewBox', [cx, cy, vw, vh].map((n) => Math.round(n * 10) / 10).join(' '));
+    const cycle = P.end + 1500;
+    const total = Math.min(cycle * 2, Math.max(cycle, 16000));
+    X = { ex, P, caps, cycle, total, layer, items: ex.diagram.items };
+    return { total, cycle, poster: Math.min(P.end + 300, cycle - 1) };
+  };
+
+  window.frameAt = function (ms) {
+    const { P, caps, cycle, total, layer, items } = X;
+    const t = ms % cycle;
+    const posOf = {};
+    items.forEach((it, i) => { posOf['i' + i] = { x: it.x, y: it.y }; });
+    P.ghosts.forEach((g) => { posOf[g.key] = null; });
+    P.moves.forEach((m) => {
+      if (t < m.t0) return;
+      const k = Math.min(1, (t - m.t0) / (m.t1 - m.t0));
+      const e = ease(k);
+      posOf[m.key] = { x: m.x0 + (m.x1 - m.x0) * e, y: m.y0 + (m.y1 - m.y0) * e };
+    });
+    items.forEach((it, i) => {
+      const el = layer.querySelector('[data-ai="' + i + '"]');
+      if (!el) return;
+      if (it.t === 'arrow') { const a = P.arrowsAt.find((x) => x.i === i); el.style.opacity = a && t >= a.t0 ? String(Math.min(1, (t - a.t0) / 220)) : '0'; return; }
+      if (it.t === 'a' || it.t === 'b' || it.t === 'ball') { const q = posOf['i' + i]; el.setAttribute('transform', 'translate(' + R.r1(q.x) + ' ' + R.r1(q.y) + ')'); }
+    });
+    P.ghosts.forEach((g) => {
+      const el = layer.querySelector('[data-ghost="' + g.key + '"]');
+      const started = t >= g.t0;
+      el.style.opacity = started ? '1' : '0';
+      const q = posOf[g.key] || { x: P.moves.find((m) => m.key === g.key).x0, y: P.moves.find((m) => m.key === g.key).y0 };
+      el.setAttribute('transform', 'translate(' + R.r1(q.x) + ' ' + R.r1(q.y) + ')');
+    });
+    const ci = Math.min(caps.length - 1, Math.floor((ms / total) * caps.length));
+    const cap = document.getElementById('cap');
+    cap.textContent = caps[ci] || '';
+    const since = ms - (ci * total) / caps.length;
+    cap.style.opacity = String(Math.min(1, since / 250));
+    cap.style.transform = 'translateY(' + Math.max(0, 14 - since / 18) + 'px)';
+    document.getElementById('bar').style.width = (100 * ms / total).toFixed(2) + '%';
+  };
+})();
+</script>
+</body>
+</html>

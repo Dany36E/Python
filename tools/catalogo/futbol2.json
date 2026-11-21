@@ -1,0 +1,1922 @@
+{
+ "exercises": [
+  {
+   "id": "cf-15",
+   "sport": "futbol",
+   "title": "Escalera de coordinación: pasos básicos",
+   "objective": "Coordinación",
+   "level": "Inicial",
+   "duration": 8,
+   "players": "10 a 35, en filas de 4 o 5 por escalera",
+   "age": "Sub-7 a Sub-12",
+   "space": "Carriles de 12 m: escalera de 3–4 m y 5 m de salida",
+   "material": "1 escalera de coordinación por fila (o dibujada con gis) y 1 cono por fila",
+   "description": "Cada fila tiene una escalera y un cono 5 m después del último cuadro. Uno por uno recorren la escalera con el patrón que marca el profe (un pie en cada cuadro, dos pies en cada cuadro o dentro-fuera en zigzag) y al salir hacen un sprint corto hasta el cono. Regresan caminando por fuera mientras sale el siguiente, y cada 3 vueltas cambia el patrón. Son series cortas: si empiezan a pisar los travesaños, se baja la velocidad y se busca primero la precisión.",
+   "keyPoints": "Pisa con la punta del pie, sin apoyar el talón\nBrazos activos, codos doblados\nVista al frente, no te quedes viendo tus pies\nPrimero preciso, después rápido",
+   "variations": "Más fácil: un solo patrón (un pie en cada cuadro) a ritmo de trote\nMás difícil: al salir, el profe señala izquierda o derecha y corren a ese lado\nCon balón: al salir reciben un pase con la mano y lo regresan con el pie",
+   "school": true,
+   "video": {
+    "captions": [
+     "Un pie en cada cuadro",
+     "Dos pies en cada cuadro",
+     "Dentro, fuera en zigzag",
+     "Sprint corto al cono"
+    ],
+    "reps": "3 vueltas por patrón"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "ladder",
+      "x": 50,
+      "y": 108,
+      "r": 0,
+      "n": 5
+     },
+     {
+      "t": "ladder",
+      "x": 110,
+      "y": 108,
+      "r": 0,
+      "n": 5
+     },
+     {
+      "t": "cone",
+      "x": 50,
+      "y": 52
+     },
+     {
+      "t": "cone",
+      "x": 110,
+      "y": 52
+     },
+     {
+      "t": "a",
+      "x": 50,
+      "y": 150,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 110,
+      "y": 150,
+      "n": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 50,
+      "y": 150,
+      "x2": 50,
+      "y2": 122,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 50,
+      "y": 122,
+      "x2": 50,
+      "y2": 115,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 50,
+      "y": 115,
+      "x2": 50,
+      "y2": 108,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 50,
+      "y": 108,
+      "x2": 50,
+      "y2": 101,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 50,
+      "y": 101,
+      "x2": 50,
+      "y2": 94,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 50,
+      "y": 94,
+      "x2": 50,
+      "y2": 62,
+      "s": 6
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 110,
+      "y": 150,
+      "x2": 110,
+      "y2": 122,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 110,
+      "y": 122,
+      "x2": 121,
+      "y2": 115,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 121,
+      "y": 115,
+      "x2": 110,
+      "y2": 108,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 110,
+      "y": 108,
+      "x2": 99,
+      "y2": 101,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 99,
+      "y": 101,
+      "x2": 110,
+      "y2": 94,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 110,
+      "y": 94,
+      "x2": 110,
+      "y2": 62,
+      "s": 6
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-16",
+   "sport": "futbol",
+   "title": "Escalera lateral, control y pase",
+   "objective": "Coordinación",
+   "level": "Intermedio",
+   "duration": 10,
+   "players": "9 a 32, en grupos de 3 o 4 por escalera",
+   "age": "Sub-9 a Sub-14",
+   "space": "Zona de 10 × 12 m por grupo",
+   "material": "1 escalera de coordinación (o dibujada con gis), 1 balón y 2 conos por grupo",
+   "description": "El jugador recorre la escalera de lado con el patrón 'dentro, dentro, fuera, fuera', avanzando un cuadro en cada ciclo. Al salir del último cuadro, su compañero le pasa raso a través de una portería de conos; el jugador controla orientado con el pie lejano y le devuelve el pase por la misma portería. Después rotan: el que trabajó pasa a ser pasador y el pasador se forma en la fila; en cada serie cambia el lado de salida para usar los dos perfiles.",
+   "keyPoints": "Pasos cortos y rápidos sobre la punta de los pies\nCadera baja y brazos activos\nAntes de recibir, ubica la portería de conos\nControla con el pie lejano y pasa raso y firme",
+   "variations": "Más fácil: patrón 'dentro, fuera' de frente y el pasador lanza con la mano\nMás difícil: el pasador señala con la mano hacia qué lado controlar\nReto: en 2 minutos, cuántos pases limpios por la portería",
+   "school": true,
+   "video": {
+    "captions": [
+     "Dentro, dentro, fuera, fuera",
+     "Avanza un cuadro cada vez",
+     "Controla con el pie lejano",
+     "Pase raso por la portería"
+    ],
+    "reps": "3 series × 4 vueltas por lado"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "ladder",
+      "x": 70,
+      "y": 130,
+      "r": 90,
+      "n": 5
+     },
+     {
+      "t": "cone",
+      "x": 88,
+      "y": 78
+     },
+     {
+      "t": "cone",
+      "x": 112,
+      "y": 78
+     },
+     {
+      "t": "a",
+      "x": 46,
+      "y": 146,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 100,
+      "y": 48,
+      "n": 2
+     },
+     {
+      "t": "a",
+      "x": 24,
+      "y": 162,
+      "n": 3
+     },
+     {
+      "t": "ball",
+      "x": 106,
+      "y": 54
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 46,
+      "y": 146,
+      "x2": 56,
+      "y2": 130,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 56,
+      "y": 130,
+      "x2": 63,
+      "y2": 142,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 63,
+      "y": 142,
+      "x2": 70,
+      "y2": 130,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 70,
+      "y": 130,
+      "x2": 77,
+      "y2": 142,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 77,
+      "y": 142,
+      "x2": 84,
+      "y2": 130,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 84,
+      "y": 130,
+      "x2": 100,
+      "y2": 112,
+      "s": 6
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 100,
+      "y": 48,
+      "x2": 100,
+      "y2": 112,
+      "s": 6
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 100,
+      "y": 112,
+      "x2": 100,
+      "y2": 98,
+      "s": 7
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 100,
+      "y": 98,
+      "x2": 100,
+      "y2": 48,
+      "s": 8
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-17",
+   "sport": "futbol",
+   "title": "Vallas y control del balón",
+   "objective": "Coordinación",
+   "level": "Avanzado",
+   "duration": 12,
+   "players": "8 a 20, en grupos de 3 o 4",
+   "age": "Sub-10 a Sub-15",
+   "space": "Carril de 12 a 15 m por grupo",
+   "material": "4 vallas bajas (15–20 cm) y 1 o 2 balones por grupo",
+   "description": "Cuatro vallas bajas en línea, separadas un paso largo, y un pasador 5–6 m después de la última. El jugador salta cada valla con los dos pies, cayendo suave y rebotando, y al salir el pasador le lanza el balón con la mano a media altura. Controla con el muslo, el pecho o el interior según la altura, deja el balón en el piso y lo devuelve con el interior. Cada quien hace 5 pasadas por serie, regresando caminando por fuera, y después se cambia a saltos a un pie o laterales.",
+   "keyPoints": "Cae suave en la punta y rebota rápido\nRodillas alineadas con los pies al caer\nAcomódate detrás del balón antes de controlarlo\nAmortigua: el muslo o el pecho ceden al contacto",
+   "variations": "Más fácil: un pie entre vallas (sin saltar) y pase raso con el pie\nMás difícil: saltos a un pie y el pasador elige la altura del envío\nCompetencia: después del control, pase a una portería de conos; gana quien sume más",
+   "school": false,
+   "video": {
+    "captions": [
+     "Salta con los dos pies",
+     "Cae suave y rebota",
+     "Control con muslo o pecho",
+     "Devuelve con el interior"
+    ],
+    "reps": "4 series × 5 pasadas"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "hurdle",
+      "x": 60,
+      "y": 140,
+      "r": 0
+     },
+     {
+      "t": "hurdle",
+      "x": 60,
+      "y": 125,
+      "r": 0
+     },
+     {
+      "t": "hurdle",
+      "x": 60,
+      "y": 110,
+      "r": 0
+     },
+     {
+      "t": "hurdle",
+      "x": 60,
+      "y": 95,
+      "r": 0
+     },
+     {
+      "t": "a",
+      "x": 60,
+      "y": 166,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 110,
+      "y": 52,
+      "n": 2
+     },
+     {
+      "t": "a",
+      "x": 36,
+      "y": 178,
+      "n": 3
+     },
+     {
+      "t": "ball",
+      "x": 104,
+      "y": 58
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 166,
+      "x2": 60,
+      "y2": 148,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 148,
+      "x2": 60,
+      "y2": 132.5,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 132.5,
+      "x2": 60,
+      "y2": 117.5,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 117.5,
+      "x2": 60,
+      "y2": 102.5,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 102.5,
+      "x2": 60,
+      "y2": 86,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 86,
+      "x2": 78,
+      "y2": 70,
+      "s": 6
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 110,
+      "y": 52,
+      "x2": 78,
+      "y2": 70,
+      "s": 6
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 78,
+      "y": 70,
+      "x2": 88,
+      "y2": 62,
+      "s": 7
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 88,
+      "y": 62,
+      "x2": 110,
+      "y2": 52,
+      "s": 8
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-18",
+   "sport": "futbol",
+   "title": "Aros: avioncito, conducción y pase",
+   "objective": "Coordinación",
+   "level": "Inicial",
+   "duration": 8,
+   "players": "10 a 35, en filas de 4 o 5",
+   "age": "Sub-6 a Sub-10",
+   "space": "Carril de 15 m por fila",
+   "material": "7 aros por fila (o círculos de gis), 1 balón y 2 conos por fila",
+   "description": "Cada fila tiene un avioncito de aros (uno, dos, uno, dos, uno) y un balón esperando junto al último aro. El alumno salta con un pie en los aros sencillos y con un pie en cada aro en los dobles; al salir conduce el balón y lo pasa por una portería de conos a 6–8 m. Recoge el balón, lo regresa conduciendo por fuera del carril y lo deja en su lugar para el siguiente.",
+   "keyPoints": "Salta suave y cae en la punta del pie\nUsa los brazos para no perder el equilibrio\nConduce con toques cortos del interior\nMira la portería antes de pasar",
+   "variations": "Más fácil: dos pies en todos los aros y conducción sin pase\nMás difícil: solo pie izquierdo en los aros sencillos y pase con la pierna menos hábil\nReto: el profe dice con qué pie se pasa justo al salir de los aros",
+   "school": true,
+   "video": {
+    "captions": [
+     "Un pie, dos pies, un pie",
+     "Cae suave en la punta",
+     "Conduce con toques cortos",
+     "Pase por la portería"
+    ],
+    "reps": "5 vueltas por alumno"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "ring",
+      "x": 60,
+      "y": 150
+     },
+     {
+      "t": "ring",
+      "x": 54,
+      "y": 138
+     },
+     {
+      "t": "ring",
+      "x": 66,
+      "y": 138
+     },
+     {
+      "t": "ring",
+      "x": 60,
+      "y": 126
+     },
+     {
+      "t": "ring",
+      "x": 54,
+      "y": 114
+     },
+     {
+      "t": "ring",
+      "x": 66,
+      "y": 114
+     },
+     {
+      "t": "ring",
+      "x": 60,
+      "y": 102
+     },
+     {
+      "t": "cone",
+      "x": 48,
+      "y": 40
+     },
+     {
+      "t": "cone",
+      "x": 72,
+      "y": 40
+     },
+     {
+      "t": "a",
+      "x": 60,
+      "y": 176,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 36,
+      "y": 182,
+      "n": 2
+     },
+     {
+      "t": "ball",
+      "x": 66,
+      "y": 84
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 176,
+      "x2": 60,
+      "y2": 150,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 150,
+      "x2": 60,
+      "y2": 138,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 138,
+      "x2": 60,
+      "y2": 126,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 126,
+      "x2": 60,
+      "y2": 114,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 114,
+      "x2": 60,
+      "y2": 102,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 60,
+      "y": 102,
+      "x2": 60,
+      "y2": 88,
+      "s": 6
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 60,
+      "y": 88,
+      "x2": 60,
+      "y2": 64,
+      "s": 7
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 60,
+      "y": 64,
+      "x2": 60,
+      "y2": 40,
+      "s": 8
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-19",
+   "sport": "futbol",
+   "title": "Circuito: escalera, slalom y tiro",
+   "objective": "Coordinación",
+   "level": "Avanzado",
+   "duration": 15,
+   "players": "8 a 16 + portero, en una fila y un pasador",
+   "age": "Sub-10 a Sub-15",
+   "space": "Medio campo: de medio campo al área grande",
+   "material": "1 escalera de coordinación, 4 o 5 picas, portería con portero y 10–15 balones",
+   "description": "El jugador recorre la escalera con un pie en cada cuadro y, al salir, recibe un pase raso del pasador. Controla hacia adelante, conduce en slalom entre las picas (separadas unos 2 m) usando interior y exterior, y remata a portería con portero. Recoge su balón, se lo lleva al pasador y se forma; sale el siguiente cuando el anterior llega a la segunda pica. En cada serie cambia el patrón de la escalera y el lado del slalom para rematar con las dos piernas.",
+   "keyPoints": "En la escalera: rápido, pero sin pisar los travesaños\nPrimer toque hacia adelante, rumbo a la primera pica\nBalón pegado en el slalom, toques con los dos pies\nAntes de tirar, levanta la cabeza y ubica al portero",
+   "variations": "Más fácil: sin escalera, solo slalom y tiro con el balón parado\nMás difícil: un defensor sale al terminar el slalom y presiona el tiro\nCompetencia: dos circuitos en paralelo; gana el primero en anotar",
+   "school": false,
+   "video": {
+    "captions": [
+     "Un pie en cada cuadro",
+     "Recibe y controla adelante",
+     "Slalom: balón pegado",
+     "¡Remate a portería!"
+    ],
+    "reps": "3 series × 4 tiros"
+   },
+   "diagram": {
+    "v": "half",
+    "items": [
+     {
+      "t": "ladder",
+      "x": 40,
+      "y": 158,
+      "r": 0,
+      "n": 4
+     },
+     {
+      "t": "pole",
+      "x": 70,
+      "y": 112
+     },
+     {
+      "t": "pole",
+      "x": 70,
+      "y": 96
+     },
+     {
+      "t": "pole",
+      "x": 70,
+      "y": 80
+     },
+     {
+      "t": "a",
+      "x": 40,
+      "y": 188,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 104,
+      "y": 150,
+      "n": 2
+     },
+     {
+      "t": "b",
+      "x": 70,
+      "y": 24,
+      "n": 1
+     },
+     {
+      "t": "ball",
+      "x": 104,
+      "y": 143
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 188,
+      "x2": 40,
+      "y2": 168.5,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 168.5,
+      "x2": 40,
+      "y2": 161.5,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 161.5,
+      "x2": 40,
+      "y2": 154.5,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 154.5,
+      "x2": 40,
+      "y2": 147.5,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 147.5,
+      "x2": 54,
+      "y2": 128,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 104,
+      "y": 150,
+      "x2": 54,
+      "y2": 128,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 54,
+      "y": 128,
+      "x2": 80,
+      "y2": 114,
+      "s": 6
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 80,
+      "y": 114,
+      "x2": 60,
+      "y2": 96,
+      "s": 7
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 60,
+      "y": 96,
+      "x2": 80,
+      "y2": 80,
+      "s": 8
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 80,
+      "y": 80,
+      "x2": 72,
+      "y2": 62,
+      "s": 9
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 72,
+      "y": 62,
+      "x2": 88,
+      "y2": 16,
+      "s": 10
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-20",
+   "sport": "futbol",
+   "title": "Rojos y azules: salida de reacción",
+   "objective": "Velocidad y agilidad",
+   "level": "Inicial",
+   "duration": 8,
+   "players": "10 a 36, en parejas de dos equipos",
+   "age": "Sub-6 a Sub-12",
+   "space": "20 × 25 m con una línea de seguridad en cada extremo",
+   "material": "4 conos y chalecos de 2 colores",
+   "description": "Las parejas se colocan en el centro, una frente a otra a 1.5 m, rojos de un lado y azules del otro; cada equipo tiene su línea de seguridad 10 m a su espalda. El profe grita un color: ese equipo persigue y el otro se da la vuelta y corre a su línea; quien es tocado antes de la línea da un punto al perseguidor. Se cambia la posición de salida (sentados, de rodillas, boca abajo, de espaldas) y se descansa unos 30 segundos entre salidas para que cada sprint sea a máxima velocidad.",
+   "keyPoints": "Reacciona a la voz del profe, no al compañero\nPrimeros pasos cortos y rápidos\nGira hacia tu línea y empuja con los brazos\nPerseguidor: cuerpo inclinado al frente y acelera",
+   "variations": "Más fácil: salida de pie y el profe dice el color despacio\nMás difícil: señal visual (levanta un cono de color) o palabras trampa como 'rosa' o 'azúcar'\nCon balón: el que huye llega conduciendo a su línea",
+   "school": true,
+   "video": {
+    "captions": [
+     "El profe grita un color",
+     "¡Ese color persigue!",
+     "El otro corre a su línea",
+     "Sprint corto, con todo"
+    ],
+    "reps": "8 a 10 salidas, 30 s de pausa"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "cone",
+      "x": 24,
+      "y": 40
+     },
+     {
+      "t": "cone",
+      "x": 136,
+      "y": 40
+     },
+     {
+      "t": "cone",
+      "x": 24,
+      "y": 160
+     },
+     {
+      "t": "cone",
+      "x": 136,
+      "y": 160
+     },
+     {
+      "t": "b",
+      "x": 40,
+      "y": 92,
+      "n": 1
+     },
+     {
+      "t": "b",
+      "x": 80,
+      "y": 92,
+      "n": 2
+     },
+     {
+      "t": "b",
+      "x": 120,
+      "y": 92,
+      "n": 3
+     },
+     {
+      "t": "a",
+      "x": 40,
+      "y": 110,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 80,
+      "y": 110,
+      "n": 2
+     },
+     {
+      "t": "a",
+      "x": 120,
+      "y": 110,
+      "n": 3
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 92,
+      "x2": 34,
+      "y2": 46,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 80,
+      "y": 92,
+      "x2": 84,
+      "y2": 46,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 120,
+      "y": 92,
+      "x2": 126,
+      "y2": 46,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 110,
+      "x2": 36,
+      "y2": 60,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 80,
+      "y": 110,
+      "x2": 82,
+      "y2": 60,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 120,
+      "y": 110,
+      "x2": 124,
+      "y2": 60,
+      "s": 1
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-21",
+   "sport": "futbol",
+   "title": "Zigzag entre picas con balón",
+   "objective": "Velocidad y agilidad",
+   "level": "Intermedio",
+   "duration": 10,
+   "players": "10 a 30, en filas de 4 o 5",
+   "age": "Sub-8 a Sub-14",
+   "space": "Carril de 15 m por fila",
+   "material": "5 picas (o conos) y 2 conos de meta por carril; 1 balón por alumno o por fila",
+   "description": "Cada carril tiene 5 picas en línea, separadas 1.5 a 2 m, y una portería de conos 5 m después de la última. El alumno conduce en zigzag entre las picas lo más rápido que pueda sin perder el balón y, al salir de la última, acelera con el balón hasta cruzar la meta. Regresa caminando por fuera del carril: cada salida dura menos de 10 segundos y la espera de la fila sirve de descanso para que la siguiente sea igual de rápida.",
+   "keyPoints": "Toques cortos: un toque por cada pica\nInterior para un lado, exterior para el otro\nCuerpo bajo y brazos abiertos en cada cambio\nAl salir de la última pica, toque largo y acelera",
+   "variations": "Más fácil: picas a 2.5 m o primero el recorrido sin balón\nMás difícil: solo con la pierna menos hábil o carrera contra el carril de al lado\nReto: el profe toma el tiempo y cada quien intenta mejorar su marca",
+   "school": true,
+   "video": {
+    "captions": [
+     "Toques cortos en cada pica",
+     "Interior y exterior",
+     "Sal y acelera a la meta",
+     "Regresa caminando"
+    ],
+    "reps": "6 a 8 salidas por alumno"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "pole",
+      "x": 80,
+      "y": 150
+     },
+     {
+      "t": "pole",
+      "x": 80,
+      "y": 134
+     },
+     {
+      "t": "pole",
+      "x": 80,
+      "y": 118
+     },
+     {
+      "t": "pole",
+      "x": 80,
+      "y": 102
+     },
+     {
+      "t": "pole",
+      "x": 80,
+      "y": 86
+     },
+     {
+      "t": "cone",
+      "x": 66,
+      "y": 44
+     },
+     {
+      "t": "cone",
+      "x": 94,
+      "y": 44
+     },
+     {
+      "t": "a",
+      "x": 80,
+      "y": 180,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 56,
+      "y": 184,
+      "n": 2
+     },
+     {
+      "t": "ball",
+      "x": 80,
+      "y": 172
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 80,
+      "y": 180,
+      "x2": 71,
+      "y2": 150,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 71,
+      "y": 150,
+      "x2": 89,
+      "y2": 134,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 89,
+      "y": 134,
+      "x2": 71,
+      "y2": 118,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 71,
+      "y": 118,
+      "x2": 89,
+      "y2": 102,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 89,
+      "y": 102,
+      "x2": 71,
+      "y2": 86,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 71,
+      "y": 86,
+      "x2": 80,
+      "y2": 40,
+      "s": 6
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-22",
+   "sport": "futbol",
+   "title": "Reto T de agilidad con conos",
+   "objective": "Velocidad y agilidad",
+   "level": "Intermedio",
+   "duration": 10,
+   "players": "8 a 32, en grupos de 4 por estación",
+   "age": "Sub-9 a Sub-14",
+   "space": "Una T de 5 × 5 m por grupo",
+   "material": "4 conos por estación y un cronómetro o celular",
+   "description": "Se arma una T: cono de salida, cono central 5 m adelante y un cono a 2.5 m a cada lado del central. El alumno corre de frente y toca el cono central, se desplaza de lado hasta tocar el cono izquierdo, luego el derecho, regresa al central y vuelve de espaldas a la salida. Un compañero toma el tiempo y cada quien hace 2 intentos con descanso completo; como es una prueba adaptada para niños, se puede repetir cada mes para ver el progreso.",
+   "keyPoints": "Toca cada cono con la mano, sin rodearlo\nDe lado: los pies no se cruzan\nCadera baja al frenar y cambiar de dirección\nDe espaldas: pasos cortos y peso un poco al frente",
+   "variations": "Más fácil: 3 m de frente y 1.5 m a los lados, sin tiempo\nMás difícil: en el cono central el profe señala hacia qué lado ir primero\nCon balón: al llegar a la salida recibe un pase y lo devuelve de primera",
+   "school": true,
+   "video": {
+    "captions": [
+     "Sprint de frente al centro",
+     "Lateral: izquierda y derecha",
+     "Regresa al cono central",
+     "De espaldas a la salida"
+    ],
+    "reps": "2 intentos con descanso completo"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "cone",
+      "x": 80,
+      "y": 168
+     },
+     {
+      "t": "cone",
+      "x": 80,
+      "y": 104
+     },
+     {
+      "t": "cone",
+      "x": 50,
+      "y": 104
+     },
+     {
+      "t": "cone",
+      "x": 110,
+      "y": 104
+     },
+     {
+      "t": "a",
+      "x": 70,
+      "y": 182,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 120,
+      "y": 172,
+      "n": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 70,
+      "y": 182,
+      "x2": 75,
+      "y2": 112,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 75,
+      "y": 112,
+      "x2": 54,
+      "y2": 112,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 54,
+      "y": 112,
+      "x2": 106,
+      "y2": 112,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 106,
+      "y": 112,
+      "x2": 86,
+      "y2": 112,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 86,
+      "y": 112,
+      "x2": 89,
+      "y2": 176,
+      "s": 5
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-23",
+   "sport": "futbol",
+   "title": "Relevos de conducción por equipos",
+   "objective": "Velocidad y agilidad",
+   "level": "Inicial",
+   "duration": 8,
+   "players": "12 a 36, en equipos de 4 a 6",
+   "age": "Sub-6 a Sub-11",
+   "space": "Carriles de 12 a 15 m, separados 3 m",
+   "material": "1 balón y 2 conos por equipo; chalecos",
+   "description": "Cada equipo se forma en fila detrás de su cono de salida y a 12–15 m tiene un cono de vuelta. El primero conduce rápido hasta el cono, lo rodea, regresa conduciendo y entrega el balón al siguiente con un pase corto; nadie sale antes de recibir. Gana el equipo que termina primero, y en cada ronda el profe cambia la consigna: solo pie derecho, solo izquierdo o rodear el cono con la planta.",
+   "keyPoints": "Toques cortos al rodear el cono\nEn la recta, toques más largos para ir más rápido\nEntrega con pase raso al pie del compañero\nEspera detrás de la línea hasta recibir",
+   "variations": "Más fácil: ida conduciendo y regreso corriendo con el balón en las manos\nMás difícil: slalom de 3 conos en la ida y pase de regreso desde la mitad\nReto: el profe indica la superficie (interior, exterior o planta)",
+   "school": true,
+   "video": {
+    "captions": [
+     "Conduce rápido al cono",
+     "Rodéalo con toques cortos",
+     "Regresa y entrega el pase",
+     "¡Sale el siguiente!"
+    ],
+    "reps": "4 a 6 rondas"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "cone",
+      "x": 50,
+      "y": 60
+     },
+     {
+      "t": "cone",
+      "x": 110,
+      "y": 60
+     },
+     {
+      "t": "a",
+      "x": 50,
+      "y": 160,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 50,
+      "y": 178,
+      "n": 2
+     },
+     {
+      "t": "b",
+      "x": 110,
+      "y": 160,
+      "n": 1
+     },
+     {
+      "t": "b",
+      "x": 110,
+      "y": 178,
+      "n": 2
+     },
+     {
+      "t": "ball",
+      "x": 57,
+      "y": 154
+     },
+     {
+      "t": "ball",
+      "x": 117,
+      "y": 154
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 50,
+      "y": 160,
+      "x2": 38,
+      "y2": 64,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 38,
+      "y": 64,
+      "x2": 50,
+      "y2": 46,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 50,
+      "y": 46,
+      "x2": 62,
+      "y2": 64,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 62,
+      "y": 64,
+      "x2": 64,
+      "y2": 150,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 64,
+      "y": 150,
+      "x2": 50,
+      "y2": 178,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 50,
+      "y": 178,
+      "x2": 44,
+      "y2": 146,
+      "s": 6
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 110,
+      "y": 160,
+      "x2": 98,
+      "y2": 64,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 98,
+      "y": 64,
+      "x2": 110,
+      "y2": 46,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 110,
+      "y": 46,
+      "x2": 122,
+      "y2": 64,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 122,
+      "y": 64,
+      "x2": 124,
+      "y2": 150,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 124,
+      "y": 150,
+      "x2": 110,
+      "y2": 178,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 110,
+      "y": 178,
+      "x2": 104,
+      "y2": 146,
+      "s": 6
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-24",
+   "sport": "futbol",
+   "title": "Circuito de fuerza con peso corporal",
+   "objective": "Fuerza y resistencia",
+   "level": "Intermedio",
+   "duration": 12,
+   "players": "12 a 35, repartidos en 4 estaciones",
+   "age": "Sub-8 a Sub-14",
+   "space": "Cuadro de 20 × 20 m, una estación en cada esquina",
+   "material": "4 conos (o tarjetas con el dibujo de cada ejercicio); sin pesas",
+   "description": "En cada esquina hay una estación: sentadillas, lagartijas con las rodillas apoyadas, saltos a un pie con caída controlada y carretillas en parejas. Se trabaja 30 segundos y se descansa 30 mientras se rota en el sentido del reloj, hasta dar 2 vueltas completas. Lo importante es la técnica, no la cantidad: el profe corrige la postura y, si alguien pierde la forma, baja el ritmo o usa la versión fácil.",
+   "keyPoints": "Sentadilla: espalda recta, rodillas en línea con los pies\nLagartija: cuerpo recto como tabla, de la cabeza a las rodillas\nSaltos: cae suave y aguanta 2 segundos sin moverte\nCarretilla: abdomen firme y pasos cortos con las manos",
+   "variations": "Más fácil: 20 s de trabajo y 40 s de descanso; sentadilla hasta tocar una banca\nMás difícil: lagartijas completas y saltos a un pie hacia los lados\nJuego: cada estación suma puntos solo por repeticiones bien hechas",
+   "school": true,
+   "video": {
+    "captions": [
+     "Sentadillas con buena postura",
+     "Lagartijas con rodillas",
+     "Saltos a un pie, cae suave",
+     "Carretillas en parejas",
+     "30 s de trabajo y rotas"
+    ],
+    "reps": "2 vueltas × 4 estaciones × 30 s"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "cone",
+      "x": 26,
+      "y": 30
+     },
+     {
+      "t": "cone",
+      "x": 134,
+      "y": 30
+     },
+     {
+      "t": "cone",
+      "x": 134,
+      "y": 170
+     },
+     {
+      "t": "cone",
+      "x": 26,
+      "y": 170
+     },
+     {
+      "t": "a",
+      "x": 40,
+      "y": 46,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 120,
+      "y": 46,
+      "n": 2
+     },
+     {
+      "t": "a",
+      "x": 120,
+      "y": 154,
+      "n": 3
+     },
+     {
+      "t": "a",
+      "x": 40,
+      "y": 136,
+      "n": 4
+     },
+     {
+      "t": "a",
+      "x": 40,
+      "y": 154,
+      "n": 5
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 120,
+      "y": 154,
+      "x2": 100,
+      "y2": 154,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 136,
+      "x2": 40,
+      "y2": 110,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 154,
+      "x2": 40,
+      "y2": 128,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 46,
+      "x2": 104,
+      "y2": 46,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 120,
+      "y": 46,
+      "x2": 120,
+      "y2": 138,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 100,
+      "y": 154,
+      "x2": 56,
+      "y2": 154,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 110,
+      "x2": 40,
+      "y2": 62,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 128,
+      "x2": 54,
+      "y2": 76,
+      "s": 2
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-25",
+   "sport": "futbol",
+   "title": "Piratas: el tesoro de balones",
+   "objective": "Fuerza y resistencia",
+   "level": "Inicial",
+   "duration": 14,
+   "players": "16 a 36, en 4 equipos",
+   "age": "Sub-7 a Sub-13",
+   "space": "25 × 25 m a 30 × 30 m",
+   "material": "4 conos (bases), chalecos de 4 colores y todos los balones disponibles (al menos 1 por cada 2 alumnos)",
+   "description": "Cada equipo tiene una base en una esquina y todos los balones (el tesoro) están en el centro. A la señal, todos corren al centro, toman un balón y lo llevan conduciendo a su base; solo se puede llevar un balón a la vez y no se vale defender la base. Cuando el centro se vacía se pueden robar balones de otras bases, y gana el equipo con más balones al terminar cada ronda de 3 minutos, con 1 minuto de descanso entre rondas.",
+   "keyPoints": "Conduce con toques cortos y la cabeza arriba\nRegresa rápido: el juego no se detiene\nCuida el espacio y no choques con otros piratas\nDosifica: mantén el ritmo los 3 minutos",
+   "variations": "Más fácil: bases más cerca del centro y rondas de 2 minutos\nMás difícil: cuadro más grande o conducir solo con la pierna menos hábil\nCon guardianes: 2 alumnos en el centro tocan a quien conduce y ese balón regresa al tesoro",
+   "school": true,
+   "video": {
+    "captions": [
+     "¡Al centro por un balón!",
+     "Conduce de regreso a tu base",
+     "Un balón a la vez",
+     "Se vale robar de otra base"
+    ],
+    "reps": "3 rondas × 3 min, 1 min de pausa"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "cone",
+      "x": 28,
+      "y": 28
+     },
+     {
+      "t": "cone",
+      "x": 132,
+      "y": 28
+     },
+     {
+      "t": "cone",
+      "x": 132,
+      "y": 172
+     },
+     {
+      "t": "cone",
+      "x": 28,
+      "y": 172
+     },
+     {
+      "t": "a",
+      "x": 40,
+      "y": 40,
+      "n": 1
+     },
+     {
+      "t": "b",
+      "x": 120,
+      "y": 40,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 120,
+      "y": 160,
+      "n": 2
+     },
+     {
+      "t": "b",
+      "x": 40,
+      "y": 160,
+      "n": 2
+     },
+     {
+      "t": "ball",
+      "x": 74,
+      "y": 92
+     },
+     {
+      "t": "ball",
+      "x": 88,
+      "y": 96
+     },
+     {
+      "t": "ball",
+      "x": 78,
+      "y": 108
+     },
+     {
+      "t": "ball",
+      "x": 26,
+      "y": 46
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 40,
+      "x2": 68,
+      "y2": 86,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 120,
+      "y": 40,
+      "x2": 94,
+      "y2": 90,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 120,
+      "y": 160,
+      "x2": 84,
+      "y2": 114,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 40,
+      "y": 160,
+      "x2": 30,
+      "y2": 58,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 68,
+      "y": 86,
+      "x2": 44,
+      "y2": 48,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 94,
+      "y": 90,
+      "x2": 118,
+      "y2": 46,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 84,
+      "y": 114,
+      "x2": 118,
+      "y2": 154,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "conduccion",
+      "x": 30,
+      "y": 58,
+      "x2": 38,
+      "y2": 148,
+      "s": 2
+     }
+    ]
+   }
+  },
+  {
+   "id": "cf-26",
+   "sport": "futbol",
+   "title": "Patinador y pase en parejas (11+ Kids)",
+   "objective": "Calentamiento",
+   "level": "Inicial",
+   "duration": 8,
+   "players": "10 a 36, en parejas",
+   "age": "Sub-7 a Sub-13",
+   "space": "Parejas a 8–10 m, con 3 m entre parejas",
+   "material": "1 balón por pareja; conos para marcar la salida",
+   "description": "Un alumno de la pareja avanza con saltos de patinador: salta de lado de un pie al otro, cae suave sobre una pierna y se sostiene 2 segundos. Después del tercer salto recibe el pase de su compañero, primero rodado con la mano y luego con el pie, y lo devuelve con el interior. Regresa trotando y cambian los papeles; se hacen 2 series de 10 saltos por alumno, 5 con cada pierna.",
+   "keyPoints": "Cae en la punta del pie con la rodilla doblada\nLa rodilla no se va hacia adentro\nCadera nivelada y vista al frente\nRecibe solo cuando ya estés en equilibrio",
+   "variations": "Más fácil: saltos cortos y el pase siempre con la mano\nMás difícil: el compañero dice en qué pierna caer o lanza a media altura\nCon balón en las manos: salta sosteniéndolo y lo pasa al caer",
+   "school": true,
+   "video": {
+    "captions": [
+     "Salto de patinador",
+     "Cae en una pierna: 2 s",
+     "Recibe el pase",
+     "Devuelve con el interior"
+    ],
+    "reps": "2 series × 10 saltos"
+   },
+   "diagram": {
+    "v": "full",
+    "items": [
+     {
+      "t": "cone",
+      "x": 30,
+      "y": 180
+     },
+     {
+      "t": "cone",
+      "x": 130,
+      "y": 180
+     },
+     {
+      "t": "a",
+      "x": 50,
+      "y": 166,
+      "n": 1
+     },
+     {
+      "t": "a",
+      "x": 50,
+      "y": 56,
+      "n": 2
+     },
+     {
+      "t": "a",
+      "x": 110,
+      "y": 166,
+      "n": 3
+     },
+     {
+      "t": "a",
+      "x": 110,
+      "y": 56,
+      "n": 4
+     },
+     {
+      "t": "ball",
+      "x": 44,
+      "y": 62
+     },
+     {
+      "t": "ball",
+      "x": 104,
+      "y": 62
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 50,
+      "y": 166,
+      "x2": 38,
+      "y2": 150,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 38,
+      "y": 150,
+      "x2": 62,
+      "y2": 134,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 62,
+      "y": 134,
+      "x2": 40,
+      "y2": 118,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 50,
+      "y": 56,
+      "x2": 40,
+      "y2": 116,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 40,
+      "y": 118,
+      "x2": 50,
+      "y2": 56,
+      "s": 5
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 110,
+      "y": 166,
+      "x2": 98,
+      "y2": 150,
+      "s": 1
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 98,
+      "y": 150,
+      "x2": 122,
+      "y2": 134,
+      "s": 2
+     },
+     {
+      "t": "arrow",
+      "k": "mov",
+      "x": 122,
+      "y": 134,
+      "x2": 100,
+      "y2": 118,
+      "s": 3
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 110,
+      "y": 56,
+      "x2": 100,
+      "y2": 116,
+      "s": 4
+     },
+     {
+      "t": "arrow",
+      "k": "pase",
+      "x": 100,
+      "y": 118,
+      "x2": 110,
+      "y2": 56,
+      "s": 5
+     }
+    ]
+   }
+  }
+ ],
+ "sessions": [
+  {
+   "name": "Primaria · Coordinación y velocidad",
+   "sport": "futbol",
+   "age": "3.º a 6.º de primaria (8 a 12 años)",
+   "notes": "Objetivo del día: mover los pies con precisión y reaccionar rápido, siempre terminando con balón. Para 30 alumnos: 6 filas de 5 con escaleras dibujadas con gis si no alcanzan, relevos de 6 equipos y piratas con 4 equipos.",
+   "items": [
+    {
+     "exId": "cf-26",
+     "min": 8
+    },
+    {
+     "exId": "cf-15",
+     "min": 8
+    },
+    {
+     "exId": "cf-20",
+     "min": 7
+    },
+    {
+     "type": "pause",
+     "label": "Hidratación",
+     "min": 2
+    },
+    {
+     "type": "pause",
+     "label": "Preparar material",
+     "min": 2
+    },
+    {
+     "exId": "cf-23",
+     "min": 8
+    },
+    {
+     "exId": "cf-25",
+     "min": 11,
+     "series": {
+      "n": 3,
+      "work": 3,
+      "rest": 1
+     }
+    },
+    {
+     "exId": "cf-14",
+     "min": 4
+    }
+   ]
+  }
+ ]
+}
