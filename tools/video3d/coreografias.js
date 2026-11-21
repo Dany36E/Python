@@ -255,9 +255,9 @@ window.CANCHA_CHOREO = {
       { t: 'arrow', k: 'conduccion', x: 71, y: 33, x2: 89, y2: 65, s: 1, h: 'I' },
       { t: 'arrow', k: 'conduccion', x: 89, y: 65, x2: 71, y2: 97, s: 1, h: 'D' },
       { t: 'arrow', k: 'conduccion', x: 71, y: 97, x2: 89, y2: 129, s: 1, h: 'I' },
-      { t: 'arrow', k: 'conduccion', x: 89, y: 129, x2: 78, y2: 140, s: 1, h: 'D', v: 2.8 },
-      { t: 'arrow', k: 'conduccion', x: 78, y: 140, x2: 73, y2: 150, s: 1, h: 'D', v: 2.9 },
-      { t: 'arrow', k: 'pase', x: 73, y: 150, x2: 80, y2: 170.5, s: 1, reb: 'a1' },
+      { t: 'arrow', k: 'conduccion', x: 89, y: 129, x2: 80, y2: 138, s: 1, h: 'D', v: 2.9 },
+      { t: 'arrow', k: 'conduccion', x: 80, y: 138, x2: 76, y2: 148, s: 1, h: 'D', v: 3.0 },
+      { t: 'arrow', k: 'pase', x: 76, y: 148, x2: 80, y2: 170.5, s: 1, reb: 'a1' },
       // El siguiente sale cuando el compañero pasa el segundo cono.
       { t: 'arrow', k: 'conduccion', x: 80, y: 12, x2: 71, y2: 33, s: 1, h: 'D', wait: 3300, nr: true, free: true },
       { t: 'arrow', k: 'conduccion', x: 71, y: 33, x2: 89, y2: 65, s: 1, h: 'I', nr: true, free: true },
