@@ -2802,7 +2802,8 @@
     return '<div class="section-head"><h2>Secciones</h2>' + (S.canWrite ? '<button class="link" data-act="new-section">' + ic('plus') + 'Nueva</button>' : '') + '</div>' +
       '<div class="sec-strip" role="list">' + list.map((sec) => {
         const exs = sectionExercises(sec);
-        return '<button class="sec-card" role="listitem" data-open-section="' + esc(sec.id) + '"><span class="sec-mosaic n' + Math.min(3, exs.length) + '">' + mosaicHTML(exs) + '</span>' +
+        const pics = exs.filter((e) => e.sport === S.sport).concat(exs.filter((e) => e.sport !== S.sport));
+        return '<button class="sec-card" role="listitem" data-open-section="' + esc(sec.id) + '"><span class="sec-mosaic n' + Math.min(3, exs.length) + '">' + mosaicHTML(pics) + '</span>' +
           '<span class="sec-name">' + esc(sec.name) + '</span><span class="sec-count">' + plural(exs.length, 'ejercicio', 'ejercicios') + '</span></button>';
       }).join('') +
       (S.canWrite && !list.length ? '<button class="sec-card sec-new" data-act="new-section"><span class="sec-mosaic">' + ic('plus') + '</span><span class="sec-name">Nueva sección</span><span class="sec-count">Agrupa tus ejercicios</span></button>' : '') +
