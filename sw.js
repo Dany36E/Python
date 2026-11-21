@@ -1,5 +1,5 @@
-/* Pitazo — service worker: la app funciona sin conexión. */
-const CACHE = 'pitazo-v2';
+/* Cancha — service worker: la app funciona sin conexión. */
+const CACHE = 'cancha-v3';
 const SHELL = [
   './',
   './index.html',

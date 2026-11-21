@@ -1,4 +1,4 @@
-/* Pitazo — biblioteca de ejercicios de fútbol y básquetbol para preparar clases.
+/* Cancha — biblioteca de ejercicios de fútbol y básquetbol para preparar clases.
    Sin dependencias (jsPDF se carga solo al exportar un PDF). Guarda en
    IndexedDB (app instalada) o en la cuenta de Claude cuando se abre como
    Artifact (db + assets). */
@@ -27,7 +27,7 @@
     futbol: [['full', 'Campo completo'], ['half', 'Medio campo']],
     basquet: [['half', 'Media cancha'], ['full', 'Cancha completa']],
   };
-  const APP_NAME = 'Pitazo';
+  const APP_NAME = 'Cancha';
   const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
   const CLOUD_LIMIT = Math.floor(19.5 * 1024 * 1024);
 
@@ -508,7 +508,7 @@
     if (!useHistory || skipPop > 0) return;
     const want = layers.length;
     try {
-      while (histDepth < want) { histDepth++; history.pushState({ pitazo: histDepth }, ''); }
+      while (histDepth < want) { histDepth++; history.pushState({ cancha: histDepth }, ''); }
       if (histDepth > want) {
         const n = histDepth - want;
         histDepth = want;
@@ -1215,7 +1215,7 @@
     if (S.backend && !S.canWrite) return alertBox('Solo lectura', 'Estás viendo una biblioteca compartida. Solo su dueño puede agregar o cambiar ejercicios.');
     if (k === 'cloud') return alertBox('Biblioteca compartida', 'Tus ejercicios, videos, clases y grupos se guardan en tu cuenta de Claude y los ves en el celular y en la computadora. Para que otros profes vean y agreguen ejercicios, invítalos como Editores desde el botón Compartir de Claude (necesitan una cuenta de Claude).');
     if (k === 'memory') return alertBox('No se puede guardar', 'Este navegador no permite guardar datos (por ejemplo, en modo privado). Lo que agregues se perderá al cerrar.');
-    return alertBox('Guardado en este dispositivo', 'Tus ejercicios, videos y clases se guardan solo en este dispositivo y funcionan sin internet. Si borras los datos del navegador, se pierden. Para compartir la biblioteca con otros profes, usa la versión de Pitazo en Claude.');
+    return alertBox('Guardado en este dispositivo', 'Tus ejercicios, videos y clases se guardan solo en este dispositivo y funcionan sin internet. Si borras los datos del navegador, se pierden. Para compartir la biblioteca con otros profes, usa la versión de Cancha en Claude.');
   }
 
   // ---------------------------------------------------------------- flujos: ejercicios
@@ -2204,7 +2204,7 @@
     requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('open')));
   }
 
-  // ---------------------------------------------------------------- modo clase (cronómetro + pitazo)
+  // ---------------------------------------------------------------- modo clase (cronómetro + silbato)
   let audioCtx = null;
   function unlockAudio() {
     try {
@@ -2265,7 +2265,7 @@
     wrap.innerHTML =
       '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir del modo clase">' + ic('xmark') + '</button>' +
       '<div class="run-hd"><span class="run-step" data-ref="step"></span><span class="run-class">' + esc(c.name || 'Clase') + '</span></div>' +
-      '<button type="button" class="glass-btn" data-run="whistle" aria-label="Pitazo">' + ic('whistle') + '</button></header>' +
+      '<button type="button" class="glass-btn" data-run="whistle" aria-label="Tocar el silbato">' + ic('whistle') + '</button></header>' +
       '<div class="run-body" data-ref="body"></div>';
     document.body.appendChild(wrap);
     const body = $('[data-ref="body"]', wrap);
@@ -2509,7 +2509,7 @@
     const cl = window.claude;
     if (framed && cl && typeof cl.use === 'function') {
       const dl = await cl.use('downloads').catch(() => null);
-      if (!dl) { alertBox('No se puede descargar aquí', 'Abre Pitazo en el navegador de tu celular o computadora para descargar el PDF.'); return; }
+      if (!dl) { alertBox('No se puede descargar aquí', 'Abre Cancha en el navegador de tu celular o computadora para descargar el PDF.'); return; }
       try { const r = await dl.save({ filename, data: blob }); if (r && r.status === 'saved') toast('PDF descargado'); } catch (e) {
         if (!e || e.code !== 'declined') alertBox('No se pudo descargar', 'Vuelve a intentarlo en un momento.');
       }

@@ -1,4 +1,4 @@
-# Pitazo
+# Cancha
 
 Tu biblioteca de ejercicios de **fútbol** y **básquetbol** para preparar y dar clases. Graba o sube videos de cada ejercicio, dibújalos en la pizarra, arma clases por grupo y dalas con el cronómetro en la mano.
 
@@ -9,8 +9,8 @@ Diseño: minimalismo nativo al estilo iOS (títulos grandes, listas agrupadas, h
 - **Biblioteca por deporte**: pestañas Fútbol y Básquetbol, con búsqueda, filtros por objetivo, favoritos y «Míos» cuando comparten varios profes.
 - **Grabar o subir**: en el celular, «Grabar» abre la cámara; «Subir» toma un video o foto de la galería.
 - **Pizarra táctica**: dibuja jugadores de dos equipos, conos, balón, pases, conducciones y desplazamientos sobre campo completo, medio campo, media cancha o cancha completa.
-- **Clases**: con fecha y grupo; añade ejercicios, ordénalos y ajusta los minutos. Pitazo calcula el tiempo total y el minuto en que empieza cada bloque.
-- **Modo clase**: cronómetro por ejercicio con pitazo al terminar, el video o la pizarra del ejercicio en pantalla, «+1 min», y la pantalla encendida mientras das la clase.
+- **Clases**: con fecha y grupo; añade ejercicios, ordénalos y ajusta los minutos. Cancha calcula el tiempo total y el minuto en que empieza cada bloque.
+- **Modo clase**: cronómetro por ejercicio con silbato al terminar, el video o la pizarra del ejercicio en pantalla, «+1 min», y la pantalla encendida mientras das la clase.
 - **Grupos**: cada grupo guarda su historial de clases, los minutos acumulados y los objetivos que ha trabajado.
 - **Compartir una clase**: por WhatsApp, en PDF o copiando el texto.
 - **Funciona sin internet** una vez instalada.
