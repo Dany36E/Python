@@ -40,7 +40,13 @@ function encoder(file) {
     ff.stdin.end();
     await done;
     await page.evaluate((ms) => window.frameAt(ms), info.poster);
-    await page.screenshot({ type: 'jpeg', quality: 80, path: path.join(OUT, id + '.jpg'), clip: { x: 0, y: 0, width: 720, height: 1280 } });
+    // Portada chica (360 × 640) para las tarjetas de la biblioteca.
+    const poster = await page.screenshot({ type: 'jpeg', quality: 90 });
+    await new Promise((res, rej) => {
+      const ff2 = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-c:v', 'mjpeg', '-i', '-', '-vf', 'scale=360:640', '-q:v', '6', path.join(OUT, id + '.jpg')]);
+      ff2.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c))));
+      ff2.stdin.end(poster);
+    });
     const kb = Math.round(fs.statSync(file).size / 1024);
     console.log(id, (info.total / 1000).toFixed(1) + ' s', kb + ' KB', Math.round((Date.now() - t0) / 1000) + ' s de trabajo');
   }
