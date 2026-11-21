@@ -1,10 +1,10 @@
 /* Cancha — service worker: la app funciona sin conexión.
    Cada versión usa su propia caché: al publicar cambios, sube VERSION para que todos reciban
    la app completa de una sola vez (sin mezclar archivos viejos y nuevos). */
-const VERSION = 'v8';
+const VERSION = 'v9';
 const CACHE = 'cancha-' + VERSION;
 // Videos y portadas de los ejercicios de entrenador: caché aparte que no se borra al actualizar la app.
-const MEDIA = 'cancha-media-1';
+const MEDIA = 'cancha-media-2';
 const SHELL = [
   './',
   './index.html',

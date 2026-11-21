@@ -1,0 +1,8 @@
+{
+  "name": "cancha-video3d",
+  "private": true,
+  "description": "Genera los videos 3D de los ejercicios recomendados (herramienta de desarrollo, no se sube con la app).",
+  "dependencies": {
+    "three": "0.180.0"
+  }
+}
