@@ -6,6 +6,9 @@ const OUT = require('path').join(__dirname, '..', '..', 'app', 'catalog.js');
 const exercises = []; const sessions = [];
 const FIELDS = ['id', 'sport', 'title', 'objective', 'level', 'duration', 'players', 'age', 'space', 'material', 'description', 'keyPoints', 'variations', 'school', 'video', 'diagram'];
 const VIDEOS = require('path').join(__dirname, '..', '..', 'app', 'videos');
+// Opciones para filtrar (tipos, edad, alumnos, organización, espacio, material), revisadas a mano.
+// Para revisar lo que la app deduce del texto: node tools/catalogo/facetas.js
+const FACETAS = JSON.parse(fs.readFileSync(COACH + 'facetas.json', 'utf8'));
 for (const sport of ['futbol', 'basquet']) {
   const f = COACH + sport + '.json';
   if (!fs.existsSync(f)) { console.log('falta', f); continue; }
@@ -17,6 +20,10 @@ for (const sport of ['futbol', 'basquet']) {
     const o = {};
     FIELDS.forEach((k) => { if (x[k] !== undefined) o[k] = x[k]; });
     o.sport = sport;
+    const fc = FACETAS[o.id];
+    if (!fc) throw new Error('faltan las opciones de ' + o.id + ' en facetas.json');
+    if (fc.tags[0] !== o.objective) throw new Error('el primer tipo de ' + o.id + ' debe ser ' + o.objective);
+    Object.assign(o, fc);
     o.diagram = { v: x.diagram.v, items: x.diagram.items.map((it) => {
       const r = { t: it.t, x: it.x, y: it.y };
       if (it.n != null) r.n = it.n;

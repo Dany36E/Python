@@ -126,7 +126,7 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
     await p.goBack(); await W(p, 500);
     const total = await p.locator('#screen-ejercicios .grid [data-open-ex]').count();
     await p.click('#screen-ejercicios [data-act="filters"]'); await W(p, 600);
-    await sheet(p).locator('[data-fgroup="levels"] [data-fval="Avanzado"]').click(); await W(p, 200);
+    await sheet(p).locator('[data-opts="levels"] [data-opt="Avanzado"]').click(); await W(p, 200);
     await sheet(p).locator('[data-sh="ok"]').click(); await W(p, 600);
     const filtered = await p.locator('#screen-ejercicios .grid [data-open-ex]').count();
     ok(filtered < total && await p.locator('#screen-ejercicios [data-unfilter]').count() === 1, 'filtro de nivel con chip activo (' + total + ' → ' + filtered + ')');
