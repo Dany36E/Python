@@ -2296,3 +2296,13 @@ a.as-btn { text-decoration: none; }
 .group-badge.band-futbol { background: #2F8C48; }
 .group-badge.band-basquet { background: #C9853F; }
 .tl-seg b, .tl-end { font-size: 11px; letter-spacing: -0.01em; }
+
+/* iPad horizontal: plan de la clase a la izquierda; resumen, asistencia y notas a la derecha */
+@media (min-width: 1000px) {
+  .screen-body:has(> .c-layout) { max-width: 1120px; }
+  .c-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; grid-template-areas: "plan sum" "plan rest"; grid-template-rows: auto 1fr; column-gap: 32px; align-items: start; }
+  .c-sum { grid-area: sum; }
+  .c-plan { grid-area: plan; }
+  .c-rest { grid-area: rest; }
+  .c-sum .c-summary { margin-top: 0; }
+}

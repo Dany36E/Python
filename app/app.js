@@ -2468,17 +2468,17 @@
     }).join('');
     return '<div class="d-head"><p class="d-eyebrow">' + ic(sport) + esc(c.date ? longDate(c.date) : 'Sin fecha') + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1>' +
       (g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') + '</div>' +
-      '<div class="c-summary"><p class="c-line"><span class="c-total">' + fmtMin(total) + '<small> min</small></span><span class="c-sub">' + plural(nEx, 'ejercicio', 'ejercicios') + (nP ? ' y ' + plural(nP, 'pausa', 'pausas') : '') + '</span></p>' +
+      '<div class="c-layout"><div class="c-sum"><div class="c-summary"><p class="c-line"><span class="c-total">' + fmtMin(total) + '<small> min</small></span><span class="c-sub">' + plural(nEx, 'ejercicio', 'ejercicios') + (nP ? ' y ' + plural(nP, 'pausa', 'pausas') : '') + '</span></p>' +
       (items.length ? '<div class="tl" aria-hidden="true">' + segs + '<b class="tl-end">' + fmtMin(total) + '′</b></div>' : '') +
       (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar clase</button>' : '') +
-      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya la diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div>' +
-      '<div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Cambiar plan') + '</button>' : '') + '</div>' +
+      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya la diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div></div>' +
+      '<div class="c-plan"><div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Cambiar plan') + '</button>' : '') + '</div>' +
       '<div class="list">' + planRowsHTML(c, edit) +
       (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Agregar ejercicios</span></button><button class="cell add-row" data-act="add-pause">' + ic('drop') + '<span>Agregar pausa</span></button>' : '') +
-      (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div>' +
-      attendanceSectionHTML(c) +
+      (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div></div>' +
+      '<div class="c-rest">' + attendanceSectionHTML(c) +
       (c.notes ? '<section class="sec"><h2>Notas</h2><p>' + esc(c.notes) + '</p></section>' : '') +
-      (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar clase</button></div>' : '');
+      (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar clase</button></div>' : '') + '</div></div>';
   }
 
   function openClass(id) {
