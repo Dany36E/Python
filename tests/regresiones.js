@@ -106,6 +106,47 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
     await ctx.close();
   }
 
+  // Biblioteca: secciones, filtros, búsqueda en Recomendados y videos
+  {
+    const { ctx, p } = await fresh();
+    await p.click('#tab-ejercicios'); await W(p, 600);
+    ok(await p.locator('#screen-ejercicios .sec-card[data-open-section]').count() === 3, 'tres secciones de ejemplo');
+    await p.locator('#screen-ejercicios .sec-card', { hasText: 'Calentamientos' }).click(); await W(p, 700);
+    ok(await scr(p).locator('[data-open-ex]').count() > 0, 'la sección Calentamientos tiene ejercicios');
+    await p.goBack(); await W(p, 500);
+    await p.click('#screen-ejercicios [data-act="new-section"]'); await W(p, 600);
+    await sheet(p).locator('#sec-name').fill('Días de lluvia');
+    await sheet(p).locator('[data-sh="ok"]').click(); await W(p, 900);
+    await scr(p).locator('[data-act="sec-add"]').click(); await W(p, 700);
+    await sheet(p).locator('[data-pick-sec]').first().click();
+    await sheet(p).locator('[data-sh="ok"]').click(); await W(p, 800);
+    ok(await scr(p).locator('[data-open-ex]').count() === 1, 'sección nueva con un ejercicio');
+    await p.goBack(); await W(p, 500);
+    const total = await p.locator('#screen-ejercicios .grid [data-open-ex]').count();
+    await p.click('#screen-ejercicios [data-act="filters"]'); await W(p, 600);
+    await sheet(p).locator('[data-fgroup="levels"] [data-fval="Avanzado"]').click(); await W(p, 200);
+    await sheet(p).locator('[data-sh="ok"]').click(); await W(p, 600);
+    const filtered = await p.locator('#screen-ejercicios .grid [data-open-ex]').count();
+    ok(filtered < total && await p.locator('#screen-ejercicios [data-unfilter]').count() === 1, 'filtro de nivel con chip activo (' + total + ' → ' + filtered + ')');
+    await p.click('#screen-ejercicios [data-unfilter]'); await W(p, 500);
+    ok(await p.locator('#screen-ejercicios .grid [data-open-ex]').count() === total, 'quitar el chip regresa todo');
+    await p.fill('#q-ejercicios', 'rondo'); await W(p, 500);
+    ok(await p.locator('#screen-ejercicios [data-open-cat]').count() >= 1, 'buscar «rondo» muestra un ejercicio recomendado');
+    await p.fill('#q-ejercicios', ''); await W(p, 400);
+    ok(await p.locator('#screen-ejercicios .badge', { hasText: 'Video' }).count() > 0, 'los ejemplos traen video');
+    // Modo clase: si la app se cierra, se puede seguir
+    await p.click('#tab-clases'); await W(p, 400);
+    await p.locator('.today [data-act="start-class"]').click(); await W(p, 700);
+    await p.click('[data-run="toggle"]'); await W(p, 300);
+    await p.click('[data-run="next"]'); await W(p, 1300);
+    await p.reload(); await W(p, 2200);
+    ok((await p.locator('.as-wrap.open').innerText()).includes('Tienes una clase en curso'), 'al volver a abrir ofrece seguir la clase');
+    await p.locator('.as-wrap.open .as-btn', { hasText: 'Seguir con la clase' }).click(); await W(p, 800);
+    ok((await p.locator('[data-ref="step"]').textContent()).includes('Ejercicio 2'), 'sigue en el mismo bloque');
+    ok(p.errs.length === 0, 'sin errores en biblioteca y modo clase: ' + p.errs.join(' / '));
+    await ctx.close();
+  }
+
   await b.close();
   console.log(fails ? fails + ' FALLAS' : 'TODO BIEN');
   process.exit(fails ? 1 : 0);

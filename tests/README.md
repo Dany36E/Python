@@ -5,8 +5,9 @@ Pruebas automáticas que abren la app en un navegador y usan todo como lo haría
 | Archivo | Qué revisa |
 |---|---|
 | `flujo-completo.js` | Clase con pausa y series, modo clase con reloj simulado, pase de lista, duplicar, «Pasar lista hoy», deshacer (también con doble toque), reporte PDF por trimestre, pizarrón, respaldo e importación en otro iPad con un conflicto, iPhone y iPad en claro y oscuro. |
-| `regresiones.js` | Errores que encontró el QA: doble toque en «Pasar lista hoy», terminar sin empezar, catálogo «De entrenadores» y plantillas, PDF de clase, trimestre en agosto. |
+| `regresiones.js` | Errores que encontró el QA (doble toque, terminar sin empezar, trimestre en agosto), Recomendados y plantillas, PDF de clase, apariencia, secciones, filtros, búsqueda y seguir una clase a medias. |
 | `nube.js` | La versión que vive en Claude (almacenamiento simulado): foto, grupo, clase con pausa y modo clase. |
+| `actualizacion.js` | Instala la versión publicada, guarda datos de un profe y actualiza a la nueva: no se pierde nada y llegan los ejemplos nuevos. Necesita `OLD` (carpeta con la versión publicada). |
 
 ## Cómo correrlas
 

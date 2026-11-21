@@ -1742,3 +1742,22 @@ a.as-btn { text-decoration: none; }
 .coach-video { display: block; width: 100%; padding: 0; }
 .coach-video .v-state { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 54px; opacity: 0; transition: opacity 0.2s; pointer-events: none; background: rgba(0,0,0,0.25); }
 .coach-video.paused .v-state { opacity: 1; }
+
+/* Revisión UX: detalle que cabe en iPhone, controles bajo el pizarrón, cifras en dos columnas */
+@media (max-width: 600px) {
+  .board-frame { max-width: calc(44vh * 0.8); }
+  .coach-video { max-width: calc(52vh * 0.5625); }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stats .stat:nth-child(odd)::before { display: none; }
+  .stats .stat:nth-child(n+3) { border-top: 0.5px solid var(--sep); }
+}
+.bf-ctrls { position: static; margin: 10px 0 0; justify-content: center; pointer-events: auto; }
+.bf-btn { background: color-mix(in srgb, var(--tint) 14%, transparent); color: var(--tint); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.board-frame { overflow: visible; }
+.board-frame .art { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: inherit; overflow: hidden; }
+.board-kinds { min-height: 52px; }
+.run-adj { display: inline-flex; gap: 6px; flex: none; }
+.skip-rest { flex: none; background: var(--water); color: #fff; font-weight: 600; height: 44px; padding: 0 16px; border-radius: 22px; }
+.skip-rest[hidden] { display: none; }
+.board-frame { aspect-ratio: auto; background: transparent; border-radius: 0; }
+.board-frame .art { border-radius: 24px; }

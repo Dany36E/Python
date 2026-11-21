@@ -85,6 +85,7 @@
     download: '<path d="M12 4v11.5M7.2 10.7L12 15.5l4.8-4.8M5 15v3.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8V15"/>',
     info: '<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.2M12 7.8v.2"/>',
     drop: '<path d="M12 3.2c3.3 4 5.6 7.2 5.6 10.4a5.6 5.6 0 0 1-11.2 0c0-3.2 2.3-6.4 5.6-10.4z"/><path d="M9.4 14.6a2.7 2.7 0 0 0 2.2 2.4"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
     sliders: '<path d="M4 7.5h9M19 7.5h1M4 16.5h3M13 16.5h7"/><circle cx="16" cy="7.5" r="2.4"/><circle cx="10" cy="16.5" r="2.4"/>',
     folder: '<path d="M3.5 7.2c0-1 .8-1.8 1.8-1.8h4.1l2 2.1h7.3c1 0 1.8.8 1.8 1.8v8.4c0 1-.8 1.8-1.8 1.8H5.3c-1 0-1.8-.8-1.8-1.8z"/>',
     copy: '<rect x="8.6" y="8.6" width="11" height="11" rx="2.2"/><path d="M15.4 8.6V6.2c0-.9-.7-1.6-1.6-1.6H6.2c-.9 0-1.6.7-1.6 1.6v7.6c0 .9.7 1.6 1.6 1.6h2.4"/>',
@@ -298,13 +299,26 @@
     const P = BOARD[sport];
     const items = (d && d.items) || [];
     const size = opts.export ? ' xmlns="http://www.w3.org/2000/svg" width="' + opts.export[0] + '" height="' + opts.export[1] + '"' : '';
-    return '<svg' + size + ' viewBox="0 0 160 200" preserveAspectRatio="' + (opts.fit || 'xMidYMid slice') + '" aria-hidden="true" class="bd bd-' + sport + (opts.cls ? ' ' + opts.cls : '') + '">' +
+    return '<svg' + size + ' viewBox="' + (opts.crop ? cropBox(items) : '0 0 160 200') + '" preserveAspectRatio="' + (opts.fit || 'xMidYMid slice') + '" aria-hidden="true" class="bd bd-' + sport + (opts.cls ? ' ' + opts.cls : '') + '">' +
       turfSVG(sport, v) +
       '<g fill="none" stroke="' + P.line + '" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" color="' + P.line + '">' + (COURT[sport + '-' + v] || COURT['futbol-full']) + '</g>' +
       '<g class="bd-items">' + items.map((it, i) => (it.t === 'arrow' ? itemSVG(it, opts.interactive ? i : null, sport, { anim: opts.anim, idx: i }) : '')).join('') +
       items.map((it, i) => (it.t !== 'arrow' ? itemSVG(it, opts.interactive ? i : null, sport, { anim: opts.anim, idx: i }) : '')).join('') + '</g></svg>';
   }
   const fieldArt = (sport) => boardSVG(sport, null);
+  // Recorte 4:5 alrededor de las piezas (mínimo 60 % de la cancha) para miniaturas legibles.
+  function cropBox(items) {
+    if (!items || !items.length) return '0 0 160 200';
+    const xs = []; const ys = [];
+    items.forEach((it) => { xs.push(it.x); ys.push(it.y); if (it.t === 'arrow') { xs.push(it.x2); ys.push(it.y2); } });
+    const x0 = Math.min.apply(null, xs) - 18; const x1 = Math.max.apply(null, xs) + 18;
+    const y0 = Math.min.apply(null, ys) - 18; const y1 = Math.max.apply(null, ys) + 18;
+    let w = Math.max(96, x1 - x0); let h = Math.max(120, y1 - y0);
+    if (w / h > 0.8) h = w / 0.8; else w = h * 0.8;
+    if (w > 160 || h > 200) return '0 0 160 200';
+    const cx = Math.max(0, Math.min(160 - w, (x0 + x1) / 2 - w / 2)); const cy = Math.max(0, Math.min(200 - h, (y0 + y1) / 2 - h / 2));
+    return [cx, cy, w, h].map(r1).join(' ');
+  }
 
   // ---------------------------------------------------------------- la jugada en movimiento
   // Reproduce un diagrama paso a paso: el balón viaja por los pases y los jugadores corren por sus flechas.
@@ -621,9 +635,10 @@
     }
     if (replaced) {
       const seed = seedData(cat);
-      for (const x of seed.exercises) await st.put('exercises', x);
-      for (const c of seed.classes) await st.put('classes', c);
-      for (const g of seed.groups) await st.put('groups', g);
+      // Nunca se pisa lo que sigue ahí (un ejemplo que el profe cambió conserva su versión).
+      for (const x of seed.exercises) if (!(await st.get('exercises', x.id))) await st.put('exercises', x);
+      for (const c of seed.classes) if (!(await st.get('classes', c.id))) await st.put('classes', c);
+      for (const g of seed.groups) if (!(await st.get('groups', g.id))) await st.put('groups', g);
     }
   }
 
@@ -1465,7 +1480,7 @@
   function thumbHTML(ex, cls) {
     const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>'
       : !ex.mediaId && ex.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(ex.thumbUrl) + '">'
-        : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram) : fieldArt(ex.sport)) + '</span>';
+        : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram, { crop: true }) : fieldArt(ex.sport)) + '</span>';
     let badge = '';
     if (cls !== 'mini') {
       if (ex.mediaType === 'video') badge = '<span class="badge">' + ic('play') + (ex.mediaDuration ? fmtClock(ex.mediaDuration) : 'Video') + '</span>';
@@ -1513,7 +1528,7 @@
       '<input class="sr" type="file" id="in-import" accept=".zip,.json,application/zip,application/json" tabindex="-1" aria-hidden="true">';
     TABS.forEach((t) => {
       $('#screen-' + t).innerHTML =
-        '<header class="navbar"><span class="nav-left"><button class="glass-btn" data-act="settings" aria-label="Ajustes">' + ic('sliders') + '</button></span><span class="nav-title">' + title[t] + '</span>' +
+        '<header class="navbar"><span class="nav-left"><button class="glass-btn" data-act="settings" aria-label="Ajustes">' + ic('gear') + '</button></span><span class="nav-title">' + title[t] + '</span>' +
         '<span class="nav-right"><button class="glass-btn cap backup-btn" data-act="backup">Respaldo</button></span></header>' +
         '<div class="page">' +
         '<h1 class="large-title" id="h-' + t + '">' + title[t] + '</h1>' +
@@ -1546,7 +1561,7 @@
       out.push('<div class="note">' + ic('box') + '<span class="txt"><b>Haz un respaldo.</b> ' + (last ? 'El último fue ' + fmtAgo(last) + '.' : 'Tus datos solo viven en este dispositivo.') + '</span><button class="link" data-act="backup-now">Respaldar</button></div>');
     }
     const hasEx = tab === 'clases' && (S.classes.some((c) => c.example) || S.exercises.some((e) => e.example) || S.groups.some((g) => g.example) || S.sections.some((x) => x.example));
-    if (S.ready && S.canWrite && hasEx) out.push('<div class="note quiet"><span class="txt">Lo que dice «Ejemplo» es para que veas cómo funciona.</span><button class="link" data-act="clear-examples">Borrar ejemplos</button></div>');
+    if (S.ready && S.canWrite && hasEx) out.push('<div class="note quiet"><span class="txt">Los ejemplos te muestran cómo funciona Cancha.</span><button class="link" data-act="clear-examples">Borrar ejemplos</button></div>');
     return out.join('');
   }
 
@@ -1579,9 +1594,14 @@
 
     let body;
     if (!S.ready) body = '<div class="grid">' + [0, 1, 2, 3].map(() => '<div class="card"><span class="thumb shimmer"></span><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></div>').join('') + '</div>';
-    else if (!all.length) body = emptyExercisesHTML(sport) + catEntryHTML(sport);
-    else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '».' : 'No hay ejercicios con estos filtros.') + (nf ? '<br><button class="link" data-act="clear-filters">Quitar filtros</button>' : '') + '</p>' + catEntryHTML(sport);
-    else body = (plain0 ? sectionsStripHTML() + catEntryHTML(sport) : '<p class="result-count">' + plural(list.length, 'ejercicio', 'ejercicios') + '</p>') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
+    else if (!all.length) body = emptyExercisesHTML(sport);
+    else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '» en tus ejercicios.' : 'No hay ejercicios con estos filtros.') + (nf ? '<br><button class="link" data-act="clear-filters">Quitar filtros</button>' : '') + '</p>';
+    else body = (plain0 ? sectionsStripHTML() + catEntryHTML(sport) : '<p class="result-count">' + plural(list.length, 'ejercicio', 'ejercicios') + (q ? ' tuyos' : '') + '</p>') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
+    if (q && S.ready) {
+      const recs = applyFilters(catExercises(sport).filter((cx) => !inLibrary(cx.id) && norm([cx.title, cx.objective, cx.description, cx.keyPoints, cx.material, cx.variations, cx.age].join(' ')).indexOf(q) >= 0), sport);
+      if (recs.length) body += '<p class="group-label">Recomendados</p><div class="grid">' + recs.map(catCardHTML).join('') + '</div>';
+      else if (!list.length) body += catEntryHTML(sport);
+    }
     const afHTML = activeFiltersHTML(sport);
 
     const sig = ['ej', sport, S.ready, S.canWrite, chipsHTML, afHTML, body, noteHTML('ejercicios')].join('|');
@@ -1611,7 +1631,7 @@
     return '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt(sport) + '</span></div>' +
       '<h2>Aún no tienes ejercicios de ' + SPORTS[sport].noun + '</h2>' +
       '<p>' + (S.canWrite ? 'Agrega uno con video, foto o un dibujo en el pizarrón.' : 'Todavía no hay ejercicios aquí.') + '</p>' +
-      (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-ex">' + ic('plus') + 'Nuevo ejercicio</button></div>' : '') + '</div>';
+      (S.canWrite ? '<div class="actions">' + (catExercises(sport).length ? '<button class="btn filled" data-act="catalog">Ver ' + catExercises(sport).length + ' ejercicios listos</button><button class="btn tinted" data-act="new-ex">' + ic('plus') + 'Crear el mío</button>' : '<button class="btn filled" data-act="new-ex">' + ic('plus') + 'Nuevo ejercicio</button>') + '</div>' : '') + '</div>';
   }
 
   // --- Clases
@@ -1619,14 +1639,14 @@
     const g = getGroup(c.groupId);
     const n = (c.items || []).filter((it) => !isPause(it)).length;
     const isToday = c.date === todayStr();
-    const canRoll = S.canWrite && g && studentsOf(g).length;
+    const canRoll = S.canWrite && isToday && g && studentsOf(g).length;
     const sp = SPORTS[c.sport] ? c.sport : 'futbol';
     return '<div class="today" data-tint="' + sp + '">' +
-      '<button class="today-main" data-open-class="' + esc(c.id) + '"><span class="today-band band-' + sp + '"><span class="today-when">' + (isToday ? 'Hoy' : esc(fmtDay(c.date))) + '</span><span class="today-min">' + fmtMin(classTotal(c)) + '′</span></span>' +
+      '<button class="today-main" data-open-class="' + esc(c.id) + '"><span class="today-band band-' + sp + '"><span class="today-when">' + (isToday ? 'Hoy' : esc(fmtDay(c.date))) + '</span>' + (n ? '<span class="today-min">' + fmtMin(classTotal(c)) + '′</span>' : '') + '</span>' +
       '<span class="today-body"><span class="today-name">' + esc(c.name || 'Clase sin nombre') + '</span>' +
       '<span class="today-meta">' + (g ? '<span class="mini-chip">' + ic('people') + esc(g.name) + '</span>' : '') + '<span>' + plural(n, 'ejercicio', 'ejercicios') + '</span></span></span></button>' +
       '<div class="today-actions">' +
-      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar</button>' : '') +
+      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar</button>' : S.canWrite ? '<button class="btn filled" data-act="plan-class" data-id="' + esc(c.id) + '">' + ic('plus') + 'Arma el plan</button>' : '') +
       (canRoll ? '<button class="btn tinted" data-act="roll-class" data-id="' + esc(c.id) + '">' + ic('check') + 'Pasar lista</button>' : '') +
       '</div></div>';
   }
@@ -1851,7 +1871,7 @@
       row('ex-space', 'flag', 'Espacio', 'Ej. 20 × 15 m', 60, ex.space) +
       row('ex-material', 'cone', 'Material', 'Conos, balones…', 200, ex.material) +
       '</div>' +
-      '<p class="group-label" id="lbl-var">Para ajustarlo</p><div class="group"><textarea id="ex-vars" aria-labelledby="lbl-var" placeholder="Más fácil: …&#10;Más difícil: …" maxlength="1500">' + esc(ex.variations || '') + '</textarea></div>' +
+      '<p class="group-label" id="lbl-var">Variantes (más fácil / más difícil)</p><div class="group"><textarea id="ex-vars" aria-labelledby="lbl-var" placeholder="Más fácil: …&#10;Más difícil: …" maxlength="1500">' + esc(ex.variations || '') + '</textarea></div>' +
       '</div>';
 
     const sheet = openSheet({
@@ -2114,7 +2134,7 @@
       ((ex.mediaId || ex.videoUrl) && hasDiagram(ex) ? sec('Pizarrón', boardFrameHTML(ex)) : '') +
       (ex.description ? sec('Cómo se hace', '<p>' + esc(ex.description) + '</p>') : '') +
       (points.length ? sec('Puntos clave', '<ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>') : '') +
-      (vars.length ? sec('Para ajustarlo', '<ul class="vars">' + varHTML + '</ul>') : '') +
+      (vars.length ? sec('Variantes', '<ul class="vars">' + varHTML + '</ul>') : '') +
       (ex.link ? sec('Video de referencia', linkCardHTML(ex.link)) : '') +
       (ex.material ? sec('Material', '<p>' + esc(ex.material) + '</p>') : '') +
       (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row danger" data-act="delete">' + ic('trash') + 'Eliminar ejercicio</button></div>' : '') +
@@ -2352,7 +2372,7 @@
         sheet.dismiss();
         haptic(12);
         toast(editing ? 'Cambios guardados' : 'Clase creada');
-        if (!editing) setTimeout(() => openClass(c.id), 260);
+        if (!editing) setTimeout(() => { openClass(c.id); if (!c.items.length) setTimeout(() => openPicker(c.id), 480); }, 260);
       },
     });
     const root = sheet.body;
@@ -2766,7 +2786,7 @@
   function mosaicHTML(exs) {
     const three = exs.slice(0, 3);
     if (!three.length) return '<span class="mo-empty">' + ic('board') + '</span>';
-    return three.map((e) => '<span class="mo-cell">' + (e.thumbId ? '<img alt="" loading="lazy" ' + srcAttr(e.thumbId) + '>' : e.posterUrl ? '<img alt="" loading="lazy" src="' + esc(e.posterUrl) + '">' : boardSVG(e.sport, hasDiagram(e) ? e.diagram : null)) + '</span>').join('');
+    return three.map((e) => '<span class="mo-cell">' + (e.thumbId ? '<img alt="" loading="lazy" ' + srcAttr(e.thumbId) + '>' : e.thumbUrl ? '<img alt="" loading="lazy" src="' + esc(e.thumbUrl) + '">' : boardSVG(e.sport, hasDiagram(e) ? e.diagram : null, { crop: true })) + '</span>').join('');
   }
   function sectionsStripHTML() {
     const list = S.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0) || (a.createdAt || 0) - (b.createdAt || 0));
@@ -4289,7 +4309,7 @@
   function catCardHTML(cx) {
     const have = inLibrary(cx.id);
     const meta = [cx.duration ? cx.duration + ' min' : '', cx.age].filter(Boolean).join(', ');
-    return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb">' + (cx.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(cx.thumbUrl) + '"><span class="badge vid">' + ic('play') + 'Video</span>' : '<span class="art">' + boardSVG(cx.sport, cx.diagram) + '</span>') +
+    return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb">' + (cx.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(cx.thumbUrl) + '"><span class="badge vid">' + ic('play') + 'Video</span>' : '<span class="art">' + boardSVG(cx.sport, cx.diagram, { crop: true }) + '</span>') +
       (have ? '<span class="badge in-lib">' + ic('check') + 'En tus ejercicios</span>' : cx.school ? '<span class="badge">Para escuela</span>' : '') + '</span>' +
       '<span class="card-body"><span class="title">' + esc(cx.title) + '</span><span class="meta">' + esc(meta) + '</span></span></button>';
   }
@@ -4297,7 +4317,7 @@
     const n = catExercises(sport).length;
     const sample = catExercises(sport).find((x) => x.diagram && x.diagram.items && x.diagram.items.length > 6);
     return '<button class="cat-entry" data-act="catalog"><span class="cat-art art-mini">' + boardSVG(sport, sample ? sample.diagram : null) + '</span>' +
-      '<span class="txt"><b>De entrenadores</b><span>' + (n ? n + ' ejercicios de ' + SPORTS[sport].noun + ' listos para usar' : 'Ejercicios listos para usar') + '</span></span>' + ic('chevR', 'chev') + '</button>';
+      '<span class="txt"><b>Recomendados</b><span>' + (n ? n + ' ejercicios de ' + SPORTS[sport].noun + ' listos, con video' : 'Ejercicios listos para usar') + '</span></span>' + ic('chevR', 'chev') + '</button>';
   }
   function templatesHTML() {
     const list = catSessions();
@@ -4317,7 +4337,7 @@
     const scr = pushScreen({ key: 'cat', tint: sport });
     function render() {
       scr.el.dataset.tint = sport;
-      scr.setTitle('De entrenadores');
+      scr.setTitle('Recomendados');
       if (!CAT()) { scr.body.innerHTML = '<div class="empty"><span class="spinner"></span><p>Cargando…</p></div>'; return; }
       const all = catExercises(sport);
       const objs = SPORTS[sport].tags.filter((t) => all.some((x) => x.objective === t));
@@ -4325,7 +4345,7 @@
       const groups = objs.filter((o) => list.some((x) => x.objective === o));
       const sessions = catSessions(sport);
       scr.body.innerHTML =
-        '<div class="d-head"><h1 class="d-title">De entrenadores</h1><p class="cat-lead">Ejercicios que se usan en clubes y escuelas. Agrega los que te sirvan y cámbialos a tu gusto.</p></div>' +
+        '<div class="d-head"><h1 class="d-title">Recomendados</h1><p class="cat-lead">Ejercicios y clases armados con base en FIFA, FIBA y otras federaciones. Agrega los que te sirvan y cámbialos a tu gusto.</p></div>' +
         segHTML('csport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], sport, 'Deporte') +
         (sessions.length ? '<p class="group-label">Clases listas</p><div class="list">' + sessions.map((t) => {
           const total = t.items.reduce((sum, it) => sum + itemMin(it), 0);
@@ -4368,10 +4388,11 @@
         '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((x) => '<div class="stat"><span class="k">' + ic(x[0]) + x[1] + '</span><span class="v">' + esc(x[2]) + '</span></div>').join('') + '</div>' +
         (S.canWrite ? '<div class="d-actions">' + (have
           ? '<button class="btn tinted grow" data-act="open-mine">' + ic('check') + 'Ya está en tus ejercicios</button>'
-          : '<button class="btn filled grow" data-act="adopt">' + ic('plus') + 'Agregar a mis ejercicios</button>') + '</div>' : '') +
+          : '<button class="btn filled grow" data-act="adopt">' + ic('plus') + 'Agregar a mis ejercicios</button>') +
+          '<button class="btn tinted" data-act="adopt-class">' + ic('clases') + 'A una clase</button></div>' : '') +
         '<section class="sec"><h2>Cómo se hace</h2><p>' + esc(cx.description) + '</p></section>' +
         (points.length ? '<section class="sec"><h2>Puntos clave</h2><ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul></section>' : '') +
-        (vars.length ? '<section class="sec"><h2>Para ajustarlo</h2><ul class="vars">' + vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + '</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('') + '</ul></section>' : '') +
+        (vars.length ? '<section class="sec"><h2>Variantes</h2><ul class="vars">' + vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + '</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('') + '</ul></section>' : '') +
         (cx.material ? '<section class="sec"><h2>Material</h2><p>' + esc(cx.material) + '</p></section>' : '');
     }
     function play(delay) {
@@ -4390,6 +4411,7 @@
       if (!a) return;
       if (a.dataset.act === 'play') { play(150); return; }
       if (a.dataset.act === 'open-mine') { const m = inLibrary(id); if (m) openExercise(m.id); return; }
+      if (a.dataset.act === 'adopt-class') { const ex = await adoptCatalogEx(cx, true); if (ex) addToClassFlow(ex); return; }
       if (a.dataset.act === 'adopt') {
         a.disabled = true;
         const ex = await adoptCatalogEx(cx);
@@ -4415,7 +4437,7 @@
       const start = mt; mt += itemMin(it);
       if (isPause(it)) return '<div class="plan-row"><span class="time">' + fmtMin(start) + '′</span><span class="mini pause-ico">' + ic('drop') + '</span><span class="txt"><span class="t1">' + esc(it.label) + '</span><span class="t2">Pausa, ' + fmtMin(it.min) + ' min</span></span></div>';
       const cx = catEx(it.exId);
-      return '<button class="plan-row" data-open-cat="' + esc(it.exId) + '"><span class="time">' + fmtMin(start) + '′</span><span class="mini"><span class="art">' + boardSVG(t.sport, cx && cx.diagram) + '</span></span>' +
+      return '<button class="plan-row" data-open-cat="' + esc(it.exId) + '"><span class="time">' + fmtMin(start) + '′</span><span class="mini">' + (cx && cx.thumbUrl ? '<img alt="" loading="lazy" src="' + esc(cx.thumbUrl) + '">' : '<span class="art">' + boardSVG(t.sport, cx && cx.diagram, { crop: true }) + '</span>') + '</span>' +
         '<span class="txt"><span class="t1">' + esc(cx ? cx.title : 'Ejercicio') + '</span><span class="t2">' + esc([cx ? cx.objective : '', fmtMin(it.min) + ' min', seriesText(it.series)].filter(Boolean).join(', ')) + '</span></span>' + ic('chevR', 'chev') + '</button>';
     }).join('');
     scr.setTitle(t.name);
@@ -4456,7 +4478,7 @@
   // Pocas herramientas: poner piezas, una flecha (con su tipo) y borrar. Arrastrar siempre mueve.
   const BOARD_TOOLS = [['a', 'Equipo A'], ['b', 'Equipo B'], ['cone', 'Material'], ['ball', 'Balón'], ['arrow', 'Flecha'], ['erase', 'Borrar']];
   const GEAR_KINDS = [['cone', 'Cono'], ['ladder', 'Escalera'], ['hurdle', 'Valla'], ['ring', 'Aro'], ['pole', 'Pica']];
-  const ARROW_KINDS = (sport) => [['pase', 'Pase'], ['conduccion', sport === 'basquet' ? 'Dribleo' : 'Conducción'], ['mov', 'Sin balón']];
+  const ARROW_KINDS = (sport) => [['pase', 'Pase o tiro'], ['conduccion', sport === 'basquet' ? 'Dribleo' : 'Conducción'], ['mov', 'Carrera']];
   const BOARD_HINT = {
     a: 'Toca la cancha para poner un jugador. Arrastra para moverlo.',
     b: 'Toca la cancha para poner un rival. Arrastra para moverlo.',
@@ -4476,7 +4498,7 @@
     let gearKind = 'cone';
     let changed = false;
     let drag = null;
-    const toolIcon = (t) => (t === 'a' || t === 'b' ? '<span class="dot dot-' + t + '">' + t.toUpperCase() + '</span>' : ic(t === 'ball' ? sport : t === 'arrow' ? 'arrowPass' : t));
+    const toolIcon = (t) => (t === 'a' || t === 'b' ? '<span class="dot" style="background:' + BOARD[sport][t] + ';color:' + BOARD[sport][t + 'Ink'] + (t === 'b' && sport === 'basquet' ? ';box-shadow:inset 0 0 0 1.5px ' + BOARD[sport].ring : '') + '">' + t.toUpperCase() + '</span>' : ic(t === 'ball' ? sport : t === 'arrow' ? 'arrowPass' : t));
     const wrap = document.createElement('div');
     wrap.className = 'board-wrap';
     wrap.dataset.tint = sport;
@@ -4487,8 +4509,8 @@
       '<div class="board-head"><button type="button" class="cap" data-bd="cancel">Cancelar</button><span class="sh-title">Pizarrón</span><button type="button" class="cap filled" data-bd="done">Listo</button></div>' +
       '<div class="board-sub">' + segHTML('variant', VARIANTS[sport], d.v, 'Cancha') + '</div>' +
       '<div class="board-stage"><div class="board-canvas art"></div></div>' +
-      '<div class="board-kind" data-ref="kind" hidden>' + segHTML('akind', ARROW_KINDS(sport), arrowKind, 'Tipo de flecha') + '</div>' +
-      '<div class="board-kind" data-ref="gear" hidden>' + segHTML('gkind', GEAR_KINDS, gearKind, 'Material') + '</div>' +
+      '<div class="board-kinds"><div class="board-kind" data-ref="kind" hidden>' + segHTML('akind', ARROW_KINDS(sport), arrowKind, 'Tipo de flecha') + '</div>' +
+      '<div class="board-kind" data-ref="gear" hidden>' + segHTML('gkind', GEAR_KINDS, gearKind, 'Material') + '</div></div>' +
       '<p class="board-hint" aria-live="polite"></p>' +
       '<div class="board-tools" role="toolbar" aria-label="Herramientas">' +
       BOARD_TOOLS.map((t) => '<button type="button" class="bt" data-tool="' + t[0] + '" aria-pressed="false">' + toolIcon(t[0]) + '<span>' + t[1] + '</span></button>').join('') +
@@ -4715,7 +4737,21 @@
     return { k, n, rest: true, left: cyc - within, len: rest };
   }
 
-  function runClass(id) {
+  function saveRun(id, st) { pref.set('run', JSON.stringify({ id, i: st.i, acc: st.acc, extra: st.extra, started: st.started, running: st.running, since: st.since, savedAt: Date.now() })); }
+  function clearRun() { pref.set('run', ''); }
+  function savedRun() { try { const r = JSON.parse(pref.get('run') || 'null'); return r && r.id && Date.now() - r.savedAt < 4 * 3600e3 ? r : null; } catch (e) { return null; } }
+  function offerResume() {
+    const r = savedRun();
+    const c = r && getClass(r.id);
+    if (!c) { if (r) clearRun(); return; }
+    actionSheet({
+      title: 'Tienes una clase en curso',
+      message: (c.name || 'Clase') + ' · bloque ' + (r.i + 1) + ' de ' + (c.items || []).length,
+      tint: SPORTS[c.sport] ? c.sport : 'futbol',
+      actions: [{ label: 'Seguir con la clase', icon: 'play', onClick: () => runClass(r.id, r) }, { label: 'Terminarla', danger: true, onClick: clearRun }],
+    });
+  }
+  function runClass(id, resume) {
     const c = getClass(id);
     if (!c) return;
     const items = (c.items || []).map((it) => (isPause(it) ? Object.assign({}, it, { pause: true }) : Object.assign({}, it, { ex: getEx(it.exId) }))).filter((it) => it.pause || it.ex);
@@ -4751,11 +4787,13 @@
     function mediaHTML(ex) {
       if (ex.mediaType === 'video' && ex.mediaId) return '<video muted playsinline loop autoplay preload="auto" data-media="' + esc(ex.mediaId) + '"' + (ex.thumbId ? ' data-poster="' + esc(ex.thumbId) + '"' : '') + '></video>';
       if (ex.mediaType === 'image' && ex.mediaId) return '<img alt="" data-media="' + esc(ex.mediaId) + '">';
-      if (ex.videoUrl) return '<video muted playsinline loop autoplay preload="auto" src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video>';
-      return '<span class="art">' + boardSVG(ex.sport, hasDiagram(ex) ? ex.diagram : null, { fit: 'xMidYMid meet', anim: hasDiagram(ex) && canPlay(ex.diagram) }) + '</span>';
+      if (ex.videoUrl && !hasDiagram(ex)) return '<video muted playsinline loop autoplay preload="auto" src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video>';
+      // En el modo clase, el pizarrón acercado a la jugada (se lee mejor que el video vertical en la franja ancha).
+      return '<span class="art">' + boardSVG(ex.sport, hasDiagram(ex) ? ex.diagram : null, { fit: 'xMidYMid meet', crop: true, anim: hasDiagram(ex) && canPlay(ex.diagram) }) + '</span>';
     }
     let runPlayer = null;
     let dir = '';
+    let lastSave = 0;
     function renderBlock() {
       if (runPlayer) { runPlayer.stop(); runPlayer = null; }
       body.classList.remove('go-next', 'go-prev');
@@ -4775,13 +4813,14 @@
         '<div class="run-ctrls"><button type="button" class="rc" data-run="prev" aria-label="Anterior"' + (st.i === 0 ? ' disabled' : '') + '>' + ic('prev') + '</button>' +
         '<button type="button" class="rc big" data-run="toggle" aria-label="Empezar"></button>' +
         '<button type="button" class="rc" data-run="next" aria-label="' + (nxt ? 'Siguiente' : 'Terminar la clase') + '">' + ic(nxt ? 'next' : 'flag') + '</button></div>' +
-        '<div class="run-sec"><button type="button" class="cap" data-run="plus" aria-label="Agregar un minuto">+1 min</button><span class="run-next">' +
+        '<div class="run-sec"><span class="run-adj"><button type="button" class="cap" data-run="minus" aria-label="Quitar un minuto">−1</button><button type="button" class="cap" data-run="plus" aria-label="Agregar un minuto">+1 min</button></span>' +
+        '<button type="button" class="cap skip-rest" data-run="skiprest" hidden>Saltar descanso</button><span class="run-next">' +
         (nxt ? 'Sigue: <b>' + esc(title(nxt)) + '</b> · ' + esc(fmtMin(itemMin(nxt))) + ' min' : 'Es lo último de la clase') + '</span></div>' +
         (points.length ? '<ul class="points run-points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
         '<div class="run-foot"><div class="tl-bar" data-ref="bar">' + items.map((x, i) => '<i style="flex-grow:' + Math.max(1, itemMin(x)) + '" class="' + (x.pause ? 'pz ' : '') + (i < st.i ? 'past' : i === st.i ? 'cur' : '') + '"></i>').join('') + '</div>' +
         '<p class="run-total" data-ref="total"></p></div>';
       if (!it.pause) hydrate(body);
-      if (ex && !ex.mediaId && !ex.videoUrl && hasDiagram(ex) && canPlay(ex.diagram) && !reduceMotion()) runPlayer = playDiagram($('.run-media', body), ex.diagram, { loop: true, delay: 700 });
+      if (ex && !ex.mediaId && hasDiagram(ex) && canPlay(ex.diagram) && !reduceMotion()) runPlayer = playDiagram($('.run-media', body), ex.diagram, { loop: true, delay: 700 });
       update();
     }
     function doneHTML() {
@@ -4843,6 +4882,9 @@
       const curBar = $('[data-ref="bar"] .cur', body);
       if (curBar) curBar.style.setProperty('--p', Math.min(100, Math.round((el / dur) * 100)) + '%');
       // Silbato al cambiar de serie o de descanso, y al terminar el tiempo.
+      const sk = $('[data-run="skiprest"]', body);
+      if (sk) sk.hidden = !(ph && ph.rest);
+      if (st.started && Date.now() - lastSave > 1000) { lastSave = Date.now(); saveRun(id, st); }
       const pk = ph ? ph.k + (ph.rest ? 'r' : 'w') : over ? 'over' : 'x';
       if (st.running && st.phase[st.i] !== null && pk !== st.phase[st.i] && ph) alarm(ph.rest ? 'short' : 'start');
       st.phase[st.i] = pk;
@@ -4866,6 +4908,7 @@
       st.done = true;
       $('[data-ref="step"]', wrap).textContent = 'Terminada';
       wrap.classList.remove('over', 'running', 'resting');
+      clearRun();
       whistle('end');
       renderBlock();
       if (S.canWrite && totalElapsed() >= 60000) mutateClass(id, (x) => { x.lastRunAt = Date.now(); });
@@ -4889,7 +4932,7 @@
     };
     function exit() {
       if (st.done || !st.started) { popLayer(layer); return; }
-      actionSheet({ title: '¿Salir del modo clase?', message: 'Se pierde el tiempo que llevas.', actions: [{ label: 'Salir', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir con la clase' });
+      actionSheet({ title: '¿Salir del modo clase?', message: 'Se pierde el tiempo que llevas.', actions: [{ label: 'Salir', danger: true, onClick: () => { clearRun(); popLayer(layer); } }], cancel: 'Seguir con la clase' });
     }
     wrap.addEventListener('click', (e) => {
       const b = e.target.closest('[data-run]');
@@ -4914,6 +4957,17 @@
           if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir del modo clase', onClick: () => popLayer(layer) }], cancel: 'Seguir aquí' }); break; }
           actionSheet({ title: '¿Terminar la clase?', actions: [{ label: 'Terminar clase', onClick: finish }], cancel: 'Seguir con la clase' });
           break;
+        case 'minus':
+          st.extra[st.i] = Math.max(1 - baseMin(st.i), st.extra[st.i] - 1);
+          haptic(6);
+          update();
+          break;
+        case 'skiprest': {
+          const it = items[st.i];
+          const ph = it.series ? seriesPhase(it.series, elapsed(st.i)) : null;
+          if (ph && ph.rest) { pin(); st.acc[st.i] += ph.left + 1; haptic(8); update(); }
+          break;
+        }
         case 'plus':
           st.extra[st.i] += 1;
           if (durMs(st.i) - elapsed(st.i) > 0) st.whistled[st.i] = false;
@@ -4923,6 +4977,16 @@
         default: break;
       }
     });
+    if (resume && Array.isArray(resume.acc) && resume.acc.length === items.length) {
+      st.i = Math.max(0, Math.min(items.length - 1, Number(resume.i) || 0));
+      st.acc = resume.acc.map((x) => Number(x) || 0);
+      st.extra = (resume.extra || []).map((x) => Number(x) || 0).concat(items.map(() => 0)).slice(0, items.length);
+      st.started = !!resume.started;
+      st.running = !!resume.running;
+      st.since = st.running ? Number(resume.since) || Date.now() : 0;
+      st.whistled = items.map((x, k) => k < st.i || st.acc[k] >= durMs(k));
+      if (st.started) keepAwake();
+    }
     renderBlock();
     pushLayer(layer);
     requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('open')));
@@ -5239,6 +5303,7 @@
           case 'new-group': openGroupEditor({}); return;
           case 'start-class': runClass(a.dataset.id); return;
           case 'roll-class': openAttendance(a.dataset.id); return;
+          case 'plan-class': openClass(a.dataset.id); setTimeout(() => openPicker(a.dataset.id), 450); return;
           case 'catalog': openCatalog(S.sport); return;
           case 'new-section': openSectionEditor({}); return;
           case 'filters': openFilters(S.sport); return;
@@ -5252,6 +5317,8 @@
       if (gr) { openGroup(gr.dataset.openGroup); return; }
       const tp = e.target.closest('[data-open-template]');
       if (tp) { openTemplate(tp.dataset.openTemplate); return; }
+      const oc = e.target.closest('[data-open-cat]');
+      if (oc) { openCatalogEx(oc.dataset.openCat); return; }
       const sc = e.target.closest('[data-open-section]');
       if (sc) { openSection(sc.dataset.openSection); return; }
       const uf = e.target.closest('[data-unfilter]');
@@ -5321,6 +5388,7 @@
       S.ready = true;
       if (!data.fromCache) { S.definitive = true; S.stale = false; clearTimeout(timer); }
       // Una vez al abrir: borra videos que ya no usa ningún ejercicio (antes de que empieces a editar).
+      if (S.definitive && !S.resumeAsked) { S.resumeAsked = true; setTimeout(offerResume, 600); }
       if (!cleaned && S.definitive && backend.cleanOrphans && S.canWrite) {
         cleaned = true;
         const used = new Set();
