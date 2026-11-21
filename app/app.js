@@ -1479,7 +1479,17 @@
     const u = S.backend ? S.backend.cachedURL(id) : null;
     return u ? 'src="' + esc(u) + '"' : 'data-media="' + esc(id) + '"';
   }
+  // Videos de Recomendados que ya no vienen con la app: se ignoran y el ejercicio muestra su pizarrón.
+  function liveMedia(ex) {
+    const c = CAT();
+    if (!ex || !ex.videoUrl || !c) return ex;
+    if (!c._media) { c._media = new Set(); c.exercises.forEach((x) => { if (x.videoUrl) c._media.add(x.videoUrl); }); }
+    if (c._media.has(ex.videoUrl)) return ex;
+    const out = Object.assign({}, ex); delete out.videoUrl; delete out.posterUrl; delete out.thumbUrl;
+    return out;
+  }
   function thumbHTML(ex, cls) {
+    ex = liveMedia(ex);
     const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>'
       : !ex.mediaId && ex.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(ex.thumbUrl) + '">'
         : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram, { crop: true }) : fieldArt(ex.sport)) + '</span>';
@@ -2062,7 +2072,7 @@
     if (ex.mediaType === 'image' && ex.mediaId) {
       return '<div class="d-frame"' + style + '><img alt="' + esc(ex.title) + '" data-media="' + esc(ex.mediaId) + '"></div>';
     }
-    if (ex.videoUrl) return coachVideoHTML(ex);
+    if (liveMedia(ex).videoUrl) return coachVideoHTML(ex);
     if (hasDiagram(ex)) return boardFrameHTML(ex);
     if (!S.canWrite) return '';
     return '<button type="button" class="board-add" data-act="board"><span class="ico">' + ic('board') + '</span><span class="txt"><b>Dibujar en el pizarrón</b><span class="s">Jugadores, conos y flechas</span></span>' + ic('chevR', 'chev') + '</button>';
@@ -2312,7 +2322,7 @@
       tint: ex.sport,
       actions: [
         { label: 'Mandar texto por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) },
-      ].concat(ex.videoUrl || ex.mediaType === 'video' ? [{ label: 'Mandar el video', icon: 'video', onClick: () => shareVideo(ex) }] : []).concat([
+      ].concat(liveMedia(ex).videoUrl || ex.mediaType === 'video' ? [{ label: 'Mandar el video', icon: 'video', onClick: () => shareVideo(ex) }] : []).concat([
         { label: 'Mandar a otro profe', sub: 'Le llega un archivo para abrir en su Cancha', icon: 'box', onClick: () => openShareCoaches({ exIds: [ex.id] }) },
         { label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) },
       ]),
@@ -2796,7 +2806,7 @@
   function mosaicHTML(exs) {
     const three = exs.slice(0, 3);
     if (!three.length) return '<span class="mo-empty">' + ic('board') + '</span>';
-    return three.map((e) => '<span class="mo-cell">' + (e.thumbId ? '<img alt="" loading="lazy" ' + srcAttr(e.thumbId) + '>' : e.thumbUrl ? '<img alt="" loading="lazy" src="' + esc(e.thumbUrl) + '">' : boardSVG(e.sport, hasDiagram(e) ? e.diagram : null, { crop: true })) + '</span>').join('');
+    return three.map(liveMedia).map((e) => '<span class="mo-cell">' + (e.thumbId ? '<img alt="" loading="lazy" ' + srcAttr(e.thumbId) + '>' : e.thumbUrl ? '<img alt="" loading="lazy" src="' + esc(e.thumbUrl) + '">' : boardSVG(e.sport, hasDiagram(e) ? e.diagram : null, { crop: true })) + '</span>').join('');
   }
   function sectionsStripHTML() {
     const list = S.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0) || (a.createdAt || 0) - (b.createdAt || 0));
@@ -2970,7 +2980,7 @@
   const DUR_BANDS = [['', 'Cualquiera'], ['0-10', 'Hasta 10 min'], ['11-20', '11 a 20 min'], ['21-999', 'Más de 20 min']];
   const SORTS = [['recent', 'Recientes'], ['az', 'A–Z'], ['short', 'Más cortos']];
   const fx = (sport) => (S.fx[sport] = S.fx[sport] || { levels: [], age: '', dur: '', video: false, school: false, sort: 'recent' });
-  const hasVideo = (e) => e.mediaType === 'video' || !!e.videoUrl || !!e.link;
+  const hasVideo = (e) => e.mediaType === 'video' || !!liveMedia(e).videoUrl || !!e.link;
   // «Sub-12» → 11 a 12; «9 a 15 años» → 9 a 15; sin edad → sirve para todos.
   function ageRange(txtAge) {
     const s = String(txtAge || '');
@@ -4360,7 +4370,7 @@
       ? pics.map((x, i) => '<img class="ce-p' + i + '" alt="" loading="lazy" decoding="async" src="' + esc(x.thumbUrl) + '">').join('')
       : '<span class="ce-board">' + boardSVG(sport, sample ? sample.diagram : null) + '</span>';
     return '<button class="cat-entry" data-act="catalog" data-tint="' + sport + '"><span class="txt"><b>Recomendados</b>' +
-      '<span class="ce-sub">' + (n ? n + ' ejercicios de ' + SPORTS[sport].noun + ' con video' : 'Ejercicios listos para usar') + '</span><span class="ce-cta">Ver ejercicios' + ic('chevR') + '</span></span>' +
+      '<span class="ce-sub">' + (n ? n + ' ejercicios de ' + SPORTS[sport].noun + (all.some((x) => x.videoUrl) ? ', ' + all.filter((x) => x.videoUrl).length + ' con video' : '') : 'Ejercicios listos para usar') + '</span><span class="ce-cta">Ver ejercicios' + ic('chevR') + '</span></span>' +
       '<span class="ce-art" aria-hidden="true">' + art + '</span></button>';
   }
   function templatesHTML() {
@@ -4832,7 +4842,7 @@
     function mediaHTML(ex) {
       if (ex.mediaType === 'video' && ex.mediaId) return '<video muted playsinline loop autoplay preload="auto" data-media="' + esc(ex.mediaId) + '"' + (ex.thumbId ? ' data-poster="' + esc(ex.thumbId) + '"' : '') + '></video>';
       if (ex.mediaType === 'image' && ex.mediaId) return '<img alt="" data-media="' + esc(ex.mediaId) + '">';
-      if (ex.videoUrl && !hasDiagram(ex)) return '<video muted playsinline loop autoplay preload="auto" src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video>';
+      if (liveMedia(ex).videoUrl && !hasDiagram(ex)) return '<video muted playsinline loop autoplay preload="auto" src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video>';
       // En el modo clase, el pizarrón acercado a la jugada (se lee mejor que el video vertical en la franja ancha).
       return '<span class="art">' + boardSVG(ex.sport, hasDiagram(ex) ? ex.diagram : null, { fit: 'xMidYMid meet', crop: true, anim: hasDiagram(ex) && canPlay(ex.diagram) }) + '</span>';
     }
@@ -5425,9 +5435,10 @@
   function tutorialSlides() {
     const cloud = S.backend && S.backend.kind === 'cloud';
     const n = CAT() ? CAT().exercises.length : 0;
+    const nv = CAT() ? CAT().exercises.filter((x) => x.videoUrl).length : 0;
     return [
       { art: 'board', title: 'Bienvenido a Cancha', text: 'Aquí preparas y das tus clases de fútbol y básquetbol.' },
-      { art: 'cards', title: 'Ejercicios con video', text: (n ? n + ' ejercicios' : 'Ejercicios') + ' listos para usar, con video. Están en «Ejercicios» y también puedes crear los tuyos.' },
+      { art: 'cards', title: 'Ejercicios listos', text: (n ? n + ' ejercicios' : 'Ejercicios') + ' para usar, ' + (nv ? 'algunos con video. ' : '') + 'Están en «Ejercicios» y también puedes crear los tuyos.' },
       { art: 'timer', title: 'El cronómetro lleva el tiempo', text: 'Toca «Iniciar clase» y luego «Empezar». Al acabar el tiempo suena el silbato y tocas «Siguiente».' },
       { art: 'roll', title: 'Pasa lista', text: 'En tu grupo toca «Pasar lista hoy». Luego saca el reporte de asistencia en PDF.' },
       cloud
