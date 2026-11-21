@@ -399,7 +399,7 @@
 
   // ---------------------------------------------------------------- ejemplos (solo modo local)
   // Versión 2: ejemplos revisados por un profe (sesión con inicio, pausa, series y cierre).
-  const SEED_VERSION = 2;
+  const SEED_VERSION = 3;
   function nextWeekday(days) {
     const d = new Date();
     for (let i = 1; i <= 7; i++) {
@@ -408,7 +408,38 @@
     }
     return addDays(1);
   }
-  function seedData() {
+  function seedFromCatalog(cat) {
+    const t = Date.now() - 864e5 * 3;
+    const fut = cat.sessions.find((x) => x.sport === 'futbol');
+    const bas = cat.sessions.find((x) => x.sport === 'basquet');
+    if (!fut || !bas) return null;
+    const ids = new Set(fut.items.concat(bas.items).map((it) => it.exId).filter(Boolean));
+    let n = 0;
+    const exercises = cat.exercises.filter((x) => ids.has(x.id)).map((x) => Object.assign({}, x, {
+      id: 'ex3-' + x.id, catalogId: x.id, favorite: false, mediaType: null, mediaId: null, thumbId: null, mediaDuration: 0, mediaAspect: null,
+      diagram: JSON.parse(JSON.stringify(x.diagram)), example: true, createdAt: t - (n += 1) * 60000, updatedAt: t - n * 60000,
+    }));
+    exercises.forEach((x) => { x.updatedAt = x.createdAt; });
+    const plan = (ses) => ses.items.map((it) => (isPause(it) ? { type: 'pause', label: it.label, min: it.min } : Object.assign({ exId: 'ex3-' + it.exId, min: it.min }, it.series ? { series: Object.assign({}, it.series) } : {})));
+    const short = (name) => String(name).split(' · ').pop();
+    const kids = (pre, names) => names.map((nm, i) => ({ id: 'al3-' + pre + (i + 1), name: nm }));
+    return {
+      exercises,
+      classes: [
+        { id: 'cl3-ej1', sport: 'futbol', name: short(fut.name), date: nextWeekday([1, 3]), groupId: 'gr3-ej1', notes: fut.notes, items: plan(fut), example: true, createdAt: t, updatedAt: t },
+        { id: 'cl3-ej2', sport: 'basquet', name: short(bas.name), date: nextWeekday([2, 4]), groupId: 'gr3-ej2', notes: bas.notes, items: plan(bas), example: true, createdAt: t, updatedAt: t },
+      ],
+      groups: [
+        { id: 'gr3-ej1', name: '5.º A', sport: 'futbol', category: 'Primaria', schedule: 'Lun y Mié 9:00', place: 'Patio', example: true, createdAt: t, updatedAt: t,
+          students: kids('a', ['Aguilar Ruiz Sofía', 'Castillo Pérez Diego', 'Domínguez Luna Valeria', 'Flores Ortega Emiliano', 'García Mendoza Regina', 'Hernández Cruz Santiago', 'Jiménez Ramos Ximena', 'López Torres Mateo', 'Martínez Vega Camila', 'Morales Díaz Leonardo', 'Ramírez Soto Renata', 'Sánchez Reyes Iker']) },
+        { id: 'gr3-ej2', name: '2.º B', sport: 'basquet', category: 'Secundaria', schedule: 'Mar y Jue 11:00', place: 'Cancha techada', example: true, createdAt: t, updatedAt: t,
+          students: kids('b', ['Acosta Medina Andrea', 'Bautista Rojas Emilio', 'Cervantes Lara Fernanda', 'Delgado Núñez Sebastián', 'Escobar Ríos Mariana', 'Fuentes Salas Daniel', 'Guerrero Peña Paola', 'Ibarra Campos Rodrigo', 'Juárez Molina Natalia', 'Navarro Lozano Jesús', 'Orozco Trejo Daniela', 'Vázquez Ponce Alejandro']) },
+      ],
+    };
+  }
+  function seedData(cat) {
+    const fromCat = cat ? seedFromCatalog(cat) : null;
+    if (fromCat) return fromCat;
     const t = Date.now() - 864e5 * 3;
     const ex = (o, i) => Object.assign({
       favorite: false, mediaType: null, mediaId: null, thumbId: null, mediaDuration: 0, mediaAspect: null, diagram: null,
@@ -530,7 +561,7 @@
   }
 
   // Cambia los ejemplos viejos por los nuevos sin tocar nada que el profe haya usado o editado.
-  async function migrateSeeds(st) {
+  async function migrateSeeds(st, cat) {
     const [exs, cls, grs] = await Promise.all([st.all('exercises'), st.all('classes'), st.all('groups')]);
     const pristine = (x) => x.example && Number(x.updatedAt) === Number(x.createdAt);
     const keepCls = cls.filter((c) => !pristine(c));
@@ -547,7 +578,7 @@
       if (pristine(g) && !usedGr.has(g.id)) { await st.del('groups', g.id); replaced++; } else if (g.example) { g.example = false; await st.put('groups', g); }
     }
     if (replaced) {
-      const seed = seedData();
+      const seed = seedData(cat);
       for (const x of seed.exercises) await st.put('exercises', x);
       for (const c of seed.classes) await st.put('classes', c);
       for (const g of seed.groups) await st.put('groups', g);
@@ -575,19 +606,22 @@
     if (kind !== 'memory') {
       const seeded = await st.get('meta', 'seeded');
       const version = Number(await st.get('meta', 'seed-version')) || (seeded ? 1 : 0);
+      // Los ejemplos salen del catálogo; si no se pudo cargar, quedan los anteriores y se intenta otro día.
+      const cat = !seeded || version < SEED_VERSION ? await loadCatalog().catch(() => null) : null;
+      const seedVersion = cat ? SEED_VERSION : 2;
       if (!seeded) {
         const existing = await st.all('exercises');
         if (!existing.length) {
-          const seed = seedData();
+          const seed = seedData(cat);
           for (const x of seed.exercises) await st.put('exercises', x);
           for (const c of seed.classes) await st.put('classes', c);
           for (const g of seed.groups) await st.put('groups', g);
         }
         await st.put('meta', true, 'seeded');
-        await st.put('meta', SEED_VERSION, 'seed-version');
-      } else if (version < SEED_VERSION) {
-        await migrateSeeds(st);
-        await st.put('meta', SEED_VERSION, 'seed-version');
+        await st.put('meta', seedVersion, 'seed-version');
+      } else if (version < seedVersion) {
+        await migrateSeeds(st, cat);
+        await st.put('meta', seedVersion, 'seed-version');
       }
       try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* opcional */ }
     }
@@ -3472,7 +3506,7 @@
   }
 
   // --- importar: todo lo que viene del archivo se revisa antes de guardarlo.
-  const SEED_RE = /^(ej-[fb]\d+|cl-ej\d+|gr-ej\d+|ex2-[fb]\d+|cl2-ej\d+|gr2-ej\d+)$/;
+  const SEED_RE = /^(ej-[fb]\d+|cl-ej\d+|gr-ej\d+|ex2-[fb]\d+|cl2-ej\d+|gr2-ej\d+|ex3-c[fb]-\d+|cl3-ej\d+|gr3-ej\d+)$/;
   const isId = (v) => typeof v === 'string' && /^[A-Za-z0-9_.:-]{1,80}$/.test(v);
   const txt = (v, max) => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '').slice(0, max);
   const numIn = (v, lo, hi, def) => { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : def; };
