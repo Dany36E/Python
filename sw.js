@@ -1,14 +1,16 @@
 /* Cancha — service worker: la app funciona sin conexión.
    Cada versión usa su propia caché: al publicar cambios, sube VERSION para que todos reciban
    la app completa de una sola vez (sin mezclar archivos viejos y nuevos). */
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'cancha-' + VERSION;
 const SHELL = [
   './',
   './index.html',
   './app/styles.css',
   './app/app.js',
+  './app/catalog.js',
   './app/vendor/jspdf.umd.min.js',
+  './app/fonts/big-shoulders-display.woff2',
   './manifest.webmanifest',
   './icons/icon.svg',
   './icons/icon-192.png',
