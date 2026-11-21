@@ -28,7 +28,7 @@
     basquet: [['half', 'Media cancha'], ['full', 'Cancha completa']],
   };
   const APP_NAME = 'Cancha';
-  const PAUSES = ['Hidratación', 'Descanso', 'Montar material'];
+  const PAUSES = ['Hidratación', 'Descanso', 'Preparar material'];
   const isPause = (it) => !!it && it.type === 'pause';
   const itemMin = (it) => Math.max(0, Number(it && it.min) || 0);
   const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
@@ -274,7 +274,8 @@
     return '<svg' + size + ' viewBox="0 0 160 200" preserveAspectRatio="' + (opts.fit || 'xMidYMid slice') + '" aria-hidden="true" class="bd bd-' + sport + (opts.cls ? ' ' + opts.cls : '') + '">' +
       turfSVG(sport, v) +
       '<g fill="none" stroke="' + P.line + '" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" color="' + P.line + '">' + (COURT[sport + '-' + v] || COURT['futbol-full']) + '</g>' +
-      '<g class="bd-items">' + items.map((it, i) => itemSVG(it, opts.interactive ? i : null, sport, { anim: opts.anim, idx: i })).join('') + '</g></svg>';
+      '<g class="bd-items">' + items.map((it, i) => (it.t === 'arrow' ? itemSVG(it, opts.interactive ? i : null, sport, { anim: opts.anim, idx: i }) : '')).join('') +
+      items.map((it, i) => (it.t !== 'arrow' ? itemSVG(it, opts.interactive ? i : null, sport, { anim: opts.anim, idx: i }) : '')).join('') + '</g></svg>';
   }
   const fieldArt = (sport) => boardSVG(sport, null);
 
@@ -961,7 +962,7 @@
   // Hoja modal genérica. A la izquierda una ✕ para cerrar; a la derecha la acción principal.
   function openSheet(o) {
     const wrap = document.createElement('div');
-    wrap.className = 'sheet-wrap';
+    wrap.className = 'sheet-wrap' + (o.wide ? ' wide' : '');
     if (o.tint) wrap.dataset.tint = o.tint;
     if (o.z) wrap.style.zIndex = o.z;
     wrap.innerHTML =
@@ -1028,7 +1029,8 @@
       },
     };
     $('[data-sh="cancel"]', wrap).addEventListener('click', () => api.requestClose());
-    $('.scrim', wrap).addEventListener('click', () => api.requestClose());
+    const openedAt = performance.now();
+    $('.scrim', wrap).addEventListener('click', () => { if (performance.now() - openedAt > 450) api.requestClose(); });
     if (okBtn) {
       okBtn.addEventListener('click', async () => {
         if (busy || closing || confirming || okBtn.disabled || !o.onConfirm) return;
@@ -1093,9 +1095,11 @@
         setTimeout(rm, 600);
       },
     };
+    const asOpenedAt = performance.now();
     wrap.addEventListener('click', (e) => {
       const b = e.target.closest('[data-i]');
       if (!b && !e.target.classList.contains('scrim')) return;
+      if (!b && performance.now() - asOpenedAt < 450) return;
       if (done) return;
       done = true;
       popLayer(api);
@@ -1137,14 +1141,16 @@
       let used = false;
       toastDone = () => { if (!used && action.onExpire) action.onExpire(); };
       $('.toast-act', t).addEventListener('click', () => {
+        if (used) return;
         used = true; toastDone = null;
         t.classList.remove('show');
         clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('has-act'), 500);
         action.onClick();
       });
     }
     toastTimer = setTimeout(() => {
-      t.classList.remove('show');
+      t.classList.remove('show', 'has-act');
       if (toastDone) { const f = toastDone; toastDone = null; f(); }
     }, action ? 5500 : 2800);
   }
@@ -1396,7 +1402,7 @@
     if (cls !== 'mini') {
       if (ex.mediaType === 'video') badge = '<span class="badge">' + ic('play') + (ex.mediaDuration ? fmtClock(ex.mediaDuration) : 'Video') + '</span>';
       else if (ex.mediaType === 'image') badge = '<span class="badge">' + ic('photo') + 'Foto</span>';
-      else if (hasDiagram(ex)) badge = '<span class="badge">' + ic('board') + 'Pizarra</span>';
+      else if (hasDiagram(ex)) badge = '<span class="badge">' + ic('board') + 'Pizarrón</span>';
     }
     const extra = cls === 'mini' ? '' : (ex.favorite ? '<span class="fav" aria-label="Favorito">' + ic('heart-fill') + '</span>' : '') + (ex.example ? '<span class="pill-ex">Ejemplo</span>' : '');
     return '<span class="' + (cls || 'thumb') + '" data-tint="' + esc(ex.sport) + '">' + inner + badge + extra + '</span>';
@@ -1462,8 +1468,9 @@
     if (S.error) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>No se pudieron cargar tus datos.</b> Vuelve a abrir la app en un momento.</span></div>');
     if (S.ready && !S.canWrite) out.push('<div class="note">' + ic('lock') + '<span class="txt"><b>Solo lectura.</b> Puedes ver esta biblioteca, pero solo su dueño puede editarla.</span></div>');
     if (S.ready && tab === 'clases' && k === 'local' && !framed && isAppleMobile() && !isStandalone()) {
-      out.push('<div class="note">' + ic('device') + '<span class="txt"><b>Instala Cancha</b> en tu pantalla de inicio para que Safari no borre tus datos.</span><button class="link" data-act="install-help">Cómo</button></div>');
-    } else if (S.ready && tab === 'clases' && needsBackup()) {
+      out.push('<div class="note">' + ic('device') + '<span class="txt"><b>Instala Cancha</b> en tu pantalla de inicio para que Safari no borre tus datos.</span><button class="link" data-act="install-help">Ver cómo</button></div>');
+    }
+    if (S.ready && tab === 'clases' && needsBackup()) {
       const last = Number(pref.get('last-backup')) || 0;
       out.push('<div class="note">' + ic('box') + '<span class="txt"><b>Haz un respaldo.</b> ' + (last ? 'El último fue ' + fmtAgo(last) + '.' : 'Tus datos solo viven en este dispositivo.') + '</span><button class="link" data-act="backup-now">Respaldar</button></div>');
     }
@@ -1524,7 +1531,7 @@
   function emptyExercisesHTML(sport) {
     return '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt(sport) + '</span></div>' +
       '<h2>Aún no tienes ejercicios de ' + SPORTS[sport].noun + '</h2>' +
-      '<p>' + (S.canWrite ? 'Agrega uno con video, foto o un dibujo en la pizarra.' : 'Todavía no hay ejercicios aquí.') + '</p>' +
+      '<p>' + (S.canWrite ? 'Agrega uno con video, foto o un dibujo en el pizarrón.' : 'Todavía no hay ejercicios aquí.') + '</p>' +
       (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-ex">' + ic('plus') + 'Nuevo ejercicio</button></div>' : '') + '</div>';
   }
 
@@ -1547,9 +1554,12 @@
   function renderClases() {
     const list = S.classes.slice().sort(byUpcoming);
     const t = todayStr();
-    const todays = list.filter((c) => c.date === t);
-    const next = todays[0] || list.find((c) => c.date && c.date > t && c.date <= addDays(7));
-    ref('clases', 'count').textContent = S.ready ? (list.length ? plural(list.length, 'clase', 'clases') : 'Sin clases todavía') : 'Cargando…';
+    const todays = list.filter((c) => c.date === t).sort((a, b) => ((b.items || []).length ? 1 : 0) - ((a.items || []).length ? 1 : 0));
+    // Arriba va la próxima clase que tiene plan (hoy o en los próximos 7 días); si no hay, la de hoy.
+    const hasPlan = (c) => (c.items || []).some((it) => it.exId && getEx(it.exId));
+    const soon = list.filter((c) => c.date && c.date > t && c.date <= addDays(7));
+    const next = todays.find(hasPlan) || soon.find(hasPlan) || todays[0] || soon[0];
+    ref('clases', 'count').textContent = longDate(t);
     let body;
     if (!S.ready) body = '<div class="list">' + [0, 1, 2].map(() => '<div class="cell"><span class="date-tile shimmer"></span><span class="txt"><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></span></div>').join('') + '</div>';
     else if (!list.length) {
@@ -1562,7 +1572,7 @@
       const past = rest.filter((c) => c.date && c.date < t);
       body = (next ? todayCardHTML(next) : '');
       if (up.length) body += '<p class="group-label">Próximas</p><div class="list">' + up.map((c) => classCellHTML(c)).join('') + '</div>';
-      if (past.length) body += '<p class="group-label">Anteriores</p><div class="list">' + past.map((c) => classCellHTML(c)).join('') + '</div>';
+      if (past.length) body += '<p class="group-label">Historial</p><div class="list">' + past.map((c) => classCellHTML(c)).join('') + '</div>';
     }
     if (S.ready && S.canWrite) body += templatesHTML();
     const sig = ['cl', S.ready, S.canWrite, body, noteHTML('clases')].join('|');
@@ -1592,7 +1602,7 @@
   // --- Grupos
   function renderGroups() {
     const list = S.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
-    ref('grupos', 'count').textContent = S.ready ? (list.length ? plural(list.length, 'grupo', 'grupos') : 'Sin grupos todavía') : 'Cargando…';
+    ref('grupos', 'count').textContent = S.ready && list.length ? list.reduce((n, g) => n + studentsOf(g).length, 0) + ' alumnos en ' + plural(list.length, 'grupo', 'grupos') : '';
     let body;
     if (!S.ready) body = '<div class="list">' + [0, 1].map(() => '<div class="cell"><span class="icon-sq shimmer"></span><span class="txt"><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></span></div>').join('') + '</div>';
     else if (!list.length) {
@@ -1674,6 +1684,13 @@
       seg.style.setProperty('--i', btns.indexOf(b));
       haptic(5);
       onChange(b.dataset.val);
+    });
+    seg.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const btns = $$('button[data-val]', seg);
+      const i = btns.findIndex((x) => x.getAttribute('aria-checked') === 'true');
+      const n = btns[(i + (e.key === 'ArrowRight' ? 1 : btns.length - 1)) % btns.length];
+      e.preventDefault(); n.focus(); n.click();
     });
   }
   function stepperHTML(id, value, small, label) {
@@ -1782,12 +1799,12 @@
     }
     function boardTileHTML(compact) {
       if (diagram && diagram.items && diagram.items.length) {
-        return '<div class="board-prev"><button type="button" class="bp-art" data-board="edit" aria-label="Editar la pizarra"><span class="art">' + boardSVG(ex.sport, diagram) + '</span></button>' +
-          '<div class="bp-txt"><b>Pizarra</b><span>' + plural(diagram.items.length, 'elemento', 'elementos') + '</span><div class="bp-actions"><button type="button" class="cap" data-board="edit">Editar</button><button type="button" class="cap" data-board="remove">Quitar</button></div></div></div>';
+        return '<div class="board-prev"><button type="button" class="bp-art" data-board="edit" aria-label="Editar el pizarrón"><span class="art">' + boardSVG(ex.sport, diagram) + '</span></button>' +
+          '<div class="bp-txt"><b>Pizarrón</b><span>' + plural(diagram.items.length, 'elemento', 'elementos') + '</span><div class="bp-actions"><button type="button" class="cap" data-board="edit">Editar</button><button type="button" class="cap" data-board="remove">Quitar</button></div></div></div>';
       }
       return compact
-        ? '<button type="button" class="pick-tile" data-board="edit"><span class="ico">' + ic('board') + '</span><b>Pizarra</b></button>'
-        : '<button type="button" class="board-add" data-board="edit"><span class="ico">' + ic('board') + '</span><span class="txt"><b>Dibujar en la pizarra</b><span class="s">Jugadores, conos y flechas</span></span>' + ic('chevR', 'chev') + '</button>';
+        ? '<button type="button" class="pick-tile" data-board="edit"><span class="ico">' + ic('board') + '</span><b>Pizarrón</b></button>'
+        : '<button type="button" class="board-add" data-board="edit"><span class="ico">' + ic('board') + '</span><span class="txt"><b>Dibujar en el pizarrón</b><span class="s">Jugadores, conos y flechas</span></span>' + ic('chevR', 'chev') + '</button>';
     }
     function renderMedia() {
       const box = $('[data-ref="media"]', root);
@@ -1873,7 +1890,7 @@
       if (!title) { shake($('#ex-title', root)); toast('Ponle nombre al ejercicio', 'pencil'); return; }
       const nx = Object.assign(plain(ex), {
         title,
-        duration: Math.max(1, Math.min(240, Math.round(Number($('#ex-duration', root).value) || 10))),
+        duration: (() => { const v = Number($('#ex-duration', root).value); return Number.isFinite(v) && $('#ex-duration', root).value !== '' ? Math.max(1, Math.min(240, Math.round(v))) : 10; })(),
         players: $('#ex-players', root).value.trim(),
         age: $('#ex-age', root).value.trim(),
         space: $('#ex-space', root).value.trim(),
@@ -1943,13 +1960,13 @@
     }
     if (hasDiagram(ex)) return boardFrameHTML(ex);
     if (!S.canWrite) return '';
-    return '<button type="button" class="board-add" data-act="board"><span class="ico">' + ic('board') + '</span><span class="txt"><b>Dibujar en la pizarra</b><span class="s">Jugadores, conos y flechas</span></span>' + ic('chevR', 'chev') + '</button>';
+    return '<button type="button" class="board-add" data-act="board"><span class="ico">' + ic('board') + '</span><span class="txt"><b>Dibujar en el pizarrón</b><span class="s">Jugadores, conos y flechas</span></span>' + ic('chevR', 'chev') + '</button>';
   }
   function boardSummary(ex) {
     const its = (ex.diagram && ex.diagram.items) || [];
     const a = its.filter((i) => i.t === 'a').length; const b = its.filter((i) => i.t === 'b').length;
     const arrows = its.filter((i) => i.t === 'arrow').length; const cones = its.filter((i) => i.t === 'cone').length;
-    return 'Pizarra: ' + [a ? plural(a, 'jugador del equipo A', 'jugadores del equipo A') : '', b ? plural(b, 'jugador del equipo B', 'jugadores del equipo B') : '', cones ? plural(cones, 'cono', 'conos') : '', arrows ? plural(arrows, 'flecha', 'flechas') : ''].filter(Boolean).join(', ');
+    return 'Pizarrón: ' + [a ? plural(a, 'jugador del equipo A', 'jugadores del equipo A') : '', b ? plural(b, 'jugador del equipo B', 'jugadores del equipo B') : '', cones ? plural(cones, 'cono', 'conos') : '', arrows ? plural(arrows, 'flecha', 'flechas') : ''].filter(Boolean).join(', ');
   }
   function boardFrameHTML(ex) {
     const playable = canPlay(ex.diagram);
@@ -2008,7 +2025,7 @@
       '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((s) => '<div class="stat"><span class="k">' + ic(s[0]) + s[1] + '</span><span class="v">' + esc(s[2]) + '</span></div>').join('') + '</div>' +
       (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="add-to-class">' + ic('plus') + 'Añadir a una clase</button>' +
         '<button class="btn icon tinted" data-act="fav" aria-pressed="' + !!ex.favorite + '" aria-label="Favorito">' + ic(ex.favorite ? 'heart-fill' : 'heart') + '</button></div>' : '') +
-      (ex.mediaId && hasDiagram(ex) ? sec('Pizarra', boardFrameHTML(ex)) : '') +
+      (ex.mediaId && hasDiagram(ex) ? sec('Pizarrón', boardFrameHTML(ex)) : '') +
       (ex.description ? sec('Cómo se hace', '<p>' + esc(ex.description) + '</p>') : '') +
       (points.length ? sec('Puntos clave', '<ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>') : '') +
       (vars.length ? sec('Para ajustarlo', '<ul class="vars">' + varHTML + '</ul>') : '') +
@@ -2150,7 +2167,10 @@
     const actions = list.map((c) => ({
       label: c.name || 'Clase sin nombre',
       sub: fmtDay(c.date) + ' · ' + fmtMin(classTotal(c)) + ' min',
-      onClick: () => { mutateClass(c.id, (cc) => { cc.items.push({ exId: ex.id, min }); }).then((ok) => { if (ok) toast('Añadido a «' + (c.name || 'la clase') + '»'); }); },
+      onClick: () => {
+        if ((c.items || []).some((it) => it.exId === ex.id)) { toast('Ya está en «' + (c.name || 'la clase') + '»', 'check'); return; }
+        mutateClass(c.id, (cc) => { cc.items.push({ exId: ex.id, min }); }).then((ok) => { if (ok) toast('Añadido a «' + (c.name || 'la clase') + '»'); });
+      },
     }));
     actions.push({ label: 'Nueva clase', icon: 'plus', onClick: () => openClassEditor({ sport: ex.sport, items: [{ exId: ex.id, min }] }) });
     actionSheet({ title: 'Añadir a una clase de ' + SPORTS[ex.sport].noun, actions, tint: ex.sport });
@@ -2208,7 +2228,7 @@
       onConfirm: async () => {
         const root = sheet.body;
         c.date = $('#cl-date', root).value || '';
-        c.name = $('#cl-name', root).value.trim() || ('Clase de ' + SPORTS[c.sport].noun + (c.date ? ' · ' + fmtDay(c.date).toLowerCase() : ''));
+        c.name = $('#cl-name', root).value.trim() || ('Clase de ' + SPORTS[c.sport].noun + (c.date && parseDay(c.date) ? ' del ' + parseDay(c.date).getDate() + ' de ' + MONTHS_LONG[parseDay(c.date).getMonth()] : ''));
         c.notes = $('#cl-notes', root).value.trim();
         c.example = false;
         c.updatedAt = Date.now();
@@ -2313,8 +2333,8 @@
       (g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') + '</div>' +
       '<div class="c-summary"><p class="c-line"><span class="c-total">' + fmtMin(total) + '<small> min</small></span><span class="c-sub">' + plural(nEx, 'ejercicio', 'ejercicios') + (nP ? ' y ' + plural(nP, 'pausa', 'pausas') : '') + '</span></p>' +
       (items.length ? '<div class="tl" aria-hidden="true">' + segs + '<b class="tl-end">' + fmtMin(total) + '′</b></div>' : '') +
-      (nEx && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar clase</button>' : '') +
-      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Dada el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div>' +
+      (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar clase</button>' : '') +
+      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya la diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div>' +
       '<div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Editar plan') + '</button>' : '') + '</div>' +
       '<div class="list">' + planRowsHTML(c, edit) +
       (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Añadir ejercicios</span></button><button class="cell add-row" data-act="add-pause">' + ic('drop') + '<span>Añadir pausa</span></button>' : '') +
@@ -2364,8 +2384,15 @@
         case 'duplicate': openDuplicate(id); break;
         case 'rm': {
           const removed = plain(cc.items[i]);
+          const before = JSON.stringify(cc.items);
           mutateClass(id, (x) => { x.items.splice(i, 1); }).then((ok) => {
-            if (ok) toast('Quitado del plan', 'trash', { label: 'Deshacer', onClick: () => mutateClass(id, (x) => { x.items.splice(Math.min(i, x.items.length), 0, removed); }) });
+            if (!ok) return;
+            const after = JSON.stringify((getClass(id) || {}).items || []);
+            toast('Quitado del plan', 'trash', { label: 'Deshacer', onClick: () => mutateClass(id, (x) => {
+              // Solo si el plan sigue igual que después de quitarlo; así un doble toque no lo repite.
+              if (JSON.stringify(x.items) === after) x.items = JSON.parse(before);
+              else if (!x.items.some((y) => JSON.stringify(y) === JSON.stringify(removed))) x.items.splice(Math.min(i, x.items.length), 0, removed);
+            }) });
           });
           haptic(8);
           break;
@@ -2403,7 +2430,7 @@
   }
 
   function addPauseFlow(classId) {
-    const opts = [['Hidratación', 3], ['Descanso', 2], ['Montar material', 3]];
+    const opts = [['Hidratación', 3], ['Descanso', 2], ['Preparar material', 3]];
     actionSheet({
       title: 'Añadir pausa',
       message: 'Cuenta en el tiempo de la clase y el cronómetro la incluye.',
@@ -2415,7 +2442,8 @@
     const c = getClass(classId);
     const it = c && c.items[i];
     if (!it || isPause(it)) return;
-    const s0 = it.series || { n: 4, work: Math.max(1, Math.min(10, Math.round(itemMin(it) / 4) || 3)), rest: 1 };
+    const fitSeries = (m) => { for (let n = 4; n >= 2; n--) { const w = Math.floor((m - (n - 1)) / n); if (w >= 2) return { n, work: Math.min(30, w), rest: 1 }; } return { n: 2, work: Math.max(1, Math.floor(m / 2) || 1), rest: 0 }; };
+    const s0 = it.series || fitSeries(itemMin(it));
     const st = { n: s0.n, work: s0.work, rest: s0.rest };
     const rests = [['0', 'Sin'], ['0.5', '30 s'], ['1', '1 min'], ['2', '2 min']];
     const counter = (k, label, val, unit) => '<div class="row"><span class="k">' + label + '</span><span class="stepper"><button type="button" class="st-btn" data-k="' + k + '" data-d="-1" aria-label="Menos">' + ic('minus') + '</button><span class="st-val" data-v="' + k + '">' + val + unit + '</span><button type="button" class="st-btn" data-k="' + k + '" data-d="1" aria-label="Más">' + ic('plus') + '</button></span></div>';
@@ -2431,9 +2459,10 @@
         (it.series ? '<button type="button" class="btn tinted wide-btn" data-act="no-series">Quitar series</button>' : ''),
       onConfirm: async () => {
         const total = st.n * st.work + (st.n - 1) * st.rest;
+        if (total > 240) { toast('Máximo 240 min por bloque', 'clock'); return; }
         const ok = await mutateClass(classId, (x) => {
           const y = x.items[i];
-          if (st.n <= 1) { delete y.series; y.min = st.work; } else { y.series = { n: st.n, work: st.work, rest: st.rest }; y.min = total; }
+          if (st.n <= 1) { delete y.series; y.min = st.work; delete y.minBefore; } else { if (!y.series && y.minBefore == null) y.minBefore = y.min; y.series = { n: st.n, work: st.work, rest: st.rest }; y.min = total; }
         });
         if (ok) { sheet.dismiss(); toast('Series guardadas'); }
       },
@@ -2443,7 +2472,8 @@
       $('[data-v="n"]', root).textContent = st.n;
       $('[data-v="work"]', root).textContent = st.work + '′';
       const total = st.n * st.work + (st.n - 1) * st.rest;
-      $('[data-ref="sum"]', root).textContent = st.n <= 1 ? 'Una sola serie de ' + st.work + ' min.' : st.n + ' series de ' + st.work + ' min' + (st.rest ? ' con ' + (st.rest < 1 ? '30 s' : st.rest + ' min') + ' de descanso' : ' sin descanso') + ' = ' + fmtMin(total) + ' min. El silbato suena en cada cambio.';
+      $('[data-ref="sum"]', root).textContent = st.n <= 1 ? 'Una sola serie de ' + st.work + ' min.' : st.n + ' series de ' + st.work + ' min' + (st.rest ? ' con ' + (st.rest < 1 ? '30 s' : st.rest + ' min') + ' de descanso' : ' sin descanso') + ' = ' + fmtMin(total) + ' min.' + (total > 240 ? ' Es demasiado: máximo 240 min.' : '');
+      sheet.setConfirm(total <= 240);
     }
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-k]');
@@ -2454,7 +2484,7 @@
         haptic(4); paint(); return;
       }
       if (e.target.closest('[data-act="no-series"]')) {
-        mutateClass(classId, (x) => { const y = x.items[i]; delete y.series; y.min = st.work; }).then((ok) => { if (ok) { sheet.dismiss(); toast('Series quitadas'); } });
+        mutateClass(classId, (x) => { const y = x.items[i]; delete y.series; y.min = y.minBefore != null ? y.minBefore : y.min; delete y.minBefore; }).then((ok) => { if (ok) { sheet.dismiss(); toast('Series quitadas'); } });
       }
     });
     bindSeg(root, 'rest', (v) => { st.rest = Number(v); paint(); });
@@ -2740,7 +2770,7 @@
               const idx = studentsOf(gPrev).findIndex((y) => y.id === sid);
               const removed = plain(st);
               mutateGroup(id, (x) => { x.students = x.students.filter((y) => y.id !== sid); }).then((ok) => {
-                if (ok) toast(st.name + ' quitado', 'trash', { label: 'Deshacer', onClick: () => mutateGroup(id, (x) => { x.students.splice(Math.max(0, idx), 0, removed); }) });
+                if (ok) toast(st.name + ' quitado', 'trash', { label: 'Deshacer', onClick: () => mutateGroup(id, (x) => { if (!x.students.some((y) => y.id === removed.id)) x.students.splice(Math.max(0, idx), 0, removed); }) });
               });
             } },
           ],
@@ -2854,31 +2884,36 @@
     } else {
       const k = attendanceCounts(c, g);
       inner = k.marked
-        ? '<p class="att-line"><b>' + (k.p + k.t) + ' de ' + k.total + '</b> asistieron' + (k.t ? ' · ' + plural(k.t, 'retardo', 'retardos') : '') + (k.f ? ' · ' + plural(k.f, 'falta', 'faltas') : '') + '</p>' +
+        ? '<p class="att-line"><b>' + (k.p + k.t) + ' de ' + k.marked + '</b> asistieron' + (k.t ? ' · ' + plural(k.t, 'retardo', 'retardos') : '') + (k.f ? ' · ' + plural(k.f, 'falta', 'faltas') : '') + '</p>' +
           (S.canWrite ? '<button class="btn tinted" data-act="attendance">' + ic('check') + 'Editar lista</button>' : '')
-        : '<p class="muted">Aún no pasas lista en esta clase.</p>' + (S.canWrite ? '<button class="btn tinted" data-act="attendance">' + ic('check') + 'Pasar lista</button>' : '');
+        : '<p class="muted">Todavía no has pasado lista.</p>' + (S.canWrite ? '<button class="btn tinted" data-act="attendance">' + ic('check') + 'Pasar lista</button>' : '');
     }
     return '<section class="sec"><h2>Asistencia</h2><div class="att-card">' + inner + '</div></section>';
   }
 
-  async function rollCallToday(groupId) {
+  function rollCallToday(groupId) {
     const g = getGroup(groupId);
     if (!g) return;
     const t = todayStr();
-    let c = S.classes.find((x) => x.groupId === groupId && x.date === t);
-    if (!c) {
-      c = { id: uid(), name: 'Clase del ' + fmtLong(Date.now()), sport: SPORTS[g.sport] ? g.sport : S.sport || 'futbol', date: t, groupId, items: [], notes: '', createdAt: Date.now(), updatedAt: Date.now() };
-      if (S.backend && S.backend.me) c.authorId = S.backend.me;
-      const ok = await commit('classes', c, null);
-      if (!ok) return;
-    }
-    openAttendance(c.id);
+    const todays = S.classes.filter((x) => x.groupId === groupId && x.date === t);
+    const c = todays.find((x) => (x.items || []).length) || todays[0];
+    if (c) { openAttendance(c.id); return; }
+    // Si hoy no hay clase de este grupo, se crea al guardar la lista (si la descartas, no queda nada).
+    const draft = { id: uid(), name: 'Clase del ' + fmtLong(Date.now()), sport: SPORTS[g.sport] ? g.sport : S.sport || 'futbol', date: t, groupId, items: [], notes: '', createdAt: Date.now(), updatedAt: Date.now() };
+    if (S.backend && S.backend.me) draft.authorId = S.backend.me;
+    openAttendance(draft);
   }
 
-  function openAttendance(classId, z) {
-    const c = getClass(classId);
+  const openRolls = new Set();
+  function openAttendance(classRef, z) {
+    const draft = typeof classRef === 'object' ? classRef : null;
+    const classId = draft ? draft.id : classRef;
+    const c = draft || getClass(classId);
     const g = c && getGroup(c.groupId);
     if (!c || !g) return;
+    const rollKey = draft ? 'draft:' + c.groupId + ':' + c.date : classId;
+    if (openRolls.has(rollKey)) return;
+    openRolls.add(rollKey);
     const att = Object.assign({}, c.attendance || {});
     let dirty = false;
     const list = studentsOf(g);
@@ -2886,6 +2921,7 @@
       title: 'Pasar lista',
       tint: SPORTS[c.sport] ? c.sport : 'futbol',
       confirmLabel: 'Guardar',
+      wide: true,
       z,
       isDirty: () => dirty,
       discardTitle: '¿Descartar la lista?',
@@ -2899,11 +2935,14 @@
           '<span class="att-btns" role="group" aria-label="' + esc(s.name) + '">' +
           ['p', 't', 'f'].map((v) => '<button type="button" class="att-b att-' + v + '" data-v="' + v + '" aria-pressed="false" aria-label="' + esc(s.name) + ': ' + ATT[v].label.toLowerCase() + '">' + (ATT[v].glyph ? ic(ATT[v].glyph) : 'R') + '</button>').join('') +
           '</span></div>').join('') + '</div>',
+      onClose: () => openRolls.delete(rollKey),
       onConfirm: async () => {
         const clean = {};
         Object.keys(att).forEach((k) => { if (att[k]) clean[k] = att[k]; });
         sheet.setBusy(true, 'Guardando…');
-        const ok = await mutateClass(classId, (x) => { x.attendance = clean; x.attendanceAt = Date.now(); });
+        const ok = draft && !getClass(classId)
+          ? await commit('classes', Object.assign(plain(draft), { attendance: clean, attendanceAt: Date.now(), updatedAt: Date.now() }), null)
+          : await mutateClass(classId, (x) => { x.attendance = clean; x.attendanceAt = Date.now(); });
         sheet.setBusy(false);
         if (!ok) return;
         dirty = false;
@@ -2957,18 +2996,18 @@
       onConfirm: async () => {
         const ta = $('#st-names', sheet.body);
         const have = new Set(studentsOf(getGroup(groupId)).map((s) => norm(s.name)));
-        const names = [];
-        ta.value.split(/\r?\n/).map((x) => x.replace(/^\s*\d+[.)-]?\s*/, '').replace(/\s+/g, ' ').trim()).filter(Boolean).forEach((n) => {
-          const k = norm(n);
-          if (!have.has(k)) { have.add(k); names.push(n.slice(0, 80)); }
+        const names = []; let skipped = 0;
+        ta.value.split(/\r?\n/).map((x) => x.replace(/^\s*\d{1,3}\s*[.)\-]\s*/, '').replace(/\s+/g, ' ').trim()).filter(Boolean).forEach((n) => {
+          if (have.has(norm(n))) { skipped++; return; }
+          names.push(n.slice(0, 80));
         });
-        if (!names.length) { shake(ta); toast('Escribe al menos un nombre nuevo', 'pencil'); return; }
+        if (!names.length) { shake(ta); toast(skipped ? 'Esos alumnos ya están en el grupo' : 'Escribe al menos un nombre', 'pencil'); return; }
         const ok = await mutateGroup(groupId, (x) => { names.forEach((n) => x.students.push({ id: uid(), name: n })); });
         if (!ok) return;
         ta.value = '';
         sheet.dismiss();
         haptic(12);
-        toast(names.length === 1 ? 'Alumno agregado' : names.length + ' alumnos agregados');
+        toast((names.length === 1 ? 'Alumno agregado' : names.length + ' alumnos agregados') + (skipped ? ', ' + skipped + ' ya estaban' : ''));
       },
     });
     setTimeout(() => { try { $('#st-names', sheet.body).focus({ preventScroll: true }); } catch (e) { /* */ } }, 450);
@@ -3021,19 +3060,20 @@
   // Trimestres aproximados del calendario de la SEP; si tu escuela usa otras fechas, elige «Fechas».
   function trimesters() {
     const d = new Date();
-    const y = d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1;
+    const t = todayStr();
+    const y = t >= d.getFullYear() + '-08-25' ? d.getFullYear() : d.getFullYear() - 1;
     const cy = ' ' + y + '-' + (y + 1);
     return [
-      ['1', '1.º', y + '-08-25', y + '-11-30', 'Primer trimestre' + cy],
+      ['1', '1.er', y + '-08-25', y + '-11-30', 'Primer trimestre' + cy],
       ['2', '2.º', y + '-12-01', (y + 1) + '-03-31', 'Segundo trimestre' + cy],
-      ['3', '3.º', (y + 1) + '-04-01', (y + 1) + '-07-20', 'Tercer trimestre' + cy],
+      ['3', '3.er', (y + 1) + '-04-01', (y + 1) + '-07-20', 'Tercer trimestre' + cy],
     ];
   }
   function currentTrimester() {
     const t = todayStr();
     const tr = trimesters();
     const hit = tr.find((x) => t >= x[2] && t <= x[3]);
-    return hit ? hit[0] : t < tr[0][2] ? '3' : '1';
+    return hit ? hit[0] : '3';
   }
   function periodRange(kind, tri, from, to) {
     if (kind === 'mes') return monthRange(0);
@@ -3094,7 +3134,7 @@
         '<div class="att-card" data-ref="preview"></div>' +
         '<p class="group-label">Datos que salen en el reporte</p><div class="group">' +
         '<label class="row"><span class="k">' + ic('flag') + 'Escuela o club</span><input id="rp-school" placeholder="Opcional" aria-label="Escuela o club" maxlength="80" value="' + esc(info.school || '') + '"></label>' +
-        '<label class="row"><span class="k">' + ic('age') + 'Profe</span><input id="rp-teacher" placeholder="Opcional" aria-label="Nombre del profe" maxlength="80" value="' + esc(info.teacher || '') + '"></label></div>' +
+        '<label class="row"><span class="k">' + ic('age') + 'Docente</span><input id="rp-teacher" placeholder="Opcional" aria-label="Nombre del docente" maxlength="80" value="' + esc(info.teacher || '') + '"></label></div>' +
         '<p class="muted" style="margin:0 16px;font-size:14px">Tamaño carta, con número de lista, totales por alumno y espacio para firma.</p>',
       onConfirm: async () => {
         const r = range();
@@ -3114,6 +3154,7 @@
       const r = range();
       const cls = reportClasses(g, r[0], r[1]);
       const st = reportStats(g, cls);
+      if (r[0] && r[1] && r[0] > r[1]) { $('[data-ref="preview"]', root).innerHTML = '<p class="muted">La fecha «Desde» es después de «Hasta».</p>'; sheet.setConfirm(false); return; }
       $('[data-ref="preview"]', root).innerHTML = '<p class="rp-range">' + esc(fmtRange(r[0], r[1])) + '</p>' + (cls.length
         ? '<p class="att-line"><b>' + plural(cls.length, 'clase', 'clases') + '</b> con lista' + (st.tot.rate != null ? ' · ' + st.tot.rate + '% de asistencia' : '') + ' · ' + plural(st.tot.f, 'falta', 'faltas') + '</p>'
         : '<p class="muted">No pasaste lista en este periodo. Elige otras fechas.</p>');
@@ -3131,7 +3172,7 @@
     try { JsPDF = await loadJsPDF(); } catch (e) { alertBox('No se pudo crear el PDF', 'Vuelve a intentarlo en un momento.'); return; }
     info = info || {};
     try {
-      const doc = new JsPDF({ unit: 'pt', format: 'letter', orientation: 'landscape' });
+      const doc = safePDF(new JsPDF({ unit: 'pt', format: 'letter', orientation: 'landscape' }));
       const W = 792; const H = 612; const M = 36;
       const OK = [30, 158, 79]; const WARN = [168, 100, 0]; const BAD = [200, 40, 30];
       const ink = [17, 17, 20]; const grey = [100, 100, 108]; const faint = [190, 190, 198];
@@ -3150,12 +3191,14 @@
 
       function header() {
         let y = M + 8;
-        if (info.school) { doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink); doc.text(info.school, M, y); y += 22; } else y += 8;
+        const wMax = W - 2 * M;
+        if (info.school) { doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink); doc.text(fit(info.school, wMax), M, y); y += 22; } else y += 8;
         doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(...ink);
-        doc.text('Asistencia · ' + g.name, M, y + 6);
+        doc.text(fit('Asistencia: ' + g.name, wMax), M, y + 6);
         doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...grey);
-        doc.text([periodLabel, fmtRange(from, to), plural(cls.length, 'clase', 'clases'), plural(rows.length, 'alumno', 'alumnos'), g.category || '', g.schedule || '', info.teacher ? 'Profe: ' + info.teacher : ''].filter(Boolean).join('   ·   '), M, y + 24);
-        doc.text('Asistencia promedio: ' + (tot.rate != null ? tot.rate + '%' : '—') + '   ·   Retardos: ' + tot.t + '   ·   Faltas: ' + tot.f, M, y + 40);
+        const meta = doc.splitTextToSize([periodLabel, fmtRange(from, to), plural(cls.length, 'clase', 'clases'), plural(rows.length, 'alumno', 'alumnos'), g.category || '', g.schedule || '', info.teacher ? 'Docente: ' + info.teacher : ''].filter(Boolean).join('   ·   '), wMax).slice(0, 2);
+        doc.text(meta, M, y + 24);
+        doc.text('Asistencia promedio: ' + (tot.rate != null ? tot.rate + '%' : '—') + '   ·   Retardos: ' + tot.t + '   ·   Faltas: ' + tot.f, M, y + 28 + meta.length * 12);
       }
       function table(colSet, rowSet, last) {
         const colW = Math.min(30, avail / Math.max(1, colSet.length));
@@ -3225,7 +3268,7 @@
         const sx = W - M - 230;
         doc.setDrawColor(...ink); doc.setLineWidth(0.7); doc.line(sx, H - M - 30, W - M, H - M - 30);
         doc.setFontSize(9); doc.setTextColor(...grey);
-        doc.text(info.teacher ? info.teacher : 'Nombre y firma del profe', sx + 115, H - M - 18, { align: 'center' });
+        doc.text(info.teacher ? fit(info.teacher, 228) : 'Nombre y firma del docente', sx + 115, H - M - 18, { align: 'center' });
       }
       let first = true;
       colChunks.forEach((colSet) => {
@@ -3246,7 +3289,7 @@
       }
       const a = parseDay(from);
       const label = periodLabel || (a && isWholeMonth(from, to) ? MONTHS_LONG[a.getMonth()] + ' ' + a.getFullYear() : fmtRange(from, to));
-      const name = ('Asistencia - ' + g.name + ' - ' + label).replace(/[\\/:*?"<>|º°ª]+/g, '').slice(0, 90) + '.pdf';
+      const name = ('Asistencia - ' + cutText(g.name, 40) + ' - ' + label).replace(/[\\/:*?"<>|º°ª]+/g, '') + '.pdf';
       await saveFile(doc.output('blob'), name);
     } catch (e) {
       alertBox('No se pudo crear el PDF', 'Vuelve a intentarlo en un momento.');
@@ -3346,7 +3389,7 @@
   }
 
   const EXT = { 'video/mp4': 'mp4', 'video/quicktime': 'mov', 'video/webm': 'webm', 'video/x-m4v': 'm4v', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
-  const safeName = (s) => String(s || '').replace(/[\\/:*?"<>|º°ª]+/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+  const safeName = (s) => cutText(String(s || '').replace(/[\\/:*?"<>|º°ª]+/g, '').replace(/\s+/g, ' ').trim(), 60);
   function shortDate() { const d = new Date(); return d.getDate() + ' ' + MONTHS[d.getMonth()].toLowerCase() + ' ' + d.getFullYear(); }
   // El .zip usa posiciones de 32 bits: más de ~4 GB no se puede abrir después.
   const ZIP_MAX = 3.8e9;
@@ -3391,7 +3434,7 @@
       title: 'Archivo listo',
       cancelLabel: 'Cerrar',
       bodyHTML:
-        '<div class="file-card"><span class="file-ico">' + ic('box') + '</span><span class="txt"><b>' + esc(file.name) + '</b><span>' + esc(what) + ' · ' + fmtMB(file.size) + '</span></span></div>' +
+        '<div class="file-card"><span class="file-ico">' + ic('box') + '</span><span class="txt"><b>' + esc(file.name) + '</b><span>' + esc(what) + ' · ' + fmtSize(file.size) + '</span></span></div>' +
         '<button type="button" class="btn filled wide-btn" data-file-share>' + ic('share') + (canShare ? (isBackup ? 'Guardar respaldo' : 'Compartir') : 'Descargar archivo') + '</button>' +
         '<div class="help">' + (isBackup
           ? (canShare ? '<p>Elige <b>Guardar en Archivos</b> → <b>iCloud Drive</b>. Así lo recuperas aunque cambies de iPad.</p>' : '<p>Descarga el archivo y guárdalo en un lugar seguro (por ejemplo, tu nube).</p>')
@@ -3410,6 +3453,8 @@
       a.click();
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 8000);
       if (isBackup) markBackup();
+      sheet.dismiss();
+      toast(isBackup ? 'Respaldo descargado' : 'Archivo descargado');
     });
   }
 
@@ -3510,7 +3555,7 @@
   const isId = (v) => typeof v === 'string' && /^[A-Za-z0-9_.:-]{1,80}$/.test(v);
   const txt = (v, max) => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '').slice(0, max);
   const numIn = (v, lo, hi, def) => { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : def; };
-  const dayOk = (v) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : '');
+  const dayOk = (v) => { if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return ''; const d = parseDay(v); return d && dayStr(d) === v ? v : ''; };
   function cleanDiagram(d) {
     if (!d || typeof d !== 'object' || !Array.isArray(d.items)) return null;
     const items = d.items.slice(0, 300).filter((it) => it && typeof it === 'object' && ['a', 'b', 'cone', 'ball', 'arrow'].indexOf(it.t) >= 0).map((it) => {
@@ -3544,7 +3589,7 @@
   }
   function cleanItem(it) {
     if (!it || typeof it !== 'object') return null;
-    if (it.type === 'pause') return { type: 'pause', label: txt(it.label, 40).trim() || 'Pausa', min: Math.round(numIn(it.min, 0, 240, 3)) };
+    if (it.type === 'pause') return { type: 'pause', label: txt(it.label, 40).trim() || 'Pausa', min: Math.round(numIn(it.min, 1, 240, 3)) };
     const gone = it.gone && typeof it.gone === 'object';
     if (!isId(it.exId) && !gone) return null;
     const o = { min: Math.round(numIn(it.min, 0, 240, 10)) };
@@ -3589,10 +3634,14 @@
         if (!x || seen.has(x.id)) return;
         seen.add(x.id);
         const cur = get(x.id);
-        if (!cur) out.nuevos.push(x);
-        else if (cur.example && !x.example) out.actualiza.push(x);
-        else if (SEED_RE.test(x.id) && !x.example && !cur.example && cur.syncedAt !== cur.updatedAt && !sameContent(x, cleanAny(cur, clean))) out.copias.push(x);
-        else if (x.updatedAt > (Number(cur.updatedAt) || 0) && !sameContent(x, cleanAny(cur, clean))) out.actualiza.push(x);
+        if (!cur) { out.nuevos.push(x); return; }
+        if (sameContent(x, cleanAny(cur, clean))) { out.iguales.push(x); return; }
+        if (cur.example && !x.example) { out.actualiza.push(x); return; }
+        // ¿Cambió aquí desde la última vez que llegó por archivo? (los ejemplos se comparan aunque nunca hayan llegado)
+        const localEdited = cur.syncedAt != null ? Number(cur.syncedAt) !== Number(cur.updatedAt) : SEED_RE.test(x.id);
+        const remoteEdited = cur.syncedAt != null ? x.updatedAt > Number(cur.syncedAt) : true;
+        if (!x.example && !cur.example && localEdited && remoteEdited) out.copias.push(x);
+        else if (x.updatedAt > (Number(cur.updatedAt) || 0)) out.actualiza.push(x);
         else out.iguales.push(x);
       });
       return out;
@@ -3610,16 +3659,17 @@
     const n = b.nuevos.length + b.actualiza.length + b.iguales.length + b.copias.length;
     if (!n) return '';
     const o = fem ? 'a' : 'o';
-    const bits = [b.nuevos.length ? b.nuevos.length + ' nuev' + o + (b.nuevos.length === 1 ? '' : 's') : '', b.actualiza.length ? b.actualiza.length + ' se actualiza' + (b.actualiza.length === 1 ? '' : 'n') : '', b.copias.length ? b.copias.length + ' como copia' : '', b.iguales.length ? b.iguales.length + ' ya ' + (fem ? 'la' : 'lo') + (b.iguales.length === 1 ? '' : 's') + ' tienes' : ''].filter(Boolean);
+    const bits = [b.nuevos.length ? b.nuevos.length + ' nuev' + o + (b.nuevos.length === 1 ? '' : 's') : '', b.actualiza.length ? b.actualiza.length + ' se actualiza' + (b.actualiza.length === 1 ? '' : 'n') : '', b.copias.length ? b.copias.length + ' como copia' : '', b.iguales.length ? b.iguales.length + ' sin cambios' : ''].filter(Boolean);
     return '<div class="imp-line"><b>' + plural(n, one, many) + '</b><span>' + bits.join(' · ') + '</span></div>';
   }
   async function startImport(file) {
-    let m; let zip = null;
+    let m; let zip = null; let damaged = false;
     try {
       const isJSON = /\.json$/i.test(file.name || '') || file.type === 'application/json';
       if (isJSON) m = JSON.parse(await file.text());
       else { zip = await readZip(file); const mb = await zip.blobOf('cancha.json', 'application/json'); m = mb ? JSON.parse(await mb.text()) : null; }
-    } catch (e) { m = null; }
+    } catch (e) { m = null; damaged = !(e && e.message === 'not-zip') || /^Cancha/i.test(file.name || ''); }
+    if (damaged && !m) { alertBox('El archivo está dañado o incompleto', 'Vuelve a descargarlo o pide que te lo manden otra vez.'); return; }
     if (!m || typeof m !== 'object' || m.format !== 'cancha') { alertBox('Ese archivo no es de Cancha', 'Elige un archivo .zip que hayas exportado desde Cancha.'); return; }
     const plan = planImport(m);
     const mediaSize = plan.media.reduce((s, k) => s + (Number(m.media[k].size) || 0), 0);
@@ -3638,7 +3688,7 @@
         importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') +
         (mainMedia ? '<div class="imp-line"><b>' + plural(mainMedia, 'video o foto', 'videos y fotos') + '</b><span>' + fmtMB(mediaSize) + '</span></div>' : '') +
         '</div>' +
-        '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? 'Ya tienes todo lo que trae este archivo.' : 'No se borra nada tuyo. Si el archivo trae una versión más nueva, se actualiza.' + (copies ? ' Lo que tú también cambiaste se guarda como copia para que no pierdas tu versión.' : '')) + '</p>',
+        '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? 'Ya tienes todo lo que trae este archivo.' : 'Si el archivo trae una versión más nueva de algo que no cambiaste aquí, se actualiza.' + (copies ? ' Lo que cambiaron los dos se guarda como copia: no pierdes tu versión.' : '')) + '</p>',
       onConfirm: async () => {
         sheet.setBusy(true, 'Importando…');
         try {
@@ -3731,7 +3781,7 @@
       bodyHTML:
         (S.canWrite
           ? '<div class="att-card bk-card"><p class="att-line">' + esc(where) + '</p>' +
-            '<p class="muted">' + (last ? 'Último respaldo: ' + esc(fmtAgo(last)) + '.' : 'Aún no haces ningún respaldo.') + '</p>' +
+            '<p class="muted">' + (last ? 'Último respaldo: ' + esc(fmtAgo(last)) + '.' : 'Todavía no has hecho ningún respaldo.') + '</p>' +
             '<button type="button" class="btn filled wide-btn" data-bk="full">' + ic('box') + 'Hacer respaldo completo</button>' +
             '<p class="muted small">Guarda ejercicios, clases, grupos, listas y videos en un archivo. Guárdalo en Archivos → iCloud Drive.</p></div>'
           : '<p class="att-head">' + esc(where) + '</p>') +
@@ -3862,7 +3912,7 @@
       const vars = String(cx.variations || '').split('\n').filter(Boolean);
       scr.setTitle(cx.title);
       scr.body.innerHTML =
-        '<div class="d-media"><div class="d-frame board-frame"><span class="art" role="img" aria-label="Pizarra del ejercicio">' + boardSVG(cx.sport, cx.diagram, { fit: 'xMidYMid meet', anim: canPlay(cx.diagram) }) + '</span>' +
+        '<div class="d-media"><div class="d-frame board-frame"><span class="art" role="img" aria-label="Pizarrón del ejercicio">' + boardSVG(cx.sport, cx.diagram, { fit: 'xMidYMid meet', anim: canPlay(cx.diagram) }) + '</span>' +
         '<div class="bf-ctrls">' + (canPlay(cx.diagram) ? '<button type="button" class="bf-btn" data-act="play">' + ic('play') + '<span>Ver jugada</span></button>' : '') + '</div></div></div>' +
         '<div class="d-head"><p class="d-tags"><span class="tag">' + esc(cx.objective) + '</span><span class="tag ghost">' + esc(cx.level) + '</span>' + (cx.school ? '<span class="tag ghost">Para escuela</span>' : '') + '</p><h1 class="d-title">' + esc(cx.title) + '</h1></div>' +
         '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((x) => '<div class="stat"><span class="k">' + ic(x[0]) + x[1] + '</span><span class="v">' + esc(x[2]) + '</span></div>').join('') + '</div>' +
@@ -3980,9 +4030,9 @@
     wrap.dataset.tint = sport;
     wrap.setAttribute('role', 'dialog');
     wrap.setAttribute('aria-modal', 'true');
-    wrap.setAttribute('aria-label', 'Pizarra');
+    wrap.setAttribute('aria-label', 'Pizarrón');
     wrap.innerHTML =
-      '<div class="board-head"><button type="button" class="cap" data-bd="cancel">Cancelar</button><span class="sh-title">Pizarra</span><button type="button" class="cap filled" data-bd="done">Listo</button></div>' +
+      '<div class="board-head"><button type="button" class="cap" data-bd="cancel">Cancelar</button><span class="sh-title">Pizarrón</span><button type="button" class="cap filled" data-bd="done">Listo</button></div>' +
       '<div class="board-sub">' + segHTML('variant', VARIANTS[sport], d.v, 'Cancha') + '</div>' +
       '<div class="board-stage"><div class="board-canvas art"></div></div>' +
       '<div class="board-kind" data-ref="kind" hidden>' + segHTML('akind', ARROW_KINDS(sport), arrowKind, 'Tipo de flecha') + '</div>' +
@@ -4007,7 +4057,15 @@
       $('[data-ref="kind"]', wrap).hidden = t !== 'arrow';
       canvas.dataset.tool = t;
     }
-    const snapshot = () => { hist.push(JSON.stringify(d.items)); if (hist.length > 60) hist.shift(); changed = true; };
+    const snapshot = () => { hist.push(JSON.stringify({ v: d.v, items: d.items })); if (hist.length > 60) hist.shift(); changed = true; };
+    const restore = () => { const h = JSON.parse(hist.pop()); d.v = h.v; d.items = h.items; syncVariant(); render(); };
+    function syncVariant() {
+      const seg = $('[data-seg="variant"]', wrap);
+      if (!seg) return;
+      const btns = $$('button[data-val]', seg);
+      btns.forEach((b) => b.setAttribute('aria-checked', String(b.dataset.val === d.v)));
+      seg.style.setProperty('--i', Math.max(0, btns.findIndex((b) => b.dataset.val === d.v)));
+    }
     const clampX = (x) => Math.min(154, Math.max(6, x));
     const clampY = (y) => Math.min(194, Math.max(6, y));
     function toBoard(e) {
@@ -4072,6 +4130,12 @@
       if (!drag) return;
       const it = d.items[drag.i];
       if (drag.kind === 'arrow' && it && Math.hypot(it.x2 - it.x, it.y2 - it.y) < 7) { d.items.splice(drag.i, 1); hist.pop(); }
+      else if (drag.kind === 'arrow' && it) {
+        // Orden de la jugada: cada flecha nueva es el siguiente paso.
+        const arrows = d.items.filter((x) => x.t === 'arrow' && x !== it);
+        arrows.forEach((x, n) => { if (!(Number(x.s) > 0)) x.s = n + 1; });
+        it.s = arrows.reduce((mx, x) => Math.max(mx, Number(x.s) || 0), 0) + 1;
+      }
       if (drag.kind === 'move' && !drag.moved) hist.pop();
       drag = null;
       render();
@@ -4086,7 +4150,7 @@
     };
     function cancel() {
       if (!changed) { popLayer(layer); return; }
-      actionSheet({ title: '¿Descartar los cambios de la pizarra?', actions: [{ label: 'Descartar cambios', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir dibujando' });
+      actionSheet({ title: '¿Descartar los cambios del pizarrón?', actions: [{ label: 'Descartar cambios', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir dibujando' });
     }
     wrap.addEventListener('click', (e) => {
       const t = e.target.closest('[data-tool]');
@@ -4096,12 +4160,12 @@
       switch (b.dataset.bd) {
         case 'cancel': cancel(); break;
         case 'done': popLayer(layer); o.onDone(d.items.length ? { v: d.v, items: d.items } : null); break;
-        case 'undo': if (hist.length) { d.items = JSON.parse(hist.pop()); render(); } break;
-        case 'clear': if (d.items.length) { snapshot(); d.items = []; render(); toast('Pizarra limpia', 'trash', { label: 'Deshacer', onClick: () => { if (hist.length) { d.items = JSON.parse(hist.pop()); render(); } } }); } break;
+        case 'undo': if (hist.length) restore(); break;
+        case 'clear': if (d.items.length) { snapshot(); d.items = []; render(); toast('Pizarrón limpio', 'trash', { label: 'Deshacer', onClick: () => { if (hist.length) restore(); } }); } break;
         default: break;
       }
     });
-    bindSeg(wrap, 'variant', (v) => { d.v = v; changed = true; render(); });
+    bindSeg(wrap, 'variant', (v) => { if (v === d.v) return; snapshot(); d.v = v; render(); });
     bindSeg(wrap, 'akind', (v) => { arrowKind = v; });
     setTool(tool);
     render();
@@ -4185,7 +4249,7 @@
     wrap.setAttribute('aria-label', 'Clase en curso');
     wrap.innerHTML =
       '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir del modo clase">' + ic('xmark') + '</button>' +
-      '<div class="run-hd"><span class="run-step" data-ref="step"></span><span class="run-class">' + esc(c.name || 'Clase') + '</span></div>' +
+      '<div class="run-hd"><span class="run-step" data-ref="step" aria-live="polite"></span><span class="run-class">' + esc(c.name || 'Clase') + '</span></div>' +
       '<button type="button" class="glass-btn" data-run="whistle" aria-label="Tocar el silbato">' + ic('whistle') + '</button></header>' +
       '<div class="run-body" data-ref="body"></div>';
     document.body.appendChild(wrap);
@@ -4240,7 +4304,7 @@
       const cc = getClass(id);
       const rolled = cc && cc.attendance && Object.keys(cc.attendance).length;
       return '<div class="run-done"><div class="empty-art icon">' + ic('check') + '</div><h2>¡Clase terminada!</h2>' +
-        '<p>Duró ' + fmtTimer(tot) + ' de ' + Math.round(plannedMs() / 60000) + ' min planeados.</p>' +
+        '<p>Duró ' + Math.max(1, Math.round(tot / 60000)) + ' min (planeados: ' + Math.round(plannedMs() / 60000) + ').</p>' +
         (canRoll() && !rolled ? '<button type="button" class="btn filled" data-run="roll">' + ic('check') + 'Pasar lista</button><button type="button" class="btn tinted" data-run="exit">Listo</button>' : '<button type="button" class="btn filled" data-run="exit">Listo</button>') + '</div>';
     }
     function canRoll() {
@@ -4266,7 +4330,7 @@
       const mins = esc(fmtMin(baseMin(st.i) + st.extra[st.i]));
       $('[data-ref="sub"]', body).textContent = ph
         ? (st.running ? '' : 'Pausado · ') + (ph.rest ? 'Descanso · sigue serie ' + (ph.k + 2) : 'Serie ' + (ph.k + 1) + ' de ' + ph.n)
-        : over ? 'Tiempo cumplido' : (st.running ? 'de ' : 'Pausado · ') + mins + ' min';
+        : over ? 'Tiempo cumplido' : (st.running ? 'de ' : st.started ? 'Pausado · ' : 'Listo · ') + mins + ' min';
       wrap.classList.toggle('over', over);
       wrap.classList.toggle('running', st.running);
       wrap.classList.toggle('resting', !!(ph && ph.rest) || !!it.pause);
@@ -4319,13 +4383,14 @@
       wrap.classList.remove('over', 'running', 'resting');
       whistle('end');
       renderBlock();
-      if (S.canWrite) mutateClass(id, (x) => { x.lastRunAt = Date.now(); });
+      if (S.canWrite && totalElapsed() >= 60000) mutateClass(id, (x) => { x.lastRunAt = Date.now(); });
     }
     const onVis = () => { if (document.visibilityState === 'visible') { keepAwake(); update(); } };
     document.addEventListener('visibilitychange', onVis);
     const timer = setInterval(update, 250);
     const layer = {
       kind: 'run', el: wrap,
+      focusEl() { return $('[data-run="toggle"]', wrap) || $('[data-run="close"]', wrap); },
       close() {
         clearInterval(timer);
         if (runPlayer) runPlayer.stop();
@@ -4360,7 +4425,7 @@
         case 'prev': go(st.i - 1); break;
         case 'next':
           if (st.i < items.length - 1) { go(st.i + 1); break; }
-          if (!st.started) { finish(); break; }
+          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir del modo clase', onClick: () => popLayer(layer) }], cancel: 'Seguir aquí' }); break; }
           actionSheet({ title: '¿Terminar la clase?', actions: [{ label: 'Terminar clase', onClick: finish }], cancel: 'Seguir con la clase' });
           break;
         case 'plus':
@@ -4439,6 +4504,26 @@
       ],
     });
   }
+
+  // La letra del PDF (Helvetica) solo tiene caracteres latinos: ′ → ', → → ->, emojis fuera.
+  const WIN_EXTRA = '€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ';
+  function pdfClean(v) {
+    if (Array.isArray(v)) return v.map(pdfClean);
+    if (typeof v !== 'string') return v;
+    return v.replace(/[′‘’]/g, "'").replace(/[″“”]/g, '"').replace(/[→⟶➜➔]/g, '->').replace(/[←]/g, '<-').replace(/[✓✔☑]/g, '')
+      .replace(/[\u2010-\u2012\u2212]/g, '-').replace(/\u00a0/g, ' ')
+      .replace(/[^\u0000-\u00ff]/gu, (ch) => (WIN_EXTRA.indexOf(ch) >= 0 ? ch : ''))
+      .replace(/ {2,}/g, ' ');
+  }
+  function safePDF(doc) {
+    ['text', 'splitTextToSize', 'getTextWidth', 'textWithLink'].forEach((fn) => {
+      const orig = doc[fn] && doc[fn].bind(doc);
+      if (orig) doc[fn] = (t, ...rest) => orig(pdfClean(t), ...rest);
+    });
+    return doc;
+  }
+  // Corta por letras completas (no parte un emoji a la mitad).
+  const cutText = (s, n) => Array.from(String(s || '')).slice(0, n).join('');
 
   // jsPDF va incluido en app/vendor (funciona sin internet); cdnjs queda de respaldo.
   const JSPDF_URLS = ['app/vendor/jspdf.umd.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'];
@@ -4522,7 +4607,7 @@
     let JsPDF;
     try { JsPDF = await loadJsPDF(); } catch (e) { alertBox('No se pudo crear el PDF', 'Revisa tu conexión a internet y vuelve a intentarlo.'); return; }
     try {
-      const doc = new JsPDF({ unit: 'pt', format: 'letter' });
+      const doc = safePDF(new JsPDF({ unit: 'pt', format: 'letter' }));
       const W = 612; const H = 792; const M = 46;
       const tint = c.sport === 'basquet' ? [196, 78, 8] : [14, 128, 62];
       const soft = (o) => tint.map((v) => Math.round(255 - (255 - v) * o));
@@ -4561,8 +4646,9 @@
           doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...water);
           doc.text(fmtMin(t) + "'", M, y + 12);
           doc.setFontSize(12); doc.text(r.title, TX, y + 12);
+          const tw = doc.getTextWidth(r.title);
           doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...grey);
-          doc.text('Pausa · ' + fmtMin(r.min) + ' min', TX + doc.getTextWidth(r.title) + 14, y + 12);
+          doc.text('Pausa, ' + fmtMin(r.min) + ' min', TX + tw + 12, y + 12);
           t += r.min;
           y += 34;
           doc.setDrawColor(225, 225, 230); doc.setLineWidth(0.6); doc.line(M, y - 12, W - M, y - 12);
@@ -4613,7 +4699,7 @@
           doc.text('Página ' + p + ' de ' + pages, W / 2, H - 24, { align: 'center' });
         }
       }
-      const name = (c.name || 'Clase').replace(/[\\/:*?"<>|º°ª]+/g, '').slice(0, 80) + '.pdf';
+      const name = cutText((c.name || 'Clase').replace(/[\\/:*?"<>|º°ª]+/g, ''), 80) + '.pdf';
       await saveFile(doc.output('blob'), name);
     } catch (e) {
       alertBox('No se pudo crear el PDF', 'Vuelve a intentarlo en un momento.');
@@ -4628,6 +4714,12 @@
     $('.tabbar').addEventListener('click', (e) => {
       const b = e.target.closest('.tab');
       if (b) { haptic(4); setTab(b.dataset.tab); }
+    });
+    $('.tabbar').addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const i = TABS.indexOf(S.tab);
+      const t = TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
+      e.preventDefault(); setTab(t); $('#tab-' + t).focus();
     });
     $('#fab').addEventListener('click', () => {
       if (!S.ready || !S.canWrite) return;

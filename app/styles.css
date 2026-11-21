@@ -14,8 +14,8 @@
   --bg: #F2F2F7;
   --bg-elev: #FFFFFF;
   --label: #000000;
-  --label-2: rgba(60, 60, 67, 0.64);
-  --label-3: rgba(60, 60, 67, 0.46);
+  --label-2: rgba(60, 60, 67, 0.82);
+  --label-3: rgba(60, 60, 67, 0.58);
   --sep: rgba(60, 60, 67, 0.17);
   --fill: rgba(118, 118, 128, 0.12);
   --fill-2: rgba(118, 118, 128, 0.22);
@@ -205,7 +205,7 @@ svg.i { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; s
   z-index: 40;
   height: 52px;
   display: grid;
-  grid-template-columns: minmax(64px, 1fr) minmax(0, 3fr) minmax(64px, 1fr);
+  grid-template-columns: minmax(64px, max-content) minmax(0, 1fr) minmax(64px, max-content);
   align-items: center;
   gap: 8px;
   padding-left: var(--gl);
@@ -315,9 +315,9 @@ svg.i { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; s
 .chips:empty { display: none; }
 .chip {
   flex: none;
-  height: 34px;
+  height: 38px;
   padding: 0 15px;
-  border-radius: 17px;
+  border-radius: 19px;
   background: var(--fill);
   color: var(--label);
   font-size: 15px;
@@ -796,10 +796,10 @@ textarea {
   background: var(--fill);
   flex: none;
 }
-.rm { width: 24px; height: 24px; border-radius: 50%; background: var(--danger); color: var(--on-danger); display: grid; place-items: center; font-size: 14px; }
+.rm { position: relative; width: 26px; height: 26px; border-radius: 50%; background: var(--danger); color: var(--on-danger); display: grid; place-items: center; font-size: 14px; }
 .rm svg { stroke-width: 3; }
 .moves { display: flex; flex-direction: column; }
-.mv { width: 40px; height: 30px; display: grid; place-items: center; color: var(--label-2); font-size: 17px; }
+.mv { width: 44px; height: 36px; display: grid; place-items: center; color: var(--label-2); font-size: 17px; }
 .mv svg { stroke-width: 2.2; }
 .mv:disabled { opacity: 0.22; }
 .add-row { color: var(--tint); font-weight: 600; min-height: 56px; }
@@ -808,8 +808,8 @@ textarea {
 .pad { padding: 16px; }
 
 /* steppers + segmented */
-.stepper { margin-left: auto; display: inline-flex; align-items: center; height: 36px; border-radius: 18px; background: var(--fill); flex: none; }
-.st-btn { width: 40px; height: 36px; display: grid; place-items: center; font-size: 17px; color: var(--label); border-radius: 18px; }
+.stepper { margin-left: auto; display: inline-flex; align-items: center; height: 40px; border-radius: 20px; background: var(--fill); flex: none; }
+.st-btn { width: 44px; height: 40px; display: grid; place-items: center; font-size: 17px; color: var(--label); border-radius: 18px; }
 .st-btn svg { stroke-width: 2.2; }
 .st-btn:active { background: var(--fill-2); }
 .st-val { display: inline-flex; align-items: baseline; gap: 3px; }
@@ -837,9 +837,9 @@ textarea {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  height: 38px;
+  height: 42px;
   padding: 3px;
-  border-radius: 19px;
+  border-radius: 21px;
   background: var(--fill);
   margin-bottom: 22px;
 }
@@ -1317,7 +1317,7 @@ a.as-btn { text-decoration: none; }
 .rc.big.wide { width: auto; padding: 0 30px 0 24px; border-radius: 41px; display: flex; gap: 10px; font-size: 26px; }
 .rc.big.wide span { font-size: 19px; font-weight: 700; }
 .run-sec { display: flex; align-items: center; gap: 12px; width: 100%; }
-.run-sec .cap { flex: none; font-weight: 600; }
+.run-sec .cap { flex: none; font-weight: 600; height: 44px; padding: 0 18px; border-radius: 22px; }
 .run-next { flex: 1; min-width: 0; font-size: 14px; color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .run-next b { color: var(--label); font-weight: 600; }
 .run-points { width: 100%; background: var(--bg-elev); border-radius: 18px; padding: 14px 16px; font-size: 16px; }
@@ -1363,7 +1363,7 @@ a.as-btn { text-decoration: none; }
 .att-all { width: 100%; margin-bottom: 16px; }
 .att-row { position: relative; display: flex; align-items: center; gap: 12px; padding: 9px 12px 9px 14px; min-height: 60px; }
 .att-row + .att-row::before { content: ""; position: absolute; top: 0; left: 50px; right: 0; border-top: 0.5px solid var(--sep); }
-.att-name { flex: 1; min-width: 0; font-size: 16px; font-weight: 500; overflow-wrap: anywhere; }
+.att-name { flex: 1; min-width: 0; font-size: 16px; font-weight: 500; overflow-wrap: break-word; hyphens: auto; }
 .att-btns { flex: none; display: flex; gap: 6px; }
 .att-b {
   width: 44px;
@@ -1634,3 +1634,55 @@ a.as-btn { text-decoration: none; }
 .cat-lead { margin: 8px 0 16px; color: var(--label-2); font-size: 16px; line-height: 1.4; max-width: 46ch; }
 .badge.in-lib { background: var(--ok); color: var(--on-ok); }
 .plan-row .mini .art, .cell .mini .art { border-radius: inherit; }
+
+.rm::before { content: ""; position: absolute; inset: -9px; }
+.glass-btn { height: 44px; min-width: 44px; border-radius: 22px; }
+.stepper.sm { height: 36px; }
+.stepper.sm .st-btn { width: 38px; height: 36px; }
+
+/* Avisos abajo, sobre la barra de pestañas: no tapan los botones de arriba */
+.toast { top: auto; bottom: calc(max(14px, var(--safe-b) - 4px) + 76px); transform: translate(-50%, calc(100% + 110px)); }
+.toast.show { transform: translate(-50%, 0); }
+
+/* Modo clase en celular: lo importante sin desplazarse */
+@media (max-width: 600px) {
+  .run.running .run-media { height: 17vh; min-height: 110px; }
+  .run-body { gap: 12px; }
+}
+@media (max-height: 700px) {
+  .run-media { height: 18vh; min-height: 96px; }
+  .run-ring { width: min(50vw, 180px); }
+  .rr-time { font-size: 62px; }
+  .run-points { display: none; }
+}
+/* iPad horizontal: pizarrón y puntos a la izquierda, reloj a la derecha */
+@media (min-width: 900px) and (orientation: landscape) {
+  .run-body { max-width: 1100px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); grid-template-areas: "media ring" "ex ring" "points ctrls" "points sec" "foot foot"; column-gap: 36px; row-gap: 14px; align-items: center; }
+  .run-media { grid-area: media; height: 44vh; }
+  .run-ex { grid-area: ex; text-align: left; }
+  .run-ring { grid-area: ring; width: min(34vw, 340px); justify-self: center; }
+  .rr-time { font-size: 120px; }
+  .run-series { grid-area: ctrls; align-self: start; }
+  .run-ctrls { grid-area: ctrls; }
+  .run-sec { grid-area: sec; }
+  .run-points { grid-area: points; align-self: start; }
+  .run-foot { grid-area: foot; }
+  .rc { width: 72px; height: 72px; }
+  .rc.big { width: 96px; height: 96px; }
+}
+
+/* Pasar lista en iPad: hoja ancha y dos columnas */
+@media (min-width: 720px) {
+  .sheet-wrap.wide .sheet { width: min(940px, calc(100% - 48px)); }
+  .sheet-wrap.wide .att-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 0; }
+  .sheet-wrap.wide .att-row + .att-row::before { left: 12px; }
+}
+
+/* El pizarrón nunca más alto que la pantalla */
+.board-frame { max-width: calc(66vh * 0.8); margin-left: auto; margin-right: auto; }
+/* iPad horizontal: pizarrón a la izquierda (fijo), información a la derecha */
+@media (min-width: 900px) and (orientation: landscape) {
+  .screen-body:has(> .d-media .board-frame) { max-width: 1120px; display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr); column-gap: 36px; align-items: start; }
+  .screen-body:has(> .d-media .board-frame) > .d-media { position: sticky; top: 64px; margin-top: 6px; }
+  .screen-body:has(> .d-media .board-frame) .board-frame { max-width: none; }
+}
