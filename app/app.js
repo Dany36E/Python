@@ -1461,7 +1461,7 @@
   }
   function thumbHTML(ex, cls) {
     const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>'
-      : !ex.mediaId && ex.posterUrl && cls !== 'mini' ? '<img alt="" loading="lazy" decoding="async" class="poster" src="' + esc(ex.posterUrl) + '">'
+      : !ex.mediaId && ex.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(ex.thumbUrl) + '">'
         : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram) : fieldArt(ex.sport)) + '</span>';
     let badge = '';
     if (cls !== 'mini') {
@@ -2041,7 +2041,7 @@
   }
   // Video vertical generado para los ejercicios de entrenador (app/videos/…): se ve como un Short.
   function coachVideoHTML(ex) {
-    return '<div class="d-frame coach-video"><video playsinline muted loop autoplay preload="metadata" controls src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video></div>';
+    return '<button type="button" class="d-frame coach-video" data-act="vtoggle" aria-label="Pausar o seguir el video"><video playsinline muted loop autoplay preload="metadata" src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video><span class="v-state" aria-hidden="true">' + ic('play') + '</span></button>';
   }
   function boardSummary(ex) {
     const its = (ex.diagram && ex.diagram.items) || [];
@@ -3967,6 +3967,7 @@
       school: x.school === true,
       videoUrl: typeof x.videoUrl === 'string' && /^app\/videos\/[\w-]+\.mp4$/.test(x.videoUrl) ? x.videoUrl : undefined,
       posterUrl: typeof x.posterUrl === 'string' && /^app\/videos\/[\w-]+\.jpg$/.test(x.posterUrl) ? x.posterUrl : undefined,
+      thumbUrl: typeof x.thumbUrl === 'string' && /^app\/videos\/[\w-]+-t\.jpg$/.test(x.thumbUrl) ? x.thumbUrl : undefined,
     });
   }
   function cleanItem(it) {
@@ -4267,7 +4268,7 @@
   function catCardHTML(cx) {
     const have = inLibrary(cx.id);
     const meta = [cx.duration ? cx.duration + ' min' : '', cx.age].filter(Boolean).join(', ');
-    return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb">' + (cx.posterUrl ? '<img alt="" loading="lazy" decoding="async" class="poster" src="' + esc(cx.posterUrl) + '"><span class="badge vid">' + ic('play') + 'Video</span>' : '<span class="art">' + boardSVG(cx.sport, cx.diagram) + '</span>') +
+    return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb">' + (cx.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(cx.thumbUrl) + '"><span class="badge vid">' + ic('play') + 'Video</span>' : '<span class="art">' + boardSVG(cx.sport, cx.diagram) + '</span>') +
       (have ? '<span class="badge in-lib">' + ic('check') + 'En tus ejercicios</span>' : cx.school ? '<span class="badge">Para escuela</span>' : '') + '</span>' +
       '<span class="card-body"><span class="title">' + esc(cx.title) + '</span><span class="meta">' + esc(meta) + '</span></span></button>';
   }
@@ -5170,6 +5171,14 @@
       alertBox('No se pudo crear el PDF', 'Vuelve a intentarlo en un momento.');
     }
   }
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act="vtoggle"]');
+    if (!b) return;
+    const v = $('video', b);
+    if (!v) return;
+    if (v.paused) { v.play().catch(() => {}); b.classList.remove('paused'); } else { v.pause(); b.classList.add('paused'); }
+  });
 
   // ---------------------------------------------------------------- eventos globales
   function bindGlobal() {

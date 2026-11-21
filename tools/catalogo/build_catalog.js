@@ -25,7 +25,7 @@ for (const sport of ['futbol', 'basquet']) {
       return r;
     }) };
     // Video generado (tools/video/make-videos.js): se enlaza si ya existe.
-    if (fs.existsSync(VIDEOS + '/' + o.id + '.mp4')) { o.videoUrl = 'app/videos/' + o.id + '.mp4'; o.posterUrl = 'app/videos/' + o.id + '.jpg'; }
+    if (fs.existsSync(VIDEOS + '/' + o.id + '.mp4')) { o.videoUrl = 'app/videos/' + o.id + '.mp4'; o.posterUrl = 'app/videos/' + o.id + '.jpg'; o.thumbUrl = 'app/videos/' + o.id + '-t.jpg'; }
     exercises.push(o);
   });
   data.sessions.forEach((t, i) => {

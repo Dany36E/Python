@@ -29,6 +29,14 @@ function encoder(file) {
     const t0 = Date.now();
     const info = await page.evaluate((x) => window.setup(x), id);
     const file = path.join(OUT, id + '.mp4');
+    if (!process.env.ONLY_IMAGES) await encodeVideo(id, info, file);
+    await images(id, info);
+    const kb = Math.round(fs.statSync(file).size / 1024);
+    console.log(id, (info.total / 1000).toFixed(1) + ' s', kb + ' KB', Math.round((Date.now() - t0) / 1000) + ' s de trabajo');
+  }
+  await b.close();
+
+  async function encodeVideo(id, info, file) {
     const ff = encoder(file);
     const done = new Promise((res, rej) => { ff.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c)))); });
     const frames = Math.ceil((info.total / 1000) * FPS);
@@ -39,6 +47,9 @@ function encoder(file) {
     }
     ff.stdin.end();
     await done;
+  }
+  // Portada del video (9:16, 360 × 640) y miniatura del pizarrón (4:5, 320 × 400) para las tarjetas.
+  async function images(id, info) {
     await page.evaluate((ms) => window.frameAt(ms), info.poster);
     // Portada chica (360 × 640) para las tarjetas de la biblioteca.
     const poster = await page.screenshot({ type: 'jpeg', quality: 90 });
@@ -47,8 +58,12 @@ function encoder(file) {
       ff2.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c))));
       ff2.stdin.end(poster);
     });
-    const kb = Math.round(fs.statSync(file).size / 1024);
-    console.log(id, (info.total / 1000).toFixed(1) + ' s', kb + ' KB', Math.round((Date.now() - t0) / 1000) + ' s de trabajo');
+    const box = await page.locator('#board').boundingBox();
+    const thumb = await page.screenshot({ type: 'jpeg', quality: 92, clip: box });
+    await new Promise((res, rej) => {
+      const ff3 = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-c:v', 'mjpeg', '-i', '-', '-vf', 'scale=320:400', '-q:v', '5', path.join(OUT, id + '-t.jpg')]);
+      ff3.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c))));
+      ff3.stdin.end(thumb);
+    });
   }
-  await b.close();
 })().catch((e) => { console.error(e); process.exit(1); });

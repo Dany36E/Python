@@ -1739,3 +1739,6 @@ a.as-btn { text-decoration: none; }
 .coach-video { --ar: 0.5625; max-width: calc(68vh * 0.5625); margin-left: auto; margin-right: auto; background: #0b2716; }
 .thumb img.poster { object-position: 50% 62%; }
 .badge.vid { left: auto; right: 8px; top: 8px; bottom: auto; }
+.coach-video { display: block; width: 100%; padding: 0; }
+.coach-video .v-state { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 54px; opacity: 0; transition: opacity 0.2s; pointer-events: none; background: rgba(0,0,0,0.25); }
+.coach-video.paused .v-state { opacity: 1; }
