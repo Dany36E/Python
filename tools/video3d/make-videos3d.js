@@ -35,25 +35,27 @@ async function work(browser, queue) {
     const file = path.join(OUT, id + '.mp4');
     if (!process.env.ONLY_IMAGES) {
       const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-        '-c:v', 'libx264', '-preset', 'slow', '-crf', '30', '-pix_fmt', 'yuv420p', '-profile:v', 'main', '-movflags', '+faststart', '-an', file]);
+        '-c:v', 'libx264', '-preset', 'slow', '-crf', '23', '-pix_fmt', 'yuv420p', '-profile:v', 'main', '-movflags', '+faststart', '-an', file]);
       ff.stderr.on('data', (d) => process.stderr.write(d));
       const done = new Promise((res, rej) => ff.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c)))));
       const frames = Math.ceil((info.total / 1000) * FPS);
       for (let f = 0; f < frames; f++) {
         await page.evaluate((ms) => window.frameAt(ms), (f * 1000) / FPS);
-        const buf = await page.screenshot({ type: 'jpeg', quality: 90 });
+        const buf = await page.screenshot({ type: 'jpeg', quality: 95 });
         if (!ff.stdin.write(buf)) await new Promise((r) => ff.stdin.once('drain', r));
       }
       ff.stdin.end();
       await done;
     }
     // Portada (con textos) y miniatura sin textos, recortada a 4:5 alrededor de la acción.
+    await page.evaluate(() => document.getElementById('v').classList.add('cover'));
     await page.evaluate((ms) => window.frameAt(ms), info.thumb);
+    await page.evaluate(() => document.getElementById('v').classList.remove('small'));
     await ffmpeg(['-f', 'image2pipe', '-c:v', 'mjpeg', '-i', '-', '-vf', 'scale=360:640', '-q:v', '5', path.join(OUT, id + '.jpg')], await page.screenshot({ type: 'jpeg', quality: 92 }));
     await page.evaluate(() => document.getElementById('v').classList.add('bare'));
     await page.evaluate((ms) => window.frameAt(ms), info.thumb);
     await ffmpeg(['-f', 'image2pipe', '-c:v', 'mjpeg', '-i', '-', '-vf', 'crop=720:900:0:250,scale=320:400', '-q:v', '5', path.join(OUT, id + '-t.jpg')], await page.screenshot({ type: 'jpeg', quality: 92 }));
-    await page.evaluate(() => document.getElementById('v').classList.remove('bare'));
+    await page.evaluate(() => document.getElementById('v').classList.remove('bare', 'cover'));
     const kb = fs.existsSync(file) ? Math.round(fs.statSync(file).size / 1024) : 0;
     console.log(id, (info.total / 1000).toFixed(1) + ' s', kb + ' KB', Math.round((Date.now() - t0) / 1000) + ' s de trabajo');
   }

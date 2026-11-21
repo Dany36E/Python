@@ -9,17 +9,23 @@ html, body { margin: 0; width: 720px; height: 1280px; overflow: hidden; backgrou
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #fff; }
 .v { position: relative; width: 720px; height: 1280px; }
 canvas { position: absolute; inset: 0; width: 720px; height: 1280px; display: block; }
-.scrim-top { position: absolute; left: 0; right: 0; top: 0; height: 420px; background: linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.38) 45%, rgba(0,0,0,0) 100%); }
-.scrim-bot { position: absolute; left: 0; right: 0; bottom: 0; height: 330px; background: linear-gradient(0deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0) 100%); }
-.top { position: absolute; left: 0; right: 0; top: 0; padding: 62px 52px 0; }
-.kicker { display: inline-flex; align-items: center; height: 46px; padding: 0 20px; border-radius: 23px; background: rgba(255,255,255,0.18); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); font-weight: 700; font-size: 25px; }
-.title { margin: 16px 0 0; font: 800 80px/0.92 'Big Shoulders Display', 'Arial Narrow', sans-serif; letter-spacing: 0; text-wrap: balance; text-shadow: 0 2px 12px rgba(0,0,0,0.35); }
-.cap { position: absolute; left: 40px; right: 40px; bottom: 120px; display: flex; justify-content: center; }
-.cap span { display: inline-block; max-width: 560px; background: #fff; color: #101410; font: 800 46px/1.02 'Big Shoulders Display', 'Arial Narrow', sans-serif; padding: 15px 28px 13px; border-radius: 20px; text-align: center; text-wrap: balance; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-.foot { position: absolute; left: 52px; right: 52px; bottom: 46px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 26px; text-shadow: 0 1px 6px rgba(0,0,0,0.4); }
-.brand { font: 800 34px/1 'Big Shoulders Display', 'Arial Narrow', sans-serif; letter-spacing: 0.02em; opacity: 0.92; }
-.reps { opacity: 0.92; }
-.bare .scrim-top, .bare .scrim-bot, .bare .top, .bare .cap, .bare .foot { display: none; }
+.scrim-top { position: absolute; left: 0; right: 0; top: 0; height: 400px; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.34) 45%, rgba(0,0,0,0) 100%); }
+.scrim-bot { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; background: linear-gradient(0deg, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.26) 55%, rgba(0,0,0,0) 100%); }
+.top { position: absolute; left: 0; right: 0; top: 0; padding: 60px 52px 0; }
+.kicker { display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 22px; background: rgba(255,255,255,0.18); font-weight: 700; font-size: 24px; }
+.title { margin: 14px 0 0; font: 800 76px/0.92 'Big Shoulders Display', 'Arial Narrow', sans-serif; letter-spacing: 0; text-wrap: balance; text-shadow: 0 2px 12px rgba(0,0,0,0.35); }
+.small .kicker { display: none; }
+.small .title { font-size: 44px; line-height: 1; margin-top: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.small .scrim-top { height: 220px; }
+.cap { position: absolute; left: 40px; right: 40px; bottom: 116px; display: flex; justify-content: center; }
+.cap span { display: inline-block; max-width: 600px; background: #fff; color: #101410; font: 800 46px/1.02 'Big Shoulders Display', 'Arial Narrow', sans-serif; padding: 14px 28px 12px; border-radius: 20px; text-align: center; text-wrap: balance; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.foot { position: absolute; left: 52px; right: 52px; bottom: 44px; display: flex; justify-content: space-between; align-items: center; gap: 20px; font-weight: 700; font-size: 24px; text-shadow: 0 1px 6px rgba(0,0,0,0.4); }
+.reps { opacity: 0.92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand { flex: none; font: 800 34px/1 'Big Shoulders Display', 'Arial Narrow', sans-serif; letter-spacing: 0.02em; opacity: 0.92; }
+.sig { position: absolute; left: 0; right: 0; top: 300px; display: flex; justify-content: center; pointer-events: none; }
+.sig span { font: 900 120px/1 'Big Shoulders Display', 'Arial Narrow', sans-serif; color: #FFD23F; text-shadow: 0 6px 0 rgba(0,0,0,0.35), 0 0 30px rgba(0,0,0,0.35); }
+.bare .scrim-top, .bare .scrim-bot, .bare .top, .bare .cap, .bare .foot, .bare .sig { display: none; }
+.cover .cap, .cover .sig { display: none; }
 </style>
 </head>
 <body>
@@ -27,15 +33,17 @@ canvas { position: absolute; inset: 0; width: 720px; height: 1280px; display: bl
   <canvas id="c" width="720" height="1280"></canvas>
   <div class="scrim-top"></div><div class="scrim-bot"></div>
   <div class="top"><span class="kicker" id="kicker"></span><h1 class="title" id="title"></h1></div>
+  <div class="sig"><span id="sig"></span></div>
   <div class="cap"><span id="cap"></span></div>
   <div class="foot"><span class="reps" id="reps"></span><span class="brand">CANCHA</span></div>
 </div>
 <script>window.CANCHA_RENDER_ONLY = true;</script>
 <script src="../../app/app.js"></script>
 <script src="../../app/catalog.js"></script>
+<script src="coreografias.js"></script>
 <script type="importmap">{ "imports": { "three": "./node_modules/three/build/three.module.js" } }</script>
 <script type="module">
-// Video 3D de un ejercicio: los jugadores corren, conducen y pasan exactamente por las flechas del pizarrón.
+// Video 3D de un ejercicio: los jugadores siguen exactamente las flechas del pizarrón (o la coreografía del video).
 // frameAt(ms) deja la escena como va en ese instante (determinista), para grabarla cuadro por cuadro.
 import * as THREE from 'three';
 
@@ -44,7 +52,7 @@ const SP = { futbol: 'Fútbol', basquet: 'Básquetbol' };
 const W = 720; const H = 1280;
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1);
-renderer.setSize(Math.round(W * 0.8), Math.round(H * 0.8), false);
+renderer.setSize(W, H, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -53,10 +61,20 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
-const smooth = (t) => t * t * (3 - 2 * t);
-// Arranque y frenado suaves con velocidad casi constante en medio (como corre una persona).
-const travel = (t) => { const a = 0.18; if (t <= 0) return 0; if (t >= 1) return 1; if (t < a) return (t * t) / (2 * a * (1 - a)); if (t > 1 - a) return 1 - ((1 - t) * (1 - t)) / (2 * a * (1 - a)); return (t - a / 2) / (1 - a); };
+const smooth = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const angLerp = (a, b, t) => { let d = ((b - a + Math.PI) % (2 * Math.PI)) - Math.PI; if (d < -Math.PI) d += 2 * Math.PI; return a + d * t; };
+const unwrap = (arr) => { for (let i = 1; i < arr.length; i++) { while (arr[i] - arr[i - 1] > Math.PI) arr[i] -= 2 * Math.PI; while (arr[i] - arr[i - 1] < -Math.PI) arr[i] += 2 * Math.PI; } return arr; };
+const V2 = (x, y) => new THREE.Vector2(x, y);
+const fwdOf = (h) => V2(Math.sin(h), Math.cos(h));
+const rightOf = (h) => V2(-Math.cos(h), Math.sin(h));
+
+// Velocidades (m/s) y formas de moverse
+const PACE = { walk: 1.3, jog: 2.5, run: 3.6, sprint: 5.0 };
+const GAIT = {
+  rodillas: { speed: 1.5, stride: 0.3 }, talones: { speed: 1.7, stride: 0.36 }, saltos: { speed: 2.0, stride: 0.55 },
+  carioca: { speed: 1.7, stride: 0.48, side: true }, defensivo: { speed: 1.5, stride: 0.42, side: true },
+};
+const LEAD = 500; const GAP = 220; const RAMP = 300;
 
 // ---------- texturas
 function canvasTex(w, h, draw, repeat) {
@@ -80,10 +98,7 @@ function loadSVG(svg) {
 const soccerTex = canvasTex(512, 256, (c, w, h) => {
   c.fillStyle = '#f4f4f2'; c.fillRect(0, 0, w, h);
   c.fillStyle = '#16161a';
-  const spots = [[0.08, 0.5], [0.33, 0.25], [0.33, 0.78], [0.58, 0.5], [0.83, 0.25], [0.83, 0.78], [0.2, 0.05], [0.7, 0.05], [0.2, 0.97], [0.7, 0.97]];
-  spots.forEach(([x, y]) => { c.beginPath(); for (let k = 0; k < 5; k++) { const a = (k / 5) * Math.PI * 2 - Math.PI / 2; c.lineTo(x * w + Math.cos(a) * 26, y * h + Math.sin(a) * 30); } c.closePath(); c.fill(); });
-  c.strokeStyle = 'rgba(0,0,0,0.25)'; c.lineWidth = 2;
-  for (let i = 0; i < 12; i++) { c.beginPath(); c.moveTo((i / 12) * w, 0); c.lineTo((i / 12) * w + 30, h); c.stroke(); }
+  [[0.08, 0.5], [0.33, 0.25], [0.33, 0.78], [0.58, 0.5], [0.83, 0.25], [0.83, 0.78], [0.2, 0.05], [0.7, 0.05], [0.2, 0.97], [0.7, 0.97]].forEach(([x, y]) => { c.beginPath(); for (let k = 0; k < 5; k++) { const a = (k / 5) * Math.PI * 2 - Math.PI / 2; c.lineTo(x * w + Math.cos(a) * 26, y * h + Math.sin(a) * 30); } c.closePath(); c.fill(); });
 });
 const basketTex = canvasTex(512, 256, (c, w, h) => {
   const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#e2742a'); g.addColorStop(1, '#c95d17');
@@ -94,9 +109,10 @@ const basketTex = canvasTex(512, 256, (c, w, h) => {
   c.beginPath(); c.ellipse(0, h / 2, w * 0.12, h * 0.5, 0, -Math.PI / 2, Math.PI / 2); c.stroke();
   c.beginPath(); c.ellipse(w, h / 2, w * 0.12, h * 0.5, 0, Math.PI / 2, Math.PI * 1.5); c.stroke();
 });
+const netTex = (rep) => canvasTex(64, 64, (c, w, h) => { c.clearRect(0, 0, w, h); c.strokeStyle = 'rgba(255,255,255,0.95)'; c.lineWidth = 3; c.strokeRect(0, 0, w, h); }, rep);
 const poleTex = canvasTex(64, 256, (c, w, h) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? '#ffffff' : '#d62828'; c.fillRect(0, (i * h) / 8, w, h / 8); } });
 
-// ---------- materiales
+// ---------- materiales y figuras
 const mat = (color, rough, extra) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: rough == null ? 0.7 : rough, metalness: 0 }, extra || {}));
 const SKINS = ['#C68642', '#8D5524', '#E0AC69', '#B97A4B', '#F1C27D', '#A5683F'];
 const HAIRS = ['#22160c', '#140e08', '#3b2414', '#2b1b10'];
@@ -104,263 +120,565 @@ const KITS = {
   futbol: { a: { shirt: '#D8352A', shorts: '#F4F4F4', socks: '#D8352A', num: '#FFFFFF' }, b: { shirt: '#1F55CF', shorts: '#14204A', socks: '#1F55CF', num: '#FFFFFF' } },
   basquet: { a: { shirt: '#16264A', shorts: '#16264A', socks: '#F4F4F4', num: '#FFFFFF' }, b: { shirt: '#F4F4F4', shorts: '#F4F4F4', socks: '#F4F4F4', num: '#16264A' } },
 };
-
-function capsule(r, len, m) { const g = new THREE.CapsuleGeometry(r, len, 6, 14); const o = new THREE.Mesh(g, m); o.castShadow = true; return o; }
+const COACH = { shirt: '#3A4250', shorts: '#3A4250', socks: '#3A4250', num: '#3A4250' };
+function capsule(r, len, m) { const o = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 14), m); o.castShadow = true; return o; }
 function numberTex(n, ink) {
   return canvasTex(128, 128, (c, w, h) => { c.fillStyle = ink; c.font = '800 104px "Big Shoulders Display", "Arial Narrow", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(String(n || ''), w / 2, h / 2 + 6); });
 }
 
-// Jugador articulado (de frente = +Z). Mide 1.48 m, como un alumno de 11 o 12 años.
-function makePlayer(kit, idx, n) {
+// Jugador articulado (de frente = +Z). Mide 1.48 m, como un alumno de 11 o 12 años; el profe, 1.75 m.
+function makePlayer(kit, idx, n, opts) {
+  opts = opts || {};
   const skin = mat(SKINS[idx % SKINS.length], 0.65);
   const shirt = mat(kit.shirt, 0.8); const shorts = mat(kit.shorts, 0.8); const socks = mat(kit.socks, 0.8);
-  const shoe = mat('#1d1d20', 0.5); const hair = mat(HAIRS[idx % HAIRS.length], 0.9);
+  const shoe = mat('#1d1d20', 0.5); const hair = mat(HAIRS[idx % HAIRS.length], 0.9); const ink = mat('#1b1411', 0.6);
   const root = new THREE.Group();
-  const hips = new THREE.Group(); hips.position.y = 0.78; root.add(hips);
+  const body = new THREE.Group(); root.add(body);
+  if (opts.coach) body.scale.setScalar(1.18);
+  const hips = new THREE.Group(); hips.position.y = 0.78; body.add(hips);
   const pelvis = capsule(0.11, 0.08, shorts); pelvis.rotation.z = Math.PI / 2; pelvis.scale.set(1, 1, 0.8); hips.add(pelvis);
   const spine = new THREE.Group(); hips.add(spine);
-  const torso = capsule(0.135, 0.26, shirt); torso.position.y = 0.25; torso.scale.set(1.18, 1, 0.78); spine.add(torso);
-  const num = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.17), new THREE.MeshStandardMaterial({ map: numberTex(n, kit.num), transparent: true, roughness: 0.8 }));
-  num.position.set(0, 0.27, -0.112); num.rotation.y = Math.PI; spine.add(num);
+  const torso = capsule(0.135, 0.26, shirt); torso.position.y = 0.25; torso.scale.set(1.08, 1, 0.78); spine.add(torso);
+  if (!opts.coach) {
+    const numM = new THREE.MeshStandardMaterial({ map: numberTex(n, kit.num), transparent: true, roughness: 0.8 });
+    const back = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.17), numM); back.position.set(0, 0.27, -0.112); back.rotation.y = Math.PI; spine.add(back);
+    const front = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.09), numM); front.position.set(0.05, 0.33, 0.112); spine.add(front);
+  } else {
+    const wh = new THREE.Mesh(new THREE.SphereGeometry(0.025, 10, 8), mat('#c9ccd2', 0.3, { metalness: 0.6 })); wh.position.set(0, 0.3, 0.12); spine.add(wh);
+  }
   const neck = capsule(0.045, 0.05, skin); neck.position.y = 0.47; spine.add(neck);
   const headG = new THREE.Group(); headG.position.y = 0.6; spine.add(headG);
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.1, 20, 16), skin); head.scale.set(0.92, 1.05, 1); head.castShadow = true; headG.add(head);
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.104, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), hair); cap.position.set(0, 0.012, -0.008); cap.scale.set(0.95, 1.05, 1.03); cap.rotation.x = -0.25; headG.add(cap);
+  // Cara sencilla: ojos, cejas y boca, para saber hacia dónde mira.
+  [-1, 1].forEach((k) => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.013, 10, 8), ink); eye.position.set(k * 0.034, 0.012, 0.088); headG.add(eye);
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.006, 0.006), ink); brow.position.set(k * 0.034, 0.038, 0.09); headG.add(brow);
+  });
+  const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.006, 0.006), mat('#7a3b2e', 0.6)); mouth.position.set(0, -0.04, 0.092); headG.add(mouth);
+  const capH = new THREE.Mesh(new THREE.SphereGeometry(0.104, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), hair); capH.position.set(0, 0.012, -0.008); capH.scale.set(0.95, 1.05, 1.03); capH.rotation.x = -0.25; headG.add(capH);
+  if (!opts.coach && idx % 3 === 1) { const tail = capsule(0.035, 0.09, hair); tail.position.set(0, -0.01, -0.12); tail.rotation.x = 0.5; headG.add(tail); }
   function arm(side) {
-    const sh = new THREE.Group(); sh.position.set(side * 0.19, 0.4, 0); spine.add(sh);
+    const sh = new THREE.Group(); sh.position.set(side * 0.168, 0.4, 0); spine.add(sh);
     const sleeve = capsule(0.055, 0.06, shirt); sleeve.position.y = -0.05; sh.add(sleeve);
-    const up = capsule(0.042, 0.16, skin); up.position.y = -0.12; sh.add(up);
+    const up = capsule(0.042, 0.16, opts.coach ? shirt : skin); up.position.y = -0.12; sh.add(up);
     const el = new THREE.Group(); el.position.y = -0.24; sh.add(el);
-    const fo = capsule(0.038, 0.16, skin); fo.position.y = -0.1; el.add(fo);
+    const fo = capsule(0.038, 0.16, opts.coach ? shirt : skin); fo.position.y = -0.1; el.add(fo);
     const hand = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 10), skin); hand.position.y = -0.21; hand.castShadow = true; el.add(hand);
     return { sh, el, hand };
   }
   function leg(side) {
     const hip = new THREE.Group(); hip.position.set(side * 0.085, -0.02, 0); hips.add(hip);
     const short = capsule(0.072, 0.12, shorts); short.position.y = -0.09; hip.add(short);
-    const thigh = capsule(0.058, 0.2, skin); thigh.position.y = -0.2; hip.add(thigh);
+    const thigh = capsule(0.058, 0.2, opts.coach ? shorts : skin); thigh.position.y = -0.2; hip.add(thigh);
     const knee = new THREE.Group(); knee.position.y = -0.37; hip.add(knee);
-    const shinTop = capsule(0.05, 0.1, skin); shinTop.position.y = -0.07; knee.add(shinTop);
+    const shinTop = capsule(0.05, 0.1, opts.coach ? shorts : skin); shinTop.position.y = -0.07; knee.add(shinTop);
     const sock = capsule(0.052, 0.17, socks); sock.position.y = -0.2; knee.add(sock);
     const ankle = new THREE.Group(); ankle.position.y = -0.35; knee.add(ankle);
     const foot = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.065, 0.22), shoe); foot.position.set(0, -0.02, 0.05); foot.castShadow = true; ankle.add(foot);
-    return { hip, knee, ankle };
+    return { hip, knee, ankle, foot };
   }
-  const P = { root, hips, spine, headG, armL: arm(1), armR: arm(-1), legL: leg(1), legR: leg(-1) };
-  return P;
+  return { root, body, hips, spine, headG, shirt, shorts, socks, armL: arm(1), armR: arm(-1), legL: leg(1), legR: leg(-1) };
 }
 
-// Postura: phase avanza con la distancia recorrida; mode: idle | run | dribble | ladder | bdribble.
+// Postura. phase avanza con la distancia; o.mode: idle | walk | run | dribble | fdribble | bdribble | bspeed | ladder | gather | gaits.
 function pose(P, o) {
-  const A = o.amp; const ph = o.phase;
-  const legs = [[P.legL, ph], [P.legR, ph + Math.PI]];
-  let crouch = 0.12; let lean = 0;
-  if (o.mode === 'idle') {
+  const A = o.amp || 0; const ph = o.phase || 0;
+  const legs = [[P.legL, ph, 1], [P.legR, ph + Math.PI, -1]];
+  let crouch = 0.03; let lean = 0.05; let bob = 0; let twist = 0;
+  P.body.rotation.set(0, 0, 0); P.body.position.set(0, 0, 0); P.hips.rotation.set(0, 0, 0);
+  const setArm = (a, x, z, el) => { a.sh.rotation.set(x, 0, z); a.el.rotation.set(el, 0, 0); };
+  const m = o.mode;
+  if (m === 'idle' || m === 'coach') {
     const br = Math.sin(o.t * 0.0022 + o.seed) * 0.02;
-    legs.forEach(([L], k) => { L.hip.rotation.x = -0.12; L.hip.rotation.z = (k ? -1 : 1) * 0.05; L.knee.rotation.x = 0.22; L.ankle.rotation.x = -0.1; });
-    P.armL.sh.rotation.set(0.05 + br, 0, 0.12); P.armR.sh.rotation.set(0.05 - br, 0, -0.12);
-    P.armL.el.rotation.x = -0.35; P.armR.el.rotation.x = -0.35;
-    crouch = 0.03; lean = 0.06;
+    legs.forEach(([L, , k]) => { L.hip.rotation.set(-0.1, 0, k * 0.05); L.knee.rotation.x = 0.2; L.ankle.rotation.x = -0.1; });
+    setArm(P.armL, 0.05 + br, 0.12, -0.35); setArm(P.armR, 0.05 - br, -0.12, -0.35);
+    crouch = 0.03; lean = 0.04;
+  } else if (GAIT[m] && GAIT[m].side) {
+    // Desplazamiento lateral: defensivo (abre y junta, sin cruzar) o carioca (cruza por delante y por detrás).
+    const c = Math.cos(ph); const s = Math.sin(ph);
+    if (m === 'defensivo') {
+      legs.forEach(([L, , k]) => { L.hip.rotation.set(-0.55, 0, k * (0.2 + 0.16 * c)); L.knee.rotation.x = 0.95; L.ankle.rotation.x = -0.35; });
+      setArm(P.armL, -0.35, 0.95, -0.5); setArm(P.armR, -0.35, -0.95, -0.5);
+      crouch = 0.2; lean = 0.32;
+    } else {
+      legs.forEach(([L, , k]) => { L.hip.rotation.set(-0.15 + k * 0.35 * s, 0, k * 0.08 - 0.22 * c); L.knee.rotation.x = 0.35 + 0.25 * Math.abs(s); });
+      setArm(P.armL, -0.1, 0.55, -0.4); setArm(P.armR, -0.1, -0.55, -0.4);
+      twist = 0.45 * s; crouch = 0.07; lean = 0.08;
+    }
+    bob = Math.abs(Math.sin(ph)) * 0.025;
   } else {
-    const hipAmp = o.mode === 'ladder' ? 0.55 : o.mode === 'dribble' ? 0.6 : 0.78;
-    const kneeAmp = o.mode === 'ladder' ? 1.35 : 1.15;
-    legs.forEach(([L, p], k) => {
+    // Carrera: fase de vuelo, rodilla de la pierna libre muy flexionada, brazos que pendulan desde el hombro.
+    const stepLen = o.stepLen || 0.9;
+    const hipAmp = m === 'rodillas' ? 0 : m === 'talones' ? 0.2 : clamp(stepLen / (Math.PI * 0.72), 0.12, 0.62);
+    const kd = m === 'ladder' ? 0.5 : m === 'walk' ? 0.05 : 0.25;
+    const swingK = m === 'walk' ? 0.55 : m === 'ladder' ? 1.35 : 1.05 + 0.5 * clamp((o.speed || 3) / 5, 0, 1);
+    legs.forEach(([L, p, k]) => {
       const s = Math.sin(p); const c = Math.cos(p);
-      L.hip.rotation.x = -(s * hipAmp * A) - (o.mode === 'ladder' ? 0.35 * Math.max(0, c) * A : 0.08);
-      L.hip.rotation.z = (k ? -1 : 1) * 0.03;
-      L.knee.rotation.x = 0.18 + kneeAmp * A * Math.pow(Math.max(0, c), 1.4) + 0.3 * A * Math.max(0, -s);
-      L.ankle.rotation.x = -0.25 * A * Math.max(0, -c);
+      let flex = s * hipAmp * A + 0.06 + A * kd * 2 * Math.max(0, s) * Math.max(0, c);
+      let kn = 0.12 + swingK * A * Math.pow(Math.max(0, c), 1.3) + 0.5 * A * Math.pow(Math.max(0, -c), 2);
+      if (m === 'rodillas') { flex = 1.35 * A * Math.max(0, s) + 0.05; kn = 0.2 + 1.7 * A * Math.max(0, s); }
+      if (m === 'talones') { kn = 0.2 + 1.95 * A * Math.max(0, s); flex = 0.25 * s * A + 0.05; }
+      const w = Math.pow(Math.max(0, -c), 2);
+      L.hip.rotation.set(-flex, 0, k * 0.03); L.knee.rotation.x = kn;
+      L.ankle.rotation.x = w * (flex - kn) - 0.35 * A * Math.max(0, s) * Math.max(0, c) + (m === 'ladder' ? 0.35 * w : 0);
     });
-    const armAmp = o.mode === 'ladder' ? 0.9 : o.mode === 'dribble' ? 0.45 : 0.75;
-    P.armL.sh.rotation.set(Math.sin(ph + Math.PI) * armAmp * A * -1, 0, o.mode === 'dribble' ? 0.32 : 0.1);
-    P.armR.sh.rotation.set(Math.sin(ph) * armAmp * A * -1, 0, o.mode === 'dribble' ? -0.32 : -0.1);
-    P.armL.el.rotation.x = -1.35; P.armR.el.rotation.x = -1.35;
-    crouch = (o.mode === 'dribble' || o.mode === 'bdribble' ? 0.07 : 0.03) + Math.abs(Math.sin(ph)) * 0.045 * A;
-    lean = 0.14 * A + (o.mode === 'ladder' ? 0.08 : 0);
+    const armAmp = (m === 'walk' ? 0.35 : m === 'ladder' || m === 'rodillas' ? 0.9 : m === 'dribble' ? 0.45 : 0.75) * (1 + 0.25 * (o.sprint || 0));
+    const elb = (p) => lerp(-0.35, m === 'walk' ? -0.45 : -1.2 - 0.2 * Math.sin(p), A);
+    setArm(P.armL, Math.sin(ph) * armAmp * A, m === 'dribble' ? 0.3 : 0.1, elb(ph));
+    setArm(P.armR, -Math.sin(ph) * armAmp * A, m === 'dribble' ? -0.3 : -0.1, elb(ph + Math.PI));
+    crouch = (m === 'dribble' || m === 'bdribble' ? 0.11 : m === 'ladder' ? 0.06 : 0.03);
+    bob = 0;
+    if (m === 'saltos') bob = 0.14 * A * Math.abs(Math.cos(ph));
+    P.hips.rotation.y = -0.1 * A * Math.sin(ph); twist = 0.18 * A * Math.sin(ph);
+    lean = (m === 'walk' ? 0.03 : 0.12 * A) + 0.14 * (o.sprint || 0) + (m === 'dribble' || m === 'bdribble' ? 0.12 : 0) + (m === 'ladder' ? 0.08 : 0);
   }
-  if (o.mode === 'bdribble' || o.handBall) {
-    // Brazo derecho abajo, botando el balón.
-    P.armR.sh.rotation.set(-0.55 - (o.bounce || 0) * 0.35, 0, -0.18);
-    P.armR.el.rotation.x = -0.45;
+  // Toque del balón al conducir (fútbol): la pierna que toca se adelanta un instante.
+  if (o.touch != null) {
+    const L = o.touchLeg > 0 ? P.legL : P.legR; const k = Math.sin(clamp(o.touch, 0, 1) * Math.PI);
+    L.hip.rotation.x -= 0.45 * k; L.knee.rotation.x = Math.max(0.2, L.knee.rotation.x - 0.4 * k); L.hip.rotation.z += o.touchLeg * (o.outside ? -0.35 : 0.35) * k;
   }
-  if (o.hold) { P.armL.sh.rotation.set(-0.95, 0, 0.25); P.armR.sh.rotation.set(-0.95, 0, -0.25); P.armL.el.rotation.x = -1.2; P.armR.el.rotation.x = -1.2; }
+  // Básquetbol: la mano que bota acompaña al balón (arriba cuando el balón sube).
+  if (o.dribbleHand) {
+    const a = o.dribbleHand > 0 ? P.armR : P.armL; const other = o.dribbleHand > 0 ? P.armL : P.armR; const sgn = o.dribbleHand > 0 ? -1 : 1;
+    const b = o.bounce || 0;
+    a.sh.rotation.set(-0.45 + 0.25 * (1 - b), 0, sgn * 0.28); a.el.rotation.x = -0.35 - 0.35 * b;
+    other.sh.rotation.set(-0.55, 0, -sgn * 0.55); other.el.rotation.x = -0.9; // brazo libre protege el balón
+  }
+  if (o.hold) { setArm(P.armL, -0.95, 0.25, -1.2); setArm(P.armR, -0.95, -0.25, -1.2); }
+  if (o.target) { setArm(P.armL, -1.2, 0.3, -0.6); setArm(P.armR, -1.2, -0.3, -0.6); }
+  if (o.chest != null) { const base = snapJ(P); const k = smooth(o.chest); setArm(P.armL, lerp(-0.95, -1.45, k), 0.25, lerp(-1.2, -0.1, k)); setArm(P.armR, lerp(-0.95, -1.45, k), -0.25, lerp(-1.2, -0.1, k)); lean += 0.1 * k; mixJ(P, base, smooth(o.chestW == null ? 1 : o.chestW)); }
+  if (o.handoff != null) { setArm(P.armR, -1.25, -0.1, -0.3); }
   if (o.kick != null) {
-    // Pierna derecha: atrás y luego adelante; cuerpo un poco inclinado.
-    const k = o.kick; const back = smooth(clamp(k / 0.45, 0, 1)); const fwd = smooth(clamp((k - 0.45) / 0.55, 0, 1));
-    P.legR.hip.rotation.x = lerp(0.55 * back, -0.95, fwd);
-    P.legR.knee.rotation.x = lerp(0.2 + 1.2 * back, 0.15, fwd);
-    P.legL.hip.rotation.x = -0.15; P.legL.knee.rotation.x = 0.3;
-    P.armL.sh.rotation.set(-0.3, 0, 0.6); P.armR.sh.rotation.set(0.3, 0, -0.35);
-    lean = 0.08;
+    const base = snapJ(P);
+    const k = Math.min(o.kick, 1); const back = smooth(k / 0.45); const fwd = smooth((k - 0.45) / 0.55);
+    P.legR.hip.rotation.set(lerp(0.5 * back, -0.7, fwd), lerp(0, -0.7, smooth((k - 0.35) / 0.3)), -0.12 * fwd); P.legR.knee.rotation.x = lerp(0.2 + 1.1 * back, 0.3, fwd);
+    P.legL.hip.rotation.set(-0.12, 0, 0.05); P.legL.knee.rotation.x = 0.35;
+    setArm(P.armL, -0.3, 0.65, -0.4); setArm(P.armR, 0.3, -0.4, -0.4);
+    lean = 0.06; crouch = 0.05;
+    mixJ(P, base, o.kick < 0.15 ? smooth(o.kick / 0.15) : o.kick > 1 ? 1 - smooth((o.kick - 1) / 0.4) : 1);
   }
+  if (o.receive != null) { const k = Math.sin(clamp(o.receive, 0, 1) * Math.PI); P.legR.hip.rotation.x -= 0.4 * k; P.legR.hip.rotation.z -= 0.25 * k; P.legR.knee.rotation.x = 0.3; crouch = 0.07; }
+  if (o.pose === 'oneLegL' || o.pose === 'oneLegR') {
+    const free = o.pose === 'oneLegL' ? P.legL : P.legR; const st = o.pose === 'oneLegL' ? P.legR : P.legL;
+    free.hip.rotation.set(-0.6, 0, 0); free.knee.rotation.x = 1.55; free.ankle.rotation.x = 0.2;
+    st.hip.rotation.set(-0.12, 0, 0); st.knee.rotation.x = 0.3; st.ankle.rotation.x = -0.15;
+    setArm(P.armL, -0.1, 0.75, -0.25); setArm(P.armR, -0.1, -0.75, -0.25);
+    P.body.rotation.z = Math.sin(o.t * 0.0062 + o.seed) * 0.03; P.body.position.x = (o.pose === 'oneLegL' ? -1 : 1) * 0.06; crouch = 0.04; lean = 0.03;
+  }
+  if (o.signal != null) { const k = Math.sin(clamp(o.signal, 0, 1) * Math.PI); P.armR.sh.rotation.set(-2.7 * k, 0, -0.15); P.armR.el.rotation.x = -0.2; }
+  if (o.tagArm != null) { const k = Math.sin(clamp(o.tagArm, 0, 1) * Math.PI); P.armR.sh.rotation.set(-1.45 * k, 0, 0.1); P.armR.el.rotation.x = -0.1; }
   if (o.shoot != null) {
-    const k = o.shoot; const up = smooth(clamp(k / 0.6, 0, 1));
-    P.armL.sh.rotation.set(-2.6 * up, 0, 0.1); P.armR.sh.rotation.set(-2.75 * up, 0, -0.1);
-    P.armL.el.rotation.x = -0.4 * (1 - up) - 0.2; P.armR.el.rotation.x = -0.3 * (1 - up) - 0.2;
-    legs.forEach(([L]) => { L.hip.rotation.x = -0.2 + 0.2 * up; L.knee.rotation.x = 0.6 * (1 - up) + 0.1; });
+    // Tiro: brazos arriba; la mano de tiro se extiende al soltar.
+    const k = o.shoot <= 1 ? smooth(o.shoot / 0.7) : 1 - smooth((o.shoot - 1) / 0.5); const hand = o.shootHand || 1;
+    const a = hand > 0 ? P.armR : P.armL; const b2 = hand > 0 ? P.armL : P.armR;
+    a.sh.rotation.set(-2.85 * k, 0, 0); a.el.rotation.x = lerp(-1.4, -0.15, smooth((Math.min(o.shoot, 1) - 0.5) / 0.4)) * Math.max(k, 0.3);
+    b2.sh.rotation.set(-2.3 * k, 0, 0); b2.el.rotation.x = -0.6;
+    if (!o.layup) legs.forEach(([L]) => { L.hip.rotation.x = -0.2 + 0.18 * k; L.knee.rotation.x = 0.7 * (1 - k) + 0.12; });
   }
-  if (o.hop) {
-    legs.forEach(([L]) => { L.hip.rotation.x = -0.75 * o.hop; L.knee.rotation.x = 1.3 * o.hop + 0.15; });
-    P.armL.sh.rotation.x = -0.9 * o.hop; P.armR.sh.rotation.x = -0.9 * o.hop;
+  if (o.layup) {
+    // Despegue con la pierna de afuera de la mano de tiro; la otra rodilla sube.
+    const up = o.layupLeg > 0 ? P.legR : P.legL; const pl = o.layupLeg > 0 ? P.legL : P.legR; const k = o.layup;
+    up.hip.rotation.set(-1.35 * k, 0, 0); up.knee.rotation.x = 1.5 * k + 0.15;
+    pl.hip.rotation.set(0.15 * k, 0, 0); pl.knee.rotation.x = 0.2; pl.ankle.rotation.x = 0.4 * k;
   }
-  P.hips.position.y = 0.78 - crouch + (o.lift || 0);
-  P.spine.rotation.x = lean;
-  P.headG.rotation.x = -lean * 0.6;
+  if (o.hop) { legs.forEach(([L]) => { L.hip.rotation.x = -0.75 * o.hop; L.knee.rotation.x = 1.3 * o.hop + 0.15; }); P.armL.sh.rotation.x = -0.9 * o.hop; P.armR.sh.rotation.x = -0.9 * o.hop; }
+  if (o.pickup != null) { const k = Math.sin(clamp(o.pickup, 0, 1) * Math.PI); crouch += 0.3 * k; lean += 0.5 * k; P.armR.sh.rotation.x = -0.8 * k; P.armL.sh.rotation.x = -0.8 * k; legs.forEach(([L]) => { L.knee.rotation.x += 0.8 * k; L.hip.rotation.x -= 0.6 * k; }); }
+  if (o.crouch) crouch += o.crouch;
+  P.hips.position.y = 0.78 - crouch + bob + (o.lift || 0);
+  P.spine.rotation.set(lean, twist, 0);
+  P.headG.rotation.x = -lean * 0.7;
+  if (o.roll) P.body.rotation.z += o.roll;
+  groundFeet(P, (o.lift || 0) > 0.02 || o.hop);
+}
+function snapJ(P) { return [P.legL.hip.rotation.clone(), P.legL.knee.rotation.x, P.legR.hip.rotation.clone(), P.legR.knee.rotation.x, P.armL.sh.rotation.clone(), P.armL.el.rotation.x, P.armR.sh.rotation.clone(), P.armR.el.rotation.x]; }
+function mixJ(P, b, w) {
+  const e = (r, q) => { r.x = lerp(q.x, r.x, w); r.y = lerp(q.y, r.y, w); r.z = lerp(q.z, r.z, w); };
+  e(P.legL.hip.rotation, b[0]); P.legL.knee.rotation.x = lerp(b[1], P.legL.knee.rotation.x, w);
+  e(P.legR.hip.rotation, b[2]); P.legR.knee.rotation.x = lerp(b[3], P.legR.knee.rotation.x, w);
+  e(P.armL.sh.rotation, b[4]); P.armL.el.rotation.x = lerp(b[5], P.armL.el.rotation.x, w);
+  e(P.armR.sh.rotation, b[6]); P.armR.el.rotation.x = lerp(b[7], P.armR.el.rotation.x, w);
+}
+const FOOT_CORNERS = []; [-0.045, 0.045].forEach((x) => [-0.0525, 0.0125].forEach((y) => [-0.06, 0.16].forEach((z) => FOOT_CORNERS.push(new THREE.Vector3(x, y, z)))));
+const _v = new THREE.Vector3();
+function groundFeet(P, airborne) {
+  P.root.updateMatrixWorld(true);
+  let lo = Infinity;
+  [P.legL.ankle, P.legR.ankle].forEach((a) => FOOT_CORNERS.forEach((c) => { _v.copy(c); a.localToWorld(_v); lo = Math.min(lo, _v.y); }));
+  const baseY = P.root.position.y;
+  const dy = lo - baseY;
+  if (!airborne || dy < 0) { P.hips.position.y -= dy / (P.body.scale.y || 1); P.root.updateMatrixWorld(true); }
 }
 
-// ---------- escena
-let X = null;
+// ---------- plan: de las flechas a una línea de tiempo
+function nearestBy(list, getP, x, y, max) { let best = null; let bd = max; list.forEach((o) => { const q = getP(o); if (!q) return; const dd = Math.hypot(q.x - x, q.y - y); if (dd < bd) { bd = dd; best = o; } }); return best; }
 
-function worldOf(sport) { return { s: sport === 'basquet' ? 0.115 : 0.15 }; }
-
-function plan3d(ex, s) {
-  const d = ex.diagram; const items = d.items; const sport = ex.sport;
-  const wp = (x, y) => new THREE.Vector2((x - 80) * s, (y - 100) * s);
+function plan3d(ex, d, S, ch) {
+  const sport = ex.sport; const items = d.items;
+  const wp = (x, y) => V2((x - 80) * S.sx, (y - 100) * S.sz);
   const players = []; const balls = []; const gear = [];
   items.forEach((it, i) => {
-    if (it.t === 'a' || it.t === 'b') players.push({ i, team: it.t, n: it.n, p0: wp(it.x, it.y), moves: [], kicks: [], shots: [] });
+    if (it.t === 'a' || it.t === 'b') players.push({ i, key: it.t + (it.n || ''), team: it.t, n: it.n, p0: wp(it.x, it.y), moves: [], acts: [], recv: [], holds: [] });
     else if (it.t === 'ball') balls.push({ key: 'i' + i, p0: wp(it.x, it.y), segs: [] });
     else if (it.t !== 'arrow') gear.push(Object.assign({ i }, it, { p: wp(it.x, it.y) }));
   });
-  const pos2 = {}; items.forEach((it, i) => { pos2['i' + i] = { x: it.x, y: it.y }; });
-  const ballAt = {}; // posición 2D actual de cada balón
-  balls.forEach((b) => { ballAt[b.key] = pos2[b.key]; });
   const hoops = [];
-  if (sport === 'basquet') { if ((d.v || 'half') === 'half') hoops.push({ rim: wp(80, 170.5), board: wp(80, 177) }); else { hoops.push({ rim: wp(80, 177), board: wp(80, 181) }); hoops.push({ rim: wp(80, 23), board: wp(80, 19) }); } }
-  const nearHoop = (x, y) => hoops.find((h) => Math.hypot(h.rim.x - (x - 80) * s, h.rim.y - (y - 100) * s) < 1.4);
-  const nearest = (list, getP, x, y, max) => { let best = null; let bd = max; list.forEach((o) => { const q = getP(o); const dd = Math.hypot(q.x - x, q.y - y); if (dd < bd) { bd = dd; best = o; } }); return best; };
+  const hoopAt = (x, y, dir) => { const rim = wp(x, y); return { rim, board: V2(rim.x, rim.y + dir * 0.4), dir }; };
+  if (sport === 'basquet' && ch.hoops !== false) { if ((d.v || 'half') === 'half') hoops.push(hoopAt(80, 170.5, 1)); else { hoops.push(hoopAt(80, 177, 1)); hoops.push(hoopAt(80, 23, -1)); } }
+  const nearHoop = (p) => hoops.find((h) => h.rim.distanceTo(p) < 1.6);
   const plPos = {}; players.forEach((p) => { plPos[p.i] = { x: items[p.i].x, y: items[p.i].y }; });
-  const steps = R.diagramSteps(d);
-  let t = 1100;
+  const ballAt = {}; balls.forEach((b) => { const it = items[Number(b.key.slice(1))]; ballAt[b.key] = { x: it.x, y: it.y }; });
+  const stepT = {};
   let ghostN = 0;
-  steps.forEach((group) => {
-    let gmax = 0;
-    group.forEach(({ it }) => {
-      const L = Math.hypot(it.x2 - it.x, it.y2 - it.y) * s;
-      let dur;
+  let t = LEAD;
+  R.diagramSteps(d).forEach((group, gi) => {
+    const sNum = Number(group[0].it.s) || gi + 1;
+    let gmax = 0; let hold = 0;
+    // Primero los que corren (así se sabe dónde estarán los que reciben), luego los pases.
+    const ordered = group.filter((g) => g.it.k !== 'pase').concat(group.filter((g) => g.it.k === 'pase'));
+    ordered.forEach(({ it }) => {
+      hold = Math.max(hold, Number(it.hold) || 0);
       if (it.k === 'pase') {
-        let b = nearest(balls, (o) => ballAt[o.key], it.x, it.y, 13);
+        let b = nearestBy(balls, (o) => ballAt[o.key], it.x, it.y, 13);
         if (!b) { b = { key: 'g' + (ghostN++), p0: wp(it.x, it.y), segs: [], ghost: true, appear: t }; balls.push(b); ballAt[b.key] = { x: it.x, y: it.y }; }
-        const shot = sport === 'basquet' ? nearHoop(it.x2, it.y2) : null;
-        const speed = shot ? 6.5 : sport === 'basquet' ? 7.5 : 9.5;
-        dur = Math.max(shot ? 1000 : 520, (L / speed) * 1000 + (shot ? 350 : 0));
-        const kicker = nearest(players, (o) => plPos[o.i], it.x, it.y, 13);
-        b.segs.push({ type: shot ? 'shot' : 'pass', t0: t, t1: t + dur, to: wp(it.x2, it.y2), hoop: shot, by: kicker ? kicker.i : null });
-        if (kicker) { if (shot) kicker.shots.push({ t0: t }); else kicker.kicks.push({ t0: t }); }
+        const passer = nearestBy(players, (o) => plPos[o.i], it.x, it.y, 13);
+        const from = wp(it.x, it.y); const to = wp(it.x2, it.y2); const L = from.distanceTo(to);
+        const hoop = sport === 'basquet' ? nearHoop(to) : null;
+        let type = hoop ? 'shot' : sport === 'basquet' && L < 1.3 ? 'handoff' : 'pass';
+        if (sport === 'futbol' && it.y2 < 16 && Math.abs(it.x2 - 80) < 18) type = 'goal';
+        const speed = type === 'goal' ? 12 : sport === 'basquet' ? 6.0 : 6.8;
+        const dur = type === 'shot' ? 1100 : type === 'handoff' ? 380 : Math.max(450, (L / speed) * 1000 + 120);
+        const receiver = type === 'shot' ? null : nearestBy(players.filter((p) => p !== passer), (o) => plPos[o.i], it.x2, it.y2, 14);
+        const seg = { type, t0: t, t1: t + dur, to, hoop, by: passer ? passer.i : null, rcv: receiver ? receiver.i : null, bounce: !!it.bounce };
+        b.segs.push(seg);
+        if (passer) passer.acts.push({ type, seg });
+        if (receiver) receiver.recv.push({ seg, fromP: from });
         ballAt[b.key] = { x: it.x2, y: it.y2 };
+        gmax = Math.max(gmax, dur);
       } else {
-        const pl = nearest(players, (o) => plPos[o.i], it.x, it.y, 13);
+        const pl = nearestBy(players, (o) => plPos[o.i], it.x, it.y, 13);
         if (!pl) return;
+        const dx = it.x2 - it.x; const dy = it.y2 - it.y;
+        const from = wp(plPos[pl.i].x, plPos[pl.i].y); const to = wp(plPos[pl.i].x + dx, plPos[pl.i].y + dy);
+        const L = from.distanceTo(to);
         const dribble = it.k === 'conduccion';
-        const from = wp(plPos[pl.i].x, plPos[pl.i].y); const to = wp(plPos[pl.i].x + it.x2 - it.x, plPos[pl.i].y + it.y2 - it.y);
-        // ¿Va por la escalera? Pasos cortos y rápidos.
-        const onLadder = gear.some((g) => g.t === 'ladder' && ladderHit(g, from, to, s));
-        const speed = onLadder ? 2.0 : dribble ? (sport === 'basquet' ? 3.0 : 2.4) : 3.6;
-        dur = Math.max(650, (L / speed) * 1000 + 300);
-        const mode = onLadder ? 'ladder' : dribble ? (sport === 'basquet' ? 'bdribble' : 'dribble') : 'run';
+        const ladder = gear.find((g) => g.t === 'ladder' && ladderHit(g, from, to));
+        let mode; let speed;
+        if (it.g && GAIT[it.g]) { mode = it.g; speed = GAIT[it.g].speed; }
+        else if (dribble) { const fast = it.pace === 'sprint' || it.pace === 'run'; mode = sport === 'basquet' ? (fast ? 'bspeed' : 'bdribble') : (fast ? 'fdribble' : 'dribble'); speed = sport === 'basquet' ? (fast ? 4.2 : 2.6) : (fast ? 3.4 : 2.2); if (ladder) speed = 1.9; }
+        else if (ladder) { mode = 'ladder'; speed = 2.0; }
+        else { mode = it.pace === 'walk' ? 'walk' : 'run'; speed = PACE[it.pace || 'run'] || PACE.run; }
+        const crowd = group.filter((g) => g.it.k !== 'pase').length >= 3;
+        if (crowd) speed *= 1 + ((((pl.i * 53) % 9) - 4) * 0.018);
+        const dur = Math.max(380, (L / speed) * 1000);
         const hops = [];
         gear.forEach((g) => { if (g.t !== 'hurdle' && g.t !== 'ring') return; const u = crossParam(from, to, g.p, g.t === 'ring' ? 0.45 : 0.5); if (u != null) hops.push(u); });
-        pl.moves.push({ t0: t, t1: t + dur, from, to, mode, hops });
-        plPos[pl.i] = { x: plPos[pl.i].x + it.x2 - it.x, y: plPos[pl.i].y + it.y2 - it.y };
+        const mv = { t0: t + (crowd ? (((pl.i * 37) % 7) - 3) * 45 + 140 : 0), dur, from, to, L, mode, speed, sprint: it.pace === 'sprint' ? 1 : 0, dribble, ladder, hand: it.h === 'I' ? -1 : it.h === 'D' ? 1 : 0, hops, hold: Number(it.hold) || 0, pose: it.pose || null };
+        pl.moves.push(mv);
+        plPos[pl.i] = { x: plPos[pl.i].x + dx, y: plPos[pl.i].y + dy };
         if (dribble) {
-          const b = nearest(balls, (o) => ballAt[o.key], it.x, it.y, 14);
-          if (b) { b.segs.push({ type: 'carry', t0: t, t1: t + dur, by: pl.i }); ballAt[b.key] = { x: ballAt[b.key].x + it.x2 - it.x, y: ballAt[b.key].y + it.y2 - it.y }; }
+          let b = nearestBy(balls, (o) => ballAt[o.key], it.x, it.y, 14);
+          if (!b) { b = { key: 'g' + (ghostN++), p0: from.clone(), segs: [] }; balls.push(b); ballAt[b.key] = { x: it.x, y: it.y }; }
+          b.segs.push({ type: 'carry', by: pl.i, mv });
+          ballAt[b.key] = { x: ballAt[b.key].x + dx, y: ballAt[b.key].y + dy };
         }
+        gmax = Math.max(gmax, dur + RAMP);
       }
-      gmax = Math.max(gmax, dur);
     });
-    t += gmax + 320;
+    stepT[sNum] = { t0: t, t1: t + gmax };
+    t += gmax + GAP + hold;
   });
-  // Tramos seguidos del mismo jugador = un solo recorrido continuo (sin frenar en cada cono).
+  // Recorridos continuos: tramos seguidos del mismo jugador sin parada; cada tramo a su propia velocidad.
   players.forEach((pl) => {
     const chains = [];
     pl.moves.forEach((m) => {
       const c = chains[chains.length - 1];
-      if (c && m.t0 - c.t1 <= 450 && c.pts[c.pts.length - 1].distanceTo(m.from) < 0.05) { c.segs.push(m); c.pts.push(m.to); c.t1 = m.t1; } else chains.push({ t0: m.t0, t1: m.t1, pts: [m.from, m.to], segs: [m] });
+      const prev = c && c.segs[c.segs.length - 1];
+      if (c && !prev.hold && m.t0 - (prev.t0 + prev.dur) <= 700 && prev.to.distanceTo(m.from) < 0.05 && !!GAIT[m.mode] === !!GAIT[prev.mode]) c.segs.push(m);
+      else chains.push({ segs: [m] });
     });
-    chains.forEach((c) => { c.lens = c.segs.map((m) => m.from.distanceTo(m.to)); c.total = c.lens.reduce((a, b) => a + b, 0); });
+    chains.forEach((c) => {
+      c.t0 = c.segs[0].t0;
+      let acc = 0;
+      c.segs.forEach((m) => { m.at = acc; acc += m.dur; });
+      c.T = acc; c.t1 = c.t0 + acc + RAMP;
+      c.lens = c.segs.map((m) => m.L); c.total = c.lens.reduce((a, b) => a + b, 0);
+      c.pts = [c.segs[0].from].concat(c.segs.map((m) => m.to));
+      let dd = 0; c.segs.forEach((m) => { m.d0 = dd; dd += m.L; });
+      c.segs.forEach((m) => { m.chain = c; m.a0 = c.t0 + m.at + (m === c.segs[0] ? 0 : RAMP / 2); m.a1 = c.t0 + m.at + m.dur + (m === c.segs[c.segs.length - 1] ? RAMP : RAMP / 2); });
+      const last = c.segs[c.segs.length - 1];
+      if (last.hold) pl.holds.push({ t0: c.t1, t1: c.t1 + last.hold, pose: last.pose });
+    });
     pl.chains = chains;
   });
+  // Tiros: entrada (llega driblando cerca del aro) o tiro parado.
+  balls.forEach((b) => b.segs.forEach((sg) => {
+    if (sg.type !== 'shot') return;
+    const pl = players.find((p) => p.i === sg.by);
+    if (!pl) return;
+    const st = playerState(pl, sg.t0);
+    const dist = st.p.distanceTo(sg.hoop.rim);
+    const lastCarry = b.segs.filter((x) => x.type === 'carry' && x.by === pl.i).pop();
+    const arriving = lastCarry && lastCarry.mv.chain && sg.t0 - lastCarry.mv.chain.t1 < 1500;
+    if (arriving && dist < 4.8 && !lastCarry.mv.hold) {
+      // Entrada: sigue sin pararse hasta el punto de despegue, recoge el balón y sube.
+      const c = lastCarry.mv.chain; const from = c.pts[c.pts.length - 1].clone();
+      const toRim = V2().subVectors(sg.hoop.rim, from).normalize();
+      const sideSign = from.x < sg.hoop.rim.x ? 1 : -1; // lado derecho (x menor) → mano derecha
+      const takeoff = V2().copy(sg.hoop.rim).addScaledVector(toRim, -0.85).add(V2(sideSign * 0.0, 0));
+      const L = from.distanceTo(takeoff);
+      const gdur = Math.max(520, (L / 3.0) * 1000);
+      const gm = { t0: c.t0, dur: gdur, from, to: takeoff, L, mode: 'gather', speed: 3.0, sprint: 0, dribble: false, hops: [], hold: 0, chain: c, at: c.T };
+      gm.d0 = c.total; c.segs.push(gm); c.T += gdur; c.lens.push(L); c.total += L; c.pts.push(takeoff);
+      const lastOld = c.segs[c.segs.length - 2]; lastOld.a1 = c.t0 + lastOld.at + lastOld.dur + RAMP / 2;
+      gm.a0 = c.t0 + gm.at + RAMP / 2; gm.a1 = c.t0 + gm.at + gdur + RAMP; c.t1 = c.t0 + c.T + RAMP;
+      sg.layup = true; sg.hand = sideSign > 0 ? 1 : -1; sg.gather = gm;
+      sg.t0 = c.t1 + 230; sg.t1 = sg.t0 + 700; sg.jumpT = c.t1 - 60;
+    } else {
+      sg.layup = false; sg.hand = 1; sg.jumpT = sg.t0 - 260; sg.t0 = sg.t0 + 120; sg.t1 = sg.t0 + 950;
+    }
+  }));
+  // Tiempos reales de la conducción (según el recorrido) y quién recoge el balón suelto.
+  balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type === 'carry') { sg.t0 = sg.mv.a0; sg.t1 = sg.mv.a1; } }));
   balls.forEach((b) => {
+    b.segs.sort((p, q) => p.t0 - q.t0);
     const out = [];
-    b.segs.forEach((sg) => { const prev = out[out.length - 1]; if (prev && prev.type === 'carry' && sg.type === 'carry' && prev.by === sg.by && sg.t0 - prev.t1 <= 450) prev.t1 = sg.t1; else out.push(Object.assign({}, sg)); });
+    b.segs.forEach((sg) => { const prev = out[out.length - 1]; if (prev && prev.type === 'carry' && sg.type === 'carry' && prev.by === sg.by && sg.t0 - prev.t1 <= 700) { prev.t1 = sg.t1; prev.mv2 = sg.mv; } else out.push(sg); });
     b.segs = out;
   });
-  return { players, balls, gear, hoops, end: t };
+  let end = t;
+  players.forEach((pl) => pl.chains.forEach((c) => { end = Math.max(end, c.t1 + 300); }));
+  players.forEach((pl) => pl.holds.forEach((h) => { end = Math.max(end, h.t1 + 200); }));
+  balls.forEach((b) => b.segs.forEach((sg) => { end = Math.max(end, sg.t1 + (sg.type === 'shot' ? 1300 : 300)); }));
+  return { players, balls, gear, hoops, stepT, end, wp };
 }
-function chainPoint(c, d) {
-  d = clamp(d, 0, c.total);
-  let acc = 0;
-  for (let i = 0; i < c.segs.length; i++) { const L = c.lens[i]; if (d <= acc + L || i === c.segs.length - 1) { const u = L ? (d - acc) / L : 0; return { p: new THREE.Vector2().lerpVectors(c.segs[i].from, c.segs[i].to, clamp(u, 0, 1)), i, u: clamp(u, 0, 1) }; } acc += L; }
-  return { p: c.pts[c.pts.length - 1].clone(), i: c.segs.length - 1, u: 1 };
-}
-function ladderHit(g, a, b, s) {
-  const n = Math.max(2, Math.min(14, Math.round(Number(g.n) || 6))); const half = (n * 7 * s) / 2;
+function ladderHit(g, a, b) {
+  const n = Math.max(2, Math.min(14, Math.round(Number(g.n) || 6))); const half = (n * 7 * X.S.sz) / 2;
   const vert = Number(g.r) !== 90;
-  const inside = (p) => (vert ? Math.abs(p.x - g.p.x) < 1.9 && Math.abs(p.y - g.p.y) <= half + 0.4 : Math.abs(p.y - g.p.y) < 1.9 && Math.abs(p.x - g.p.x) <= half + 0.4);
-  const mid = new THREE.Vector2((a.x + b.x) / 2, (a.y + b.y) / 2);
-  return inside(mid) && (inside(a) || inside(b));
+  const inside = (p) => (vert ? Math.abs(p.x - g.p.x) < 0.8 && Math.abs(p.y - g.p.y) <= half + 0.3 : Math.abs(p.y - g.p.y) < 0.8 && Math.abs(p.x - g.p.x) <= half + 0.3);
+  const mid = V2((a.x + b.x) / 2, (a.y + b.y) / 2);
+  return inside(mid);
 }
 function crossParam(a, b, p, r) {
-  const ab = new THREE.Vector2().subVectors(b, a); const L2 = ab.lengthSq(); if (L2 < 1e-6) return null;
-  const u = clamp(new THREE.Vector2().subVectors(p, a).dot(ab) / L2, 0, 1);
-  const q = new THREE.Vector2(a.x + ab.x * u, a.y + ab.y * u);
+  const ab = V2().subVectors(b, a); const L2 = ab.lengthSq(); if (L2 < 1e-6) return null;
+  const u = clamp(V2().subVectors(p, a).dot(ab) / L2, 0, 1);
+  const q = V2(a.x + ab.x * u, a.y + ab.y * u);
   return q.distanceTo(p) < r && u > 0.02 && u < 0.98 ? u : null;
 }
 
-// Estado de un jugador en el instante t: posición, rumbo, modo y fase de la zancada.
+// Estado del jugador en t: dónde está, qué tramo va haciendo y cuánto ha recorrido.
+function chainAt(c, t) {
+  // Tiempo deformado: arranca y frena suave (RAMP) y en medio cada tramo va a su velocidad.
+  const tau = clamp(t - c.t0, 0, c.T + RAMP); const a = RAMP;
+  let tw;
+  if (tau < a) tw = (tau * tau) / (2 * a);
+  else if (tau > c.T) { const r = c.T + a - tau; tw = c.T - (r * r) / (2 * a); }
+  else tw = tau - a / 2;
+  tw = clamp(tw, 0, c.T);
+  let i = 0; while (i < c.segs.length - 1 && tw > c.segs[i].at + c.segs[i].dur) i++;
+  const m = c.segs[i]; const u = clamp((tw - m.at) / m.dur, 0, 1);
+  return { m, i, u, p: V2().lerpVectors(m.from, m.to, u), d: m.d0 + m.L * u, raw: tau / (c.T + a) };
+}
 function playerState(pl, t) {
   let p = pl.p0.clone(); let dist = 0; let cur = null; let last = null;
   for (const c of pl.chains) {
-    if (t >= c.t1) { p = c.pts[c.pts.length - 1].clone(); dist += c.total; last = c.segs[c.segs.length - 1]; continue; }
-    if (t >= c.t0) {
-      const raw = (t - c.t0) / (c.t1 - c.t0); const d = travel(raw) * c.total;
-      const q = chainPoint(c, d);
-      p = q.p; dist += d;
-      cur = { m: c.segs[q.i], c, k: q.u, raw, d };
-    }
+    if (t >= c.t1) { p = c.pts[c.pts.length - 1].clone(); dist += c.total; last = c; continue; }
+    if (t >= c.t0) { const q = chainAt(c, t); p = q.p; dist += q.d; cur = Object.assign(q, { c }); }
     break;
   }
-  return { p, dist, cur, last };
+  const hold = pl.holds.find((h) => t >= h.t0 && t < h.t1);
+  return { p, dist, cur, last, hold };
+}
+function headingOf(pl, t) {
+  const st = playerState(pl, t);
+  const travelDir = (c, d) => { const a = chainAt(c, c.t0 + 0).p; const q1 = pointAtD(c, d - 0.3); const q2 = pointAtD(c, d + 0.3); return q2.distanceTo(q1) > 1e-3 ? Math.atan2(q2.x - q1.x, q2.y - q1.y) : Math.atan2(c.pts[c.pts.length - 1].x - a.x, c.pts[c.pts.length - 1].y - a.y); };
+  let h;
+  if (st.cur) {
+    h = travelDir(st.cur.c, st.cur.d);
+    if (GAIT[st.cur.m.mode] && GAIT[st.cur.m.mode].side) h += Math.PI / 2;
+    const before = idleHeading(pl, st.cur.c.t0, st.cur.c.pts[0]);
+    h = angLerp(before, h, smooth((t - st.cur.c.t0) / 260));
+  } else {
+    h = idleHeading(pl, t, st.p);
+    if (st.last && t - st.last.t1 < 500) { const L = st.last.segs[st.last.segs.length - 1]; let hl = Math.atan2(L.to.x - L.from.x, L.to.y - L.from.y); if (GAIT[L.mode] && GAIT[L.mode].side) hl += Math.PI / 2; h = angLerp(hl, h, smooth((t - st.last.t1) / 500)); }
+  }
+  // Quien recibe mira al que le pasa; quien pasa o tira mira a su objetivo.
+  pl.recv.forEach((r) => { const w = Math.min(smooth((t - (r.seg.t1 - 1500)) / 300), 1 - smooth((t - (r.seg.t1 + 200)) / 300)); if (w > 0 && !st.cur) h = angLerp(h, Math.atan2(r.fromP.x - st.p.x, r.fromP.y - st.p.y), w); });
+  pl.acts.forEach((a) => { const tgt = a.seg.type === 'shot' ? a.seg.hoop.rim : a.seg.to; const w = Math.min(smooth((t - (a.seg.t0 - 650)) / 280), 1 - smooth((t - (a.seg.t0 + 250)) / 300)); if (w > 0 && !(st.cur && a.seg.layup)) h = angLerp(h, Math.atan2(tgt.x - st.p.x, tgt.y - st.p.y), w); });
+  return h;
+}
+function pointAtD(c, d) { d = clamp(d, 0, c.total); for (const m of c.segs) { if (d <= m.d0 + m.L || m === c.segs[c.segs.length - 1]) return V2().lerpVectors(m.from, m.to, m.L ? clamp((d - m.d0) / m.L, 0, 1) : 0); } return c.pts[c.pts.length - 1].clone(); }
+function idleHeading(pl, t, p) {
+  const next = pl.moves.find((m) => m.t0 >= t - 1);
+  if (next && next.L > 0.3) { let h = Math.atan2(next.to.x - next.from.x, next.to.y - next.from.y); if (GAIT[next.mode] && GAIT[next.mode].side) h += Math.PI / 2; return h; }
+  const prev = pl.moves.length ? pl.moves[pl.moves.length - 1] : null;
+  if (prev && t >= prev.t0) { let h = Math.atan2(prev.to.x - prev.from.x, prev.to.y - prev.from.y); if (GAIT[prev.mode] && GAIT[prev.mode].side) h += Math.PI / 2; return h; }
+  const c = X.center;
+  const dx = c.x - p.x; const dz = c.y - p.y;
+  if (Math.hypot(dx, dz) < 0.5) return 0;
+  return Math.atan2(dx, dz);
 }
 
-function buildScene(ex, s) {
+// ---------- balón
+function ownedPos(pl, t, sport, r) {
+  const st = playerState(pl, t); const h = headingOf(pl, t); const f = fwdOf(h);
+  if (sport === 'basquet') return new THREE.Vector3(st.p.x + f.x * 0.3, 1.02, st.p.y + f.y * 0.3);
+  return new THREE.Vector3(st.p.x + f.x * 0.34, r, st.p.y + f.y * 0.34);
+}
+function carryPos(sg, t, sport, r) {
+  const pl = X.P.players.find((x) => x.i === sg.by);
+  const st = playerState(pl, t); const h = headingOf(pl, t); const f = fwdOf(h); const rt = rightOf(h);
+  const m = st.cur ? st.cur.m : null; const d = st.cur ? st.cur.d : 0;
+  if (sport === 'basquet') {
+    const speedy = m && m.mode === 'bspeed';
+    const len = speedy ? 1.5 : 0.85;
+    const b = Math.abs(Math.cos((d / len) * Math.PI));
+    const hand = handAt(pl, st);
+    // Cambio de mano: el balón cruza por delante, bajo, en los primeros 40 cm del tramo nuevo.
+    let side = hand.side; let low = 0;
+    if (hand.prev !== hand.side && hand.into < 0.45) { const k = smooth(hand.into / 0.45); side = lerp(hand.prev, hand.side, k); low = Math.sin(k * Math.PI); }
+    const lead = speedy ? 0.55 : 0.25 + 0.12 * low;
+    const peak = speedy ? 0.95 : 0.72 - 0.3 * low;
+    return { p: new THREE.Vector3(st.p.x + f.x * lead + rt.x * side * 0.24, r + (peak - r) * b, st.p.y + f.y * lead + rt.y * side * 0.24), bounce: b, side };
+  }
+  // Fútbol: un toque cada tramo corto; el balón se adelanta y el jugador lo alcanza.
+  const fast = m && m.mode === 'fdribble';
+  const tl = fast ? 1.5 : 0.85; const u = ((d % tl) + tl) % tl / tl;
+  const lead = 0.28 + (fast ? 0.9 : 0.45) * (u < 0.12 ? u / 0.12 : 1 - (u - 0.12) / 0.88);
+  const k = Math.floor(d / tl);
+  return { p: new THREE.Vector3(st.p.x + f.x * lead, r, st.p.y + f.y * lead), touch: u < 0.16 ? u / 0.16 : null, touchLeg: k % 2 ? 1 : -1, outside: k % 4 >= 2 };
+}
+function handAt(pl, st) {
+  if (!st.cur) return { side: 1, prev: 1, into: 9 };
+  const c = st.cur.c; const i = st.cur.i;
+  const sideOf = (j) => { const m = c.segs[j]; if (m.hand) return m.hand; return 1; };
+  const side = sideOf(i); const prev = i > 0 ? sideOf(i - 1) : side;
+  return { side, prev, into: st.cur.d - c.segs[i].d0 };
+}
+function ballState(b, t, sport) {
+  const r = b.r;
+  let cur = { p: new THREE.Vector3(b.p0.x, r, b.p0.y), owner: null, loose: null };
+  // Al empezar, el balón es de quien lo tiene al lado.
+  const own0 = nearestBy(X.P.players, (pl) => pl.p0, b.p0.x, b.p0.y, 1.3);
+  if (own0) cur.owner = own0;
+  const visible = !b.ghost || t >= b.appear - 400;
+  let spin = 0;
+  for (const sg of b.segs) {
+    if (t < (sg.type === 'shot' ? (sg.layup ? sg.gather.a0 : sg.t0 - 400) : sg.t0)) break;
+    if (sg.type === 'carry') {
+      if (t < sg.t1) {
+        const c = carryPos(sg, t, sport, r);
+        if (t - sg.t0 < 240) { const prevP = cur.owner ? ownedPos(cur.owner, sg.t0, sport, r) : cur.p; c.p = prevP.clone().lerp(c.p, smooth((t - sg.t0) / 240)); }
+        return { p: c.p, visible, carry: sg, c, spin: playerState(X.P.players.find((x) => x.i === sg.by), t).dist / r };
+      }
+      cur = { p: carryPos(sg, sg.t1, sport, r).p, owner: X.P.players.find((x) => x.i === sg.by), loose: null, since: sg.t1 };
+      cur.fromP = cur.p.clone();
+      continue;
+    }
+    const start = cur.owner ? ownedPos(cur.owner, sg.t0, sport, r) : cur.p.clone();
+    if (sg.type === 'shot') {
+      const rim = new THREE.Vector3(sg.hoop.rim.x, 3.05, sg.hoop.rim.y);
+      const shooter = X.P.players.find((x) => x.i === sg.by);
+      if (t < sg.t0) {
+        // Recogida y subida del balón: en las manos, cada vez más alto.
+        const k = smooth((t - (sg.layup ? sg.gather.a0 : sg.t0 - 400)) / ((sg.layup ? sg.t0 - sg.gather.a0 : 400)));
+        const own = ownedPos(shooter, t, sport, r);
+        return { p: new THREE.Vector3(own.x, lerp(1.02, 1.0 + 1.3 + (sg.layup ? jumpLift(sg, t) : 0.15), k * k), own.z), visible, hand: true };
+      }
+      const rel = ownedPos(shooter, sg.t0, sport, r); rel.y = 2.35 + (sg.layup ? 0.42 : 0.15);
+      const bd = sg.hoop.dir; // tablero detrás del aro
+      const spot = new THREE.Vector3(rim.x + (sg.hand > 0 ? -0.16 : 0.16), 3.32, sg.hoop.board.y - bd * 0.06);
+      if (t < sg.t1) {
+        if (sg.layup) {
+          const k = (t - sg.t0) / (sg.t1 - sg.t0);
+          if (k < 0.55) { const q = k / 0.55; const p = new THREE.Vector3().lerpVectors(rel, spot, q); p.y += Math.sin(q * Math.PI) * 0.35; return { p, visible, spin: q * 20 }; }
+          const q = (k - 0.55) / 0.45; return { p: new THREE.Vector3().lerpVectors(spot, rim, q), visible, spin: 22 + q * 10 };
+        }
+        const k = (t - sg.t0) / (sg.t1 - sg.t0); const p = new THREE.Vector3().lerpVectors(rel, rim, k); p.y += Math.sin(k * Math.PI) * 1.3; return { p, visible, spin: k * 30 };
+      }
+      // Entra, cae por la red y bota.
+      const after = t - sg.t1;
+      if (after < 420) return { p: new THREE.Vector3(rim.x, lerp(3.0, 2.3, after / 420), rim.z), visible, spin: 30 };
+      const fall = (after - 420) / 420;
+      if (fall < 1) return { p: new THREE.Vector3(rim.x, lerp(2.3, r, fall * fall), rim.z), visible, spin: 30 };
+      cur = { p: new THREE.Vector3(rim.x, r, rim.z), owner: null, loose: sg.t1 + 840 };
+      continue;
+    }
+    const recv = sg.rcv != null ? X.P.players.find((x) => x.i === sg.rcv) : null;
+    let end = sport === 'basquet' && recv ? ownedPos(recv, sg.t1, sport, r) : new THREE.Vector3(sg.to.x, sport === 'basquet' ? 1.0 : r, sg.to.y);
+    if (sport === 'futbol' && recv) { const rp = playerState(recv, sg.t1).p; const toP = V2(start.x - rp.x, start.z - rp.y).normalize(); end = new THREE.Vector3(rp.x + toP.x * 0.32, r, rp.y + toP.y * 0.32); }
+    if (t < sg.t1) {
+      const k = (t - sg.t0) / (sg.t1 - sg.t0);
+      const e = sport === 'futbol' ? 1 - Math.pow(1 - k, 1.5) : k;
+      const p = new THREE.Vector3().lerpVectors(start, end, e);
+      if (sport === 'basquet') { if (sg.bounce) p.y = k < 0.66 ? lerp(start.y, r, k / 0.66) : lerp(r, end.y, (k - 0.66) / 0.34); else p.y += Math.sin(k * Math.PI) * 0.12; }
+      else p.y = r + (sg.type === 'goal' ? Math.sin(k * Math.PI) * 0.4 : 0);
+      return { p, visible, spin: start.distanceTo(p) / r };
+    }
+    cur = { p: end, owner: recv || null, loose: recv ? null : sg.t1 };
+  }
+  // Suelto: si alguien quieto lo tiene cerca, lo recoge (en básquetbol a las manos, en fútbol a los pies).
+  if (!cur.owner) {
+    const close = nearestBy(X.P.players.filter((pl) => !playerState(pl, t).cur), (pl) => playerState(pl, t).p, cur.p.x, cur.p.z, 0.8);
+    if (close && (sport === 'futbol' || cur.loose == null || t - cur.loose > 300)) cur.owner = close;
+  }
+  if (cur.owner) {
+    const st = playerState(cur.owner, t);
+    if (st.cur) return { p: cur.p, visible, spin };
+    let op = ownedPos(cur.owner, t, sport, r);
+    if (cur.fromP && t - cur.since < 240) op = cur.fromP.clone().lerp(op, smooth((t - cur.since) / 240));
+    return { p: op, visible, held: sport === 'basquet' ? cur.owner : null, spin };
+  }
+  if (cur.loose != null && sport === 'basquet') { const bt = (t - cur.loose) / 380; cur.p.y = r + Math.abs(Math.sin(Math.PI * Math.min(bt, 3))) * 0.55 * Math.max(0, 1 - bt / 3); }
+  return { p: cur.p, visible, spin };
+}
+function jumpLift(sg, t) { const k = (t - sg.jumpT) / 650; return k > 0 && k < 1 ? Math.sin(k * Math.PI) * (sg.layup ? 0.42 : 0.15) : 0; }
+
+function strideOf(m) {
+  if (m.ladder) return m.ladder.L / (m.ladder.rungs || 10);
+  if (GAIT[m.mode]) return GAIT[m.mode].stride;
+  const v = m.speed || 3;
+  const base = clamp(0.3 + 0.21 * v, 0.5, 1.45);
+  return m.mode === 'dribble' || m.mode === 'fdribble' ? base * 0.8 : m.mode === 'bdribble' ? base * 0.85 : m.mode === 'walk' ? 0.6 : base;
+}
+// ---------- escena
+let X = null;
+
+function scalesOf(ex, d, ch) {
+  if (ch && ch.s) return { sx: ch.s, sz: ch.s };
+  if (ex.sport === 'basquet') return (d.v || 'half') === 'half' ? { sx: 0.115, sz: 0.0815 } : { sx: 0.115, sz: 0.163 };
+  return { sx: 0.15, sz: 0.15 };
+}
+function buildScene(ex) {
   const scene = new THREE.Scene();
-  const sport = ex.sport; const v = (ex.diagram && ex.diagram.v) || (sport === 'basquet' ? 'half' : 'full');
-  const indoor = sport === 'basquet';
-  scene.background = indoor ? new THREE.Color('#1c140e') : canvasTex(8, 256, (c, w, h) => { const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#5e9fe0'); g.addColorStop(0.65, '#b7d8f5'); g.addColorStop(1, '#e4f0f6'); c.fillStyle = g; c.fillRect(0, 0, w, h); });
-  scene.fog = new THREE.Fog(indoor ? '#1c140e' : '#cfe3ee', indoor ? 26 : 45, indoor ? 60 : 120);
-  const hemi = new THREE.HemisphereLight(indoor ? '#fff3e2' : '#e8f3ff', indoor ? '#5a3a20' : '#3f6b2e', indoor ? 1.25 : 1.15);
-  scene.add(hemi);
-  const sun = new THREE.DirectionalLight(indoor ? '#fff1dc' : '#fff6e5', indoor ? 1.6 : 2.6);
-  sun.castShadow = true; sun.shadow.mapSize.set(1536, 1536); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
+  const indoor = ex.sport === 'basquet';
+  scene.background = indoor ? new THREE.Color('#cdbfae') : canvasTex(8, 256, (c, w, h) => { const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#5e9fe0'); g.addColorStop(0.65, '#b7d8f5'); g.addColorStop(1, '#e4f0f6'); c.fillStyle = g; c.fillRect(0, 0, w, h); });
+  scene.fog = new THREE.Fog(indoor ? '#cdbfae' : '#cfe3ee', indoor ? 30 : 45, indoor ? 70 : 120);
+  scene.add(new THREE.HemisphereLight(indoor ? '#fff3e2' : '#e8f3ff', indoor ? '#6a4a2a' : '#3f6b2e', indoor ? 1.35 : 1.15));
+  const sun = new THREE.DirectionalLight(indoor ? '#fff1dc' : '#fff6e5', indoor ? 1.7 : 2.6);
+  sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
   scene.add(sun); scene.add(sun.target);
-  return { scene, sun, v, indoor };
+  return { scene, sun, indoor };
 }
-
-async function buildGround(ex, s, scene, v) {
+async function buildGround(ex, S, scene, v) {
   const sport = ex.sport;
-  const svg = R.boardSVG(sport, { v, items: [] }, { export: [1280, 1600] });
-  const im = await loadSVG(svg);
+  const im = await loadSVG(R.boardSVG(sport, { v, items: [] }, { export: [1280, 1600] }));
   const tex = canvasTex(1280, 1600, (c, w, h) => {
     c.drawImage(im, 0, 0, w, h);
     if (sport === 'basquet') {
-      // Duela fina: tablas de unos 7 cm con vetas.
       for (let x = 0; x < w; x += 6) { c.fillStyle = 'rgba(80,40,10,' + (0.04 + ((x * 37) % 11) / 200) + ')'; c.fillRect(x, 0, 1, h); }
       for (let x = 0; x < w; x += 6) { const y = ((x * 131) % h); c.fillStyle = 'rgba(70,35,8,0.12)'; c.fillRect(x, y, 6, 1); }
       noise(c, w, h, 10, 11);
     } else noise(c, w, h, 12, 5);
   });
-  const field = new THREE.Mesh(new THREE.PlaneGeometry(160 * s, 200 * s), new THREE.MeshStandardMaterial({ map: tex, color: sport === 'basquet' ? '#ffffff' : '#e6eedd', roughness: sport === 'basquet' ? 0.42 : 0.95, metalness: 0 }));
+  const field = new THREE.Mesh(new THREE.PlaneGeometry(160 * S.sx, 200 * S.sz), new THREE.MeshStandardMaterial({ map: tex, color: sport === 'basquet' ? '#ffffff' : '#e6eedd', roughness: sport === 'basquet' ? 0.42 : 0.95 }));
   field.rotation.x = -Math.PI / 2; field.receiveShadow = true; scene.add(field);
   const outer = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({
-    map: sport === 'basquet' ? null : canvasTex(256, 256, (c, w, h) => { c.fillStyle = '#2c8443'; c.fillRect(0, 0, w, h); c.fillStyle = '#33904b'; c.fillRect(0, 0, w, h / 2); noise(c, w, h, 20, 9); }, [400 / 6, 400 / 6]),
-    color: sport === 'basquet' ? '#8a5a32' : '#e6eedd', roughness: 0.95,
+    map: sport === 'basquet' ? null : canvasTex(256, 256, (c, w, h) => { c.fillStyle = '#2c8443'; c.fillRect(0, 0, w, h); c.fillStyle = '#33904b'; c.fillRect(0, 0, w, h / 2); noise(c, w, h, 14, 9); }, [400 / 6, 400 / 6]),
+    color: sport === 'basquet' ? '#9a6a3f' : '#e6eedd', roughness: 0.95,
   }));
   outer.rotation.x = -Math.PI / 2; outer.position.y = -0.005; outer.receiveShadow = true; scene.add(outer);
 }
-
-function addGear(scene, g, sport, s) {
+function addGear(scene, g, sport) {
   const grp = new THREE.Group(); grp.position.set(g.p.x, 0, g.p.y); scene.add(grp);
   if (g.t === 'cone') {
     const col = sport === 'basquet' ? '#FFD23F' : '#FF8A1F';
@@ -368,12 +686,13 @@ function addGear(scene, g, sport, s) {
     const base = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.02, 24), mat(col, 0.6)); base.position.y = 0.01; base.castShadow = true; grp.add(base);
     const band = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.068, 0.05, 24, 1, true), mat('#ffffff', 0.5, { side: THREE.DoubleSide })); band.position.y = 0.18; grp.add(band);
   } else if (g.t === 'ladder') {
-    const n = Math.max(2, Math.min(14, Math.round(Number(g.n) || 6))); const L = n * 7 * s; const wdt = 0.6;
-    const m = mat('#FFD23F', 0.6);
+    const n = Math.max(2, Math.min(14, Math.round(Number(g.n) || 6))); const vert = Number(g.r) !== 90;
+    const L = n * 7 * (vert ? X.S.sz : X.S.sx); const wdt = 0.55; const m = mat('#FFD23F', 0.6);
     const rungs = Math.max(n, Math.round(L / 0.45));
+    g.rungs = rungs; g.L = L;
     [-1, 1].forEach((k) => { const r = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.015, L), m); r.position.set(k * wdt / 2, 0.008, 0); r.receiveShadow = true; grp.add(r); });
     for (let i = 0; i <= rungs; i++) { const r = new THREE.Mesh(new THREE.BoxGeometry(wdt, 0.018, 0.035), m); r.position.set(0, 0.01, -L / 2 + (i * L) / rungs); r.castShadow = true; grp.add(r); }
-    grp.rotation.y = Number(g.r) === 90 ? Math.PI / 2 : 0;
+    grp.rotation.y = vert ? 0 : Math.PI / 2;
   } else if (g.t === 'hurdle') {
     const m = mat('#F25C2A', 0.55); const w = 0.7; const h = 0.3;
     const bar = new THREE.Mesh(new THREE.BoxGeometry(w, 0.05, 0.03), m); bar.position.y = h; bar.castShadow = true; grp.add(bar);
@@ -386,25 +705,39 @@ function addGear(scene, g, sport, s) {
     const base = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.06, 20), mat('#d62828', 0.6)); base.position.y = 0.03; base.castShadow = true; grp.add(base);
   }
 }
-
+function addGym(scene, S) {
+  const hw = 80 * S.sx + 3.5; const hd = 100 * S.sz + 3.5; const H = 8;
+  const wallTex = canvasTex(512, 256, (c, w, h) => { c.fillStyle = '#ece4d8'; c.fillRect(0, 0, w, h); c.fillStyle = '#16264A'; c.fillRect(0, h * 0.72, w, h * 0.08); c.fillStyle = '#c9853f'; c.fillRect(0, h * 0.8, w, h * 0.2); noise(c, w, h, 8, 21); }, [4, 1]);
+  const wm = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.9 });
+  [[0, -hd, 0, 2 * hw], [0, hd, Math.PI, 2 * hw], [-hw, 0, Math.PI / 2, 2 * hd], [hw, 0, -Math.PI / 2, 2 * hd]].forEach(([x, z, ry, len]) => { const w = new THREE.Mesh(new THREE.PlaneGeometry(len, H), wm); w.position.set(x, H / 2, z); w.rotation.y = ry; w.receiveShadow = true; scene.add(w); });
+  const bm = mat('#8a96a8', 0.7);
+  for (let k = 0; k < 4; k++) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.45, 2 * hd - 6), bm); b.position.set(hw - 0.6 - k * 0.8, 0.22 + k * 0.45, 0); b.castShadow = true; b.receiveShadow = true; scene.add(b); }
+  const lm = new THREE.MeshBasicMaterial({ color: '#fffaf0' });
+  for (let i = -2; i <= 2; i++) for (let j = -1; j <= 1; j++) { const l = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.5), lm); l.position.set(j * hw * 0.55, H - 0.3, i * hd * 0.38); scene.add(l); }
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(2 * hw, 2 * hd), mat('#b9ad9e', 0.95)); ceil.rotation.x = Math.PI / 2; ceil.position.y = H; scene.add(ceil);
+}
 function addGoal(scene, cx, z, facing, w) {
   const g = new THREE.Group(); g.position.set(cx, 0, z); g.rotation.y = facing; scene.add(g);
   const m = mat('#ffffff', 0.35); const h = 1.9; const r = 0.05;
   const postL = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 12), m); postL.position.set(-w / 2, h / 2, 0); postL.castShadow = true; g.add(postL);
   const postR = postL.clone(); postR.position.x = w / 2; g.add(postR);
   const bar = new THREE.Mesh(new THREE.CylinderGeometry(r, r, w + 2 * r, 12), m); bar.rotation.z = Math.PI / 2; bar.position.y = h; bar.castShadow = true; g.add(bar);
-  const net = new THREE.Mesh(new THREE.BoxGeometry(w, h, 1.1), new THREE.MeshStandardMaterial({ color: '#ffffff', wireframe: true, transparent: true, opacity: 0.35 })); net.position.set(0, h / 2, -0.55); g.add(net);
+  const nm = (a, b) => new THREE.MeshStandardMaterial({ map: netTex([a, b]), transparent: true, alphaTest: 0.3, side: THREE.DoubleSide, roughness: 0.9 });
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(w, h), nm(w / 0.15, h / 0.15)); back.position.set(0, h / 2, -1.0); g.add(back);
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(w, 1.0), nm(w / 0.15, 1 / 0.15)); top.rotation.x = Math.PI / 2; top.position.set(0, h, -0.5); g.add(top);
+  [-1, 1].forEach((k) => { const sd = new THREE.Mesh(new THREE.PlaneGeometry(1.0, h), nm(1 / 0.15, h / 0.15)); sd.rotation.y = Math.PI / 2; sd.position.set(k * w / 2, h / 2, -0.5); g.add(sd); });
 }
-function addHoop(scene, hp, toward) {
-  const g = new THREE.Group(); g.position.set(hp.board.x, 0, hp.board.y); g.rotation.y = toward; scene.add(g);
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.4, 16), mat('#2b2f36', 0.4)); pole.position.set(0, 1.7, -0.9); pole.castShadow = true; g.add(pole);
-  const arm = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.95), mat('#2b2f36', 0.4)); arm.position.set(0, 3.25, -0.45); g.add(arm);
-  const board = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.05, 0.04), new THREE.MeshStandardMaterial({ color: '#f4f8ff', roughness: 0.2, transparent: true, opacity: 0.85 })); board.position.set(0, 3.45, 0); board.castShadow = true; g.add(board);
-  const sq = new THREE.Mesh(new THREE.PlaneGeometry(0.59, 0.45), new THREE.MeshBasicMaterial({ color: '#d14a1a', wireframe: true })); sq.position.set(0, 3.27, 0.025); g.add(sq);
-  const rimZ = hp.board.distanceTo(hp.rim);
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.014, 10, 36), mat('#e2531c', 0.4, { metalness: 0.3 })); rim.rotation.x = Math.PI / 2; rim.position.set(0, 3.05, rimZ); g.add(rim);
-  const net = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.15, 0.42, 16, 3, true), new THREE.MeshStandardMaterial({ color: '#ffffff', wireframe: true, transparent: true, opacity: 0.7 })); net.position.set(0, 2.83, rimZ); g.add(net);
-  const brace = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.03, rimZ), mat('#e2531c', 0.4)); brace.position.set(0, 3.05, rimZ / 2); g.add(brace);
+function addHoop(scene, hp) {
+  // Tablero 0.4 m detrás del aro; poste 1.2 m más atrás. dir = 1: la canasta mira hacia -Z.
+  const g = new THREE.Group(); g.position.set(hp.board.x, 0, hp.board.y); g.rotation.y = hp.dir > 0 ? Math.PI : 0; scene.add(g);
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.4, 16), mat('#2b2f36', 0.4)); pole.position.set(0, 1.7, -1.2); pole.castShadow = true; g.add(pole);
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.6, 0.3), mat('#16264A', 0.8)); pad.position.set(0, 0.8, -1.2); g.add(pad);
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 1.2), mat('#2b2f36', 0.4)); arm.position.set(0, 3.3, -0.6); g.add(arm);
+  const board = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.05, 0.04), new THREE.MeshStandardMaterial({ color: '#f4f8ff', roughness: 0.2, transparent: true, opacity: 0.88 })); board.position.set(0, 3.45, 0); board.castShadow = true; g.add(board);
+  const sq = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.05), new THREE.MeshBasicMaterial({ map: canvasTex(360, 210, (c, w, h) => { c.clearRect(0, 0, w, h); c.strokeStyle = '#d14a1a'; c.lineWidth = 10; c.strokeRect(5, 5, w - 10, h - 10); c.lineWidth = 8; c.strokeRect(w / 2 - 59, h - 100, 118, 90); }), transparent: true })); sq.position.set(0, 3.45, 0.025); g.add(sq);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.014, 10, 36), mat('#e2531c', 0.4, { metalness: 0.3 })); rim.rotation.x = Math.PI / 2; rim.position.set(0, 3.05, 0.4); g.add(rim);
+  const net = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.15, 0.42, 16, 1, true), new THREE.MeshStandardMaterial({ map: canvasTex(128, 64, (c, w, h) => { c.clearRect(0, 0, w, h); c.strokeStyle = '#ffffff'; c.lineWidth = 3; for (let i = -8; i < 16; i++) { c.beginPath(); c.moveTo(i * 16, 0); c.lineTo(i * 16 + 32, h); c.stroke(); c.beginPath(); c.moveTo(i * 16 + 32, 0); c.lineTo(i * 16, h); c.stroke(); } }), transparent: true, alphaTest: 0.3, side: THREE.DoubleSide })); net.position.set(0, 2.83, 0.4); g.add(net);
+  const brace = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.03, 0.4), mat('#e2531c', 0.4)); brace.position.set(0, 3.05, 0.2); g.add(brace);
 }
 
 window.setup = async function (id, opts) {
@@ -412,235 +745,158 @@ window.setup = async function (id, opts) {
   const ex = window.CANCHA_CATALOG.exercises.find((x) => x.id === id);
   if (!ex) throw new Error('no existe ' + id);
   await document.fonts.ready;
-  // Ejercicios de pases (rondos, ruedas): jugadores más juntos, como se hace con niños, para que todo quepa en vertical.
-  const its = ex.diagram.items; const arrows = its.filter((i) => i.t === 'arrow');
-  const nPass = arrows.filter((i) => i.k === 'pase').length;
-  const runUnits = arrows.filter((i) => i.k !== 'pase').reduce((a, i) => a + Math.hypot(i.x2 - i.x, i.y2 - i.y), 0);
-  const tight = nPass >= 3 && runUnits < nPass * 45;
-  const s = worldOf(ex.sport).s * (tight ? 0.7 : 1);
-  const { scene, sun, v, indoor } = buildScene(ex, s);
-  await buildGround(ex, s, scene, v);
-  const P = plan3d(ex, s);
-  P.gear.forEach((g) => addGear(scene, g, ex.sport, s));
-  if (ex.sport === 'futbol') {
-    if (v === 'half') addGoal(scene, 0, (14 - 100) * s, 0, 5.0);
-    else addGoal(scene, 0, (14 - 100) * s, 0, 5.0);
-  }
-  P.hoops.forEach((hp) => addHoop(scene, hp, hp.rim.y > hp.board.y ? 0 : Math.PI));
-  const kitSet = KITS[ex.sport];
-  P.players.forEach((pl, k) => { pl.rig = makePlayer(kitSet[pl.team], k + (pl.team === 'b' ? 3 : 0), pl.n); scene.add(pl.rig.root); });
+  const ch = (window.CANCHA_CHOREO || {})[id] || {};
+  const d = ch.diagram || ex.diagram;
+  const v = d.v || (ex.sport === 'basquet' ? 'half' : 'full');
+  const S = scalesOf(ex, d, ch);
+  X = { S, center: V2(0, 0) };
+  const { scene, sun, indoor } = buildScene(ex);
+  await buildGround(ex, S, scene, v);
+  const P = plan3d(ex, d, S, ch);
+  X.P = P;
+  P.gear.forEach((g) => addGear(scene, g, ex.sport));
+  // Portería solo si alguien tira a ella.
+  if (ex.sport === 'futbol' && P.balls.some((b) => b.segs.some((sg) => sg.type === 'goal'))) addGoal(scene, 0, (14 - 100) * S.sz, 0, 5.0);
+  P.hoops.forEach((hp) => addHoop(scene, hp));
+  if (indoor) addGym(scene, S);
+  const kitSet = Object.assign({}, KITS[ex.sport], ch.kits || {});
+  P.players.forEach((pl, k) => { pl.rig = makePlayer(kitSet[pl.team], k + (pl.team === 'b' ? 3 : 0), pl.n); pl.kit = kitSet[pl.team]; scene.add(pl.rig.root); });
   P.balls.forEach((b) => {
-    const r = ex.sport === 'basquet' ? 0.12 : 0.11;
-    b.r = r;
-    b.mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 20), new THREE.MeshStandardMaterial({ map: ex.sport === 'basquet' ? basketTex : soccerTex, roughness: ex.sport === 'basquet' ? 0.65 : 0.45 }));
+    b.r = ex.sport === 'basquet' ? 0.12 : 0.11;
+    b.mesh = new THREE.Mesh(new THREE.SphereGeometry(b.r, 32, 20), new THREE.MeshStandardMaterial({ map: ex.sport === 'basquet' ? basketTex : soccerTex, roughness: ex.sport === 'basquet' ? 0.65 : 0.45 }));
     b.mesh.castShadow = true; scene.add(b.mesh);
   });
-  // Cámara: detrás de la jugada, un poco elevada, encuadrando todo lo que se mueve.
+  // El profe y lo que grita.
+  let coach = null;
+  if (ch.coach) {
+    coach = { rig: makePlayer(COACH, 4, '', { coach: true }), p: P.wp(ch.coach.x, ch.coach.y) };
+    coach.rig.root.position.set(coach.p.x, 0, coach.p.y); scene.add(coach.rig.root);
+  }
+  const timeOf = (e) => { const st = P.stepT[e.s] || { t0: 0, t1: 0 }; return e.end ? st.t1 + 150 : e.at != null ? lerp(st.t0, st.t1, e.at) : st.t0; };
+  const signals = (ch.signals || []).map((e) => ({ t: timeOf(e) - 250, text: e.text }));
+  // Etiqueta («las traes»): toca al hombro y se cambian los chalecos.
+  let tag = null;
+  if (ch.tag) {
+    const by = P.players.find((p) => p.key === ch.tag.by); const who = P.players.find((p) => p.key === ch.tag.who);
+    if (by && who) tag = { by, who, t: timeOf({ s: ch.tag.s, end: true }) - 150 };
+  }
+  // Cámara
   const pts = [];
   P.players.forEach((pl) => { pts.push(pl.p0); pl.moves.forEach((m) => pts.push(m.to)); });
   P.balls.forEach((b) => { pts.push(b.p0); b.segs.forEach((sg) => { if (sg.to) pts.push(sg.to); }); });
   P.gear.forEach((g) => pts.push(g.p));
+  if (coach) pts.push(coach.p);
   const ext = { x0: Infinity, x1: -Infinity, z0: Infinity, z1: -Infinity };
   pts.forEach((p) => { ext.x0 = Math.min(ext.x0, p.x); ext.x1 = Math.max(ext.x1, p.x); ext.z0 = Math.min(ext.z0, p.y); ext.z1 = Math.max(ext.z1, p.y); });
-  const pad = tight ? 0.6 : 1.0;
-  ext.x0 -= pad; ext.x1 += pad; ext.z0 -= pad; ext.z1 += pad;
-  const tallTop = P.hoops.length && P.balls.some((b) => b.segs.some((sg) => sg.type === 'shot')) ? 3.5 : 1.6;
-  const corners = [];
-  [ext.x0, ext.x1].forEach((x) => [ext.z0, ext.z1].forEach((z) => [0, tallTop].forEach((y) => corners.push(new THREE.Vector3(x, y, z)))));
-  P.hoops.forEach((hp) => { if (tallTop > 2) corners.push(new THREE.Vector3(hp.board.x, 4.0, hp.board.y)); });
-  // Del lado contrario a la canasta en básquetbol de media cancha; en fútbol, desde abajo del pizarrón.
-  const side = ex.sport === 'basquet' && v === 'half' ? -1 : 1;
-  const camera = new THREE.PerspectiveCamera(tight ? 42 : 34, W / H, 0.1, 300);
-  const target = new THREE.Vector3((ext.x0 + ext.x1) / 2, 0.5, (ext.z0 + ext.z1) / 2);
-  X = { target, center: target.clone(), side };
-  const pitch = THREE.MathUtils.degToRad(opts.pitch || (tight ? 40 : 23));
-  const dirFor = (yaw) => new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), side * Math.cos(yaw) * Math.cos(pitch));
-  const box = { x: [-0.9, 0.9], y: [-0.62, 0.38] };
-  function fit(yaw) {
-    const dir = dirFor(yaw);
-    let lo = 2; let hi = 120;
-    const ok = (dist) => {
-      camera.position.copy(target).addScaledVector(dir, dist); camera.lookAt(target); camera.updateMatrixWorld(); camera.updateProjectionMatrix();
+  X.center = V2((ext.x0 + ext.x1) / 2, (ext.z0 + ext.z1) / 2);
+  const cam = Object.assign({}, ch.cam || {});
+  const passes = P.balls.reduce((a, b) => a + b.segs.filter((sg) => sg.type === 'pass').length, 0);
+  let hero = null; let heroLen = 0;
+  const shooter = P.players.find((pl) => pl.acts.some((a) => a.type === 'shot'));
+  P.players.forEach((pl) => { const L = pl.moves.reduce((a, m) => a + m.L, 0); if (L > heroLen) { heroLen = L; hero = pl; } });
+  if (shooter && ex.sport === 'basquet') hero = shooter;
+  let mode = cam.mode || (passes < 2 && heroLen >= 4.5 ? 'follow' : 'static');
+  const pad = cam.pad != null ? cam.pad : 0.8;
+  const ex2 = { x0: ext.x0 - pad, x1: ext.x1 + pad, z0: ext.z0 - pad, z1: ext.z1 + pad };
+  const sideStatic = cam.side === 'north' ? -1 : cam.side === 'south' ? 1 : ex.sport === 'basquet' && v === 'half' ? -1 : 1;
+  const camera = new THREE.PerspectiveCamera(cam.fov || 36, W / H, 0.1, 300);
+  const box = { x: [-0.88, 0.88], y: [-0.62, 0.36] };
+  const target0 = new THREE.Vector3(X.center.x, 0.5, X.center.y);
+  function fitStatic(pitchDeg, fov, yaw) {
+    camera.fov = fov; camera.updateProjectionMatrix();
+    const pitch = THREE.MathUtils.degToRad(pitchDeg);
+    const dir = yaw == null ? new THREE.Vector3(0, Math.sin(pitch), sideStatic * Math.cos(pitch)) : new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
+    const corners = [];
+    [ex2.x0, ex2.x1].forEach((x) => [ex2.z0, ex2.z1].forEach((z) => [0, 1.6].forEach((y) => corners.push(new THREE.Vector3(x, y, z)))));
+    let lo = 2; let hi = 150; let res = null;
+    const test = (dist) => {
+      camera.position.copy(target0).addScaledVector(dir, dist); camera.lookAt(target0); camera.clearViewOffset(); camera.updateMatrixWorld();
       let xa = Infinity; let xb = -Infinity; let ya = Infinity; let yb = -Infinity;
       for (const c of corners) { const q = c.clone().project(camera); xa = Math.min(xa, q.x); xb = Math.max(xb, q.x); ya = Math.min(ya, q.y); yb = Math.max(yb, q.y); }
-      return { fits: xb - xa <= box.x[1] - box.x[0] && yb - ya <= box.y[1] - box.y[0], xa, xb, ya, yb };
+      return { ok: xb - xa <= box.x[1] - box.x[0] && yb - ya <= box.y[1] - box.y[0], xa, xb, ya, yb };
     };
-    for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; if (ok(mid).fits) hi = mid; else lo = mid; }
-    const r = ok(hi);
-    return { dist: hi, dir, shiftX: (r.xa + r.xb) / 2 - (box.x[0] + box.x[1]) / 2, shiftY: (r.ya + r.yb) / 2 - (box.y[0] + box.y[1]) / 2 };
+    for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; if (test(mid).ok) hi = mid; else lo = mid; }
+    res = test(hi);
+    return { pos: target0.clone().addScaledVector(dir, hi), look: target0.clone(), fov, offX: (res.xa + res.xb) / 2 - (box.x[0] + box.x[1]) / 2, offY: (res.ya + res.yb) / 2 - (box.y[0] + box.y[1]) / 2, dist: hi };
   }
-  // Si la jugada es chica, cámara fija con todo a la vista; si ocupa mucha cancha, la cámara sigue la acción.
-  const hw = clamp((ext.x1 - ext.x0) / 2, 2.4, 3.3); const hd = clamp((ext.z1 - ext.z0) / 2, 2.8, 4.0);
-  // Protagonista: el que más recorre; la cámara lo sigue a él (y al balón cuando va en un pase).
-  let hero = null; let heroLen = 0;
-  P.players.forEach((pl) => { const L = pl.moves.reduce((a, m) => a + m.from.distanceTo(m.to), 0); if (L > heroLen) { heroLen = L; hero = pl; } });
-  const passes = P.balls.reduce((a, b) => a + b.segs.filter((sg) => sg.type === 'pass').length, 0);
-  // Ejercicios de pases (rondos, ruedas): cámara fija que muestra a todos. Si alguien corre mucho, la cámara lo sigue.
-  const passDrill = tight || (passes >= 3 && (ext.x1 - ext.x0) < 14 && (ext.z1 - ext.z0) < 16);
-  const wide = (ext.x1 - ext.x0) > 2 * hw + 0.2 || (ext.z1 - ext.z0) > 2 * hd + 0.2;
-  const follow = !passDrill && wide && (heroLen >= 4.5 || (heroLen >= 2 && (ext.x1 - ext.x0) > 8));
-  let focusAt = null;
-  if (follow) {
-    corners.length = 0;
-    [-hw, hw].forEach((x) => [-hd, hd].forEach((z) => [0, tallTop].forEach((y) => corners.push(new THREE.Vector3(target.x + x, y, target.z + z)))));
-    const cycle0 = P.end + 1400;
-    const f = []; let last = null;
-    const firstMove = () => { let best = null; (hero ? [hero] : P.players).forEach((pl) => pl.moves.forEach((m) => { if (!best || m.t0 < best.t0) best = m; })); return best ? best.from : new THREE.Vector2(target.x, target.z); };
-    for (let t = 0; t <= cycle0; t += 100) {
-      const pts2 = [];
-      const hs = hero ? playerState(hero, t) : null;
-      if (hs && hs.cur) pts2.push(hs.p, hs.p);
-      else P.players.forEach((pl) => { const st = playerState(pl, t); if (st.cur) pts2.push(st.p); });
-      P.balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type !== 'carry' && t >= sg.t0 && t < sg.t1) pts2.push(sg.to); }));
-      if (!pts2.length) {
-        let soon = null; (hero ? [hero] : P.players).forEach((pl) => pl.moves.forEach((m) => { if (m.t0 > t && m.t0 - t < 1200 && (!soon || m.t0 < soon.t0)) soon = m; }));
-        if (soon) pts2.push(soon.from);
-      }
-      P.balls.forEach((b) => b.segs.forEach((sg) => {
-        if (sg.type !== 'shot' || t < sg.t0 - 700 || t >= sg.t1 + 900) return;
-        // Tiro: el aro y el tirador juntos en cuadro.
-        const by = P.players.find((x) => x.i === sg.by);
-        pts2.length = 0; pts2.push(sg.hoop.rim); if (by) pts2.push(playerState(by, t).p);
-      }));
-      if (pts2.length) last = pts2.reduce((a, q) => a.add(new THREE.Vector2(q.x / pts2.length, q.y / pts2.length)), new THREE.Vector2());
-      f.push(last ? last.clone() : firstMove().clone());
+  let wide = fitStatic(cam.mode === 'static' ? (cam.pitch || 30) : 34, cam.mode === 'static' ? (cam.fov || 40) : 42);
+  let follow = null;
+  if (mode === 'follow') {
+    const cycle0 = P.end + 900;
+    const fx = []; const fz = []; const yaws = []; const shotW = [];
+    let lastF = hero ? hero.p0.clone() : X.center.clone(); let lastYaw = null;
+    const focusMode = cam.focus || 'hero';
+    const ball0 = P.balls[0];
+    for (let t = 0; t <= cycle0 + 1000; t += 100) {
+      let f = null; let yaw = null;
+      if (focusMode === 'ball' && ball0) { const bs = ballState(ball0, t, ex.sport); f = V2(bs.p.x, bs.p.z); }
+      else if (hero) { const st = playerState(hero, t); f = st.p.clone(); const c = st.cur ? st.cur.c : hero.chains.find((cc) => cc.t0 > t) || null; if (c) { const a = c.pts[0]; const b = c.pts[c.pts.length - 1]; if (a.distanceTo(b) > 0.6) yaw = Math.atan2(b.x - a.x, b.y - a.y); } }
+      if (focusMode === 'center') f = V2(X.center.x, f ? f.y : X.center.y);
+      if (focusMode === 'ball' && ball0) { const bs1 = ballState(ball0, t + 400, ex.sport); const dv = V2(bs1.p.x - f.x, bs1.p.z - f.y); if (dv.length() > 0.3) yaw = Math.atan2(dv.x, dv.y); }
+      let w = 0;
+      P.balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type === 'shot' && t >= sg.t0 - 1400 && t < sg.t1 + 1200) { w = 1; const sh = P.players.find((x) => x.i === sg.by); const sp = sh ? playerState(sh, t).p : f; f = V2((sp.x + sg.hoop.rim.x) / 2, (sp.y + sg.hoop.rim.y) / 2); yaw = Math.atan2(sg.hoop.rim.x - sp.x, sg.hoop.rim.y - sp.y); } }));
+      if (!f) f = lastF;
+      if (yaw == null) yaw = lastYaw != null ? lastYaw : (sideStatic > 0 ? Math.PI : 0);
+      lastF = f; lastYaw = yaw;
+      fx.push(f.x); fz.push(f.y); yaws.push(yaw); shotW.push(w);
     }
-    const shotW = [];
-    for (let t = 0; t <= cycle0; t += 100) { let w = 0; P.balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type === 'shot' && t >= sg.t0 - 900 && t < sg.t1 + 1100) w = 1; })); shotW.push(w); }
-    X.shotAt = (t) => { const i0 = Math.round(t / 100); let a = 0; let n = 0; for (let d = -7; d <= 7; d++) { const w = 8 - Math.abs(d); a += shotW[clamp(i0 + d, 0, shotW.length - 1)] * w; n += w; } return a / n; };
-    focusAt = (t) => { const i0 = Math.round(t / 100); let x = 0; let z = 0; let n = 0; for (let d = -8; d <= 8; d++) { const q = f[clamp(i0 + d, 0, f.length - 1)]; const w = 9 - Math.abs(d); x += q.x * w; z += q.y * w; n += w; } return new THREE.Vector3(x / n, 0.5, z / n); };
+    unwrap(yaws);
+    const sm = (arr, i, R2) => { let a = 0; let n = 0; for (let k = -R2; k <= R2; k++) { const w = R2 + 1 - Math.abs(k); a += arr[clamp(i + k, 0, arr.length - 1)] * w; n += w; } return a / n; };
+    const at = (arr, t, R2) => { const u = t / 100; const i = Math.floor(u); return lerp(sm(arr, i, R2), sm(arr, i + 1, R2), smooth(u - i)); };
+    const yawOff = THREE.MathUtils.degToRad(cam.yaw != null ? cam.yaw : 35);
+    const dist = cam.dist || 6.8; const pitch = THREE.MathUtils.degToRad(cam.pitch || 17); const fov = cam.fov || 36;
+    follow = (t) => {
+      const sw = smooth(at(shotW, t, 6));
+      const yaw = at(yaws, t, 10) + lerp(yawOff, THREE.MathUtils.degToRad(62), sw);
+      const look = new THREE.Vector3(at(fx, t, 9), lerp(0.75, 1.75, sw), at(fz, t, 9));
+      const dd = dist * (1 + 0.45 * sw);
+      const pos = look.clone().add(new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(dd));
+      return { pos, look, fov: lerp(fov, fov + 6, sw), offX: 0, offY: 0.13, yaw };
+    };
   }
-  let base;
-  if (follow) {
-    // Siguiendo al protagonista: a 8.5 m, con él a la altura media entre el título y la frase.
-    const dir = dirFor(0); const dist = opts.dist || 8.5;
-    camera.position.copy(target).addScaledVector(dir, dist); camera.lookAt(target); camera.updateMatrixWorld(); camera.updateProjectionMatrix();
-    const q = new THREE.Vector3(target.x, 0.75, target.z).project(camera);
-    base = { dist, dir, shiftX: 0, shiftY: q.y - (box.y[0] + box.y[1]) / 2 };
-  } else base = fit(0);
-  // Sombra del sol ajustada al área de la jugada.
-  const span = Math.max(ext.x1 - ext.x0, ext.z1 - ext.z0) / 2 + 3;
-  sun.position.set(target.x - 6, 14, target.z + side * 7); sun.target.position.copy(target);
-  Object.assign(sun.shadow.camera, { left: -span, right: span, top: span, bottom: -span, near: 1, far: 50 }); sun.shadow.camera.updateProjectionMatrix();
-  // Textos del Short.
+  // La toma abierta del inicio, del mismo lado que la cámara que sigue (sin pasar por encima).
+  if (follow) wide = fitStatic(34, 42, follow(1000).yaw);
+  // Zancada de cada tramo (según la velocidad) y fase continua del ciclo de piernas a lo largo del recorrido.
+  P.players.forEach((pl) => pl.chains.forEach((c) => { let ph = 0; c.segs.forEach((m) => { m.stride = strideOf(m); m.ph0 = ph; ph += Math.PI * m.L / m.stride; }); }));
+  // Sol: sombra sobre el área de la jugada.
+  const span = Math.max(ext.x1 - ext.x0, ext.z1 - ext.z0) / 2 + 4;
+  sun.position.set(X.center.x - 6, 14, X.center.y + 7); sun.target.position.set(X.center.x, 0, X.center.y);
+  Object.assign(sun.shadow.camera, { left: -span, right: span, top: span, bottom: -span, near: 1, far: 60 }); sun.shadow.camera.updateProjectionMatrix();
+  scene.fog.near = Math.max(scene.fog.near, wide.dist * 1.3 + 6); scene.fog.far = Math.max(scene.fog.far, wide.dist * 2.6 + 30);
+  // Textos
   document.getElementById('kicker').textContent = SP[ex.sport] + ' · ' + ex.objective;
-  document.getElementById('title').textContent = ex.title;
+  document.getElementById('title').textContent = ch.title || ex.title;
   const video = ex.video || {};
-  const caps = (video.captions && video.captions.length ? video.captions : String(ex.keyPoints || '').split('\n').filter(Boolean).slice(0, 4));
+  const rawCaps = ch.captions || (video.captions && video.captions.length ? video.captions : String(ex.keyPoints || '').split('\n').filter(Boolean).slice(0, 3));
+  const nSteps = Object.keys(P.stepT).length;
+  const caps = rawCaps.map((c, i) => (typeof c === 'string' ? { t: i === 0 ? 0 : timeOf({ s: Object.keys(P.stepT).map(Number).sort((a, b) => a - b)[Math.min(nSteps - 1, Math.round((i * nSteps) / rawCaps.length))] }), text: c } : { t: timeOf(c), text: c.text }));
+  caps.sort((a, b) => a.t - b.t); if (caps.length) caps[0].t = 0;
   document.getElementById('reps').textContent = video.reps || (ex.duration + ' min');
   document.getElementById('v').classList.toggle('bare', !!opts.bare);
-  const cycle = P.end + 1400;
-  const total = Math.min(cycle * 2, Math.max(cycle, 15000));
-  // La neblina del fondo siempre más allá de la jugada (si la cámara está lejos, no se oscurece).
-  scene.fog.near = Math.max(scene.fog.near, base.dist * 1.3 + 6); scene.fog.far = Math.max(scene.fog.far, base.dist * 2.6 + 30);
-  // Miniatura y portada: a media jugada del protagonista (no al final, cuando ya están quietos).
+  const cycle = P.end + 700;
+  const total = cycle * (cycle >= 8500 ? 1 : 2);
   let thumb = P.end * 0.45;
-  if (hero && hero.chains && hero.chains.length) { const c = hero.chains[0]; thumb = c.t0 + (c.t1 - c.t0) * 0.55; }
-  X = { ex, s, P, scene, camera, target, center: target.clone(), base, caps, cycle, total, side, dirFor, indoor, focusAt, shotAt: X.shotAt };
+  if (hero && hero.chains.length) { const c = hero.chains[0]; thumb = c.t0 + (c.t1 - c.t0) * 0.6; }
+  Object.assign(X, { ex, P, scene, camera, wide, follow, caps, cycle, total, coach, signals, tag, sideStatic, mode });
   return { total, cycle, poster: Math.min(P.end - 150, cycle - 1), thumb };
 };
 
-function ballState(b, t, ex) {
-  // Posición del balón: sigue sus tramos (pase, tiro o conducción) y si está quieto junto a un jugador, se queda a sus pies o en sus manos.
-  let p = new THREE.Vector3(b.p0.x, b.r, b.p0.y); let visible = !b.ghost || t >= b.appear - 400; let spinDist = 0; let moving = null;
-  for (const sg of b.segs) {
-    if (t < sg.t0) break;
-    const start = p.clone();
-    if (sg.type === 'carry') {
-      const end = carried(sg.by, sg.t1, ex, b);
-      if (t < sg.t1) { p = carried(sg.by, t, ex, b); moving = { kind: 'carry', by: sg.by }; spinDist += start.distanceTo(p); break; }
-      spinDist += start.distanceTo(end); p = end; continue;
-    }
-    const to = sg.type === 'shot' ? new THREE.Vector3(X.P.hoops.length ? sg.hoop.rim.x : sg.to.x, 3.05, sg.hoop ? sg.hoop.rim.y : sg.to.y) : new THREE.Vector3(sg.to.x, b.r, sg.to.y);
-    if (sg.type === 'pass' && ex.sport === 'basquet') to.y = 1.0;
-    const k = clamp((t - sg.t0) / (sg.t1 - sg.t0), 0, 1);
-    if (t < sg.t1) {
-      const e = sg.type === 'shot' ? k : 1 - Math.pow(1 - k, 1.6);
-      p = new THREE.Vector3().lerpVectors(start, to, e);
-      if (sg.type === 'shot') p.y = lerp(start.y, 3.05, k) + Math.sin(Math.PI * k) * 1.6;
-      else if (ex.sport === 'basquet') p.y = lerp(Math.max(start.y, 1.0), 1.0, k) + Math.sin(Math.PI * k) * 0.15;
-      else p.y = b.r + Math.sin(Math.PI * k) * Math.min(0.6, start.distanceTo(to) * 0.03);
-      moving = { kind: sg.type };
-      spinDist += start.distanceTo(p) * 1.2;
-      break;
-    }
-    if (sg.type === 'shot') {
-      // Entra en el aro, cae y bota.
-      const after = t - sg.t1;
-      const rim = to.clone();
-      const fall = Math.min(after / 650, 1);
-      p = new THREE.Vector3(rim.x, lerp(3.0, b.r, fall * fall), rim.z);
-      if (after > 650) { const bt = (after - 650) / 400; p.y = b.r + Math.abs(Math.sin(Math.PI * Math.min(bt, 2))) * 0.6 * Math.max(0, 1 - bt / 2); }
-      spinDist += 2; continue;
-    }
-    spinDist += start.distanceTo(to); p = to;
-    if (ex.sport === 'basquet') p.y = b.r;
-  }
-  // Quieto junto a un jugador quieto: a sus pies (fútbol) o en sus manos (básquetbol).
-  if (!moving) {
-    let best = null; let bd = 1.4;
-    X.P.players.forEach((pl) => { const st = playerState(pl, t); if (st.cur) return; const dd = Math.hypot(st.p.x - p.x, st.p.y - p.z); if (dd < bd) { bd = dd; best = { pl, st }; } });
-    if (best) {
-      const h = headingOf(best.pl, t);
-      if (ex.sport === 'basquet') p = new THREE.Vector3(best.st.p.x + Math.sin(h) * 0.26, 1.0, best.st.p.y + Math.cos(h) * 0.26), moving = { kind: 'hold', by: best.pl.i };
-      else p = new THREE.Vector3(best.st.p.x + Math.sin(h) * 0.34, b.r, best.st.p.y + Math.cos(h) * 0.34);
-    }
-  }
-  return { p, visible, spinDist, moving };
-}
-function carried(plI, t, ex, b) {
-  const pl = X.P.players.find((x) => x.i === plI);
-  const st = playerState(pl, t); const h = headingOf(pl, t);
-  const fwd = new THREE.Vector2(Math.sin(h), Math.cos(h)); const side = new THREE.Vector2(fwd.y, -fwd.x);
-  const phase = st.dist / 0.7 * Math.PI;
-  if (ex.sport === 'basquet') {
-    const bounce = Math.abs(Math.sin(st.dist / 0.9 * Math.PI));
-    return new THREE.Vector3(st.p.x + fwd.x * 0.22 - side.x * 0.24, b.r + bounce * 0.78, st.p.y + fwd.y * 0.22 - side.y * 0.24);
-  }
-  const lead = 0.42 + 0.12 * Math.sin(phase);
-  const lat = 0.06 * Math.sin(phase * 0.5);
-  return new THREE.Vector3(st.p.x + fwd.x * lead + side.x * lat, b.r, st.p.y + fwd.y * lead + side.y * lat);
-}
-function headingOf(pl, t) {
-  const st = playerState(pl, t);
-  const dirOf = (m) => Math.atan2(m.to.x - m.from.x, m.to.y - m.from.y);
-  if (st.cur) {
-    // Rumbo según la tangente del recorrido: gira suave en cada cono.
-    const c = st.cur.c; const a = chainPoint(c, st.cur.d - 0.35).p; const b = chainPoint(c, st.cur.d + 0.35).p;
-    const h = b.distanceTo(a) > 1e-3 ? Math.atan2(b.x - a.x, b.y - a.y) : dirOf(st.cur.m);
-    const before = idleHeading(pl, c.t0, c.pts[0]);
-    return angLerp(before, h, smooth(clamp((t - c.t0) / 220, 0, 1)));
-  }
-  const ih = idleHeading(pl, t, st.p);
-  if (st.last && t - st.last.t1 < 450) return angLerp(dirOf(st.last), ih, smooth((t - st.last.t1) / 450));
-  return ih;
-}
-function idleHeading(pl, t, p) {
-  // Quieto: mira hacia su siguiente carrera; si no tiene, hacia el centro de la jugada.
-  const next = pl.moves.find((m) => m.t0 >= t);
-  if (next && next.from.distanceTo(next.to) > 0.3) return Math.atan2(next.to.x - next.from.x, next.to.y - next.from.y);
-  const c = X.center || X.target;
-  const prev = pl.moves.length ? pl.moves[pl.moves.length - 1] : null;
-  if (prev && t >= prev.t1) return Math.atan2(prev.to.x - prev.from.x, prev.to.y - prev.from.y);
-  const dx = c.x - p.x; const dz = c.z - p.y;
-  if (Math.hypot(dx, dz) < 0.5) return X.side > 0 ? Math.PI : 0;
-  return Math.atan2(dx, dz);
-}
-
 window.frameAt = function (ms) {
-  const { P, camera, base, caps, cycle, total, ex, dirFor, focusAt } = X;
+  const { P, camera, wide, follow, caps, cycle, total, ex, coach, signals, tag } = X;
   const t = ms % cycle;
-  const target = focusAt ? focusAt(t) : X.target;
-  const sw = X.shotAt ? smooth(X.shotAt(t)) : 0;
-  if (sw) target.y = lerp(target.y, 1.7, sw);
-  // Cámara con un movimiento muy lento (como si la llevara alguien).
-  const yaw = Math.sin((ms / total) * Math.PI * 2) * THREE.MathUtils.degToRad(3.5);
-  const push = 1 - 0.035 * (ms / total);
-  const dir = dirFor(yaw);
-  camera.position.copy(target).addScaledVector(dir, base.dist * push * (1 + 0.45 * sw));
-  camera.lookAt(target);
-  camera.setViewOffset(W, H, base.shiftX * W / 2, -base.shiftY * H / 2, W, H);
+  // Cámara: toma abierta al inicio y luego sigue la acción (o fija toda la jugada).
+  let C = wide;
+  if (follow) {
+    const f = follow(t); const k = smooth((t - 900) / 1300);
+    C = { pos: wide.pos.clone().lerp(f.pos, k), look: wide.look.clone().lerp(f.look, k), fov: lerp(wide.fov, f.fov, k), offX: lerp(wide.offX, f.offX, k), offY: lerp(wide.offY, f.offY, k) };
+  }
+  const breathe = 1 - 0.0175 * (1 - Math.cos((ms / total) * Math.PI * 2));
+  camera.position.copy(C.look).add(C.pos.clone().sub(C.look).multiplyScalar(breathe));
+  camera.fov = C.fov; camera.updateProjectionMatrix();
+  camera.lookAt(C.look);
+  camera.setViewOffset(W, H, C.offX * W / 2, -C.offY * H / 2, W, H);
   camera.updateMatrixWorld();
+  // Jugadores
   P.players.forEach((pl, k) => {
     const st = playerState(pl, t);
     const h = headingOf(pl, t);
@@ -649,36 +905,68 @@ window.frameAt = function (ms) {
     const o = { t, seed: k * 1.7, mode: 'idle', amp: 0, phase: 0 };
     if (st.cur) {
       const m = st.cur.m;
-      const r = st.cur.raw;
-      o.mode = m.mode; o.amp = clamp(Math.min(r / 0.12, (1 - r) / 0.12, 1), 0.25, 1);
-      const stride = m.mode === 'ladder' ? 0.34 : m.mode === 'dribble' ? 0.62 : m.mode === 'bdribble' ? 0.75 : 0.95;
-      o.phase = (st.dist / stride) * Math.PI;
-      if (m.mode === 'bdribble') o.bounce = Math.abs(Math.sin(st.dist / 0.9 * Math.PI));
-      m.hops.forEach((u) => { const dk = st.cur.k - u; const w = 0.6 / Math.max(0.6, m.from.distanceTo(m.to)); if (Math.abs(dk) < w) { const q = 1 - Math.abs(dk) / w; o.hop = Math.sin(q * Math.PI / 2); o.lift = Math.sin((dk / w + 1) * Math.PI / 2) * 0.32; } });
+      o.mode = m.mode === 'fdribble' ? 'dribble' : m.mode === 'bspeed' ? 'run' : m.mode === 'gather' ? 'run' : m.mode;
+      const tt = t - st.cur.c.t0; const rem = st.cur.c.t1 - t;
+      o.amp = clamp(Math.min(tt / 260, rem / 260, 1), 0, 1);
+      o.sprint = m.sprint || (m.mode === 'bspeed' ? 0.6 : 0);
+      o.speed = m.speed; o.stepLen = m.stride || strideOf(m);
+      if (m.ladder) o.mode = 'ladder';
+      o.phase = (m.ph0 || 0) + Math.PI * (st.cur.d - m.d0) / (m.stride || strideOf(m));
+      // Se inclina hacia adentro en las curvas.
+      if (!(GAIT[m.mode] && GAIT[m.mode].side)) { const h1 = headingOf(pl, t - 60); const h2 = headingOf(pl, t + 60); let dw = h2 - h1; while (dw > Math.PI) dw -= 2 * Math.PI; while (dw < -Math.PI) dw += 2 * Math.PI; o.roll = clamp(-Math.atan((m.speed * dw / 0.12) / 9.8) * 0.8, -0.4, 0.4) * o.amp; }
+      m.hops.forEach((u) => { const dk = st.cur.u - u; const w = 0.6 / Math.max(0.6, m.L); if (Math.abs(dk) < w) { const q = 1 - Math.abs(dk) / w; o.hop = Math.sin(q * Math.PI / 2); o.lift = Math.sin((dk / w + 1) * Math.PI / 2) * 0.32; } });
     }
-    pl.kicks.forEach((kk) => { const r = (t - (kk.t0 - 260)) / 420; if (r >= 0 && r <= 1) o.kick = r; });
-    pl.shots.forEach((sh) => { const r = (t - (sh.t0 - 380)) / 520; if (r >= 0 && r <= 1.3) { o.shoot = Math.min(1, r); o.lift = Math.sin(Math.min(1, r) * Math.PI) * 0.22; } });
-    // ¿Tiene el balón en las manos?
-    o.hold = false;
+    if (st.hold) { o.pose = st.hold.pose; o.mode = 'idle'; }
+    pl.acts.forEach((a) => {
+      const sg = a.seg;
+      if (sg.type === 'pass' || sg.type === 'goal') { if (ex.sport === 'futbol') { const r = (t - (sg.t0 - 290)) / 420; if (r >= 0 && r <= 1.4) o.kick = r; } else { const r = (t - (sg.t0 - 260)) / 380; if (r >= 0 && r <= 1) o.chest = r < 0.65 ? r / 0.65 : 1 - (r - 0.65) / 0.35 * 0.3; } }
+      if (sg.type === 'handoff') { const r = (t - (sg.t0 - 200)) / 500; if (r >= 0 && r <= 1) o.handoff = r; }
+      if (sg.type === 'shot') {
+        if (sg.layup) {
+          const r = (t - sg.jumpT) / 650; if (r >= 0 && r <= 1) { o.layup = Math.sin(r * Math.PI); o.layupLeg = sg.hand; o.lift = Math.sin(r * Math.PI) * 0.42; o.shoot = clamp(r * 1.3, 0, 1) * 1.0; o.shootHand = sg.hand; }
+          else if (t >= sg.gather.a0 && t < sg.jumpT) o.hold = true;
+        } else { const r = (t - (sg.t0 - 520)) / 820; if (r >= 0 && r <= 1.15) { o.shoot = clamp(r, 0, 1); o.shootHand = 1; o.lift = Math.sin(clamp(r, 0, 1) * Math.PI) * 0.15; } }
+      }
+    });
+    pl.recv.forEach((rv) => { const sg = rv.seg; if (ex.sport === 'futbol') { const r = (t - (sg.t1 - 180)) / 420; if (r >= 0 && r <= 1 && !st.cur) o.receive = r; } else if (t > sg.t1 - 380 && t < sg.t1 && !st.cur) o.target = true; });
+    if (tag && pl === tag.by) { const r = (t - (tag.t - 250)) / 600; if (r >= 0 && r <= 1) o.tagArm = r; }
     pl.rig.state = o;
+    // Chalecos que cambian de dueño en «las traes»
+    if (tag && (pl === tag.by || pl === tag.who)) { const swapped = t >= tag.t + 250; const kit = swapped ? (pl === tag.by ? tag.who.kit : tag.by.kit) : pl.kit; pl.rig.shirt.color.set(kit.shirt); }
   });
+  // Balones (después de saber qué hace cada jugador)
   P.balls.forEach((b) => {
-    const bs = ballState(b, t, ex);
+    const bs = ballState(b, t, ex.sport);
     b.mesh.visible = bs.visible;
     b.mesh.position.copy(bs.p);
-    b.mesh.rotation.set(bs.spinDist / b.r, 0.4, 0);
-    if (bs.moving && bs.moving.kind === 'hold') { const pl = P.players.find((x) => x.i === bs.moving.by); if (pl && !pl.rig.state.shoot) pl.rig.state.hold = true; }
-    if (bs.moving && bs.moving.kind === 'carry' && ex.sport === 'basquet') { const pl = P.players.find((x) => x.i === bs.moving.by); if (pl) pl.rig.state.handBall = true; }
+    b.mesh.rotation.set(bs.spin || 0, 0.4, 0);
+    if (bs.carry) {
+      const pl = P.players.find((x) => x.i === bs.carry.by);
+      if (ex.sport === 'basquet') { pl.rig.state.dribbleHand = bs.c.side >= 0 ? 1 : -1; pl.rig.state.bounce = bs.c.bounce; }
+      else if (bs.c.touch != null) { pl.rig.state.touch = bs.c.touch; pl.rig.state.touchLeg = bs.c.touchLeg; pl.rig.state.outside = bs.c.outside; }
+    }
+    if (bs.held && !bs.held.rig.state.shoot && !bs.held.rig.state.chest && !bs.held.rig.state.handoff) bs.held.rig.state.hold = true;
   });
   P.players.forEach((pl) => pose(pl.rig, pl.rig.state));
+  // El profe: mira a los alumnos y levanta la mano cuando grita.
+  const sigNow = signals.find((s) => t >= s.t && t < s.t + 900);
+  if (coach) {
+    const c = X.center; coach.rig.root.rotation.y = Math.atan2(c.x - coach.p.x, c.y - coach.p.y);
+    const s2 = signals.find((s) => t >= s.t - 100 && t < s.t + 900);
+    pose(coach.rig, { t, seed: 3, mode: 'coach', signal: s2 ? (t - s2.t + 100) / 1000 : null });
+  }
   renderer.render(X.scene, camera);
-  const ci = Math.min(caps.length - 1, Math.floor((ms / total) * caps.length));
+  // Textos: título que se achica, frase del paso y lo que grita el profe.
+  document.getElementById('v').classList.toggle('small', t > 2600);
+  let ci = 0; for (let i = 0; i < caps.length; i++) if (t >= caps[i].t) ci = i;
   const cap = document.getElementById('cap');
-  cap.textContent = caps[ci] || '';
+  cap.textContent = caps[ci] ? caps[ci].text : '';
   cap.parentNode.style.display = caps[ci] ? '' : 'none';
-  const since = ms - (ci * total) / caps.length;
-  cap.style.opacity = String(Math.min(1, since / 250));
-  cap.style.transform = 'translateY(' + Math.max(0, 14 - since / 18) + 'px)';
+  const since = t - (caps[ci] ? caps[ci].t : 0);
+  cap.style.opacity = String(Math.min(1, since / 220));
+  cap.style.transform = 'translateY(' + Math.max(0, 12 - since / 18) + 'px)';
+  const sig = document.getElementById('sig');
+  if (sigNow) { const k = (t - sigNow.t) / 900; sig.textContent = sigNow.text; sig.style.opacity = String(k < 0.75 ? 1 : (1 - k) * 4); sig.style.transform = 'scale(' + (0.7 + 0.3 * smooth(k * 4)) + ')'; } else sig.textContent = '';
 };
 window.ready3d = true;
 </script>
