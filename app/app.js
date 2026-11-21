@@ -32,17 +32,17 @@
     const fold = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     // [clave, texto, ayuda]: la ayuda es el grado escolar en México.
     const AGES = [['4-5', '4 a 5', 'Preescolar'], ['6-8', '6 a 8', '1.º a 3.º'], ['9-10', '9 a 10', '4.º y 5.º'], ['11-12', '11 a 12', '6.º y 1.º sec.'], ['13-14', '13 a 14', '2.º y 3.º sec.'], ['15-18', '15 a 18', 'Prepa']];
-    const SIZES = [['s', 'Menos de 10', 1, 9], ['m', '10 a 20', 10, 20], ['l', '21 a 30', 21, 30], ['xl', 'Más de 30', 31, 99]];
-    const FORMS = [['solo', 'Individual'], ['pair', 'En parejas'], ['trio', 'En tríos'], ['small', 'Grupos chicos'], ['rows', 'En filas'], ['stations', 'Estaciones'], ['teams', 'Equipos']];
+    const SIZES = [['s', 'Menos de 10', 1, 9], ['m', '10 a 20', 10, 20], ['l', '21 a 30', 21, 30], ['xl', '31 a 40', 31, 40], ['xxl', 'Más de 40', 41, 99]];
+    const FORMS = [['solo', 'Individual'], ['pair', 'En parejas'], ['trio', 'En tríos'], ['small', 'Grupos chicos'], ['rows', 'En filas'], ['stations', 'Circuito o estaciones'], ['teams', 'Equipos']];
     const SPACES = {
-      futbol: [['chico', 'Zona chica'], ['porteria', 'Área y portería'], ['medio', 'Medio campo'], ['completo', 'Campo completo'], ['patio', 'Patio']],
+      futbol: [['chico', 'Zona chica'], ['porteria', 'Área y portería'], ['medio', 'Media cancha'], ['completo', 'Cancha completa'], ['patio', 'Patio']],
       basquet: [['chico', 'Zona chica'], ['aro', 'Bajo el aro'], ['medio', 'Media cancha'], ['completo', 'Cancha completa'], ['patio', 'Patio']],
     };
     const GEAR = {
-      futbol: [['balon', 'Balones'], ['cono', 'Conos'], ['chaleco', 'Chalecos'], ['porteria', 'Porterías'], ['escalera', 'Escalera'], ['valla', 'Vallas'], ['aro', 'Aros'], ['pica', 'Picas'], ['crono', 'Cronómetro'], ['nada', 'Sin material']],
-      basquet: [['balon', 'Balones'], ['cono', 'Conos'], ['chaleco', 'Chalecos'], ['escalera', 'Escalera'], ['valla', 'Vallas'], ['aro', 'Aros'], ['crono', 'Cronómetro'], ['nada', 'Sin material']],
+      futbol: [['balon', 'Balones'], ['cono', 'Conos'], ['chaleco', 'Chalecos'], ['porteria', 'Porterías'], ['escalera', 'Escalera'], ['valla', 'Vallas'], ['aro', 'Aros'], ['pica', 'Postes'], ['nada', 'Sin material']],
+      basquet: [['balon', 'Balones'], ['cono', 'Conos'], ['chaleco', 'Chalecos'], ['escalera', 'Escalera'], ['valla', 'Vallas'], ['aro', 'Aros'], ['nada', 'Sin material']],
     };
-    const DURS = [['0-7', 'Hasta 7 min', 0, 7], ['8-12', '8 a 12 min', 8, 12], ['13-20', '13 a 20 min', 13, 20], ['21-999', 'Más de 20 min', 21, 999]];
+    const DURS = [['0-5', '5 min o menos', 0, 5], ['6-10', '6 a 10 min', 6, 10], ['11-15', '11 a 15 min', 11, 15], ['16-20', '16 a 20 min', 16, 20], ['21-999', 'Más de 20 min', 21, 999]];
     const span = (k) => k.split('-').map(Number);
     // «Sub-12» → 11 a 12; «9 a 15 años» → 9 a 15; sin edad → null.
     function ageRange(txtAge) {
@@ -67,7 +67,7 @@
       const one = t.match(/(\d+)/);
       if (/todo el grupo/.test(t) && !m) { lo = 1; hi = 99; } else if (m) { lo = Number(m[1]); hi = Number(m[2]); } else if (one) { lo = hi = Number(one[1]); }
       const out = lo ? SIZES.filter((b) => b[2] <= hi && b[3] >= lo).map((b) => b[0]) : [];
-      if (school) ['l', 'xl'].forEach((k) => { if (out.indexOf(k) < 0) out.push(k); });
+      if (school) ['l', 'xl', 'xxl'].forEach((k) => { if (out.indexOf(k) < 0) out.push(k); });
       return SIZES.map((b) => b[0]).filter((k) => out.indexOf(k) >= 0);
     }
     function forms(players) {
@@ -107,8 +107,7 @@
       add('escalera', /escalera/);
       add('valla', /valla/);
       add('aro', /\baros?\b/);
-      add('pica', /pica/);
-      add('crono', /cronometro|celular/);
+      add('pica', /pica|poste|estaca/);
       if (!out.length && /ningun|sin material|peso del cuerpo/.test(t)) out.push('nada');
       return (GEAR[sport] || GEAR.futbol).map((g) => g[0]).filter((k) => out.indexOf(k) >= 0);
     }
@@ -1719,7 +1718,7 @@
   }
 
   function cardHTML(ex) {
-    const meta = [facetsOf(ex).tags.slice(0, 2).join(', '), ex.duration ? ex.duration + ' min' : null].filter(Boolean).join(' · ');
+    const meta = [ex.duration ? ex.duration + ' min' : null, facetsOf(ex).tags.slice(0, 2).join(', ')].filter(Boolean).join(' · ');
     return '<button class="card" data-open-ex="' + esc(ex.id) + '">' + thumbHTML(ex) +
       '<span class="card-body"><span class="title">' + esc(ex.title || 'Sin título') + '</span>' +
       (meta ? '<span class="meta">' + esc(meta) + '</span>' : '') + '</span></button>';
@@ -1961,7 +1960,6 @@
     const body =
       '<div class="group"><input class="field-lg" id="ex-title" placeholder="Nombre del ejercicio" aria-label="Nombre del ejercicio" maxlength="120" autocomplete="off" enterkeyhint="done" value="' + esc(ex.title) + '"></div>' +
       '<p class="group-label" id="lbl-obj">Tipo de ejercicio<span class="gl-hint">Uno o varios</span></p><div class="group pad"><div class="chips wrap" data-ref="tags" role="group" aria-labelledby="lbl-obj"></div></div>' +
-      '<div data-ref="media"></div>' +
       '<div class="group dur-group"><div class="row"><span class="k">' + ic('clock') + 'Duración</span>' + stepperHTML('ex-duration', ex.duration || 10, false, 'Duración en minutos') + '</div>' +
       '<div class="dur-quick">' + optChipsHTML('dur', DUR_QUICK.map((m) => [String(m), m + ' min']), [String(ex.duration || 10)], { multi: false, label: 'Minutos' }) + '</div></div>' +
       '<p class="group-label">¿Para quién es?</p><div class="group fgroup">' +
@@ -1972,6 +1970,7 @@
       facetBlockHTML('forms', 'move', 'Organización', sel.forms, ex.sport) +
       facetBlockHTML('spaces', 'flag', 'Espacio', sel.spaces, ex.sport) +
       facetBlockHTML('gear', 'cone', 'Material', sel.gear, ex.sport) + '</div>' +
+      '<p class="group-label">Video, foto o pizarrón</p><div data-ref="media"></div>' +
       '<p class="group-label" id="lbl-desc">Cómo se hace</p><div class="group"><textarea id="ex-desc" aria-labelledby="lbl-desc" placeholder="Organización, reglas, series…" maxlength="4000">' + esc(ex.description) + '</textarea></div>' +
       '<p class="group-label" id="lbl-pts">Puntos clave</p><div class="group"><textarea id="ex-points" aria-labelledby="lbl-pts" placeholder="Uno por renglón" maxlength="2000">' + esc(ex.keyPoints) + '</textarea></div>' +
       '<div class="group"><label class="row"><span class="k">' + ic('video') + 'YouTube</span><input id="ex-link" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Pega el link aquí" aria-label="Link de video de YouTube" maxlength="400" value="' + esc(ex.link || '') + '"></label></div>' +
@@ -1979,8 +1978,8 @@
       '<div data-ref="more"' + (moreOpen ? '' : ' hidden') + '>' +
       '<p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], ex.sport, 'Deporte') +
       '<p class="group-label">Detalles (opcional)</p><div class="group">' +
-      row('ex-players', 'people', 'Alumnos', 'Ej. en parejas, 2 filas', 80, ex.players) +
-      row('ex-space', 'flag', 'Medidas', 'Ej. 20 × 15 m', 80, ex.space) +
+      row('ex-players', 'people', 'Cómo se acomodan', 'Ej. 2 filas de 5', 80, ex.players) +
+      row('ex-space', 'flag', 'Medidas del área', 'Ej. 20 × 15 m', 80, ex.space) +
       row('ex-material', 'cone', 'Cantidades', 'Ej. 1 balón por pareja', 300, ex.material) +
       '</div>' +
       '<p class="group-label" id="lbl-var">Variantes (más fácil / más difícil)</p><div class="group"><textarea id="ex-vars" aria-labelledby="lbl-var" placeholder="Más fácil: …&#10;Más difícil: …" maxlength="1500">' + esc(ex.variations || '') + '</textarea></div>' +
@@ -2003,7 +2002,7 @@
       $('[data-ref="tags"]', root).innerHTML = tags.map((t) => '<button type="button" class="chip" aria-pressed="' + (sel.tags.indexOf(t) >= 0) + '" data-tag="' + esc(t) + '">' + esc(t) + '</button>').join('');
     }
     // Resumen a la derecha de cada bloque: «9 a 12 años», «En parejas o en filas»…
-    const EMPTY_VAL = { ages: 'Cualquier edad', sizes: 'Cualquier número', levels: 'Todos', forms: 'Elige una o varias', spaces: 'Elige uno o varios', gear: 'Elige lo que se usa' };
+    const EMPTY_VAL = { ages: 'Sin elegir', sizes: 'Sin elegir', levels: 'Sin elegir', forms: 'Sin elegir', spaces: 'Sin elegir', gear: 'Sin elegir' };
     function paintFacet(k) {
       const el = $('[data-fb-val="' + k + '"]', root);
       if (!el) return;
@@ -2279,9 +2278,11 @@
   }
   function exStatsHTML(ex) {
     const z = facetsOf(ex);
-    const stats = [['clock', 'Duración', (Number(ex.duration) || 0) + ' min'], ['people', 'Alumnos', ex.players || sizesText(z.sizes)], ['age', 'Edad', ex.age || agesText(z.ages)], ['flag', 'Espacio', ex.space || facetText('spaces', z.spaces, ex.sport)]].filter((x) => x[2]);
+    // [ícono, rótulo, lo elegido, texto libre]
+    const pair = (chosen, free) => (chosen ? [chosen, free && norm(free) !== norm(chosen) ? free : ''] : [free || '', '']);
+    const stats = [['clock', 'Duración', [(Number(ex.duration) || 0) + ' min', '']], ['people', 'Alumnos', pair(sizesText(z.sizes), ex.players)], ['age', 'Edad', pair(agesText(z.ages), ex.age)], ['flag', 'Espacio', pair(facetText('spaces', z.spaces, ex.sport), ex.space)]].filter((x) => x[2][0]);
     const forms = facetText('forms', z.forms, ex.sport);
-    return '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((x) => '<div class="stat"><span class="k">' + ic(x[0]) + x[1] + '</span><span class="v">' + esc(x[2]) + '</span></div>').join('') + '</div>' +
+    return '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((x) => '<div class="stat"><span class="k">' + ic(x[0]) + x[1] + '</span><span class="v">' + esc(x[2][0]) + '</span>' + (x[2][1] ? '<span class="v2">' + esc(x[2][1]) + '</span>' : '') + '</div>').join('') + '</div>' +
       (forms ? '<p class="d-facts">' + ic('move') + '<span><b>Organización:</b> ' + esc(forms.charAt(0).toLowerCase() + forms.slice(1)) + '</span></p>' : '');
   }
   function exMaterialHTML(ex) {
@@ -2535,7 +2536,7 @@
       const label = i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : WD[d.getDay()] + ' ' + d.getDate();
       out.push('<button type="button" class="chip' + (gdays.indexOf(d.getDay()) >= 0 ? ' gday' : '') + '" data-opt="' + v + '" aria-pressed="' + (v === cur) + '"' + (gdays.indexOf(d.getDay()) >= 0 ? ' aria-description="Día del grupo"' : '') + '>' + label + '</button>');
     }
-    return '<div class="chips opts date-chips" data-opts="date" data-multi="false" data-required="true" role="group" aria-label="Fecha">' + out.join('') + '</div>';
+    return '<div class="chips wrap opts date-chips" data-opts="date" data-multi="false" data-required="true" role="group" aria-label="Fecha">' + out.join('') + '</div>';
   }
   // Primer día de clase del grupo a partir de hoy (hoy si toca).
   function nextGroupDay(g) {
@@ -2559,17 +2560,17 @@
     let focus = (c.focus || []).slice();
     // El nombre se arma con los temas mientras el profe no escriba otro.
     const autoName = (tags) => cap(listEs(lowerRest(tags)));
+    focus = focus.filter((t) => FRAME_TAGS.indexOf(t) < 0);
     let nameAuto = !c.name || c.name === autoName(focus);
     let dateTouched = editing || !!opts.date;
     let dirty = false;
     const body =
       '<div class="group"><input class="field-lg" id="cl-name" placeholder="Nombre de la clase" aria-label="Nombre de la clase" maxlength="80" autocomplete="off" enterkeyhint="done" value="' + esc(c.name) + '"></div>' +
+      '<p class="group-label" id="lbl-group">Grupo</p><div class="group pad"><div class="chips wrap" data-ref="groups" role="group" aria-labelledby="lbl-group"></div></div>' +
       '<p class="group-label" id="lbl-focus">¿Qué van a trabajar?<span class="gl-hint">Le pone nombre a la clase</span></p><div class="group pad"><div class="chips wrap" data-ref="focus" role="group" aria-labelledby="lbl-focus"></div></div>' +
-      '<div class="group">' +
-      '<button type="button" class="row row-btn" data-act="pick-group"><span class="k">' + ic('people') + 'Grupo</span><span class="val" data-ref="group-val"></span>' + ic('chevR', 'chev') + '</button>' +
-      '<label class="row"><span class="k">' + ic('calendar') + 'Fecha</span><input id="cl-date" type="date" aria-label="Fecha" value="' + esc(c.date || '') + '"></label>' +
-      '<div class="date-quick" data-ref="dates"></div></div>' +
-      '<div class="group fgroup"><div class="fblock"><div class="fb-head"><span class="k">' + ic('clock') + 'Duración de la clase</span><span class="fb-val" data-ref="target-val"></span></div>' +
+      '<div class="group fgroup"><div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + 'Fecha</span><span class="fb-val" data-ref="date-val"></span></div><div data-ref="dates"></div>' +
+      '<label class="row inline-row"><span class="k">Otra fecha</span><input id="cl-date" type="date" aria-label="Otra fecha" value="' + esc(c.date || '') + '"></label></div>' +
+      '<div class="fblock"><div class="fb-head"><span class="k">' + ic('clock') + 'Duración de la clase</span><span class="fb-val" data-ref="target-val"></span></div>' +
       optChipsHTML('target', CLASS_MINS.map((m) => [String(m), m + ' min']), c.target ? [String(c.target)] : [], { multi: false, label: 'Duración de la clase' }) + '</div></div>' +
       '<div data-ref="sport-box"><p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], c.sport, 'Deporte') + '</div>' +
       '<p class="group-label" id="lbl-notes">Notas</p><div class="group"><textarea id="cl-notes" aria-labelledby="lbl-notes" placeholder="Objetivo del día, recordatorios…" maxlength="2000">' + esc(c.notes) + '</textarea></div>' +
@@ -2578,7 +2579,7 @@
     const sheet = openSheet({
       title: editing ? 'Editar clase' : 'Nueva clase',
       tint: c.sport,
-      confirmLabel: editing ? 'Guardar' : 'Crear',
+      confirmLabel: 'Guardar',
       bodyHTML: body,
       isDirty: () => dirty,
       onConfirm: async () => {
@@ -2610,20 +2611,28 @@
     const root = sheet.body;
     const groupOk = (g) => g && (g.sport === c.sport || !SPORTS[g.sport]);
     function renderFocus() {
-      $('[data-ref="focus"]', root).innerHTML = SPORTS[c.sport].tags.map((t) => '<button type="button" class="chip" data-focus="' + esc(t) + '" aria-pressed="' + (focus.indexOf(t) >= 0) + '">' + esc(t) + '</button>').join('');
+      $('[data-ref="focus"]', root).innerHTML = themeTags(c.sport).map((t) => '<button type="button" class="chip" data-focus="' + esc(t) + '" aria-pressed="' + (focus.indexOf(t) >= 0) + '">' + esc(t) + '</button>').join('');
     }
     function renderDates() {
-      $('[data-ref="dates"]', root).innerHTML = dateChipsHTML($('#cl-date', root).value, groupDays(getGroup(c.groupId)));
+      const v = $('#cl-date', root).value;
+      $('[data-ref="dates"]', root).innerHTML = dateChipsHTML(v, groupDays(getGroup(c.groupId)));
+      $('[data-ref="date-val"]', root).textContent = v ? longDate(v) : 'Sin fecha';
+    }
+    function renderGroups() {
+      const list = S.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      $('[data-ref="groups"]', root).innerHTML = list.map((g) => '<button type="button" class="chip" data-gpick="' + esc(g.id) + '" aria-pressed="' + (g.id === c.groupId) + '">' + esc(g.name) + '</button>').join('') +
+        '<button type="button" class="chip" data-gpick="" aria-pressed="' + !c.groupId + '">Sin grupo</button>' +
+        '<button type="button" class="chip add-chip" data-act="new-group">' + ic('plus') + 'Nuevo grupo</button>';
     }
     function paintTarget() {
       const el = $('[data-ref="target-val"]', root);
       const n = c.items.length ? classTotal(c) : 0;
-      el.textContent = c.target ? c.target + ' min' + (n ? ' · llevas ' + fmtMin(n) : '') : 'Sin definir';
+      el.textContent = c.target ? c.target + ' min' + (n ? ' · llevas ' + fmtMin(n) : '') : 'Sin elegir';
       el.classList.toggle('none', !c.target);
     }
     function renderGroupVal() {
       const g = getGroup(c.groupId);
-      $('[data-ref="group-val"]', root).textContent = g ? g.name : 'Sin grupo';
+      renderGroups();
       // si el grupo es de un solo deporte, la clase usa ese deporte y no se pregunta
       const fixed = g && SPORTS[g.sport];
       $('[data-ref="sport-box"]', root).hidden = !!fixed;
@@ -2664,16 +2673,13 @@
       const op = e.target.closest('[data-opt]');
       if (op) {
         const k = op.closest('[data-opts]').dataset.opts;
-        if (k === 'date') { optToggle(op, []); $('#cl-date', root).value = op.dataset.opt; dateTouched = true; }
+        if (k === 'date') { optToggle(op, []); $('#cl-date', root).value = op.dataset.opt; dateTouched = true; renderDates(); }
         if (k === 'target') { const v = optToggle(op, c.target ? [String(c.target)] : []); c.target = v.length ? Number(v[0]) : 0; c.targetTouched = true; paintTarget(); }
         dirty = true; return;
       }
-      if (!e.target.closest('[data-act="pick-group"]')) return;
-      const list = S.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
-      const actions = list.map((g) => ({ label: g.name, sub: [g.category, g.schedule].filter(Boolean).join(' · ') || undefined, onClick: () => adoptGroup(g) }));
-      if (c.groupId) actions.push({ label: 'Sin grupo', onClick: () => adoptGroup(null) });
-      actions.push({ label: 'Nuevo grupo', icon: 'plus', onClick: () => openGroupEditor({ sport: c.sport, onCreate: (g) => adoptGroup(g) }) });
-      actionSheet({ title: 'Grupo de la clase', actions, tint: c.sport });
+      const gp = e.target.closest('[data-gpick]');
+      if (gp) { haptic(4); adoptGroup(getGroup(gp.dataset.gpick)); return; }
+      if (e.target.closest('[data-act="new-group"]')) openGroupEditor({ sport: c.sport, onCreate: (g) => adoptGroup(g) });
     });
   }
 
@@ -2954,6 +2960,10 @@
     return ages.length || sizes.length ? { ages, sizes } : null;
   }
 
+  // Temas que se trabajan en la parte principal de la clase (el calentamiento y el cierre van siempre).
+  const FRAME_TAGS = ['Calentamiento', 'Vuelta a la calma'];
+  const themeTags = (sport) => SPORTS[sport].tags.filter((t) => FRAME_TAGS.indexOf(t) < 0);
+
   function openPicker(classId) {
     const c = getClass(classId);
     if (!c) return;
@@ -2964,18 +2974,19 @@
     const inClass = new Set((c.items || []).map((it) => it.exId).filter(Boolean));
     const g = getGroup(c.groupId);
     const gf = groupFacets(g);
-    // Filtros propios de esta hoja: el grupo (prendido si sabemos para quién es) y los temas de la clase.
-    const pf = Object.assign(FX0(), { tags: (c.focus || []).filter((t) => SPORTS[sport].tags.indexOf(t) >= 0) });
+    const focus = (c.focus || []).filter((t) => themeTags(sport).indexOf(t) >= 0);
+    // Filtros propios de esta hoja: el grupo (prendido si sabemos para quién es) y los tipos que toque el profe.
+    const pf = FX0();
     let forGroup = !!gf;
     const catAll = catExercises(sport).filter((cx) => !inLibrary(cx.id));
     const sheet = openSheet({
       title: 'Agregar ejercicios',
       tint: sport,
       confirmLabel: 'Agregar',
-      bodyHTML: '<p class="pk-time" data-ref="time" hidden></p>' +
-        '<label class="search">' + ic('search') + '<input type="search" id="pk-q" placeholder="Buscar en ' + SPORTS[sport].noun + '" autocomplete="off" aria-label="Buscar ejercicios"></label>' +
+      bodyHTML: '<label class="search">' + ic('search') + '<input type="search" id="pk-q" placeholder="Buscar en ' + SPORTS[sport].noun + '" autocomplete="off" aria-label="Buscar ejercicios"></label>' +
         '<div class="chips pk-chips" data-ref="chips" role="toolbar" aria-label="Filtrar"></div>' +
-        '<div class="list pick-list" data-ref="list"></div><div data-ref="recs"></div>',
+        '<div data-ref="list"></div><div data-ref="recs"></div>' +
+        '<p class="pk-time" data-ref="time" role="status"></p>',
       isDirty: () => sel.length > 0,
       discardTitle: '¿Salir sin agregar?',
       onConfirm: async () => {
@@ -2996,41 +3007,53 @@
     sheet.setConfirm(false);
     const root = sheet.body;
     const durOf = (id) => (id.indexOf('cat:') === 0 ? (catEx(id.slice(4)) || {}).duration : (getEx(id) || {}).duration) || 10;
+    // Barra fija abajo: cuánto lleva la clase con lo elegido y cuánto falta.
     function paintTime() {
       const el = $('[data-ref="time"]', root);
-      const now = classTotal(c);
-      const add = sel.reduce((sum, id) => sum + durOf(id), 0);
+      const tot = classTotal(c) + sel.reduce((sum, id) => sum + durOf(id), 0);
       const target = Number(c.target) || 0;
-      if (!target && !add) { el.hidden = true; return; }
-      el.hidden = false;
-      const tot = now + add;
-      el.innerHTML = ic('clock') + '<span>' + (target ? 'Clase de ' + target + ' min · ' : '') + (add ? 'con lo elegido: <b>' + fmtMin(tot) + ' min</b>' : 'llevas <b>' + fmtMin(now) + ' min</b>') + (target && tot < target ? ' · faltan ' + fmtMin(target - tot) : target && tot > target ? ' · ' + fmtMin(tot - target) + ' de más' : '') + '</span>';
+      el.innerHTML = ic('clock') + '<span><b>' + fmtMin(tot) + (target ? ' de ' + target : '') + ' min</b>' + (target && tot < target ? ' · faltan ' + fmtMin(target - tot) : target && tot > target ? ' · ' + fmtMin(tot - target) + ' de más' : target ? ' · completa' : sel.length ? ' con lo elegido' : ' en la clase') + '</span>';
       el.classList.toggle('over', !!target && tot > target);
+      el.classList.toggle('done', !!target && tot === target);
     }
     function filtersNow() { return forGroup && gf ? Object.assign({}, pf, { ages: gf.ages, sizes: gf.sizes }) : pf; }
     function rowHTML(e, key, isCat) {
       const n = sel.indexOf(key) >= 0;
-      const meta = [facetsOf(e).tags.slice(0, 2).join(', '), (e.duration || 10) + ' min', !isCat && inClass.has(e.id) ? 'ya en la clase' : ''].filter(Boolean).join(' · ');
-      return '<button class="cell" role="checkbox" aria-checked="' + n + '" data-pick-ex="' + esc(key) + '">' + thumbHTML(e, 'mini') +
-        '<span class="txt"><span class="t1">' + esc(e.title) + '</span><span class="t2">' + esc(meta) + '</span></span><span class="check">' + ic('check') + '</span></button>';
+      const here = !isCat && inClass.has(e.id);
+      return '<button class="cell pk-row" role="checkbox" aria-checked="' + n + '" data-pick-ex="' + esc(key) + '">' + thumbHTML(e, 'mini') +
+        '<span class="txt"><span class="t1">' + esc(e.title) + '</span><span class="t2">' + (here ? '<span class="pk-here">' + ic('check') + 'Ya está en la clase</span>' : esc(facetsOf(e).tags.slice(0, 2).join(', '))) + '</span></span>' +
+        '<span class="pk-min">' + (e.duration || 10) + ' min</span><span class="check">' + ic('check') + '</span></button>';
     }
+    // Sin búsqueda ni tipos elegidos, la lista sigue el orden de una clase: calentamiento, tema, cierre.
+    function sectionsOf(list) {
+      const order = [['Calentamiento', (e) => facetsOf(e).tags[0] === 'Calentamiento']];
+      if (focus.length) order.push([cap(listEs(lowerRest(focus))), (e) => anyOf(focus, facetsOf(e).tags)]);
+      order.push(['Vuelta a la calma', (e) => facetsOf(e).tags.indexOf('Vuelta a la calma') >= 0]);
+      const used = new Set();
+      const out = order.map(([label, fn]) => { const xs = list.filter((e) => !used.has(e.id) && fn(e)); xs.forEach((e) => used.add(e.id)); return [label, xs]; });
+      out.push([focus.length ? 'Otros ejercicios' : 'Parte principal', list.filter((e) => !used.has(e.id))]);
+      return out.filter((x) => x[1].length);
+    }
+    const hereLast = (xs) => xs.filter((e) => !inClass.has(e.id)).concat(xs.filter((e) => inClass.has(e.id)));
     function render() {
       const qq = norm(q).trim();
       const f = filtersNow();
       const hit = (e) => !qq || norm([e.title, facetsOf(e).tags.join(' '), e.description].join(' ')).indexOf(qq) >= 0;
       const list = applyFilters(all.filter(hit), sport, f);
-      const recs = applyFilters(catAll.filter(hit), sport, f);
+      const focusFirst = (xs) => (focus.length ? xs.filter((e) => anyOf(focus, facetsOf(e).tags)).concat(xs.filter((e) => !anyOf(focus, facetsOf(e).tags))) : xs);
+      const recs = focusFirst(applyFilters(catAll.filter(hit), sport, f));
       const have = new Set();
       all.concat(catAll).forEach((e) => facetsOf(e).tags.forEach((t) => have.add(t)));
       const chip = (key, label, on) => '<button class="chip" data-pchip="' + esc(key) + '" aria-pressed="' + on + '">' + label + '</button>';
       $('[data-ref="chips"]', root).innerHTML = chip('all', 'Todos', !pf.tags.length && !forGroup) +
         (gf ? chip('group', ic('people') + esc('Para ' + g.name), forGroup) : '') +
         SPORTS[sport].tags.filter((t) => have.has(t)).map((t) => chip('t:' + t, esc(t), pf.tags.indexOf(t) >= 0)).join('');
-      $('[data-ref="list"]', root).innerHTML =
-        (S.canWrite ? '<button class="cell add-row" data-act="new-ex">' + ic('plus') + '<span>Nuevo ejercicio</span></button>' : '') +
-        list.map((e) => rowHTML(e, e.id, false)).join('') +
-        (!list.length ? '<p class="muted pad">' + (all.length ? 'Ninguno de tus ejercicios coincide.' + (forGroup || pf.tags.length ? ' <button class="link" data-pchip="all">Ver todos</button>' : '') : 'Aún no tienes ejercicios de ' + SPORTS[sport].noun + '.') + '</p>' : '');
-      $('[data-ref="recs"]', root).innerHTML = recs.length ? '<p class="group-label">Recomendados<span class="gl-hint">Se guardan en tus ejercicios al agregarlos</span></p><div class="list pick-list">' + recs.map((e) => rowHTML(e, 'cat:' + e.id, true)).join('') + '</div>' : '';
+      const flat = qq || pf.tags.length;
+      const newRow = S.canWrite ? '<div class="list pick-list"><button class="cell add-row" data-act="new-ex">' + ic('plus') + '<span>Nuevo ejercicio</span></button></div>' : '';
+      const empty = !list.length ? '<p class="muted pad">' + (all.length ? 'Ninguno de tus ejercicios coincide.' + (forGroup || pf.tags.length ? ' <button class="link" data-pchip="all">Ver todos</button>' : '') : 'Aún no tienes ejercicios de ' + SPORTS[sport].noun + '.') + '</p>' : '';
+      $('[data-ref="list"]', root).innerHTML = newRow + empty + (flat ? (list.length ? '<div class="list pick-list">' + hereLast(list).map((e) => rowHTML(e, e.id, false)).join('') + '</div>' : '')
+        : sectionsOf(list).map(([label, xs]) => '<p class="group-label pk-sec">' + esc(label) + '</p><div class="list pick-list">' + hereLast(xs).map((e) => rowHTML(e, e.id, false)).join('') + '</div>').join(''));
+      $('[data-ref="recs"]', root).innerHTML = recs.length ? '<p class="group-label pk-sec">Recomendados<span class="gl-hint">Se guardan en tus ejercicios al agregarlos</span></p><div class="list pick-list">' + recs.map((e) => rowHTML(e, 'cat:' + e.id, true)).join('') + '</div>' : '';
       hydrate(root);
     }
     render();
@@ -3038,7 +3061,7 @@
     $('#pk-q', root).addEventListener('input', (e) => { q = e.target.value; render(); });
     root.addEventListener('click', (e) => {
       if (e.target.closest('[data-act="new-ex"]')) {
-        openExerciseEditor({ sport, tag: pf.tags[0], afterCreate: (nx) => { all.unshift(nx); sel.push(nx.id); render(); paintTime(); sheet.setConfirm(true, 'Agregar (' + sel.length + ')'); } });
+        openExerciseEditor({ sport, tag: pf.tags[0] || focus[0], afterCreate: (nx) => { all.unshift(nx); sel.push(nx.id); render(); paintTime(); sheet.setConfirm(true, 'Agregar (' + sel.length + ')'); } });
         return;
       }
       const pc = e.target.closest('[data-pchip]');
@@ -3447,7 +3470,8 @@
   // Fila de opciones para tocar, usada en formularios y filtros. data-multi="false": solo una.
   function optChipsHTML(name, opts, sel, cfg) {
     cfg = cfg || {};
-    return '<div class="chips wrap opts' + (cfg.sub ? ' opts-grid' : '') + '" data-opts="' + esc(name) + '" data-multi="' + (cfg.multi !== false) + '" role="group"' + (cfg.label ? ' aria-label="' + esc(cfg.label) + '"' : '') + '>' +
+    const grid = cfg.sub ? ' opts-grid' : name === 'sizes' ? ' opts-sizes' : name === 'days' ? ' opts-days' : name === 'durs' ? ' opts-durs' : '';
+    return '<div class="chips wrap opts' + grid + '" data-opts="' + esc(name) + '" data-multi="' + (cfg.multi !== false) + '" role="group"' + (cfg.label ? ' aria-label="' + esc(cfg.label) + '"' : '') + '>' +
       opts.map((o) => '<button type="button" class="chip' + (cfg.sub && o[2] ? ' two' : '') + '" data-opt="' + esc(o[0]) + '" aria-pressed="' + (sel.indexOf(String(o[0])) >= 0) + '">' + esc(cfg.short && o[3] != null && typeof o[3] === 'string' ? o[3] : o[1]) + (cfg.sub && o[2] ? '<small>' + esc(o[2]) + '</small>' : '') + '</button>').join('') + '</div>';
   }
   // Prende o apaga una opción y regresa la nueva selección. «Sin material» apaga las demás y al revés.
@@ -3473,8 +3497,9 @@
     o = o || {};
     const onApply = o.onApply;
     const draft = JSON.parse(JSON.stringify(fx(sport)));
+    const optsFor = (k) => (k === 'gear' ? facetOpts(k, sport).map((o) => (o[0] === 'nada' ? ['nada', 'No tengo material'] : o)) : facetOpts(k, sport));
     const block = (k, label, hint) => '<p class="group-label">' + label + (hint ? '<span class="gl-hint">' + hint + '</span>' : '') + '</p>' +
-      '<div class="fchips">' + optChipsHTML(k, facetOpts(k, sport), draft[k], { label, sub: k === 'ages' }) + '</div>';
+      '<div class="fchips">' + optChipsHTML(k, optsFor(k), draft[k], { label, sub: k === 'ages' }) + '</div>';
     const sheet = openSheet({
       title: 'Filtros',
       tint: sport,
@@ -3483,11 +3508,11 @@
         '<p class="f-lead">Elige una o varias opciones en cada grupo.</p>' +
         block('ages', 'Edad de tus alumnos') +
         block('sizes', '¿Cuántos alumnos son?') +
+        block('durs', 'Duración') +
+        block('gear', 'Material que tienes', 'Solo verás los que se hacen con eso') +
         block('levels', 'Nivel') +
         block('forms', 'Organización') +
-        block('durs', 'Duración') +
         block('spaces', 'Espacio') +
-        block('gear', 'Material que tienes', 'Solo verás los que se hacen con eso') +
         '<div class="group" style="margin-top:20px">' + switchRow('f-video', ic('video'), 'Con video', 'Tuyo, de Recomendados o de YouTube', draft.video, false) + '</div>' +
         '<p class="group-label">Ordenar</p>' + segHTML('fsort', SORTS, draft.sort, 'Ordenar') +
         '<button type="button" class="btn tinted wide-btn" data-act="f-clear"' + (activeFilterCount(sport) || draft.sort !== 'recent' ? '' : ' hidden') + '>Quitar filtros</button>',
@@ -3551,7 +3576,7 @@
       (g.schedule ? '<span class="g-when">' + ic('clock') + esc(g.schedule) + '</span>' : '') + '</button>';
   }
   const CATEGORIES = ['Preescolar', 'Primaria', 'Secundaria', 'Preparatoria', 'Club o selección'];
-  const PLACES = ['Patio', 'Cancha 1', 'Cancha techada', 'Gimnasio'];
+  const PLACES = ['Patio', 'Cancha de usos múltiples', 'Cancha techada', 'Gimnasio', 'Salón (si llueve)'];
   function openGroupEditor(opts) {
     const editing = !!opts.group;
     const g = editing ? plain(opts.group) : { id: uid(), name: '', sport: opts.sport || 'ambos', category: '', schedule: '', place: '', students: [], createdAt: Date.now() };
@@ -3576,14 +3601,14 @@
     const sheet = openSheet({
       title: editing ? 'Editar grupo' : 'Nuevo grupo',
       tint: groupTint(g),
-      confirmLabel: editing ? 'Guardar' : 'Crear',
+      confirmLabel: 'Guardar',
       isDirty: () => dirty,
       bodyHTML:
         '<div class="group"><input class="field-lg" id="gr-name" placeholder="Nombre (Ej. 5.º A, Sub-12)" aria-label="Nombre del grupo" maxlength="60" autocomplete="off" enterkeyhint="done" value="' + esc(g.name) + '"></div>' +
         '<p class="group-label">Deporte</p>' + segHTML('gsport', [['ambos', 'Ambos'], ['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], SPORTS[g.sport] ? g.sport : 'ambos', 'Deporte') +
         '<p class="group-label">¿Quiénes son?</p><div class="group fgroup">' +
-        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('doc') + 'Escuela o club</span></div>' + optChipsHTML('cat', CATEGORIES.map((x) => [x, x]), [g.category], { multi: false, label: 'Escuela o club' }) +
-        '<label class="row inline-row"><span class="k">' + ic('pencil') + 'Escribe otra</span><input id="gr-cat" placeholder="Ej. Sub-12" aria-label="Categoría" maxlength="60" value="' + esc(CATEGORIES.indexOf(g.category) >= 0 ? '' : g.category) + '"></label></div>' +
+        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('doc') + 'Nivel escolar o club</span></div>' + optChipsHTML('cat', CATEGORIES.map((x) => [x, x]), [g.category], { multi: false, label: 'Nivel escolar o club' }) +
+        '<label class="row inline-row"><span class="k">' + ic('pencil') + 'Otra categoría</span><input id="gr-cat" placeholder="Ej. Sub-12" aria-label="Categoría" maxlength="60" value="' + esc(CATEGORIES.indexOf(g.category) >= 0 ? '' : g.category) + '"></label></div>' +
         facetBlockHTML('ages', 'age', 'Edad', st.ages, 'futbol', { sub: true }) +
         (nStudents ? '<div class="fblock"><div class="fb-head"><span class="k">' + ic('people') + 'Alumnos</span><span class="fb-val">' + plural(nStudents, 'alumno', 'alumnos') + ' en la lista</span></div></div>'
           : facetBlockHTML('sizes', 'people', '¿Cuántos son?', st.sizes, 'futbol', { multi: false })) + '</div>' +
@@ -3592,7 +3617,7 @@
         '<label class="row inline-row"><span class="k">' + ic('clock') + 'Hora</span><input id="gr-time" type="time" aria-label="Hora" value="' + esc(st.time) + '"></label></div>' +
         '<div class="fblock"><div class="fb-head"><span class="k">' + ic('timer') + 'Duración de cada clase</span><span class="fb-val" data-ref="min-val"></span></div>' + optChipsHTML('classMin', CLASS_MINS.map((m) => [String(m), m + ' min']), st.classMin ? [String(st.classMin)] : [], { multi: false, label: 'Duración de cada clase' }) + '</div>' +
         '<div class="fblock"><div class="fb-head"><span class="k">' + ic('flag') + 'Lugar</span></div>' + optChipsHTML('place', places.map((x) => [x, x]), [g.place], { multi: false, label: 'Lugar' }) +
-        '<label class="row inline-row"><span class="k">' + ic('pencil') + 'Escribe otro</span><input id="gr-place" placeholder="Ej. Cancha 2" aria-label="Lugar" maxlength="60" value="' + esc(places.indexOf(g.place) >= 0 ? '' : g.place) + '"></label></div>' +
+        '<label class="row inline-row"><span class="k">' + ic('pencil') + 'Otro lugar</span><input id="gr-place" placeholder="Ej. Cancha 2" aria-label="Lugar" maxlength="60" value="' + esc(places.indexOf(g.place) >= 0 ? '' : g.place) + '"></label></div>' +
         '</div>',
       onConfirm: async () => {
         const root = sheet.body;
@@ -3627,15 +3652,15 @@
     function paint() {
       const sv = $('[data-ref="sched-val"]', root);
       const t = scheduleText(st.days, $('#gr-time', root).value);
-      sv.textContent = t || (g.schedule && !schedTouched ? g.schedule : 'Elige los días');
+      sv.textContent = t || (g.schedule && !schedTouched ? g.schedule : 'Sin elegir');
       sv.classList.toggle('none', !t && !(g.schedule && !schedTouched));
       const mv = $('[data-ref="min-val"]', root);
-      mv.textContent = st.classMin ? st.classMin + ' min' : 'Sin definir';
+      mv.textContent = st.classMin ? st.classMin + ' min' : 'Sin elegir';
       mv.classList.toggle('none', !st.classMin);
       const av = $('[data-fb-val="ages"]', root);
-      if (av) { const at = agesText(st.ages); av.textContent = at || 'Cualquier edad'; av.classList.toggle('none', !at); }
+      if (av) { const at = agesText(st.ages); av.textContent = at || 'Sin elegir'; av.classList.toggle('none', !at); }
       const zv = $('[data-fb-val="sizes"]', root);
-      if (zv) { const zt = sizesText(st.sizes); zv.textContent = zt ? zt + ' alumnos' : 'Elige uno'; zv.classList.toggle('none', !zt); }
+      if (zv) { const zt = sizesText(st.sizes); zv.textContent = zt ? zt + ' alumnos' : 'Sin elegir'; zv.classList.toggle('none', !zt); }
     }
     // Si el profe no tocó la edad, se deduce del nombre y la escuela («5.º A» + Primaria → 10 y 11 años).
     function guessAges() {
@@ -4880,7 +4905,7 @@
 
   function catCardHTML(cx) {
     const have = inLibrary(cx.id);
-    const meta = [cx.duration ? cx.duration + ' min' : '', cx.age].filter(Boolean).join(', ');
+    const meta = [cx.duration ? cx.duration + ' min' : '', agesText(facetsOf(cx).ages) || cx.age].filter(Boolean).join(' · ');
     return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb">' + (cx.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(cx.thumbUrl) + '"><span class="badge vid">' + ic('play') + '<span class="sr">Con video</span></span>' : '<span class="art">' + boardSVG(cx.sport, cx.diagram, { crop: true }) + '</span>') +
       (have ? '<span class="badge in-lib">' + ic('check') + 'En tus ejercicios</span>' : cx.school ? '<span class="badge">Grupos grandes</span>' : '') + '</span>' +
       '<span class="card-body"><span class="title">' + esc(cx.title) + '</span><span class="meta">' + esc(meta) + '</span></span></button>';
