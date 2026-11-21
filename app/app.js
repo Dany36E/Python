@@ -23,6 +23,7 @@
     },
   };
   const LEVELS = ['Inicial', 'Intermedio', 'Avanzado'];
+  const lvl = (l) => (l === 'Inicial' ? 'Básico' : l || '');
   const VARIANTS = {
     futbol: [['full', 'Campo completo'], ['half', 'Medio campo']],
     basquet: [['half', 'Media cancha'], ['full', 'Cancha completa']],
@@ -1077,8 +1078,8 @@
         if (busy || closing) return;
         if (o.isDirty && o.isDirty()) {
           actionSheet({
-            title: o.discardTitle || '¿Descartar los cambios?',
-            actions: [{ label: 'Descartar cambios', danger: true, onClick: () => api.dismiss() }],
+            title: o.discardTitle || '¿Salir sin guardar?',
+            actions: [{ label: 'Salir sin guardar', danger: true, onClick: () => api.dismiss() }],
             cancel: 'Seguir editando',
           });
         } else api.dismiss();
@@ -1240,11 +1241,11 @@
     const code = e && e.code;
     const msg = e && e.message;
     if (msg === 'too-long') return 'El video es demasiado largo para guardarlo en la nube (máximo unos 3 minutos). Recórtalo y vuelve a intentarlo.';
-    if (msg === 'transcode-unsupported' || msg === 'transcode-failed') return 'El video pesa más de 20 MB y este dispositivo no pudo reducirlo. Prueba con un clip más corto o grábalo en 720p.';
+    if (msg === 'transcode-unsupported' || msg === 'transcode-failed') return 'El video es muy pesado. Prueba con uno más corto.';
     if (e && e.name === 'QuotaExceededError') return 'Tu iPad no tiene espacio. Elimina videos que ya no uses.';
     switch (code) {
-      case 'too_large': return 'El archivo supera 20 MB. Prueba con un clip más corto.';
-      case 'unsupported_type': return 'Ese formato no es compatible. Usa un video MP4 o MOV, o una foto.';
+      case 'too_large': return 'El video es muy pesado. Prueba con uno más corto.';
+      case 'unsupported_type': return 'No se puede usar ese archivo. Elige un video o una foto.';
       case 'quota_or_state':
       case 'quota_exceeded': return 'Se llenó el espacio disponible. Borra ejercicios o videos que ya no uses.';
       case 'rate_limited':
@@ -1550,10 +1551,10 @@
     const k = S.backend ? S.backend.kind : '';
     if (k === 'memory') out.push('<div class="note warn">' + ic('warn') + '<span class="txt"><b>No se está guardando.</b> Lo que hagas se perderá al cerrar Cancha.</span></div>');
     if (S.stale) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>Sin conexión.</b> Puede que lo que ves no esté al día.</span></div>');
-    if (S.error) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>No se pudieron cargar tus datos.</b> Vuelve a abrir la app en un momento.</span></div>');
+    if (S.error) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>No se pudieron cargar tus datos.</b> Cierra Cancha y vuelve a abrirla.</span></div>');
     if (S.ready && !S.canWrite) out.push('<div class="note">' + ic('lock') + '<span class="txt"><b>Solo lectura.</b> Puedes ver esta biblioteca, pero solo su dueño puede editarla.</span></div>');
     if (S.ready && tab === 'clases' && k === 'local' && !framed && isAppleMobile() && !isStandalone()) {
-      out.push('<div class="note">' + ic('device') + '<span class="txt"><b>Instala Cancha</b> en tu pantalla de inicio para que Safari no borre tus datos.</span><button class="link" data-act="install-help">Ver cómo</button></div>');
+      out.push('<div class="note">' + ic('device') + '<span class="txt"><b>Agrega Cancha</b> a tu pantalla de inicio para no perder tus datos.</span><button class="link" data-act="install-help">Ver cómo</button></div>');
     }
     if (S.ready && tab === 'clases' && needsBackup()) {
       const last = Number(pref.get('last-backup')) || 0;
@@ -1597,7 +1598,7 @@
     if (!S.ready) body = '<div class="grid">' + [0, 1, 2, 3].map(() => '<div class="card"><span class="thumb shimmer"></span><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></div>').join('') + '</div>';
     else if (!all.length) body = emptyExercisesHTML(sport);
     else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '» en tus ejercicios.' : 'No hay ejercicios con estos filtros.') + (nf ? '<br><button class="link" data-act="clear-filters">Quitar filtros</button>' : '') + '</p>';
-    else body = (plain0 ? sectionsStripHTML() + catEntryHTML(sport) : '<p class="result-count">' + plural(list.length, 'ejercicio', 'ejercicios') + (q ? ' tuyos' : '') + '</p>') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
+    else body = (plain0 ? sectionsStripHTML() + catEntryHTML(sport) + shareCardHTML() : '<p class="result-count">' + plural(list.length, 'ejercicio', 'ejercicios') + (q ? ' tuyos' : '') + '</p>') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
     if (q && S.ready) {
       const recs = applyFilters(catExercises(sport).filter((cx) => !inLibrary(cx.id) && norm([cx.title, cx.objective, cx.description, cx.keyPoints, cx.material, cx.variations, cx.age].join(' ')).indexOf(q) >= 0), sport);
       if (recs.length) body += '<p class="group-label">Recomendados</p><div class="grid">' + recs.map(catCardHTML).join('') + '</div>';
@@ -1647,7 +1648,7 @@
       '<span class="today-body"><span class="today-name">' + esc(c.name || 'Clase sin nombre') + '</span>' +
       '<span class="today-meta">' + (g ? '<span class="mini-chip">' + ic('people') + esc(g.name) + '</span>' : '') + '<span>' + plural(n, 'ejercicio', 'ejercicios') + '</span></span></span></button>' +
       '<div class="today-actions">' +
-      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar</button>' : S.canWrite ? '<button class="btn filled" data-act="plan-class" data-id="' + esc(c.id) + '">' + ic('plus') + 'Agregar ejercicios</button>' : '') +
+      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar clase</button>' : S.canWrite ? '<button class="btn filled" data-act="plan-class" data-id="' + esc(c.id) + '">' + ic('plus') + 'Agregar ejercicios</button>' : '') +
       (canRoll ? '<button class="btn tinted" data-act="roll-class" data-id="' + esc(c.id) + '">' + ic('check') + 'Pasar lista</button>' : '') +
       '</div></div>';
   }
@@ -1665,7 +1666,7 @@
     else if (!list.length) {
       body = '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('futbol') + '</span></div><h2>Arma tu primera clase</h2>' +
         '<p>Elige ejercicios, ordénalos y ajusta los minutos. Luego la das con el cronómetro.</p>' +
-        (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' + (CAT() ? '<button class="btn tinted" data-act="catalog">Usar una clase lista</button>' : '') + '</div>' : '') + '</div>';
+        (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' + (CAT() ? '<button class="btn tinted" data-act="catalog">Ver clases recomendadas</button>' : '') + '</div>' : '') + '</div>';
     } else {
       const rest = list.filter((c) => c !== next);
       const up = rest.filter((c) => !c.date || c.date >= t);
@@ -1696,7 +1697,7 @@
     const done = c.lastRunAt || c.attendanceAt;
     return '<button class="cell" data-open-class="' + esc(c.id) + '" data-tint="' + sport + '">' + dateTileHTML(c.date) +
       '<span class="txt"><span class="t1">' + esc(c.name || 'Clase sin nombre') + (c.date === todayStr() ? '<span class="pill">Hoy</span>' : '') + '</span>' +
-      '<span class="t2">' + (inGroup ? '' : esc(first) + ', ') + plural(n, 'ejercicio', 'ejercicios') + ', ' + fmtMin(classTotal(c)) + ' min</span></span>' +
+      '<span class="t2">' + (inGroup ? '' : esc(first) + ' · ') + plural(n, 'ejercicio', 'ejercicios') + ' · ' + fmtMin(classTotal(c)) + ' min</span></span>' +
       (done ? '<span class="done-mark" title="Dada" aria-label="Dada">' + ic('check') + '</span>' : '') + ic('chevR', 'chev') + '</button>';
   }
 
@@ -1761,12 +1762,12 @@
   function showStatus() {
     const k = S.backend ? S.backend.kind : 'cloud';
     if (S.backend && !S.canWrite) return alertBox('Solo lectura', 'Estás viendo una biblioteca compartida. Solo su dueño puede agregar o cambiar ejercicios.');
-    if (k === 'cloud') return alertBox('Dónde se guardan tus datos', 'En tu cuenta de Claude. Los ves en el celular y en la computadora.');
+    if (k === 'cloud') return alertBox('¿Dónde se guardan mis datos?', 'En tu cuenta de Claude. Los ves en el celular y en la computadora.');
     if (k === 'memory') return alertBox('No se está guardando', 'Este navegador no deja guardar datos (por ejemplo, en modo privado). Lo que agregues se perderá al cerrar.');
-    return alertBox('Dónde se guardan tus datos', 'Solo en este iPad, no en internet. Si el iPad se pierde o se borra, solo los recuperas con un respaldo. Haz uno de vez en cuando.');
+    return alertBox('¿Dónde se guardan mis datos?', 'Solo en este iPad, no en internet. Si el iPad se pierde o se borra, solo los recuperas con un respaldo. Haz uno de vez en cuando.');
   }
   function showInstallHelp() {
-    alertBox('Instalar Cancha', 'En Safari toca el botón Compartir (el cuadrito con la flecha) y elige «Agregar a pantalla de inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');
+    alertBox('Instalar Cancha', 'En Safari toca «Compartir» (el cuadrito con la flecha) y elige «Agregar a pantalla de inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');
   }
 
   // ---------------------------------------------------------------- flujos: ejercicios
@@ -1857,16 +1858,16 @@
     const row = (id, icon, label, ph, max, val) => '<label class="row"><span class="k">' + ic(icon) + label + '</span><input id="' + id + '" placeholder="' + esc(ph) + '" maxlength="' + max + '" value="' + esc(val || '') + '" aria-label="' + esc(label) + '"></label>';
     const body =
       '<div class="group"><input class="field-lg" id="ex-title" placeholder="Nombre del ejercicio" aria-label="Nombre del ejercicio" maxlength="120" autocomplete="off" enterkeyhint="done" value="' + esc(ex.title) + '"></div>' +
-      '<p class="group-label" id="lbl-obj">Objetivo</p><div class="group pad"><div class="chips wrap" data-ref="tags" role="group" aria-labelledby="lbl-obj"></div></div>' +
+      '<p class="group-label" id="lbl-obj">Tipo de ejercicio</p><div class="group pad"><div class="chips wrap" data-ref="tags" role="group" aria-labelledby="lbl-obj"></div></div>' +
       '<div data-ref="media"></div>' +
       '<div class="group"><div class="row"><span class="k">' + ic('clock') + 'Duración</span>' + stepperHTML('ex-duration', ex.duration || 10, false, 'Duración en minutos') + '</div></div>' +
       '<p class="group-label" id="lbl-desc">Cómo se hace</p><div class="group"><textarea id="ex-desc" aria-labelledby="lbl-desc" placeholder="Organización, reglas, series…" maxlength="4000">' + esc(ex.description) + '</textarea></div>' +
-      '<p class="group-label" id="lbl-pts">Puntos clave</p><div class="group"><textarea id="ex-points" aria-labelledby="lbl-pts" placeholder="Uno por línea" maxlength="2000">' + esc(ex.keyPoints) + '</textarea></div>' +
+      '<p class="group-label" id="lbl-pts">Puntos clave</p><div class="group"><textarea id="ex-points" aria-labelledby="lbl-pts" placeholder="Uno por renglón" maxlength="2000">' + esc(ex.keyPoints) + '</textarea></div>' +
       '<div class="group"><label class="row"><span class="k">' + ic('video') + 'YouTube</span><input id="ex-link" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Pega el link aquí" aria-label="Link de video de YouTube" maxlength="400" value="' + esc(ex.link || '') + '"></label></div>' +
       '<button type="button" class="more-btn" data-more aria-expanded="' + moreOpen + '">Más detalles' + ic('down') + '</button>' +
       '<div data-ref="more"' + (moreOpen ? '' : ' hidden') + '>' +
       '<p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], ex.sport, 'Deporte') +
-      '<p class="group-label">Nivel</p>' + segHTML('level', LEVELS.map((l) => [l, l]), ex.level || 'Inicial', 'Nivel') +
+      '<p class="group-label">Nivel</p>' + segHTML('level', LEVELS.map((l) => [l, lvl(l)]), ex.level || 'Inicial', 'Nivel') +
       '<div class="group">' +
       row('ex-players', 'people', 'Jugadores', 'Ej. 8 a 12', 60, ex.players) +
       row('ex-age', 'age', 'Edad', 'Ej. Sub-10 a Sub-12', 60, ex.age) +
@@ -1931,7 +1932,7 @@
       }
       const hasBoard = diagram && diagram.items && diagram.items.length;
       box.innerHTML = '<div class="media-pick">' +
-        (isTouch ? '<button type="button" class="pick-tile" data-pick="capture"><span class="ico">' + ic('video') + '</span><b>Grabar</b></button>' : '') +
+        (isTouch ? '<button type="button" class="pick-tile" data-pick="capture"><span class="ico">' + ic('video') + '</span><b>Grabar video</b></button>' : '') +
         '<button type="button" class="pick-tile" data-pick="pick"><span class="ico">' + ic('upload') + '</span><b>' + (isTouch ? 'De tus fotos' : 'Elegir video o foto') + '</b></button>' +
         (hasBoard ? '' : boardTileHTML(true)) + '</div>' + (hasBoard ? boardTileHTML(false) : '');
     }
@@ -2013,7 +2014,7 @@
           let blob = media.file;
           let type = media.kind === 'image' ? 'image/jpeg' : null;
           if (media.kind === 'video' && S.backend.kind === 'cloud') {
-            const r = await prepareCloudVideo(media.file, (p) => sheet.progress(p, 'Reduciendo el video · ' + Math.round(p * 100) + '% · mantén la app abierta'));
+            const r = await prepareCloudVideo(media.file, (p) => sheet.progress(p, 'Reduciendo el video · ' + Math.round(p * 100) + '% · no cierres Cancha'));
             blob = r.blob; type = r.type;
           }
           sheet.progress(null, S.backend.kind === 'cloud' ? 'Subiendo ' + (media.kind === 'video' ? 'video' : 'foto') + '…' : 'Guardando…');
@@ -2125,10 +2126,10 @@
     const points = String(ex.keyPoints || '').split('\n').map((s) => s.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
     const stats = [['clock', 'Duración', (Number(ex.duration) || 0) + ' min'], ['people', 'Jugadores', ex.players], ['age', 'Edad', ex.age], ['flag', 'Espacio', ex.space]].filter((s) => s[2]);
     const vars = String(ex.variations || '').split('\n').map((s) => s.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
-    const varHTML = vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + '</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('');
+    const varHTML = vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + ':</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('');
     let created = '';
     try { created = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ex.createdAt || Date.now())); } catch (e) { /* */ }
-    return '<div class="d-head"><p class="d-tags">' + (ex.objective ? '<span class="tag">' + esc(ex.objective) + '</span>' : '<span class="tag">' + esc(SPORTS[ex.sport].name) + '</span>') + (ex.level ? '<span class="tag ghost">' + esc(ex.level) + '</span>' : '') + '</p><h1 class="d-title">' + esc(ex.title || 'Sin título') + '</h1></div>' +
+    return '<div class="d-head"><p class="d-tags">' + (ex.objective ? '<span class="tag">' + esc(ex.objective) + '</span>' : '<span class="tag">' + esc(SPORTS[ex.sport].name) + '</span>') + (ex.level ? '<span class="tag ghost">' + esc(lvl(ex.level)) + '</span>' : '') + '</p><h1 class="d-title">' + esc(ex.title || 'Sin título') + '</h1>' + (ex.sharedBy && ex.sharedBy !== coachName() ? '<p class="shared-by">' + ic('people') + 'Te lo mandó ' + esc(ex.sharedBy) + '</p>' : '') + '</div>' +
       '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((s) => '<div class="stat"><span class="k">' + ic(s[0]) + s[1] + '</span><span class="v">' + esc(s[2]) + '</span></div>').join('') + '</div>' +
       (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="add-to-class">' + ic('plus') + 'Agregar a una clase</button>' +
         '<button class="btn icon tinted" data-act="sections" aria-label="Guardar en sección">' + ic('folder') + '</button>' +
@@ -2236,7 +2237,7 @@
     const uses = S.classes.filter((c) => (c.items || []).some((it) => it.exId === id)).length;
     actionSheet({
       title: '¿Eliminar «' + e.title + '»?',
-      message: [uses ? 'Se quitará de ' + plural(uses, 'clase', 'clases') + '; en las que ya diste se queda el nombre.' : '', e.mediaId ? 'También se borrará su ' + (e.mediaType === 'video' ? 'video' : 'foto') + '.' : ''].filter(Boolean).join(' ') || undefined,
+      message: [uses ? 'Se quitará de ' + plural(uses, 'clase', 'clases') + '. En las que ya diste solo quedará su nombre.' : '', e.mediaId ? 'También se borrará su ' + (e.mediaType === 'video' ? 'video' : 'foto') + '.' : ''].filter(Boolean).join(' ') || undefined,
       actions: [{ label: 'Eliminar ejercicio', danger: true, onClick: () => deleteExercise(id) }],
     });
   }
@@ -2295,7 +2296,7 @@
 
   function exerciseText(ex) {
     const points = String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
-    const lines = ['*' + ex.title + '*', [ex.objective, ex.level, (Number(ex.duration) || 0) + ' min'].filter(Boolean).join(' · ')];
+    const lines = ['*' + ex.title + '*', [ex.objective, lvl(ex.level), (Number(ex.duration) || 0) + ' min'].filter(Boolean).join(' · ')];
     const facts = [ex.players ? 'Jugadores: ' + ex.players : '', ex.age ? 'Edad: ' + ex.age : '', ex.space ? 'Espacio: ' + ex.space : ''].filter(Boolean).join(' · ');
     if (facts) lines.push(facts);
     if (ex.material) lines.push('Material: ' + ex.material);
@@ -2311,7 +2312,7 @@
       actions: [
         { label: 'Mandar texto por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) },
       ].concat(ex.videoUrl || ex.mediaType === 'video' ? [{ label: 'Mandar el video', icon: 'video', onClick: () => shareVideo(ex) }] : []).concat([
-        { label: 'Mandar a otro profe', icon: 'box', onClick: () => sendExercise(ex) },
+        { label: 'Mandar a otro profe', sub: 'Le llega un archivo para abrir en su Cancha', icon: 'box', onClick: () => openShareCoaches({ exIds: [ex.id] }) },
         { label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) },
       ]),
     });
@@ -2470,7 +2471,7 @@
       (items.length ? '<div class="tl" aria-hidden="true">' + segs + '<b class="tl-end">' + fmtMin(total) + '′</b></div>' : '') +
       (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar clase</button>' : '') +
       (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya la diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div>' +
-      '<div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Editar plan') + '</button>' : '') + '</div>' +
+      '<div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Cambiar plan') + '</button>' : '') + '</div>' +
       '<div class="list">' + planRowsHTML(c, edit) +
       (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Agregar ejercicios</span></button><button class="cell add-row" data-act="add-pause">' + ic('drop') + '<span>Agregar pausa</span></button>' : '') +
       (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div>' +
@@ -2580,7 +2581,7 @@
     const fitSeries = (m) => { for (let n = 4; n >= 2; n--) { const w = Math.floor((m - (n - 1)) / n); if (w >= 2) return { n, work: Math.min(30, w), rest: 1 }; } return { n: 2, work: Math.max(1, Math.floor(m / 2) || 1), rest: 0 }; };
     const s0 = it.series || fitSeries(itemMin(it));
     const st = { n: s0.n, work: s0.work, rest: s0.rest };
-    const rests = [['0', 'Sin'], ['0.5', '30 s'], ['1', '1 min'], ['2', '2 min']];
+    const rests = [['0', 'Sin descanso'], ['0.5', '30 s'], ['1', '1 min'], ['2', '2 min']];
     const counter = (k, label, val, unit) => '<div class="row"><span class="k">' + label + '</span><span class="stepper"><button type="button" class="st-btn" data-k="' + k + '" data-d="-1" aria-label="Menos">' + ic('minus') + '</button><span class="st-val" data-v="' + k + '">' + val + unit + '</span><button type="button" class="st-btn" data-k="' + k + '" data-d="1" aria-label="Más">' + ic('plus') + '</button></span></div>';
     const sheet = openSheet({
       title: 'Series',
@@ -2681,7 +2682,7 @@
       bodyHTML: (all.length ? '<label class="search">' + ic('search') + '<input type="search" id="pk-q" placeholder="Buscar en ' + SPORTS[sport].noun + '" autocomplete="off" aria-label="Buscar ejercicios"></label>' : '<p class="att-head">Aún no tienes ejercicios de ' + SPORTS[sport].noun + '.</p>') +
         '<div class="list pick-list" data-ref="list"></div>',
       isDirty: () => sel.length > 0,
-      discardTitle: '¿Descartar la selección?',
+      discardTitle: '¿Salir sin agregar?',
       onConfirm: async () => {
         const add = sel.slice();
         const ok = await mutateClass(classId, (x) => { add.forEach((id) => x.items.push({ exId: id, min: (getEx(id) || {}).duration || 10 })); });
@@ -2723,7 +2724,7 @@
       if (i >= 0) sel.splice(i, 1); else sel.push(id);
       b.setAttribute('aria-checked', String(i < 0));
       haptic(5);
-      sheet.setConfirm(sel.length > 0, sel.length ? 'Agregar (' + sel.length + ')' : 'Añadir');
+      sheet.setConfirm(sel.length > 0, sel.length ? 'Agregar (' + sel.length + ')' : 'Agregar');
     });
   }
 
@@ -2850,7 +2851,7 @@
     if (backToScreen('sec:' + id)) return;
     haptic(4);
     let editing = false;
-    const scr = pushScreen({ key: 'sec:' + id, tint: 'clases', rightHTML: S.canWrite ? '<button class="glass-btn cap" data-act="sec-edit">Editar</button>' : '' });
+    const scr = pushScreen({ key: 'sec:' + id, tint: 'clases', rightHTML: S.canWrite ? '<button class="glass-btn" data-act="sec-share" aria-label="Compartir con otros profes">' + ic('share') + '</button><button class="glass-btn cap" data-act="sec-edit">Editar</button>' : '' });
     function render() {
       const sec = getSection(id);
       if (!sec) { popLayer(scr); return; }
@@ -2889,6 +2890,7 @@
       if (a.dataset.act === 'sec-edit') openSectionEditor({ section: getSection(id) });
       else if (a.dataset.act === 'sec-toggle-edit') { editing = !editing; render(); }
       else if (a.dataset.act === 'sec-add') openSectionPicker(id);
+      else if (a.dataset.act === 'sec-share') { const x = getSection(id); if (x) openShareCoaches({ exIds: sectionExercises(x).map((y) => y.id) }); }
     });
   }
   // Elegir ejercicios de la biblioteca para una sección (los dos deportes).
@@ -3001,7 +3003,7 @@
     if (f.age) chips.push(['age', (AGE_BANDS.find((x) => x[0] === f.age) || [])[1] + ' años']);
     if (f.dur) chips.push(['dur', (DUR_BANDS.find((x) => x[0] === f.dur) || [])[1]]);
     if (f.video) chips.push(['video', 'Con video']);
-    if (f.school) chips.push(['school', 'Para escuela']);
+    if (f.school) chips.push(['school', 'Grupos grandes']);
     if (f.sort !== 'recent') chips.push(['sort', 'Orden: ' + (SORTS.find((x) => x[0] === f.sort) || [])[1]]);
     return chips.map((c) => '<button class="chip on-chip" data-unfilter="' + esc(c[0]) + '" aria-label="Quitar filtro ' + esc(c[1]) + '">' + esc(c[1]) + ic('xmark') + '</button>').join('');
   }
@@ -3023,11 +3025,11 @@
       tint: sport,
       confirmLabel: 'Ver',
       bodyHTML:
-        '<p class="group-label">Nivel</p>' + chipGroup('levels', LEVELS.map((l) => [l, l]), (v) => draft.levels.indexOf(v) >= 0) +
+        '<p class="group-label">Nivel</p>' + chipGroup('levels', LEVELS.map((l) => [l, lvl(l)]), (v) => draft.levels.indexOf(v) >= 0) +
         '<p class="group-label">Edad de tus alumnos</p>' + chipGroup('age', AGE_BANDS, (v) => draft.age === v) +
         '<p class="group-label">Duración</p>' + chipGroup('dur', DUR_BANDS, (v) => draft.dur === v) +
         '<div class="group" style="margin-top:20px">' + switchRow('f-video', ic('video'), 'Con video', 'Tuyo, de Recomendados o de YouTube', draft.video, false) +
-        switchRow('f-school', ic('people'), 'Para escuela', 'Para grupos de 25 a 35 alumnos', draft.school, false) + '</div>' +
+        switchRow('f-school', ic('people'), 'Grupos grandes', 'De 25 a 35 alumnos', draft.school, false) + '</div>' +
         '<p class="group-label">Ordenar</p>' + segHTML('fsort', SORTS, draft.sort, 'Ordenar') +
         '<button type="button" class="btn tinted wide-btn" data-act="f-clear">Quitar filtros</button>',
       onConfirm: () => { S.fx[sport] = draft; S.sig = {}; renderEjercicios(); sheet.dismiss(); },
@@ -3111,7 +3113,7 @@
         '<p class="group-label">Deporte</p>' + segHTML('gsport', [['ambos', 'Ambos'], ['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], SPORTS[g.sport] ? g.sport : 'ambos', 'Deporte') +
         '<div class="group">' +
         '<label class="row"><span class="k">' + ic('age') + 'Categoría</span><input id="gr-cat" placeholder="Ej. Sub-12, 4.º de primaria" aria-label="Categoría" maxlength="60" value="' + esc(g.category) + '"></label>' +
-        '<label class="row"><span class="k">' + ic('clock') + 'Horario</span><input id="gr-sched" placeholder="Ej. Lun y Mié 16:00" aria-label="Horario" maxlength="60" value="' + esc(g.schedule) + '"></label>' +
+        '<label class="row"><span class="k">' + ic('clock') + 'Horario</span><input id="gr-sched" placeholder="Ej. lunes y miércoles 16:00" aria-label="Horario" maxlength="60" value="' + esc(g.schedule) + '"></label>' +
         '<label class="row"><span class="k">' + ic('flag') + 'Lugar</span><input id="gr-place" placeholder="Ej. Cancha 2" aria-label="Lugar" maxlength="60" value="' + esc(g.place) + '"></label>' +
         '</div>',
       onConfirm: async () => {
@@ -3160,7 +3162,7 @@
       (S.canWrite ? '<div class="g-actions">' +
         (hasStudents ? '<button class="btn filled" data-act="roll-today">' + ic('check') + 'Pasar lista hoy</button>' : '<button class="btn filled" data-act="add-students">' + ic('plus') + 'Agregar alumnos</button>') +
         '<button class="btn tinted" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' +
-        (hasStudents ? '<button class="btn tinted" data-act="report">' + ic('doc') + 'Reporte</button>' : '') + '</div>'
+        (hasStudents ? '<button class="btn tinted" data-act="report">' + ic('doc') + 'Reporte de asistencia</button>' : '') + '</div>'
         : hasStudents ? '<div class="g-actions"><button class="btn tinted" data-act="report">' + ic('doc') + 'Reporte de asistencia</button></div>' : '') +
       '</div>' +
       (up.length ? '<p class="group-label">Próximas</p><div class="list">' + up.map((c) => classCellHTML(c, true)).join('') + '</div>' : '') +
@@ -3359,12 +3361,12 @@
       wide: true,
       z,
       isDirty: () => dirty,
-      discardTitle: '¿Descartar la lista?',
+      discardTitle: '¿Salir sin guardar la lista?',
       bodyHTML:
         '<p class="att-head"><b>' + esc(g.name) + '</b> · ' + esc(fmtDay(c.date)) + '</p>' +
         '<p class="att-legend"><span>' + ic('check') + ' asistió</span><span><b>R</b> retardo</span><span>' + ic('xmark') + ' falta</span></p>' +
-        '<p class="hint">Si casi todos vinieron, toca «Marcar a todos presentes» y luego cambia a los que faltaron.</p>' +
-        '<button type="button" class="btn tinted att-all" data-att-all>' + ic('check') + 'Marcar a todos presentes</button>' +
+        '<p class="hint">Si casi todos vinieron, toca «Todos asistieron» y luego marca a los que faltaron.</p>' +
+        '<button type="button" class="btn tinted att-all" data-att-all>' + ic('check') + 'Todos asistieron</button>' +
         '<p class="att-sum" data-ref="sum" aria-live="polite"></p>' +
         '<div class="list att-list">' + list.map((s, n) =>
           '<div class="att-row" data-sid="' + esc(s.id) + '"><span class="att-n">' + (n + 1) + '</span><span class="att-name">' + esc(s.name) + '</span>' +
@@ -3426,7 +3428,7 @@
       confirmLabel: 'Agregar',
       isDirty: () => !!$('#st-names', sheet.body).value.trim(),
       bodyHTML:
-        '<p class="group-label" id="lbl-st">Un nombre por línea, en el orden de tu lista</p>' +
+        '<p class="group-label" id="lbl-st">Un nombre por renglón, en el orden de tu lista</p>' +
         '<div class="group"><textarea id="st-names" aria-labelledby="lbl-st" placeholder="Ana Martínez&#10;Diego López&#10;Valeria Ruiz" style="min-height:220px" autocapitalize="words"></textarea></div>' +
         '<p class="muted" style="margin:0 16px">Puedes pegar la lista completa de tu grupo.</p>',
       onConfirm: async () => {
@@ -3833,6 +3835,7 @@
 
   async function buildExport(opt, onProgress) {
     const exercises = S.exercises.filter((e) => opt.exIds.has(e.id)).map((e) => plain(e));
+    if (opt.from) exercises.forEach((e) => { if (!e.sharedBy) e.sharedBy = opt.from; e.example = false; });
     const classes = S.classes.filter((c) => opt.classIds.has(c.id)).map((c) => {
       const x = plain(c);
       if (!opt.groupIds.has(x.groupId)) { delete x.attendance; delete x.attendanceAt; delete x.groupId; }
@@ -3855,7 +3858,7 @@
       files.push({ name: path, data: blob });
     }
     const sections = opt.kind === 'respaldo' ? S.sections.map((x) => plain(x)) : [];
-    const manifest = { format: 'cancha', version: 3, app: APP_NAME, kind: opt.kind, title: opt.title, exportedAt: Date.now(), exercises, classes, groups, sections, media };
+    const manifest = { format: 'cancha', version: 3, app: APP_NAME, kind: opt.kind, title: opt.title, from: opt.from || undefined, exportedAt: Date.now(), exercises, classes, groups, sections, media };
     files.unshift({ name: 'cancha.json', data: JSON.stringify(manifest) });
     const zip = await buildZip(files, (p) => onProgress && onProgress(0.5 + p * 0.5, 'Armando el archivo · ' + Math.round(p * 100) + '%'));
     return new File([zip], APP_NAME + ' - ' + safeName(opt.title) + ' - ' + shortDate() + '.zip', { type: 'application/zip' });
@@ -3864,7 +3867,9 @@
   function markBackup() { pref.set('last-backup', String(Date.now())); S.sig = {}; renderAll(); }
 
   // Comparte el archivo ya creado: en Claude se descarga; en iPad abre el menú de compartir (AirDrop, WhatsApp, Archivos).
-  async function deliverFile(file, what, isBackup) {
+  async function deliverFile(file, what, isBackup, opt) {
+    const shared = !!(opt && opt.kind === 'compartido');
+    const msg = shared ? 'Te mando ' + what + ' de Cancha. Guarda el archivo, abre Cancha y toca Ejercicios → «Abrir los que me mandaron».' + (appLink() ? ' Si no tienes Cancha: ' + appLink() : '') : '';
     const cl = window.claude;
     if (framed && cl && typeof cl.use === 'function') { if (await saveFile(file, file.name, 'Archivo') && isBackup) markBackup(); return; }
     const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch (e) { return false; } })();
@@ -3876,13 +3881,13 @@
         '<button type="button" class="btn filled wide-btn" data-file-share>' + ic('share') + (canShare ? (isBackup ? 'Guardar respaldo' : 'Compartir') : 'Descargar archivo') + '</button>' +
         '<div class="help">' + (isBackup
           ? (canShare ? '<p>Elige <b>AirDrop</b> o <b>Guardar en Archivos</b> → <b>iCloud Drive</b>. Así lo recuperas si cambias de iPad.</p>' : '<p>Descarga el archivo y guárdalo en un lugar seguro (por ejemplo, tu nube).</p>')
-          : (canShare ? '<p>Elige <b>AirDrop</b> o <b>WhatsApp</b> y mándalo al otro profe.</p>' : '<p>Descarga el archivo y mándalo por AirDrop, WhatsApp o correo.</p>')) +
-        '<p>Para abrirlo en otro iPad: guarda el archivo, abre Cancha y toca <b>Respaldo → Abrir archivo de Cancha</b>.</p></div>',
+          : (canShare ? '<p>Elige <b>WhatsApp</b> (puede ser el grupo de profes) o <b>AirDrop</b>.</p>' : '<p>Descarga el archivo y mándalo por WhatsApp, AirDrop o correo.</p>')) +
+        (shared ? '<p>Quien lo reciba guarda el archivo, abre Cancha y toca <b>Ejercicios → Abrir los que me mandaron</b>.</p>' : '<p>Para abrirlo en otro iPad: guarda el archivo, abre Cancha y toca <b>Respaldo → Abrir archivo de Cancha</b>.</p>') + '</div>',
     });
     sheet.body.addEventListener('click', async (e) => {
       if (!e.target.closest('[data-file-share]')) return;
       if (canShare) {
-        try { await navigator.share({ files: [file], title: file.name }); if (isBackup) markBackup(); sheet.dismiss(); toast(isBackup ? 'Respaldo guardado' : 'Archivo enviado'); return; } catch (err) { if (err && err.name === 'AbortError') return; }
+        try { await navigator.share(msg ? { files: [file], title: file.name, text: msg } : { files: [file], title: file.name }); if (isBackup) markBackup(); sheet.dismiss(); toast(isBackup ? 'Respaldo guardado' : 'Archivo enviado'); return; } catch (err) { if (err && err.name === 'AbortError') return; }
       }
       const a = document.createElement('a');
       a.href = URL.createObjectURL(file);
@@ -3903,7 +3908,7 @@
       const file = await buildExport(opt, (p, label) => { sheet.progress(p, label); });
       sheet.setBusy(false);
       sheet.dismiss();
-      setTimeout(() => deliverFile(file, what, opt.kind === 'respaldo'), 350);
+      setTimeout(() => deliverFile(file, what, opt.kind === 'respaldo', opt), 350);
     } catch (e) {
       sheet.setBusy(false);
       sheet.dismiss();
@@ -3942,7 +3947,7 @@
         switchRow('xp-c', ic('clases'), 'Clases', plural(nC, 'clase', 'clases') + ' con sus ejercicios', nC > 0, !nC) +
         switchRow('xp-g', ic('people'), 'Grupos y asistencia', nG ? 'Incluye nombres de alumnos' : 'Sin grupos', false, !nG) +
         '</div><div class="group">' +
-        switchRow('xp-m', ic('video'), 'Videos y fotos', 'Sin ellos el archivo pesa muy poco', true, false) +
+        switchRow('xp-m', ic('video'), 'Videos y fotos', 'Si los quitas, el archivo pesa mucho menos', true, false) +
         '</div><p class="muted xp-sum" data-ref="sum"></p>',
       onConfirm: () => {
         const o = collect();
@@ -4025,6 +4030,7 @@
       mediaType: mt, mediaId: mt && isId(x.mediaId) ? x.mediaId : null, thumbId: isId(x.thumbId) ? x.thumbId : null,
       mediaDuration: numIn(x.mediaDuration, 0, 36000, 0), mediaAspect: x.mediaAspect == null ? null : numIn(x.mediaAspect, 0.1, 10, null), diagram: cleanDiagram(x.diagram),
       catalogId: isId(x.catalogId) ? x.catalogId : undefined,
+      sharedBy: txt(x.sharedBy, 40).trim() || undefined,
       school: x.school === true,
       videoUrl: typeof x.videoUrl === 'string' && /^app\/videos\/[\w-]+\.mp4$/.test(x.videoUrl) ? x.videoUrl : undefined,
       posterUrl: typeof x.posterUrl === 'string' && /^app\/videos\/[\w-]+\.jpg$/.test(x.posterUrl) ? x.posterUrl : undefined,
@@ -4128,16 +4134,21 @@
     const copies = plan.ex.copias.length + plan.cl.copias.length + plan.gr.copias.length;
     let when = '';
     try { when = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(m.exportedAt)); } catch (e) { /* */ }
+    const from = txt(m.from, 40).trim();
+    const incoming = plan.ex.nuevos.concat(plan.ex.actualiza, plan.ex.copias);
     const sheet = openSheet({
-      title: 'Abrir archivo',
+      title: from ? 'Ejercicios de ' + from : 'Abrir archivo',
       confirmLabel: 'Agregar',
       bodyHTML:
-        '<p class="att-head"><b>' + esc(txt(m.title, 80) || 'Archivo de Cancha') + '</b>' + (when ? ' · del ' + esc(when) : '') + '</p>' +
+        (from
+          ? '<p class="att-head"><b>' + esc(from) + '</b> te mandó ' + plural((m.exercises || []).length, 'ejercicio', 'ejercicios') + (when ? ' el ' + esc(when) : '') + '.</p>' +
+            (incoming.length ? '<ul class="imp-names">' + incoming.slice(0, 6).map((x) => '<li>' + esc(x.title) + '</li>').join('') + (incoming.length > 6 ? '<li class="muted">y ' + (incoming.length - 6) + ' más</li>' : '') + '</ul>' : '')
+          : '<p class="att-head"><b>' + esc(txt(m.title, 80) || 'Archivo de Cancha') + '</b>' + (when ? ' · del ' + esc(when) : '') + '</p>') +
         '<div class="att-card imp-card">' +
         importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') + importLine(plan.sc, 'sección', 'secciones', true) +
         (mainMedia ? '<div class="imp-line"><b>' + plural(mainMedia, 'video o foto', 'videos y fotos') + '</b><span>' + fmtMB(mediaSize) + '</span></div>' : '') +
         '</div>' +
-        '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? 'Ya tienes todo lo que trae este archivo.' : 'Lo que venga más nuevo en el archivo se actualiza aquí.' + (copies ? ' Si tú también lo cambiaste, se agrega como copia y no pierdes tu versión.' : '')) + '</p>',
+        '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? (from ? 'Ya tienes estos ejercicios. Se juntan en la sección «De ' + esc(from) + '».' : 'Ya tienes todo lo que trae este archivo.') : 'Lo que venga más nuevo en el archivo se actualiza aquí.' + (copies ? ' Si tú también lo cambiaste, se agrega como copia y no pierdes tu versión.' : '')) + '</p>',
       onConfirm: async () => {
         sheet.setBusy(true, 'Agregando…');
         try {
@@ -4146,7 +4157,9 @@
           sheet.dismiss();
           haptic(14);
           const parts = [r.ex ? plural(r.ex, 'ejercicio', 'ejercicios') : '', r.cl ? plural(r.cl, 'clase', 'clases') : '', r.gr ? plural(r.gr, 'grupo', 'grupos') : ''].filter(Boolean);
-          toast(parts.length ? 'Se agregaron ' + parts.join(', ') : 'Listo');
+          const secId = from ? await fileIntoSharedSection(from, r.exIds).catch(() => null) : null;
+          if (secId) toast('Se agregaron ' + plural(r.ex, 'ejercicio', 'ejercicios') + ' de ' + from, 'check', { label: 'Ver', onClick: () => openSection(secId) });
+          else toast(parts.length ? 'Se agregaron ' + parts.join(', ') : 'Listo');
         } catch (e) {
           sheet.setBusy(false);
           renderAll(); refreshScreens();
@@ -4154,7 +4167,7 @@
         }
       },
     });
-    sheet.setConfirm(!nothing);
+    sheet.setConfirm(!nothing || !!(from && (m.exercises || []).length));
   }
   async function applyImport(m, zip, plan, onProgress) {
     const idMap = {};
@@ -4166,7 +4179,7 @@
       if (!blob || !blob.size) continue;
       let type = typeof info.type === 'string' ? info.type : '';
       if (S.backend.kind === 'cloud' && type.indexOf('video/') === 0) {
-        const r = await prepareCloudVideo(new File([blob], info.path.split('/').pop(), { type }), (p) => onProgress(i / plan.media.length, 'Reduciendo video ' + (i + 1) + ' de ' + plan.media.length + ' · ' + Math.round(p * 100) + '% · mantén la app abierta'));
+        const r = await prepareCloudVideo(new File([blob], info.path.split('/').pop(), { type }), (p) => onProgress(i / plan.media.length, 'Reduciendo video ' + (i + 1) + ' de ' + plan.media.length + ' · ' + Math.round(p * 100) + '% · no cierres Cancha'));
         blob = r.blob; type = r.type;
       }
       idMap[key] = await S.backend.putMedia(blob, type);
@@ -4178,6 +4191,7 @@
     plan.gr.copias.forEach((x) => { grRe[x.id] = uid(); });
     const now = Date.now();
     let nEx = 0; let nCl = 0; let nGr = 0;
+    const exIds = [];
     for (const x of plan.gr.nuevos.concat(plan.gr.actualiza, plan.gr.copias)) {
       const g = plain(x);
       if (grRe[x.id]) { g.id = grRe[x.id]; g.name = g.name + ' (copia)'; g.example = false; } else g.syncedAt = g.updatedAt;
@@ -4198,6 +4212,7 @@
       replaceLocal('exercises', nx);
       await S.backend.saveExercise(nx);
       old.filter((id) => id !== nx.mediaId && id !== nx.thumbId).forEach((id) => S.backend.deleteMedia(id).catch(() => {}));
+      exIds.push(nx.id);
       nEx++;
     }
     const clRe = {};
@@ -4222,8 +4237,9 @@
       replaceLocal('sections', sec);
       await S.backend.saveSection(sec);
     }
+    if (m.from) (m.exercises || []).forEach((x) => { if (x && isId(x.id) && exIds.indexOf(exRe[x.id] || x.id) < 0 && getEx(exRe[x.id] || x.id)) exIds.push(exRe[x.id] || x.id); });
     renderAll(); refreshScreens();
-    return { ex: nEx, cl: nCl, gr: nGr };
+    return { ex: nEx, cl: nCl, gr: nGr, exIds };
   }
 
   // --- Apariencia: «Automático» sigue al iPad (modo oscuro de noche si así está); «Claro» y «Oscuro» la fijan.
@@ -4331,7 +4347,7 @@
     const have = inLibrary(cx.id);
     const meta = [cx.duration ? cx.duration + ' min' : '', cx.age].filter(Boolean).join(', ');
     return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb">' + (cx.thumbUrl ? '<img alt="" loading="lazy" decoding="async" src="' + esc(cx.thumbUrl) + '"><span class="badge vid">' + ic('play') + '<span class="sr">Con video</span></span>' : '<span class="art">' + boardSVG(cx.sport, cx.diagram, { crop: true }) + '</span>') +
-      (have ? '<span class="badge in-lib">' + ic('check') + 'En tus ejercicios</span>' : cx.school ? '<span class="badge">Para escuela</span>' : '') + '</span>' +
+      (have ? '<span class="badge in-lib">' + ic('check') + 'En tus ejercicios</span>' : cx.school ? '<span class="badge">Grupos grandes</span>' : '') + '</span>' +
       '<span class="card-body"><span class="title">' + esc(cx.title) + '</span><span class="meta">' + esc(meta) + '</span></span></button>';
   }
   function catEntryHTML(sport) {
@@ -4342,14 +4358,14 @@
     const art = pics.length === 3
       ? pics.map((x, i) => '<img class="ce-p' + i + '" alt="" loading="lazy" decoding="async" src="' + esc(x.thumbUrl) + '">').join('')
       : '<span class="ce-board">' + boardSVG(sport, sample ? sample.diagram : null) + '</span>';
-    return '<button class="cat-entry" data-act="catalog" data-tint="' + sport + '"><span class="txt"><span class="ce-kick">' + ic('sparkle') + 'Listos para usar</span><b>Recomendados</b>' +
+    return '<button class="cat-entry" data-act="catalog" data-tint="' + sport + '"><span class="txt"><b>Recomendados</b>' +
       '<span class="ce-sub">' + (n ? n + ' ejercicios de ' + SPORTS[sport].noun + ' con video' : 'Ejercicios listos para usar') + '</span><span class="ce-cta">Ver ejercicios' + ic('chevR') + '</span></span>' +
       '<span class="ce-art" aria-hidden="true">' + art + '</span></button>';
   }
   function templatesHTML() {
     const list = catSessions();
     if (!list.length) return '';
-    return '<p class="group-label">Clases listas</p><div class="list">' + list.map((t) => {
+    return '<p class="group-label">Clases recomendadas</p><div class="list">' + list.map((t) => {
       const nEx = t.items.filter((it) => !isPause(it)).length;
       const total = t.items.reduce((sum, it) => sum + itemMin(it), 0);
       return '<button class="cell" data-open-template="' + esc(t.id) + '" data-tint="' + t.sport + '"><span class="group-badge band-' + t.sport + '" aria-hidden="true">' + total + '′</span>' +
@@ -4374,11 +4390,11 @@
       scr.body.innerHTML =
         '<div class="d-head"><h1 class="d-title">Recomendados</h1><p class="cat-lead">Ejercicios y clases armados con base en FIFA, FIBA y otras federaciones. Agrega los que te sirvan y cámbialos a tu gusto.</p></div>' +
         segHTML('csport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], sport, 'Deporte') +
-        (sessions.length ? '<p class="group-label">Clases listas</p><div class="list">' + sessions.map((t) => {
+        (sessions.length ? '<p class="group-label">Clases recomendadas</p><div class="list">' + sessions.map((t) => {
           const total = t.items.reduce((sum, it) => sum + itemMin(it), 0);
           return '<button class="cell" data-open-template="' + esc(t.id) + '"><span class="group-badge band-' + t.sport + '" aria-hidden="true">' + total + '′</span><span class="txt"><span class="t1">' + esc(t.name) + '</span><span class="t2">' + esc(t.notes || '') + '</span></span>' + ic('chevR', 'chev') + '</button>';
         }).join('') + '</div>' : '') +
-        '<div class="chips" role="toolbar" aria-label="Filtrar">' + [['all', 'Todos'], ['school', 'Para escuela']].concat(objs.map((o) => [o, o])).map((c) => '<button class="chip" data-cf="' + esc(c[0]) + '" aria-pressed="' + (c[0] === filter) + '">' + esc(c[1]) + '</button>').join('') + '</div>' +
+        '<div class="chips" role="toolbar" aria-label="Filtrar">' + [['all', 'Todos'], ['school', 'Grupos grandes']].concat(objs.map((o) => [o, o])).map((c) => '<button class="chip" data-cf="' + esc(c[0]) + '" aria-pressed="' + (c[0] === filter) + '">' + esc(c[1]) + '</button>').join('') + '</div>' +
         groups.map((o) => '<p class="group-label">' + esc(o) + '</p><div class="grid">' + list.filter((x) => x.objective === o).map(catCardHTML).join('') + '</div>').join('');
       bindSeg(scr.body, 'csport', (v) => { sport = v; filter = 'all'; render(); scr.scroller.scrollTo({ top: 0 }); });
     }
@@ -4412,15 +4428,15 @@
       scr.body.innerHTML =
         '<div class="ex-layout"><div class="d-media">' + (cx.videoUrl ? coachVideoHTML(cx) : '<div class="d-frame board-frame"><span class="art" role="img" aria-label="Pizarrón del ejercicio">' + boardSVG(cx.sport, cx.diagram, { fit: 'xMidYMid meet', anim: canPlay(cx.diagram) }) + '</span>' +
         '<div class="bf-ctrls">' + (canPlay(cx.diagram) ? '<button type="button" class="bf-btn" data-act="play">' + ic('play') + '<span>Ver jugada</span></button>' : '') + '</div></div>') + '</div>' +
-        '<div class="ex-info"><div class="d-head"><p class="d-tags"><span class="tag">' + esc(cx.objective) + '</span><span class="tag ghost">' + esc(cx.level) + '</span>' + (cx.school ? '<span class="tag ghost">Para escuela</span>' : '') + '</p><h1 class="d-title">' + esc(cx.title) + '</h1></div>' +
+        '<div class="ex-info"><div class="d-head"><p class="d-tags"><span class="tag">' + esc(cx.objective) + '</span><span class="tag ghost">' + esc(lvl(cx.level)) + '</span>' + (cx.school ? '<span class="tag ghost">Grupos grandes</span>' : '') + '</p><h1 class="d-title">' + esc(cx.title) + '</h1></div>' +
         '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((x) => '<div class="stat"><span class="k">' + ic(x[0]) + x[1] + '</span><span class="v">' + esc(x[2]) + '</span></div>').join('') + '</div>' +
         (S.canWrite ? '<div class="d-actions">' + (have
-          ? '<button class="btn tinted grow" data-act="open-mine">' + ic('check') + 'Ya está en tus ejercicios</button>'
+          ? '<button class="btn tinted grow" data-act="open-mine">' + ic('check') + 'Ver en tus ejercicios</button>'
           : '<button class="btn filled grow" data-act="adopt">' + ic('plus') + 'Agregar a tus ejercicios</button>') +
           '<button class="btn tinted" data-act="adopt-class">' + ic('clases') + 'Agregar a una clase</button></div>' : '') +
         '<section class="sec"><h2>Cómo se hace</h2><p>' + esc(cx.description) + '</p></section>' +
         (points.length ? '<section class="sec"><h2>Puntos clave</h2><ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul></section>' : '') +
-        (vars.length ? '<section class="sec"><h2>Variantes</h2><ul class="vars">' + vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + '</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('') + '</ul></section>' : '') +
+        (vars.length ? '<section class="sec"><h2>Variantes</h2><ul class="vars">' + vars.map((v) => { const m = v.match(/^([^:]{2,24}):\s*(.+)$/); return '<li>' + (m ? '<b>' + esc(m[1]) + ':</b> ' + esc(m[2]) : esc(v)) + '</li>'; }).join('') + '</ul></section>' : '') +
         (cx.material ? '<section class="sec"><h2>Material</h2><p>' + esc(cx.material) + '</p></section>' : '') + '</div></div>';
     }
     function play(delay) {
@@ -4544,7 +4560,7 @@
       BOARD_TOOLS.map((t) => '<button type="button" class="bt" data-tool="' + t[0] + '" aria-pressed="false">' + toolIcon(t[0]) + '<span>' + t[1] + '</span></button>').join('') +
       '<span class="bt-sep" aria-hidden="true"></span>' +
       '<button type="button" class="bt" data-bd="undo">' + ic('undo') + '<span>Deshacer</span></button>' +
-      '<button type="button" class="bt" data-bd="clear">' + ic('trash') + '<span>Limpiar</span></button></div>';
+      '<button type="button" class="bt" data-bd="clear">' + ic('trash') + '<span>Borrar todo</span></button></div>';
     document.body.appendChild(wrap);
     const canvas = $('.board-canvas', wrap);
 
@@ -4659,7 +4675,7 @@
     };
     function cancel() {
       if (!changed) { popLayer(layer); return; }
-      actionSheet({ title: '¿Descartar los cambios del pizarrón?', actions: [{ label: 'Descartar cambios', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir dibujando' });
+      actionSheet({ title: '¿Salir sin guardar el dibujo?', actions: [{ label: 'Salir sin guardar', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir dibujando' });
     }
     wrap.addEventListener('click', (e) => {
       const t = e.target.closest('[data-tool]');
@@ -4670,7 +4686,7 @@
         case 'cancel': cancel(); break;
         case 'done': popLayer(layer); o.onDone(d.items.length ? { v: d.v, items: d.items } : null); break;
         case 'undo': if (hist.length) restore(); break;
-        case 'clear': if (d.items.length) { snapshot(); d.items = []; render(); toast('Pizarrón limpio', 'trash', { label: 'Deshacer', onClick: () => { if (hist.length) restore(); } }); } break;
+        case 'clear': if (d.items.length) { snapshot(); d.items = []; render(); toast('Pizarrón borrado', 'trash', { label: 'Deshacer', onClick: () => { if (hist.length) restore(); } }); } break;
         default: break;
       }
     });
@@ -4773,10 +4789,10 @@
     const c = r && getClass(r.id);
     if (!c) { if (r) clearRun(); return; }
     actionSheet({
-      title: 'Tienes una clase en curso',
+      title: 'Tienes una clase sin terminar',
       message: (c.name || 'Clase') + (() => { const it = (c.items || [])[r.i]; const nm = !it ? '' : isPause(it) ? (it.label || 'Pausa') : ((getEx(it.exId) || {}).title || ''); return nm ? ' · ibas en «' + nm + '»' : ''; })(),
       tint: SPORTS[c.sport] ? c.sport : 'futbol',
-      actions: [{ label: 'Seguir con la clase', icon: 'play', onClick: () => runClass(r.id, r) }, { label: 'Descartar', danger: true, onClick: clearRun }],
+      actions: [{ label: 'Seguir con la clase', icon: 'play', onClick: () => runClass(r.id, r) }, { label: 'No seguir', danger: true, onClick: clearRun }],
     });
   }
   function runClass(id, resume) {
@@ -4796,7 +4812,7 @@
     wrap.setAttribute('aria-modal', 'true');
     wrap.setAttribute('aria-label', 'Clase en curso');
     wrap.innerHTML =
-      '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir del modo clase">' + ic('xmark') + '</button>' +
+      '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir de la clase">' + ic('xmark') + '</button>' +
       '<div class="run-hd"><span class="run-step" data-ref="step" aria-live="polite"></span><span class="run-class">' + esc(c.name || 'Clase') + '</span></div>' +
       '<button type="button" class="glass-btn" data-run="whistle" aria-label="Tocar el silbato">' + ic('whistle') + '</button></header>' +
       '<div class="run-body" data-ref="body"></div>';
@@ -4840,10 +4856,10 @@
         (it.series && it.series.n > 1 ? '<div class="run-series" data-ref="dots" aria-hidden="true"></div>' : '') +
         '<div class="run-ctrls"><button type="button" class="rc" data-run="prev" aria-label="Anterior"' + (st.i === 0 ? ' disabled' : '') + '>' + ic('prev') + '</button>' +
         '<button type="button" class="rc big" data-run="toggle" aria-label="Empezar"></button>' +
-        '<button type="button" class="rc" data-run="next" aria-label="' + (nxt ? 'Siguiente' : 'Terminar la clase') + '">' + ic(nxt ? 'next' : 'flag') + '</button></div>' +
+        '<button type="button" class="rc" data-run="next" aria-label="' + (nxt ? 'Siguiente' : 'Terminar la clase') + '">' + ic(nxt ? 'next' : 'flag') + '<span class="rc-lbl" aria-hidden="true">' + (nxt ? 'Siguiente' : 'Terminar') + '</span></button></div>' +
         '<div class="run-sec"><span class="run-adj"><button type="button" class="cap" data-run="minus" aria-label="Quitar un minuto">−1 min</button><button type="button" class="cap" data-run="plus" aria-label="Agregar un minuto">+1 min</button></span>' +
         '<button type="button" class="cap skip-rest" data-run="skiprest" hidden>Saltar descanso</button><span class="run-next">' +
-        (nxt ? 'Sigue: <b>' + esc(title(nxt)) + '</b> · ' + esc(fmtMin(itemMin(nxt))) + ' min' : 'Es lo último de la clase') + '</span></div>' +
+        (nxt ? 'Después: <b>' + esc(title(nxt)) + '</b> · ' + esc(fmtMin(itemMin(nxt))) + ' min' : 'Es lo último de la clase') + '</span></div>' +
         (points.length ? '<ul class="points run-points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
         '<div class="run-foot"><div class="tl-bar" data-ref="bar">' + items.map((x, i) => '<i style="flex-grow:' + Math.max(1, itemMin(x)) + '" class="' + (x.pause ? 'pz ' : '') + (i < st.i ? 'past' : i === st.i ? 'cur' : '') + '"></i>').join('') + '</div>' +
         '<p class="run-total" data-ref="total"></p></div>';
@@ -4881,7 +4897,7 @@
       t.textContent = ph ? fmtTimer(ph.left) : over ? '+' + fmtTimer(-rem) : fmtTimer(rem);
       const mins = esc(fmtMin(baseMin(st.i) + st.extra[st.i]));
       $('[data-ref="sub"]', body).textContent = ph
-        ? (st.running ? '' : 'Pausado · ') + (ph.rest ? 'Descanso · sigue serie ' + (ph.k + 2) : 'Serie ' + (ph.k + 1) + ' de ' + ph.n)
+        ? (st.running ? '' : 'Pausado · ') + (ph.rest ? 'Descanso · luego serie ' + (ph.k + 2) : 'Serie ' + (ph.k + 1) + ' de ' + ph.n)
         : over ? 'Tiempo cumplido' : (st.running ? 'de ' : st.started ? 'Pausado · ' : 'Dura ') + mins + ' min';
       wrap.classList.toggle('over', over);
       wrap.classList.toggle('running', st.running);
@@ -4960,7 +4976,7 @@
     };
     function exit() {
       if (st.done || !st.started) { popLayer(layer); return; }
-      actionSheet({ title: '¿Salir del modo clase?', message: 'Se pierde el tiempo y la clase no cuenta como dada.', actions: [{ label: 'Salir', danger: true, onClick: () => { clearRun(); popLayer(layer); } }], cancel: 'Seguir con la clase' });
+      actionSheet({ title: '¿Salir de la clase?', message: 'Se borra el avance y no contará como dada.', actions: [{ label: 'Salir', danger: true, onClick: () => { clearRun(); popLayer(layer); } }], cancel: 'Seguir con la clase' });
     }
     wrap.addEventListener('click', (e) => {
       const b = e.target.closest('[data-run]');
@@ -4982,7 +4998,7 @@
         case 'prev': go(st.i - 1); break;
         case 'next':
           if (st.i < items.length - 1) { go(st.i + 1); break; }
-          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir del modo clase', onClick: () => popLayer(layer) }], cancel: 'Seguir aquí' }); break; }
+          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir', onClick: () => popLayer(layer) }], cancel: 'Seguir con la clase' }); break; }
           actionSheet({ title: '¿Terminar la clase?', actions: [{ label: 'Terminar clase', onClick: finish }], cancel: 'Seguir con la clase' });
           break;
         case 'minus':
@@ -5076,8 +5092,8 @@
       tint: SPORTS[c.sport] ? c.sport : 'futbol',
       actions: [
         { label: 'Mandar texto por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) },
-        { label: 'PDF para imprimir', icon: 'doc', onClick: () => exportPDF(c) },
-        { label: 'Mandar a otro profe', icon: 'box', onClick: () => sendClass(c) },
+        { label: 'Crear PDF para imprimir', icon: 'doc', onClick: () => exportPDF(c) },
+        { label: 'Mandar a otro profe', sub: 'Le llega un archivo para abrir en su Cancha', icon: 'box', onClick: () => sendClass(c) },
         { label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) },
       ],
     });
@@ -5293,6 +5309,104 @@
     if (v.paused) { v.play().catch(() => {}); b.classList.remove('paused'); } else { v.pause(); b.classList.add('paused'); }
   });
 
+  // ---------------------------------------------------------------- entre profes (compartir ejercicios)
+  // Sin servidores: se arma un archivo con los ejercicios (y sus videos) y se manda por WhatsApp o AirDrop.
+  // Quien lo recibe lo abre en su Cancha y le aparecen en una sección «De …» con el nombre de quien lo mandó.
+  const coachName = () => (pref.get('coach-name') || '').trim();
+  const appLink = () => (framed ? '' : location.href.split('#')[0].replace(/index\.html$/, ''));
+  function shareCardHTML() {
+    if (!S.canWrite) return '';
+    return '<div class="share-card"><span class="sc-ico" aria-hidden="true">' + ic('people') + '</span>' +
+      '<span class="txt"><b>Entre profes</b><span>Manda tus ejercicios a otros entrenadores o abre los que te mandaron.</span></span>' +
+      '<span class="sc-actions"><button class="btn filled" data-act="share-coaches">' + ic('share') + 'Compartir</button>' +
+      '<button class="btn tinted" data-act="open-shared">' + ic('download') + 'Abrir los que me mandaron</button></span></div>';
+  }
+  function openShareCoaches(opts) {
+    opts = opts || {};
+    const own = S.exercises.filter((e) => !e.example && !e.catalogId);
+    const chosen = new Set((opts.exIds || own.map((e) => e.id)).filter((id) => getEx(id)));
+    let sport = opts.exIds && opts.exIds.length && getEx(opts.exIds[0]) ? getEx(opts.exIds[0]).sport : S.sport;
+    let q = '';
+    const secs = S.sections.filter((x) => sectionExercises(x).length);
+    const sheet = openSheet({
+      title: 'Compartir con otros profes',
+      confirmLabel: 'Crear archivo',
+      bodyHTML:
+        '<p class="group-label">Tu nombre</p><div class="group"><input class="field-lg" id="sh-name" placeholder="Ej. Profe Toño" aria-label="Tu nombre" maxlength="40" autocomplete="name" enterkeyhint="done" value="' + esc(coachName()) + '"></div>' +
+        '<p class="hint">Así sabrán quién lo manda.</p>' +
+        (secs.length ? '<p class="group-label">Una sección completa</p><div class="chips wrap" data-ref="secs">' + secs.map((x) => '<button type="button" class="chip" data-sh-sec="' + esc(x.id) + '" aria-pressed="false">' + ic('folder') + esc(x.name) + '</button>').join('') + '</div>' : '') +
+        '<p class="group-label">Ejercicios</p>' + segHTML('shsport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], sport, 'Deporte') +
+        '<label class="search">' + ic('search') + '<input type="search" id="sh-q" placeholder="Buscar ejercicios" autocomplete="off" aria-label="Buscar ejercicios"></label>' +
+        '<div class="list pick-list" data-ref="list"></div>' +
+        '<div class="group">' + switchRow('sh-media', ic('video'), 'Con videos y fotos', 'Los tuyos van dentro del archivo', true, false) + '</div>' +
+        '<p class="muted xp-sum" data-ref="sum"></p>',
+      onConfirm: () => {
+        const nameEl = $('#sh-name', sheet.body);
+        const name = nameEl.value.trim();
+        if (!name) { shake(nameEl); nameEl.focus(); toast('Escribe tu nombre', 'pencil'); return; }
+        const ids = Array.from(chosen).filter((id) => getEx(id));
+        if (!ids.length) { toast('Elige al menos un ejercicio', 'check'); return; }
+        pref.set('coach-name', name);
+        const withMedia = $('#sh-media', sheet.body).checked;
+        sheet.dismiss();
+        const what = plural(ids.length, 'ejercicio', 'ejercicios');
+        setTimeout(() => runExport({ exIds: new Set(ids), classIds: new Set(), groupIds: new Set(), withMedia, kind: 'compartido', title: 'Ejercicios de ' + name, from: name }, what), 300);
+      },
+    });
+    const root = sheet.body;
+    function paint() {
+      const nq = norm(q).trim();
+      const list = exOf(sport).filter((e) => !nq || norm(e.title + ' ' + (e.objective || '')).indexOf(nq) >= 0);
+      $('[data-ref="list"]', root).innerHTML = list.length ? list.map((e) => '<button type="button" class="cell" role="checkbox" aria-checked="' + chosen.has(e.id) + '" data-sh-ex="' + esc(e.id) + '">' + thumbHTML(e, 'mini') +
+        '<span class="txt"><span class="t1">' + esc(e.title) + '</span><span class="t2">' + esc([e.objective, e.duration ? e.duration + ' min' : '', e.example ? 'Ejemplo' : e.catalogId ? 'Recomendado' : ''].filter(Boolean).join(' · ')) + '</span></span><span class="check">' + ic('check') + '</span></button>').join('')
+        : '<p class="muted pad">No hay ejercicios' + (nq ? ' con esa búsqueda' : ' de ' + SPORTS[sport].noun) + '.</p>';
+      hydrate(root);
+      sum();
+    }
+    function sum() {
+      const n = Array.from(chosen).filter((id) => getEx(id)).length;
+      $('[data-ref="sum"]', root).textContent = n ? 'Vas a mandar ' + plural(n, 'ejercicio', 'ejercicios') + '.' : 'Elige los ejercicios que quieres mandar.';
+      $$('[data-sh-sec]', root).forEach((b) => { const x = getSection(b.dataset.shSec); b.setAttribute('aria-pressed', String(!!x && sectionExercises(x).every((e) => chosen.has(e.id)))); });
+      sheet.setConfirm(n > 0);
+    }
+    bindSeg(root, 'shsport', (v) => { sport = v; paint(); });
+    $('#sh-q', root).addEventListener('input', (e) => { q = e.target.value; paint(); });
+    root.addEventListener('click', (e) => {
+      const sb = e.target.closest('[data-sh-sec]');
+      if (sb) {
+        const x = getSection(sb.dataset.shSec);
+        if (!x) return;
+        const exs = sectionExercises(x);
+        const all = exs.every((y) => chosen.has(y.id));
+        exs.forEach((y) => { if (all) chosen.delete(y.id); else chosen.add(y.id); });
+        haptic(6); paint();
+        return;
+      }
+      const b = e.target.closest('[data-sh-ex]');
+      if (!b) return;
+      const id = b.dataset.shEx;
+      if (chosen.has(id)) chosen.delete(id); else chosen.add(id);
+      b.setAttribute('aria-checked', String(chosen.has(id)));
+      haptic(4); sum();
+    });
+    paint();
+  }
+  // Al abrir un archivo que mandó otro profe: sus ejercicios quedan juntos en la sección «De …».
+  async function fileIntoSharedSection(from, exIds) {
+    if (!from || !exIds.length) return null;
+    const name = ('De ' + from).slice(0, 40);
+    const cur = S.sections.find((x) => norm(x.name) === norm(name));
+    if (cur) {
+      await mutateSection(cur.id, (x) => { exIds.forEach((id) => { if (x.exIds.indexOf(id) < 0) x.exIds.push(id); }); });
+      return cur.id;
+    }
+    const sec = { id: uid(), name, exIds: exIds.slice(), createdAt: Date.now(), updatedAt: Date.now(), order: -Date.now() };
+    replaceLocal('sections', sec);
+    renderAll();
+    await S.backend.saveSection(sec);
+    return sec.id;
+  }
+
   // ---------------------------------------------------------------- tutorial (la primera vez)
   // Cinco pasos cortos con dibujos que se mueven. Se puede saltar y se vuelve a ver desde Ajustes.
   const TUT_BOARD = { v: 'full', items: [
@@ -5312,12 +5426,12 @@
     const n = CAT() ? CAT().exercises.length : 0;
     return [
       { art: 'board', title: 'Bienvenido a Cancha', text: 'Aquí preparas y das tus clases de fútbol y básquetbol.' },
-      { art: 'cards', title: 'Ejercicios con video', text: (n ? n + ' ejercicios' : 'Ejercicios') + ' recomendados, listos para usar. También puedes crear los tuyos.' },
-      { art: 'timer', title: 'El reloj te guía', text: 'Toca Iniciar y Cancha lleva el tiempo de cada ejercicio. El silbato suena al cambiar.' },
-      { art: 'roll', title: 'Pasa lista en segundos', text: 'Marca quién vino con un toque y saca el reporte en PDF.' },
+      { art: 'cards', title: 'Ejercicios con video', text: (n ? n + ' ejercicios' : 'Ejercicios') + ' listos para usar, con video. Están en «Ejercicios» y también puedes crear los tuyos.' },
+      { art: 'timer', title: 'El cronómetro lleva el tiempo', text: 'Toca «Iniciar clase» y luego «Empezar». Al acabar el tiempo suena el silbato y tocas «Siguiente».' },
+      { art: 'roll', title: 'Pasa lista', text: 'En tu grupo toca «Pasar lista hoy». Luego saca el reporte de asistencia en PDF.' },
       cloud
-        ? { art: 'safe', title: 'Se guarda en tu cuenta', text: 'Tus clases quedan en tu cuenta de Claude. Las ves en el celular y en la computadora.' }
-        : { art: 'safe', title: 'Todo se queda en tu ' + devWord(), text: 'No necesitas cuenta ni internet. De vez en cuando toca «Respaldo» para guardar una copia.' },
+        ? { art: 'safe', title: 'Todo se guarda en tu cuenta', text: 'Todo queda en tu cuenta de Claude. Lo ves en el celular y en la computadora.' }
+        : { art: 'safe', title: 'Todo se guarda en tu ' + devWord(), text: 'No necesitas cuenta ni internet. Cada semana toca «Respaldo» para guardar una copia.' },
     ];
   }
 
@@ -5335,7 +5449,7 @@
     if (kind === 'timer') {
       return '<div class="ta-timer" data-tint="futbol"><span class="tt-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="tt-track" cx="60" cy="60" r="52"/><circle class="tt-bar" cx="60" cy="60" r="52" pathLength="100"/></svg>' +
         '<span class="tt-txt"><b class="tt-time">0:05</b><small class="tt-name">Rondo 4 contra 1</small></span></span>' +
-        '<span class="tt-whistle">' + ic('whistle') + '<i></i><i></i></span></div>';
+        '<span class="tt-whistle">' + ic('whistle') + '<i></i><i></i></span><span class="tt-next">Siguiente' + ic('next') + '</span></div>';
     }
     if (kind === 'roll') {
       const kids = [['Ana', 'p'], ['Luis', 'p'], ['Sofía', 't'], ['Diego', 'p'], ['Mateo', 'f']];
@@ -5361,7 +5475,7 @@
       const bar = $('.tt-bar', slide); const time = $('.tt-time', slide); const name = $('.tt-name', slide); const wrap = $('.ta-timer', slide);
       const names = ['Rondo 4 contra 1', 'Escalera de coordinación', 'Tiros libres'];
       const tints = ['futbol', 'futbol', 'basquet'];
-      let k = 0; let left = 5; let iv = 0; let to = 0;
+      let k = 0; let left = 5; let iv = 0; let to = 0; let to2 = 0;
       const paint = () => { time.textContent = '0:0' + left; bar.style.strokeDashoffset = String(100 - left * 20); };
       if (still) { paint(); return () => {}; }
       const tick = () => {
@@ -5370,18 +5484,19 @@
         if (left > 0) return;
         clearInterval(iv);
         wrap.classList.add('blow');
-        to = setTimeout(() => {
-          wrap.classList.remove('blow');
+        to = setTimeout(() => { wrap.classList.add('tap'); }, 1100);
+        to2 = setTimeout(() => {
+          wrap.classList.remove('blow', 'tap');
           k = (k + 1) % names.length;
           name.textContent = names[k];
           wrap.dataset.tint = tints[k];
           left = 5; paint();
           iv = setInterval(tick, 1000);
-        }, 1600);
+        }, 1700);
       };
       paint();
       iv = setInterval(tick, 1000);
-      return () => { clearInterval(iv); clearTimeout(to); };
+      return () => { clearInterval(iv); clearTimeout(to); clearTimeout(to2); };
     }
     if (kind === 'roll') {
       const box = $('.ta-roll', slide); const cnt = $('.tr-count b', slide);
@@ -5533,6 +5648,8 @@
           case 'plan-class': openClass(a.dataset.id); setTimeout(() => openPicker(a.dataset.id), 450); return;
           case 'catalog': openCatalog(S.sport); return;
           case 'new-section': openSectionEditor({}); return;
+          case 'share-coaches': openShareCoaches({}); return;
+          case 'open-shared': pickFile('import', startImport); return;
           case 'filters': openFilters(S.sport); return;
           case 'clear-filters': S.fx[S.sport] = null; S.sig = {}; renderEjercicios(); return;
           default: break;

@@ -2150,3 +2150,39 @@ a.as-btn { text-decoration: none; }
 .sheet .hint { margin: -2px 16px 14px; }
 .row-2 { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 9px 0; }
 .row-2 small { font-size: 13px; color: var(--label-2); font-weight: 400; }
+
+/* Entre profes: compartir ejercicios con otros entrenadores */
+.share-card { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; padding: 16px 18px; margin: -10px 0 26px; border-radius: 22px; background: var(--bg-elev); box-shadow: var(--lift); }
+.sc-ico { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--tint) 14%, transparent); color: var(--tint); font-size: 22px; }
+.share-card .txt { flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.share-card b { font: 800 22px/1.05 var(--font-score); }
+.share-card .txt span { font-size: 14px; line-height: 1.35; color: var(--label-2); }
+.sc-actions { display: flex; gap: 8px; flex-wrap: wrap; flex: 1 1 100%; }
+.sc-actions .btn { flex: 1 1 160px; height: 44px; font-size: 15px; padding: 0 14px; }
+@media (min-width: 700px) { .sc-actions { flex: 0 1 auto; } .sc-actions .btn { flex: none; } }
+.imp-names { margin: 0 16px 14px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.imp-names li { display: flex; gap: 8px; }
+.imp-names li:not(.muted)::before { content: ""; flex: none; width: 6px; height: 6px; margin-top: 0.55em; border-radius: 50%; background: var(--tint); }
+.shared-by { display: inline-flex; align-items: center; gap: 6px; margin: 8px 0 0; font-size: 14px; font-weight: 600; color: var(--tint); }
+.shared-by svg { font-size: 16px; }
+
+/* Modo clase: «Siguiente» con texto, y se ilumina cuando se acaba el tiempo */
+.rc { position: relative; }
+.run-ctrls { margin-bottom: 14px; }
+.rc-lbl { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 600; color: var(--label-2); white-space: nowrap; pointer-events: none; }
+.run.over [data-run="next"] { background: var(--tint); color: var(--tint-on); animation: next-pulse 1.6s ease-in-out infinite; }
+.run.over [data-run="next"] .rc-lbl { color: var(--tint); }
+@keyframes next-pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tint) 55%, transparent); } 60% { box-shadow: 0 0 0 14px transparent; } }
+@media (max-width: 600px) {
+  .run-sec { flex-wrap: wrap; justify-content: center; row-gap: 8px; }
+  .run-next { flex: 1 1 100%; text-align: center; white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) { .run.over [data-run="next"] { animation: none; } }
+
+/* Tutorial, paso 3: el botón «Siguiente» que se toca al acabar el tiempo */
+.ta-timer { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.tt-next { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px 10px 20px; border-radius: 22px; background: var(--fill); color: var(--label-2); font-size: 15px; font-weight: 650; transition: background 0.3s, color 0.3s, transform 0.2s; }
+.tt-next svg { font-size: 16px; }
+.blow .tt-next { background: var(--tint); color: var(--tint-on); box-shadow: 0 10px 22px -10px var(--tint); }
+.tap .tt-next { transform: scale(0.9); }
+@media (max-height: 700px) { .tt-ring { width: min(52vw, 200px); } }

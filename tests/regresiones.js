@@ -45,7 +45,7 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   await p.locator('.today [data-act="start-class"]').click(); await W(p, 800);
   for (let i = 0; i < 10 && !(await p.locator('.as-wrap.open').count()); i++) { await p.click('[data-run="next"]'); await W(p, 200); }
   ok((await p.locator('.as-wrap.open').innerText()).includes('No has empezado'), 'terminar sin empezar avisa');
-  await p.locator('.as-wrap.open .as-btn', { hasText: 'Salir del modo clase' }).click(); await W(p, 700);
+  await p.locator('.as-wrap.open .as-btn', { hasText: 'Salir' }).click(); await W(p, 700);
   const given = await p.evaluate(() => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const q = r.result.transaction('classes').objectStore('classes').get('cl3-ej1'); q.onsuccess = () => res(!!(q.result && q.result.lastRunAt)); }; }));
   ok(!given, 'la clase no quedó como «dada»');
 
@@ -142,11 +142,34 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
     await p.click('[data-run="toggle"]'); await W(p, 300);
     await p.click('[data-run="next"]'); await W(p, 1300);
     await p.reload(); await W(p, 2200);
-    ok((await p.locator('.as-wrap.open').innerText()).includes('Tienes una clase en curso'), 'al volver a abrir ofrece seguir la clase');
+    ok((await p.locator('.as-wrap.open').innerText()).includes('Tienes una clase sin terminar'), 'al volver a abrir ofrece seguir la clase');
     await p.locator('.as-wrap.open .as-btn', { hasText: 'Seguir con la clase' }).click(); await W(p, 800);
     ok((await p.locator('[data-ref="step"]').textContent()).includes('Ejercicio 2'), 'sigue en el mismo bloque');
     ok(p.errs.length === 0, 'sin errores en biblioteca y modo clase: ' + p.errs.join(' / '));
     await ctx.close();
+  }
+
+  // Entre profes: uno manda sus ejercicios por archivo y otro los abre; quedan en la sección «De …»
+  {
+    const A = await fresh();
+    await A.p.click('#tab-ejercicios'); await W(A.p, 700);
+    await A.p.click('[data-act="share-coaches"]'); await W(A.p, 800);
+    await sheet(A.p).locator('#sh-name').fill('Profe Prueba');
+    await sheet(A.p).locator('[data-sh-sec]').first().click(); await W(A.p, 300);
+    ok((await sheet(A.p).locator('[data-ref="sum"]').innerText()).includes('Vas a mandar'), 'compartir: elige una sección completa');
+    await sheet(A.p).locator('[data-sh="ok"]').click(); await W(A.p, 3500);
+    const [dl] = await Promise.all([A.p.waitForEvent('download', { timeout: 20000 }), sheet(A.p).locator('[data-file-share]').click()]);
+    const zip = OUT + 'rg_compartido.zip'; await dl.saveAs(zip);
+    ok(require('fs').statSync(zip).size > 1000, 'compartir: se crea el archivo');
+    const B = await fresh();
+    await B.p.click('#tab-ejercicios'); await W(B.p, 700);
+    await Promise.all([B.p.waitForEvent('filechooser').then((fc) => fc.setFiles(zip)), B.p.click('[data-act="open-shared"]')]);
+    await W(B.p, 1500);
+    ok((await sheet(B.p).locator('.sh-title').innerText()).includes('Profe Prueba'), 'abrir: dice quién lo mandó');
+    await sheet(B.p).locator('[data-sh="ok"]').click(); await W(B.p, 3000);
+    ok(await B.p.locator('#screen-ejercicios .sec-card', { hasText: 'De Profe Prueba' }).count() === 1, 'abrir: aparece la sección «De Profe Prueba»');
+    ok(A.p.errs.length === 0 && B.p.errs.length === 0, 'sin errores al compartir: ' + A.p.errs.concat(B.p.errs).join(' / '));
+    await A.ctx.close(); await B.ctx.close();
   }
 
   // Tutorial de la primera vez: aparece solo una vez, se puede saltar y se vuelve a ver desde Ajustes
