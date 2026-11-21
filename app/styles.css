@@ -1383,3 +1383,5 @@ a.as-btn { text-decoration: none; }
 .st-rate { flex: none; font: 600 15px/1 var(--font-round); font-variant-numeric: tabular-nums; color: var(--ok); }
 .st-rate.low { color: var(--warn); }
 .run-done .btn { min-width: 220px; }
+.wide-btn { width: 100%; margin-bottom: 26px; }
+.rp-range { margin: 0; font-weight: 600; font-size: 16px; }

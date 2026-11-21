@@ -12,7 +12,7 @@ Diseño: minimalismo nativo al estilo iOS (títulos grandes, listas agrupadas, h
 - **Clases**: con fecha y grupo; añade ejercicios, ordénalos y ajusta los minutos. Cancha calcula el tiempo total y el minuto en que empieza cada bloque.
 - **Modo clase**: cronómetro por ejercicio con silbato al terminar, el video o la pizarra del ejercicio en pantalla, «+1 min», y la pantalla encendida mientras das la clase.
 - **Grupos**: cada grupo guarda su historial de clases, los minutos acumulados y los objetivos que ha trabajado.
-- **Asistencia**: lista de alumnos por grupo (puedes pegarla completa) y «Pasar lista» en cada clase con asistió, retardo o falta; cada alumno muestra su porcentaje de asistencia.
+- **Asistencia**: lista de alumnos por grupo (puedes pegarla completa) y «Pasar lista» en cada clase con asistió, retardo o falta; cada alumno muestra su porcentaje de asistencia, y puedes sacar un reporte en PDF por mes, por dos meses o por fechas.
 - **Compartir una clase**: por WhatsApp, en PDF o copiando el texto.
 - **Funciona sin internet** una vez instalada.
 

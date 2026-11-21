@@ -2050,6 +2050,7 @@
       switch (a.dataset.act) {
         case 'edit-group': openGroupEditor({ group: g }); break;
         case 'add-students': openAddStudents(id); break;
+        case 'report': openAttendanceReport(id); break;
         case 'new-class': openClassEditor({ sport: SPORTS[g.sport] ? g.sport : undefined, groupId: g.id }); break;
         case 'delete-group':
           actionSheet({
@@ -2278,7 +2279,232 @@
       '<div class="list st-list">' + rows +
       (S.canWrite ? '<button class="cell add-row" data-act="add-students">' + ic('plus') + '<span>Agregar alumnos</span></button>' : '') +
       (!list.length && !S.canWrite ? '<p class="muted pad">Sin alumnos.</p>' : '') + '</div>' +
-      (list.length ? '<p class="foot" style="margin-top:-12px;margin-bottom:22px">El porcentaje cuenta asistencias y retardos de las clases en que pasaste lista.</p>' : '');
+      (list.length ? '<p class="foot" style="margin-top:-12px;margin-bottom:14px">El porcentaje cuenta asistencias y retardos de las clases en que pasaste lista.</p>' +
+        '<button class="btn tinted wide-btn" data-act="report">' + ic('doc') + 'Reporte de asistencia en PDF</button>' : '');
+  }
+
+  // ---------------------------------------------------------------- reporte de asistencia (PDF)
+  const MONTHS_LONG = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  function monthRange(offset) {
+    const d = new Date();
+    return [dayStr(new Date(d.getFullYear(), d.getMonth() + offset, 1)), dayStr(new Date(d.getFullYear(), d.getMonth() + offset + 1, 0))];
+  }
+  function periodRange(kind, from, to) {
+    if (kind === 'mes') return monthRange(0);
+    if (kind === 'anterior') return monthRange(-1);
+    if (kind === 'dos') return [monthRange(-1)[0], monthRange(0)[1]];
+    return [from || '', to || ''];
+  }
+  const classDay = (c) => c.date || (c.attendanceAt ? dayStr(new Date(c.attendanceAt)) : '');
+  function reportClasses(g, from, to) {
+    return groupClasses(g.id)
+      .filter((c) => c.attendance && Object.keys(c.attendance).length && classDay(c) && (!from || classDay(c) >= from) && (!to || classDay(c) <= to))
+      .sort((a, b) => (classDay(a) < classDay(b) ? -1 : classDay(a) > classDay(b) ? 1 : 0));
+  }
+  function fmtRange(from, to) {
+    const a = parseDay(from); const b = parseDay(to);
+    if (!a && !b) return 'Todas las fechas';
+    if (!a) return 'Hasta el ' + b.getDate() + ' de ' + MONTHS_LONG[b.getMonth()] + ' de ' + b.getFullYear();
+    if (!b) return 'Desde el ' + a.getDate() + ' de ' + MONTHS_LONG[a.getMonth()] + ' de ' + a.getFullYear();
+    if (a.getFullYear() === b.getFullYear()) {
+      if (a.getMonth() === b.getMonth()) return a.getDate() + ' al ' + b.getDate() + ' de ' + MONTHS_LONG[a.getMonth()] + ' de ' + a.getFullYear();
+      return a.getDate() + ' de ' + MONTHS_LONG[a.getMonth()] + ' al ' + b.getDate() + ' de ' + MONTHS_LONG[b.getMonth()] + ' de ' + a.getFullYear();
+    }
+    return a.getDate() + ' de ' + MONTHS_LONG[a.getMonth()] + ' de ' + a.getFullYear() + ' al ' + b.getDate() + ' de ' + MONTHS_LONG[b.getMonth()] + ' de ' + b.getFullYear();
+  }
+  function reportStats(g, cls) {
+    const students = sortStudents(studentsOf(g));
+    const rows = students.map((s) => {
+      const r = { s, p: 0, t: 0, f: 0 };
+      cls.forEach((c) => { const v = c.attendance[s.id]; if (v === 'p' || v === 't' || v === 'f') r[v]++; });
+      const m = r.p + r.t + r.f;
+      r.rate = m ? Math.round(((r.p + r.t) * 100) / m) : null;
+      return r;
+    });
+    const tot = rows.reduce((a, r) => ({ p: a.p + r.p, t: a.t + r.t, f: a.f + r.f }), { p: 0, t: 0, f: 0 });
+    const m = tot.p + tot.t + tot.f;
+    tot.rate = m ? Math.round(((tot.p + tot.t) * 100) / m) : null;
+    return { rows, tot };
+  }
+
+  function openAttendanceReport(groupId) {
+    const g = getGroup(groupId);
+    if (!g) return;
+    let kind = 'mes';
+    const sheet = openSheet({
+      title: 'Reporte de asistencia',
+      tint: groupTint(g),
+      confirmLabel: 'Crear PDF',
+      bodyHTML:
+        '<p class="att-head"><b>' + esc(g.name) + '</b> · ' + plural(studentsOf(g).length, 'alumno', 'alumnos') + '</p>' +
+        '<p class="group-label">Periodo</p>' + segHTML('period', [['mes', 'Este mes'], ['anterior', 'Mes pasado'], ['dos', '2 meses'], ['fechas', 'Fechas']], kind) +
+        '<div class="group" data-ref="dates" hidden>' +
+        '<label class="row"><span class="k">' + ic('calendar') + 'Desde</span><input id="rp-from" type="date" value="' + monthRange(0)[0] + '"></label>' +
+        '<label class="row"><span class="k">' + ic('calendar') + 'Hasta</span><input id="rp-to" type="date" value="' + todayStr() + '"></label></div>' +
+        '<div class="att-card" data-ref="preview"></div>' +
+        '<p class="muted" style="margin:14px 16px 0;font-size:14px">El PDF incluye una tabla con cada alumno y cada clase en la que pasaste lista, con sus totales y porcentaje.</p>',
+      onConfirm: async () => {
+        const r = range();
+        const cls = reportClasses(g, r[0], r[1]);
+        if (!cls.length) return;
+        sheet.setBusy(true, 'Creando el PDF…');
+        await exportAttendancePDF(getGroup(groupId) || g, cls, r[0], r[1]);
+        sheet.setBusy(false);
+        sheet.dismiss();
+      },
+    });
+    const root = sheet.body;
+    function range() { return periodRange(kind, $('#rp-from', root).value, $('#rp-to', root).value); }
+    function preview() {
+      const r = range();
+      const cls = reportClasses(g, r[0], r[1]);
+      const st = reportStats(g, cls);
+      $('[data-ref="preview"]', root).innerHTML = cls.length
+        ? '<p class="rp-range">' + esc(fmtRange(r[0], r[1])) + '</p><div class="att-figs">' +
+          '<div><span class="num sm">' + cls.length + '</span><span class="unit">' + (cls.length === 1 ? 'clase con lista' : 'clases con lista') + '</span></div>' +
+          (st.tot.rate != null ? '<div><span class="num sm">' + st.tot.rate + '</span><span class="unit">% asistencia</span></div>' : '') +
+          '<div><span class="num sm">' + st.tot.f + '</span><span class="unit">' + (st.tot.f === 1 ? 'falta' : 'faltas') + '</span></div></div>'
+        : '<p class="rp-range">' + esc(fmtRange(r[0], r[1])) + '</p><p class="muted">No pasaste lista en este periodo. Elige otras fechas.</p>';
+      sheet.setConfirm(cls.length > 0);
+    }
+    bindSeg(root, 'period', (v) => { kind = v; $('[data-ref="dates"]', root).hidden = v !== 'fechas'; preview(); });
+    root.addEventListener('input', preview);
+    root.addEventListener('change', preview);
+    preview();
+  }
+
+  async function exportAttendancePDF(g, cls, from, to) {
+    let JsPDF;
+    try { JsPDF = await loadJsPDF(); } catch (e) { alertBox('No se pudo crear el PDF', 'Vuelve a intentarlo en un momento.'); return; }
+    try {
+      const doc = new JsPDF({ unit: 'pt', format: 'a4', orientation: 'landscape' });
+      const W = 841.89; const H = 595.28; const M = 36;
+      const tint = g.sport === 'basquet' ? [210, 85, 10] : g.sport === 'futbol' ? [14, 138, 67] : [17, 17, 20];
+      const OK = [30, 158, 79]; const WARN = [217, 138, 0]; const BAD = [229, 53, 43];
+      const ink = [17, 17, 20]; const grey = [110, 110, 118]; const faint = [190, 190, 198];
+      const { rows, tot } = reportStats(g, cls);
+      const nameW = 178; const totCols = [['Asist.', 'p'], ['Ret.', 't'], ['Faltas', 'f'], ['%', 'rate']]; const totW = 40;
+      const rowH = 17;
+      const tableTop = 154;
+      const avail = W - 2 * M - nameW - totCols.length * totW;
+      const perCols = Math.max(1, Math.floor(avail / 22));
+      const perRows = Math.max(1, Math.floor((H - M - 34 - 20 - tableTop) / rowH));
+      const chunk = (arr, n) => { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out.length ? out : [[]]; };
+      const colChunks = chunk(cls, perCols);
+      const rowChunks = chunk(rows, perRows);
+      const rateColor = (r) => (r == null ? grey : r >= 90 ? OK : r >= 75 ? ink : r >= 60 ? WARN : BAD);
+      const fit = (text, w) => { let t = String(text); if (doc.getTextWidth(t) <= w) return t; while (t.length > 1 && doc.getTextWidth(t + '…') > w) t = t.slice(0, -1); return t + '…'; };
+
+      function header() {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...tint);
+        doc.text(APP_NAME.toUpperCase(), M, M + 6, { charSpace: 1.5 });
+        doc.setFontSize(20); doc.setTextColor(...ink);
+        doc.text('Asistencia · ' + g.name, M, M + 32);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...grey);
+        doc.text([fmtRange(from, to), plural(cls.length, 'clase', 'clases'), plural(rows.length, 'alumno', 'alumnos'), g.category || '', g.schedule || ''].filter(Boolean).join('   ·   '), M, M + 50);
+        const figs = [[tot.rate != null ? tot.rate + ' %' : '—', 'asistencia promedio', rateColor(tot.rate)], [String(tot.t), tot.t === 1 ? 'retardo' : 'retardos', WARN], [String(tot.f), tot.f === 1 ? 'falta' : 'faltas', BAD]];
+        let x = M;
+        figs.forEach((f) => {
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(...f[2]);
+          doc.text(f[0], x, M + 76);
+          const w = doc.getTextWidth(f[0]);
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...grey);
+          doc.text(f[1], x + w + 5, M + 76);
+          x += w + 5 + doc.getTextWidth(f[1]) + 26;
+        });
+      }
+      function table(colSet, rowSet, last) {
+        const colW = Math.min(32, avail / Math.max(1, colSet.length));
+        const x0 = M; const xd = M + nameW; const xt = xd + colSet.length * colW;
+        let y = tableTop;
+        // encabezados
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...grey);
+        doc.text('Alumno', x0 + 4, y - 6);
+        colSet.forEach((c, i) => {
+          const d = parseDay(classDay(c));
+          const cx = xd + i * colW + colW / 2;
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...ink);
+          doc.text(String(d ? d.getDate() : ''), cx, y - 14, { align: 'center' });
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...grey);
+          doc.text(d ? MONTHS[d.getMonth()].toLowerCase() : '', cx, y - 5, { align: 'center' });
+        });
+        totCols.forEach((t, i) => {
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...grey);
+          doc.text(t[0], xt + i * totW + totW / 2, y - 6, { align: 'center' });
+        });
+        doc.setDrawColor(...faint); doc.setLineWidth(0.6); doc.line(x0, y, xt + totCols.length * totW, y);
+        rowSet.forEach((r, ri) => {
+          if (ri % 2 === 1) { doc.setFillColor(246, 246, 248); doc.rect(x0, y, xt + totCols.length * totW - x0, rowH, 'F'); }
+          const ty = y + 12;
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...ink);
+          doc.text(fit(r.s.name, nameW - 10), x0 + 4, ty);
+          colSet.forEach((c, i) => {
+            const v = c.attendance[r.s.id];
+            const cx = xd + i * colW + colW / 2;
+            if (v === 'p') { doc.setFillColor(...OK); doc.circle(cx, y + rowH / 2, 3.4, 'F'); } else if (v === 't') {
+              doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...WARN); doc.text('R', cx, ty, { align: 'center' });
+            } else if (v === 'f') {
+              doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...BAD); doc.text('F', cx, ty, { align: 'center' });
+            } else { doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...faint); doc.text('–', cx, ty, { align: 'center' }); }
+          });
+          totCols.forEach((t, i) => {
+            const val = r[t[1]];
+            const cx = xt + i * totW + totW / 2;
+            doc.setFont('helvetica', t[1] === 'rate' ? 'bold' : 'normal'); doc.setFontSize(10);
+            doc.setTextColor(...(t[1] === 'rate' ? rateColor(val) : t[1] === 'f' && val ? BAD : ink));
+            doc.text(val == null ? '—' : t[1] === 'rate' ? val + ' %' : String(val), cx, ty, { align: 'center' });
+          });
+          y += rowH;
+        });
+        doc.setDrawColor(...faint); doc.line(x0, y, xt + totCols.length * totW, y);
+        if (last) {
+          const ty = y + 13;
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...grey);
+          doc.text('Asistieron', x0 + 4, ty);
+          colSet.forEach((c, i) => {
+            const n = rows.filter((r) => { const v = c.attendance[r.s.id]; return v === 'p' || v === 't'; }).length;
+            doc.setTextColor(...ink);
+            doc.text(String(n), xd + i * colW + colW / 2, ty, { align: 'center' });
+          });
+        }
+        // leyenda
+        const ly = H - M - 14;
+        doc.setFillColor(...OK); doc.circle(M + 3.4, ly - 3.2, 3.4, 'F');
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...grey);
+        doc.text('Asistió', M + 11, ly);
+        doc.setFont('helvetica', 'bold'); doc.setTextColor(...WARN); doc.text('R', M + 56, ly);
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(...grey); doc.text('Retardo (cuenta como asistencia)', M + 65, ly);
+        doc.setFont('helvetica', 'bold'); doc.setTextColor(...BAD); doc.text('F', M + 214, ly);
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(...grey); doc.text('Falta', M + 223, ly);
+        doc.setTextColor(...faint); doc.text('–', M + 260, ly);
+        doc.setTextColor(...grey); doc.text('Sin registro', M + 268, ly);
+      }
+      let first = true;
+      colChunks.forEach((colSet) => {
+        rowChunks.forEach((rowSet, ri) => {
+          if (!first) doc.addPage();
+          first = false;
+          header();
+          table(colSet, rowSet, ri === rowChunks.length - 1);
+        });
+      });
+      const pages = doc.getNumberOfPages();
+      for (let pg = 1; pg <= pages; pg++) {
+        doc.setPage(pg);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...grey);
+        doc.text('Hecho con ' + APP_NAME + (pages > 1 ? '   ·   página ' + pg + ' de ' + pages : ''), W - M, H - M - 14, { align: 'right' });
+      }
+      const a = parseDay(from);
+      const label = a && (isWholeMonth(from, to)) ? MONTHS_LONG[a.getMonth()] + ' ' + a.getFullYear() : fmtRange(from, to);
+      const name = ('Asistencia - ' + g.name + ' - ' + label).replace(/[\\/:*?"<>|]+/g, '').slice(0, 90) + '.pdf';
+      await saveFile(doc.output('blob'), name);
+    } catch (e) {
+      alertBox('No se pudo crear el PDF', 'Vuelve a intentarlo en un momento.');
+    }
+  }
+  function isWholeMonth(from, to) {
+    const a = parseDay(from); const b = parseDay(to);
+    return a && b && a.getDate() === 1 && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear() && new Date(b.getFullYear(), b.getMonth() + 1, 0).getDate() === b.getDate();
   }
 
   // ---------------------------------------------------------------- pizarra táctica
