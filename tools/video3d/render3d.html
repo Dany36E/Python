@@ -239,7 +239,8 @@ function pose(P, o) {
     if (o.speedy) { const s = Math.sin(ph) * 0.5 * A; other.sh.rotation.set(sgn > 0 ? -s - 0.1 : s - 0.1, 0, -sgn * 0.2); other.el.rotation.x = -1.3; }
     else { other.sh.rotation.set(-0.55, 0, -sgn * 0.55); other.el.rotation.x = -0.9; }
   }
-  if (o.hold) { setArm(P.armL, -0.95, 0.25, -1.2); setArm(P.armR, -0.95, -0.25, -1.2); }
+  if (o.hold) { const base = snapJ(P); setArm(P.armL, -0.95, 0.25, -1.2); setArm(P.armR, -0.95, -0.25, -1.2); if (o.holdW != null && o.holdW < 1) mixJ(P, base, o.holdW); }
+  if (o.reach) { const base = snapJ(P); setArm(P.armL, -2.5, 0.35, -0.5); setArm(P.armR, -2.5, -0.35, -0.5); mixJ(P, base, o.reach); }
   if (o.target) { setArm(P.armL, -1.2, 0.3, -0.6); setArm(P.armR, -1.2, -0.3, -0.6); }
   if (o.catchHigh) { setArm(P.armL, -2.5, 0.35, -0.5); setArm(P.armR, -2.5, -0.35, -0.5); }
   if (o.chest != null) { const base = snapJ(P); const k = smooth(o.chest); setArm(P.armL, lerp(-0.95, -1.45, k), 0.25, lerp(-1.2, -0.1, k)); setArm(P.armR, lerp(-0.95, -1.45, k), -0.25, lerp(-1.2, -0.1, k)); lean += 0.1 * k; mixJ(P, base, 1); }
@@ -385,6 +386,10 @@ function plan3d(ex, d, S, ch) {
       sg.jumpT = jt; sg.t0 = jt + 240; sg.t1 = sg.t0 + 480;
       c.jump = { t: jt, dur: 560, side };
       alignPhase(c, jt, side > 0 ? 1 : -1);
+      const phJ = phaseAt(c, jt); const target = phJ - 0.4 - Math.PI - 0.3;
+      let gT = jt; while (gT > c.t0 && phaseAt(c, gT) > target) gT -= 5;
+      sg.gatherT = gT;
+      b.segs.forEach((x) => { if (x === lc) x.gatherEnd = gT; });
     } else if (c && !c.lad && !later && (lastMv.stop || sg.stop)) {
       c.hop = { t: c.t1 - 240, dur: 240 };
       sg.layup = false; sg.hand = 1; sg.stopAt = c.t1;
@@ -398,8 +403,14 @@ function plan3d(ex, d, S, ch) {
     const runs = group.filter((g) => g.it.k !== 'pase'); const passes = group.filter((g) => g.it.k === 'pase');
     const crowd = runs.length >= 3;
     const seqs = new Map(); const seqEnd = new Map();
-    runs.forEach(({ it }) => {
-      const pl = nearestBy(players, (o) => plPos[o.i], it.x, it.y, 13);
+    // Primero los que corren por su cuenta, luego los pases y al final los que salen al recibir («after»).
+    const owner = new Map(); const tmp = {}; players.forEach((p) => { tmp[p.i] = Object.assign({}, plPos[p.i]); });
+    const firstOf = new Map();
+    runs.forEach((g) => { const p = nearestBy(players, (o) => tmp[o.i], g.it.x, g.it.y, 13); if (!p) return; owner.set(g, p); if (!firstOf.has(p)) firstOf.set(p, g.it); tmp[p.i] = { x: tmp[p.i].x + g.it.x2 - g.it.x, y: tmp[p.i].y + g.it.y2 - g.it.y }; });
+    const isLate = (g) => { const p = owner.get(g); return !!(p && firstOf.get(p).after); };
+    const carried = {};
+    const doRuns = (list) => list.forEach((g) => {
+      const it = g.it; const pl = owner.get(g);
       if (!pl) return;
       const dx = it.x2 - it.x; const dy = it.y2 - it.y;
       const from = wp(plPos[pl.i].x, plPos[pl.i].y); const to = wp(plPos[pl.i].x + dx, plPos[pl.i].y + dy);
@@ -427,33 +438,43 @@ function plan3d(ex, d, S, ch) {
         if (!b) { b = { key: 'g' + (ghostN++), p0: from.clone(), segs: [] }; balls.push(b); ballAt[b.key] = { x: it.x, y: it.y }; }
         b.segs.push({ type: 'carry', by: pl.i, mv });
         ballAt[b.key] = { x: ballAt[b.key].x + dx, y: ballAt[b.key].y + dy };
+        carried[pl.i] = b;
       }
       if (!seqs.has(pl)) seqs.set(pl, []);
       seqs.get(pl).push(mv);
     });
-    const order = [...seqs.keys()].sort((p, q) => (seqs.get(p)[0].after ? 1 : 0) - (seqs.get(q)[0].after ? 1 : 0));
-    order.forEach((pl) => {
+    const doChains = (pls) => pls.forEach((pl) => {
       const mvs = seqs.get(pl);
       let st0 = t + (crowd ? (((pl.i * 37) % 7) - 3) * 45 + 140 : 0) + (mvs[0].wait || 0);
-      if (mvs[0].after) { const tgt = players.find((p) => p.key === mvs[0].after); const c0 = tgt && tgt.chains.find((c) => c.step === sNum); if (c0) st0 = c0.t1 + (mvs[0].afterDt != null ? mvs[0].afterDt : 150); }
+      if (mvs[0].after) {
+        // Sale al recibir el pase de ese compañero (o, si no hay pase, cuando el compañero termina su recorrido).
+        const tgt = players.find((p) => p.key === mvs[0].after);
+        const rv = tgt && pl.recv.filter((r) => r.seg.by === tgt.i && r.seg.t0 >= t).pop();
+        const c0 = tgt && tgt.chains.find((c) => c.step === sNum);
+        if (rv) st0 = rv.seg.t1 + (mvs[0].afterDt != null ? mvs[0].afterDt : 0);
+        else if (c0) st0 = c0.t1 + (mvs[0].afterDt != null ? mvs[0].afterDt : 150);
+      }
       const parts = []; let buf = [];
       mvs.forEach((m) => { if (m.feet || m.gap) { if (buf.length) parts.push(buf); buf = []; } if (m.feet) parts.push([m]); else buf.push(m); });
       if (buf.length) parts.push(buf);
       let tc = st0;
-      parts.forEach((segs, j) => { if (j > 0) tc += segs[0].gap || 0; const c = { t0: tc, segs, lad: !!segs[0].feet, step: sNum }; kinChain(c); pl.chains.push(c); tc = c.t1; });
+      parts.forEach((segs, j) => { if (j > 0) tc += segs[0].gap || 0; const c = { t0: tc, segs, lad: !!segs[0].feet, step: sNum }; if (j > 0 && parts[j - 1][0].feet && !segs[0].feet && !segs[0].gap) { c.v0 = 1.3; } kinChain(c); pl.chains.push(c); tc = c.t1; });
       const lastM = mvs[mvs.length - 1];
       if (lastM.hold) { pl.holds.push({ t0: tc, t1: tc + lastM.hold, pose: lastM.pose, count: lastM.count }); hold = Math.max(hold, lastM.hold); }
       seqEnd.set(pl, tc);
       if (!mvs.some((m) => m.free)) gmax = Math.max(gmax, tc - t);
     });
+    const runsA = runs.filter((g) => !isLate(g)); const runsB = runs.filter((g) => isLate(g));
+    doRuns(runsA);
+    doChains([...seqs.keys()]);
     passes.forEach(({ it }) => {
-      let b = nearestBy(balls, (o) => ballAt[o.key], it.x, it.y, 13);
-      if (!b) { b = { key: 'g' + (ghostN++), p0: wp(it.x, it.y), segs: [], ghost: true, appear: t }; balls.push(b); ballAt[b.key] = { x: it.x, y: it.y }; }
       const from = wp(it.x, it.y); const to = wp(it.x2, it.y2); const L = from.distanceTo(to);
       // Quien pasa: el que llega a ese punto en este paso, o el que está ahí.
       let passer = null; let pd = 1.2;
       players.forEach((p) => p.chains.forEach((c) => { if (c.step !== sNum) return; const e = c.pts[c.pts.length - 1]; const dd = e.distanceTo(from); if (dd < pd) { pd = dd; passer = p; } }));
       if (!passer) passer = nearestBy(players, (o) => pos0[o.i], it.x, it.y, 13) || nearestBy(players, (o) => plPos[o.i], it.x, it.y, 13);
+      let b = (passer && carried[passer.i]) || nearestBy(balls, (o) => ballAt[o.key], it.x, it.y, 13);
+      if (!b) { b = { key: 'g' + (ghostN++), p0: wp(it.x, it.y), segs: [], ghost: true, appear: t }; balls.push(b); ballAt[b.key] = { x: it.x, y: it.y }; }
       const hoop = sport === 'basquet' ? nearHoop(to) : null;
       let type = hoop ? 'shot' : sport === 'basquet' && L < 1.3 ? 'handoff' : 'pass';
       if (sport === 'futbol' && it.y2 < 16 && Math.abs(it.x2 - 80) < 18) type = 'goal';
@@ -480,6 +501,9 @@ function plan3d(ex, d, S, ch) {
         gmax = Math.max(gmax, seg.t1 + 500 - t);
       } else gmax = Math.max(gmax, t0p + dur - t);
     });
+    const before = new Set(seqs.keys());
+    doRuns(runsB);
+    doChains([...seqs.keys()].filter((p) => !before.has(p)));
     stepT[sNum] = { t0: t, t1: t + gmax };
     t += gmax + GAP + hold;
   });
@@ -489,7 +513,7 @@ function plan3d(ex, d, S, ch) {
     b.segs.sort((p, q) => p.t0 - q.t0);
     const out = [];
     b.segs.forEach((sg) => { const prev = out[out.length - 1]; if (prev && prev.type === 'carry' && sg.type === 'carry' && prev.by === sg.by && sg.t0 - prev.t1 <= 120) { prev.t1 = sg.t1; prev.mv2 = sg.mv; } else out.push(sg); });
-    out.forEach((sg, i) => { const nx = out[i + 1]; if (sg.type === 'carry' && nx && nx.type !== 'carry' && nx.t0 < sg.t1) sg.t1 = Math.max(sg.t0 + 100, nx.type === 'shot' && nx.layup ? sg.t1 : nx.t0); });
+    out.forEach((sg, i) => { const nx = out[i + 1]; if (sg.type !== 'carry' || !nx || nx.type === 'carry') return; if (nx.type === 'shot' && nx.layup) sg.t1 = nx.gatherT; else if (nx.t0 < sg.t1) sg.t1 = Math.max(sg.t0 + 100, nx.t0); });
     b.segs = out;
   });
   players.forEach((pl) => pl.moves.forEach((m) => { m.t0 = m.a0; }));
@@ -550,7 +574,7 @@ function kinChain(c) {
   const last = segs.length - 1;
   const aDn = (g) => (g === last && segs[g].brake ? Math.max(1.5, segs[g].speed / (segs[g].brake / 1000)) : segs[g].gather ? 6.5 : 5.0);
   const V = new Float64Array(N);
-  V[0] = 0;
+  V[0] = c.v0 || 0;
   for (let i = 1; i < N; i++) V[i] = Math.min(VL[i], Math.sqrt(V[i - 1] * V[i - 1] + 2 * aUp(G[i]) * (Sd[i] - Sd[i - 1])));
   V[N - 1] = 0;
   for (let i = N - 2; i >= 0; i--) V[i] = Math.min(V[i], Math.sqrt(V[i + 1] * V[i + 1] + 2 * aDn(G[i]) * (Sd[i + 1] - Sd[i])));
@@ -712,7 +736,7 @@ function idleHeading(pl, t, p) {
 }
 
 // ---------- pies: cada apoyo es un punto fijo del piso; entre apoyos el pie vuela con la forma de cada movimiento
-const DUTY = (kind, v) => (kind === 'walk' || v < 1.8 ? 0.62 : kind === 'defensivo' ? 0.62 : kind === 'carioca' ? 0.46 : kind === 'rodillas' || kind === 'talones' ? 0.4 : clamp(0.6 - 0.075 * v, 0.3, 0.6));
+const DUTY = (kind, v) => (kind === 'walk' || v < 1.8 ? 0.62 : kind === 'defensivo' ? 0.62 : kind === 'carioca' ? 0.46 : kind === 'rodillas' ? 0.3 : kind === 'talones' ? 0.4 : clamp(0.6 - 0.075 * v, 0.3, 0.6));
 function buildFeet(pl) {
   const F = { 1: [], '-1': [] };
   const h0 = idleHeading(pl, -1, pl.p0);
@@ -799,7 +823,7 @@ function footAt(L, t) {
   const k = nx.kind; const v = nx.v || 0;
   let hp = smooth(u); let y; let back = 0;
   if (k === 'lad') y = 0.1 * Math.sin(Math.PI * u);
-  else if (k === 'rodillas') { y = 0.4 * Math.pow(Math.sin(Math.PI * u), 1.1); back = -0.3 * Math.sin(Math.PI * u); }
+  else if (k === 'rodillas') { y = 0.44 * Math.pow(Math.sin(Math.PI * u), 1.0); back = -0.36 * Math.sin(Math.PI * u); }
   else if (k === 'talones') { y = 0.4 * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.15)), 0.9); hp = Math.pow(smooth(u), 1.8); back = 0.18 * Math.sin(Math.PI * u); }
   else if (k === 'defensivo') y = 0.045 * Math.sin(Math.PI * u);
   else if (k === 'carioca') y = 0.09 * Math.sin(Math.PI * u);
@@ -858,7 +882,8 @@ function carryPos(sg, t, sport, r) {
   const m = st.cur ? st.cur.m : null;
   if (sport === 'basquet') {
     const speedy = m && m.mode === 'bspeed';
-    const ph = st.cur ? phaseAt(st.cur.c, t) : 0;
+    const cc = st.cur ? st.cur.c : null;
+    const ph = !cc ? 0 : cc.lad ? (Math.PI * (t - cc.t0 - cc.segs[0].feet.t0)) / cc.segs[0].feet.T : phaseAt(cc, t);
     const b = Math.abs(Math.cos(ph / 2 - 0.35));
     const hand = handAt(pl, st);
     // Cambio de mano: el balón cruza por delante, bajo, en los primeros 45 cm del tramo nuevo.
@@ -877,6 +902,13 @@ function handAt(pl, st) {
   const side = sideOf(i); const prev = i > 0 ? sideOf(i - 1) : side;
   return { side, prev, into: st.cur.d - c.segs[i].d0 };
 }
+// Básquetbol: quien espera con balón dribla en su lugar, a un costado.
+function inPlace(pl, t, r) {
+  const st = playerState(pl, t); const h = headingOf(pl, t); const f = fwdOf(h); const rt = rightOf(h);
+  const bb = Math.abs(Math.cos((Math.PI * t) / 560 + pl.i));
+  return { p: new THREE.Vector3(st.p.x + f.x * 0.22 + rt.x * 0.27, r + (0.68 - r) * bb, st.p.y + f.y * 0.22 + rt.y * 0.27), bounce: bb };
+}
+const waitsToDribble = (b, pl, t) => b.segs.some((x) => x.type === 'carry' && x.by === pl.i && x.t0 > t && x.t0 - t < 7000);
 function ballState(b, t, sport) {
   const r = b.r;
   let cur = { p: new THREE.Vector3(b.p0.x, r, b.p0.y), owner: null, loose: null };
@@ -885,9 +917,9 @@ function ballState(b, t, sport) {
   const visible = !b.ghost || t >= b.appear - 400;
   let spin = 0;
   for (const sg of b.segs) {
-    if (t < (sg.type === 'shot' ? (sg.layup ? sg.gather.a0 : sg.stopAt ? sg.stopAt - 250 : sg.t0 - 400) : sg.t0)) break;
+    if (t < (sg.type === 'shot' ? (sg.layup ? sg.gatherT : sg.stopAt ? sg.stopAt - 250 : sg.t0 - 400) : sg.t0)) break;
     if (sg.type === 'carry') {
-      if (!sg.p0) sg.p0 = cur.owner ? ownedPos(cur.owner, sg.t0, sport, r) : cur.p.clone();
+      if (!sg.p0) sg.p0 = cur.owner ? (sport === 'basquet' && cur.owner.i === sg.by && cur.high == null ? inPlace(cur.owner, sg.t0, r).p : ownedPos(cur.owner, sg.t0, sport, r)) : cur.p.clone();
       if (t < sg.t1) {
         const c = carryPos(sg, t, sport, r);
         if (sport === 'basquet' && t - sg.t0 < 240) c.p = sg.p0.clone().lerp(c.p, smooth((t - sg.t0) / 240));
@@ -901,14 +933,16 @@ function ballState(b, t, sport) {
     if (sg.type === 'shot') {
       const rim = new THREE.Vector3(sg.hoop.rim.x, 3.05, sg.hoop.rim.y);
       const shooter = X.P.players.find((x) => x.i === sg.by);
-      const g0 = sg.layup ? sg.gather.a0 : sg.stopAt ? sg.stopAt - 250 : sg.t0 - 400;
+      const g0 = sg.layup ? sg.gatherT : sg.stopAt ? sg.stopAt - 250 : sg.t0 - 400;
       const relAt = (tt) => { const o = ownedPos(shooter, tt, sport, r); const f = V2(rim.x - o.x, rim.z - o.z).normalize(); return new THREE.Vector3(o.x + f.x * 0.12, (sg.layup ? 2.12 : 2.0) + jumpLift(sg, tt), o.z + f.y * 0.12); };
       if (t < sg.t0) {
         // Recoge con las dos manos (en el último bote si es entrada) y sube el balón hasta soltarlo arriba.
         const own = ownedPos(shooter, t, sport, r);
         const k = smooth((t - g0) / Math.max(1, sg.t0 - g0));
         const hi = relAt(t);
-        return { p: new THREE.Vector3(lerp(own.x, hi.x, k * k), lerp(1.02, hi.y, k * k), lerp(own.z, hi.z, k * k)), visible, hand: true, handBy: shooter };
+        const pr = new THREE.Vector3(lerp(own.x, hi.x, k * k), lerp(1.02, hi.y, k * k), lerp(own.z, hi.z, k * k));
+        const hw = smooth((t - g0) / 160);
+        return { p: hw < 1 ? cur.p.clone().lerp(pr, hw) : pr, visible, hand: true, handBy: shooter, handW: hw };
       }
       const rel = sg.relP ? sg.relP.clone() : relAt(sg.t0);
       const bd = sg.hoop.dir;
@@ -957,6 +991,7 @@ function ballState(b, t, sport) {
   }
   if (cur.owner) {
     const st = playerState(cur.owner, t);
+    if (sport === 'basquet' && !st.cur && cur.high == null && waitsToDribble(b, cur.owner, t)) { const q = inPlace(cur.owner, t, r); return { p: q.p, visible, carry: { by: cur.owner.i }, c: { side: 1, bounce: q.bounce }, spin }; }
     let op = ownedPos(cur.owner, t, sport, r);
     if (cur.high != null && t - cur.high < 260) op.y = lerp(1.95, op.y, smooth((t - cur.high) / 260));
     if (st.cur && sport === 'futbol') return { p: cur.p, visible, spin };
@@ -1105,7 +1140,7 @@ window.setup = async function (id, opts) {
     coach.rig.root.position.set(coach.p.x, 0, coach.p.y); scene.add(coach.rig.root);
   }
   const evs = { shot: [], pass: [] };
-  P.balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type === 'shot') evs.shot.push(sg.layup ? sg.gather.a0 : sg.stopAt ? sg.stopAt - 300 : sg.t0 - 500); else if (sg.type !== 'carry') evs.pass.push(sg.t0); }));
+  P.balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type === 'shot') evs.shot.push(sg.layup ? sg.gatherT : sg.stopAt ? sg.stopAt - 300 : sg.t0 - 500); else if (sg.type !== 'carry') evs.pass.push(sg.t0); }));
   evs.shot.sort((a, b) => a - b); evs.pass.sort((a, b) => a - b);
   const timeOf = (e) => {
     if (e.who) { const pl = P.players.find((p) => p.key === e.who); const m = pl && pl.moves[e.m || 0]; if (m) return (e.end ? m.a1 : m.a0) + (e.dt || 0); }
@@ -1264,6 +1299,8 @@ function handBall(b) {
   const st = owner.rig.state; const hL = new THREE.Vector3(); const hR = new THREE.Vector3();
   owner.rig.root.updateMatrixWorld(true);
   owner.rig.armL.hand.getWorldPosition(hL); owner.rig.armR.hand.getWorldPosition(hR);
+  const hw = bs.handW == null ? 1 : bs.handW;
+  if (hw < 1) { const mid = hL.clone().add(hR).multiplyScalar(0.5); return bs.p.clone().lerp(mid, hw); }
   if (st.shoot != null && st.shoot > 0.3) { const h = (st.shootHand || 1) > 0 ? hR : hL; const k = smooth((st.shoot - 0.3) / 0.3); const mid = hL.clone().add(hR).multiplyScalar(0.5); return mid.lerp(h, k).add(new THREE.Vector3(0, 0.12 * k + 0.02, 0)); }
   const f = fwdOf(owner.rig.root.rotation.y);
   return hL.add(hR).multiplyScalar(0.5).add(new THREE.Vector3(f.x * 0.07, 0.02, f.y * 0.07));
@@ -1331,7 +1368,8 @@ function drawScene(t) {
         if (sg.layup) {
           const r = (t - sg.jumpT) / 560;
           if (r >= 0 && r <= 1) { o.layup = Math.sin(r * Math.PI); o.layupR = r; o.layupLeg = sg.hand; o.lift = jumpLift(sg, t); o.shoot = clamp(r / 0.45, 0, 1); o.shootHand = sg.hand; }
-          else if (t >= sg.gather.a0 && t < sg.jumpT) o.hold = true;
+          else if (r > 1 && r < 1.7) { o.shoot = 1 + (r - 1) * 0.85; o.shootHand = sg.hand; o.hy -= 0.13 * Math.sin(Math.PI * clamp((r - 1) / 0.65, 0, 1)); }
+          else if (t >= sg.gatherT && t < sg.jumpT) { o.hold = true; o.holdW = smooth((t - sg.gatherT) / 160); }
         } else {
           const r = (t - (sg.t0 - 520)) / 820;
           if (r >= 0 && r <= 1.15) { o.shoot = clamp(r, 0, 1); o.shootHand = 1; o.lift = jumpLift(sg, t); }
@@ -1339,6 +1377,7 @@ function drawScene(t) {
         }
       }
     });
+    P.balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type === 'shot' && sg.reb === pl.key) { const ct = sg.t1 + 470; if (t > ct - 480 && t < ct) o.reach = smooth((t - (ct - 480)) / 320); } }));
     pl.recv.forEach((rv) => { const sg = rv.seg; if (ex.sport === 'futbol') { const r = (t - (sg.t1 - 180)) / 420; if (r >= 0 && r <= 1 && !st.cur) o.receive = r; } else if (t > sg.t1 - 380 && t < sg.t1 && !st.cur) o.target = true; });
     if (tag && pl === tag.by && tag.touch) { const r = (t - (tag.t - 300)) / 600; if (r >= 0 && r <= 1) o.tagArm = r; }
     pl.rig.state = o;
@@ -1411,6 +1450,9 @@ window.__feet = (key, t0, t1, dt) => {
 window.__ev = () => ({ cycle: Math.round(X.cycle), steps: Object.fromEntries(Object.entries(X.P.stepT).map(([k, v]) => [k, [Math.round(v.t0), Math.round(v.t1)]])), shots: X.P.balls.flatMap((b) => b.segs.filter((s) => s.type === 'shot').map((s) => ({ layup: s.layup, gather: s.gather ? Math.round(s.gather.a0) : null, jump: Math.round(s.jumpT), rel: Math.round(s.t0), in: Math.round(s.t1), stopAt: s.stopAt ? Math.round(s.stopAt) : null }))), passes: X.P.balls.flatMap((b) => b.segs.filter((s) => s.type !== 'shot' && s.type !== 'carry').map((s) => [s.type, Math.round(s.t0), Math.round(s.t1), s.by != null ? X.P.players.find((p) => p.i === s.by).key : null, s.rcv != null ? X.P.players.find((p) => p.i === s.rcv).key : null])), tag: X.tag ? [Math.round(X.tag.t), +X.tag.d.toFixed(2)] : null });
 window.__hands = (ts, k) => { X.noRender = true; const out = ts.map((t) => { drawScene(t); const pl = X.P.players[k || 0]; const w = new THREE.Vector3(); const hs = [pl.rig.armL, pl.rig.armR].map((a) => { a.el.children[1].getWorldPosition(w); return [+w.x.toFixed(2), +w.y.toFixed(2), +w.z.toFixed(2)]; }); const b = X.P.balls[0].mesh.position; const hd = new THREE.Vector3(); pl.rig.headG.getWorldPosition(hd); return [t, 'ball', +b.x.toFixed(2), +b.y.toFixed(2), +b.z.toFixed(2), 'L', ...hs[0], 'R', ...hs[1], 'head', +hd.y.toFixed(2), 'hold', !!pl.rig.state.hold]; }); X.noRender = false; return out; };
 window.__ball = (ts) => ts.map((t) => { const b = X.P.balls[0]; const bs = ballState(b, t, X.ex.sport); const pl = X.P.players[0]; const st = playerState(pl, t); return [t, +bs.p.x.toFixed(2), +bs.p.y.toFixed(2), +bs.p.z.toFixed(2), '|', +st.p.x.toFixed(2), +st.p.y.toFixed(2), bs.carry ? 'carry' : bs.hand ? 'hand' : bs.held ? 'held' : '-', st.cur ? st.cur.m.mode : 'idle']; });
+window.__balls = () => X.P.balls.map((b) => ({ key: b.key, ghost: !!b.ghost, p0: [+b.p0.x.toFixed(2), +b.p0.y.toFixed(2)], segs: b.segs.map((sg) => [sg.type, Math.round(sg.t0), Math.round(sg.t1), sg.by != null ? X.P.players.find((p) => p.i === sg.by).key : '-']) }));
+window.__pairs = () => { const ps = X.P.players; const res = []; for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) { let md = 9; let mt = 0; for (let t = 0; t < X.cycle; t += 40) { const d = playerState(ps[i], t).p.distanceTo(playerState(ps[j], t).p); if (d < md) { md = d; mt = t; } } if (md < 0.9) res.push([ps[i].key, ps[j].key, +md.toFixed(2), mt]); } return { tag: X.tag ? [Math.round(X.tag.t), +X.tag.d.toFixed(2)] : null, close: res, cycle: Math.round(X.cycle), end: X.P.players.map((p) => [p.key, Math.round(p.chains.length ? p.chains[p.chains.length - 1].t1 : 0)]) }; };
+window.__track = (keys, a, z, st) => { const out = []; for (let t = a; t <= z; t += st) out.push([t].concat(keys.map((k) => { const p = playerState(X.P.players.find((q) => q.key === k), t).p; return [+(p.x / X.S.sx + 80).toFixed(1), +(p.y / X.S.sz + 100).toFixed(1)]; }))); return out; };
 window.__dbg = () => ({ gear: X.P.gear.map((g) => [g.t, +g.p.x.toFixed(2), +g.p.y.toFixed(2)]), lad: X.P.players.map((pl) => pl.moves.filter((m) => m.feet).map((m) => ({ pat: m.feet.pat, from: [m.from.x, m.from.y], C: m.feet.C.map((c) => [c.foot, +c.p.x.toFixed(2), +c.p.y.toFixed(2)]) }))) });
 window.ready3d = true;
 </script>
