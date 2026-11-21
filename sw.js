@@ -1,10 +1,11 @@
-/* Cancha — service worker: la app funciona sin conexión. */
-const CACHE = 'cancha-v1';
+/* Pitazo — service worker: la app funciona sin conexión. */
+const CACHE = 'pitazo-v2';
 const SHELL = [
   './',
   './index.html',
   './app/styles.css',
   './app/app.js',
+  './app/vendor/jspdf.umd.min.js',
   './manifest.webmanifest',
   './icons/icon.svg',
   './icons/icon-192.png',

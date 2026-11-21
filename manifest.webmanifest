@@ -1,7 +1,7 @@
 {
-  "name": "Cancha",
-  "short_name": "Cancha",
-  "description": "Tu biblioteca de ejercicios de fútbol y básquet para preparar clases.",
+  "name": "Pitazo",
+  "short_name": "Pitazo",
+  "description": "Tu biblioteca de ejercicios de fútbol y básquetbol para preparar clases.",
   "lang": "es",
   "start_url": "./#futbol",
   "scope": "./",

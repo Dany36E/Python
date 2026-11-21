@@ -1,6 +1,7 @@
-/* Cancha — biblioteca de ejercicios de fútbol y básquet para preparar clases.
-   Sin dependencias. Guarda en IndexedDB (app instalada) o en la cuenta de
-   Claude cuando se abre como Artifact (db + assets). */
+/* Pitazo — biblioteca de ejercicios de fútbol y básquetbol para preparar clases.
+   Sin dependencias (jsPDF se carga solo al exportar un PDF). Guarda en
+   IndexedDB (app instalada) o en la cuenta de Claude cuando se abre como
+   Artifact (db + assets). */
 (function () {
   'use strict';
 
@@ -8,7 +9,7 @@
   const TABS = ['futbol', 'basquet', 'clases'];
   const TAB_META = {
     futbol: { label: 'Fútbol', icon: 'futbol' },
-    basquet: { label: 'Básquet', icon: 'basquet' },
+    basquet: { label: 'Básquetbol', icon: 'basquet' },
     clases: { label: 'Clases', icon: 'clases' },
   };
   const SPORTS = {
@@ -17,11 +18,16 @@
       tags: ['Calentamiento', 'Pase', 'Conducción', 'Control', 'Tiro', 'Defensa', 'Táctica', 'Portero', 'Físico', 'Juego reducido'],
     },
     basquet: {
-      name: 'Básquet', noun: 'básquet',
-      tags: ['Calentamiento', 'Bote', 'Pase', 'Tiro', 'Bandeja', 'Defensa', 'Rebote', 'Táctica', 'Físico', 'Juego reducido'],
+      name: 'Básquetbol', noun: 'básquetbol',
+      tags: ['Calentamiento', 'Dribleo', 'Pase', 'Tiro', 'Entrada', 'Defensa', 'Rebote', 'Táctica', 'Físico', 'Juego reducido'],
     },
   };
   const LEVELS = ['Inicial', 'Intermedio', 'Avanzado'];
+  const VARIANTS = {
+    futbol: [['full', 'Campo completo'], ['half', 'Medio campo']],
+    basquet: [['half', 'Media cancha'], ['full', 'Cancha completa']],
+  };
+  const APP_NAME = 'Pitazo';
   const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
   const CLOUD_LIMIT = Math.floor(19.5 * 1024 * 1024);
 
@@ -56,6 +62,23 @@
     lock: '<rect x="5.5" y="10.5" width="13" height="10" rx="2.6"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
     warn: '<path d="M12 4l8.5 15H3.5z"/><path d="M12 10v4M12 16.8v.2"/>',
     sparkle: '<path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z"/>',
+    whistle: '<path d="M14.6 13.6a5.6 5.6 0 1 1-5.6-5.6h11.4v4.4h-5.9z"/><circle cx="9" cy="13.6" r="1.5"/><path d="M3.6 5.2l1.6 1.4"/>',
+    share: '<path d="M12 3.6v11M8.2 7.4L12 3.6l3.8 3.8"/><path d="M8.6 10.4H7.2c-1.1 0-2 .9-2 2v6.4c0 1.1.9 2 2 2h9.6c1.1 0 2-.9 2-2v-6.4c0-1.1-.9-2-2-2h-1.4"/>',
+    pause: '<rect x="6.4" y="5" width="3.8" height="14" rx="1.3" fill="currentColor" stroke="none"/><rect x="13.8" y="5" width="3.8" height="14" rx="1.3" fill="currentColor" stroke="none"/>',
+    prev: '<path d="M18 6.2v11.6L9.6 12z" fill="currentColor" stroke="none"/><path d="M6.6 6.2v11.6"/>',
+    next: '<path d="M6 6.2v11.6l8.4-5.8z" fill="currentColor" stroke="none"/><path d="M17.4 6.2v11.6"/>',
+    move: '<path d="M12 3.5v17M3.5 12h17M9.6 5.9L12 3.5l2.4 2.4M9.6 18.1l2.4 2.4 2.4-2.4M5.9 9.6L3.5 12l2.4 2.4M18.1 9.6l2.4 2.4-2.4 2.4"/>',
+    erase: '<path d="M8.6 19.6l-4-4a1.6 1.6 0 0 1 0-2.3l8.7-8.7a1.6 1.6 0 0 1 2.3 0l4 4a1.6 1.6 0 0 1 0 2.3l-8.6 8.7z"/><path d="M8.6 19.6H20M9 9.3l5.9 5.9"/>',
+    undo: '<path d="M9 14.2L4.6 9.8 9 5.4"/><path d="M4.6 9.8h9.6a5.4 5.4 0 0 1 0 10.8H11"/>',
+    board: '<rect x="3.5" y="4" width="17" height="13" rx="2.3"/><path d="M8.2 21l1.9-4M15.8 21l-1.9-4"/><circle cx="8.4" cy="10.4" r="1.7"/><path d="M13.4 8.6l3.4 3.4M16.8 8.6l-3.4 3.4"/>',
+    arrowPass: '<path d="M4.6 19.4L17.6 6.4" stroke-dasharray="2.4 2.6"/><path d="M11 6h7v7"/>',
+    arrowDrib: '<path d="M4.6 19.4l1.4-3.6 3 1.2 1.4-3.6 3 1.2 1.4-3.6 2.8-2.6"/><path d="M11.6 6H18v6.4"/>',
+    arrowRun: '<path d="M4.6 19.4L17.6 6.4"/><path d="M11 6h7v7"/>',
+    timer: '<circle cx="12" cy="13.4" r="7.4"/><path d="M12 9.6v3.8l2.4 1.6M9.6 2.8h4.8M18.6 6.6l1.4-1.4"/>',
+    flag: '<path d="M5.5 21V4.2M5.5 4.6h11.6l-2.4 4 2.4 4H5.5"/>',
+    chat: '<path d="M4.4 19.6l1.3-3.8a7.9 7.9 0 1 1 3 2.6z"/><path d="M9 10.6c.3 1.6 1.8 3.2 3.6 3.8l1.1-1.1 1.8.8-.4 1.6c-3 .3-6.6-2.8-6.9-6.2l1.5-.5.8 1.8z" fill="currentColor" stroke="none"/>',
+    doc: '<path d="M7 3.5h7l4.5 4.5v11.5c0 .8-.7 1.5-1.5 1.5H7c-.8 0-1.5-.7-1.5-1.5v-14.5c0-.8.7-1.5 1.5-1.5z"/><path d="M13.6 3.6V8.4h4.8M8.8 13h6.4M8.8 16.4h4.4"/>',
+    copy: '<rect x="8.6" y="8.6" width="11" height="11" rx="2.2"/><path d="M15.4 8.6V6.2c0-.9-.7-1.6-1.6-1.6H6.2c-.9 0-1.6.7-1.6 1.6v7.6c0 .9.7 1.6 1.6 1.6h2.4"/>',
   };
 
   // ---------------------------------------------------------------- utilidades
@@ -89,7 +112,10 @@
     const p = s.split('-').map(Number);
     return new Date(p[0], p[1] - 1, p[2]);
   }
-  const dayFmt = (() => { try { return new Intl.DateTimeFormat('es', { weekday: 'short', day: 'numeric', month: 'short' }); } catch (e) { return null; } })();
+  const dayFmt = (() => { try { return new Intl.DateTimeFormat('es-MX', { weekday: 'short', day: 'numeric', month: 'short' }); } catch (e) { return null; } })();
+  function fmtLong(ts) {
+    try { return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long' }).format(new Date(ts)); } catch (e) { return ''; }
+  }
   function fmtDay(s) {
     const d = parseDay(s);
     if (!d) return 'Sin fecha';
@@ -98,62 +124,162 @@
     return dayFmt ? cap(dayFmt.format(d).replace(/\./g, '')) : s;
   }
 
-  // ---------------------------------------------------------------- dibujos de cancha
-  function fieldArt(sport) {
-    const g = '<g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">';
-    if (sport === 'basquet') {
-      return '<svg viewBox="0 0 160 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + g +
-        '<rect x="14" y="14" width="132" height="172" rx="2"/>' +
-        '<path d="M62 14a18 18 0 0 0 36 0"/>' +
-        '<rect x="58" y="124" width="44" height="62"/>' +
-        '<path d="M64 124a16 16 0 0 1 32 0"/>' +
-        '<path d="M64 124a16 16 0 0 0 32 0" stroke-dasharray="3 4"/>' +
-        '<path d="M24 186v-37.5a60 60 0 0 1 112 0V186"/>' +
-        '<path d="M71 177h18"/><circle cx="80" cy="170.5" r="4.5"/>' +
-        '</g></svg>';
-    }
-    return '<svg viewBox="0 0 160 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + g +
+  // ---------------------------------------------------------------- canchas y pizarra
+  // Todo se dibuja en un lienzo vertical de 160 × 200 (proporción 4:5).
+  const COURT = {
+    'futbol-full':
       '<rect x="14" y="14" width="132" height="172" rx="2"/>' +
       '<path d="M14 100h132"/><circle cx="80" cy="100" r="18"/>' +
       '<rect x="44" y="14" width="72" height="30"/><rect x="62" y="14" width="36" height="11"/>' +
       '<path d="M63.9 44a18 18 0 0 0 32.2 0"/>' +
       '<rect x="44" y="156" width="72" height="30"/><rect x="62" y="175" width="36" height="11"/>' +
       '<path d="M63.9 156a18 18 0 0 1 32.2 0"/>' +
-      '</g><g fill="currentColor"><circle cx="80" cy="100" r="1.7"/><circle cx="80" cy="35" r="1.3"/><circle cx="80" cy="165" r="1.3"/></g></svg>';
+      '<g fill="currentColor" stroke="none"><circle cx="80" cy="100" r="1.7"/><circle cx="80" cy="35" r="1.3"/><circle cx="80" cy="165" r="1.3"/></g>',
+    'futbol-half':
+      '<rect x="14" y="14" width="132" height="172" rx="2"/>' +
+      '<rect x="34" y="14" width="92" height="40"/><rect x="58" y="14" width="44" height="14"/>' +
+      '<path d="M61.6 54a22 22 0 0 0 36.8 0"/><path d="M54 186a26 26 0 0 1 52 0"/><path d="M68 14V9h24v5"/>' +
+      '<g fill="currentColor" stroke="none"><circle cx="80" cy="42" r="1.4"/><circle cx="80" cy="186" r="1.7"/></g>',
+    'basquet-half':
+      '<rect x="14" y="14" width="132" height="172" rx="2"/>' +
+      '<path d="M62 14a18 18 0 0 0 36 0"/>' +
+      '<rect x="58" y="124" width="44" height="62"/>' +
+      '<path d="M64 124a16 16 0 0 1 32 0"/>' +
+      '<path d="M64 124a16 16 0 0 0 32 0" stroke-dasharray="3 4"/>' +
+      '<path d="M24 186v-37.5a60 60 0 0 1 112 0V186"/>' +
+      '<path d="M71 177h18"/><circle cx="80" cy="170.5" r="4.5"/>',
+    'basquet-full':
+      '<rect x="14" y="14" width="132" height="172" rx="2"/>' +
+      '<path d="M14 100h132"/><circle cx="80" cy="100" r="14"/>' +
+      '<rect x="64" y="152" width="32" height="34"/><path d="M68 152a12 12 0 0 1 24 0"/>' +
+      '<path d="M26 186v-23.8a56 56 0 0 1 108 0V186"/><path d="M73 181h14"/><circle cx="80" cy="177" r="3.5"/>' +
+      '<rect x="64" y="14" width="32" height="34"/><path d="M68 48a12 12 0 0 0 24 0"/>' +
+      '<path d="M26 14v23.8a56 56 0 0 0 108 0V14"/><path d="M73 19h14"/><circle cx="80" cy="23" r="3.5"/>',
+  };
+  const EXPORT_COLORS = {
+    futbol: { bg: '#E0F0E7', line: '#5EB181', a: '#0E8A43' },
+    basquet: { bg: '#F9E9DF', line: '#E18D5B', a: '#D2550A' },
+  };
+  const defaultVariant = (sport) => (sport === 'basquet' ? 'half' : 'full');
+  const hasDiagram = (ex) => !!(ex && ex.diagram && ex.diagram.items && ex.diagram.items.length);
+  const r1 = (n) => Math.round(n * 10) / 10;
+
+  function arrowGeom(it) {
+    const dx = it.x2 - it.x; const dy = it.y2 - it.y;
+    const L = Math.hypot(dx, dy) || 1;
+    const ux = dx / L; const uy = dy / L;
+    const ex = it.x2 - ux * 4.2; const ey = it.y2 - uy * 4.2;
+    let body;
+    if (it.k === 'conduccion' && L > 10) {
+      const n = Math.max(2, Math.floor((L - 6) / 3.4));
+      const pts = [[it.x, it.y]];
+      for (let i = 1; i < n; i++) {
+        const t = (i / n) * (L - 6);
+        const off = i % 2 ? 1.9 : -1.9;
+        pts.push([it.x + ux * t - uy * off, it.y + uy * t + ux * off]);
+      }
+      pts.push([ex, ey]);
+      body = 'M' + pts.map((q) => r1(q[0]) + ' ' + r1(q[1])).join('L');
+    } else body = 'M' + r1(it.x) + ' ' + r1(it.y) + 'L' + r1(ex) + ' ' + r1(ey);
+    const bx = it.x2 - ux * 5.4; const by = it.y2 - uy * 5.4;
+    const head = 'M' + r1(it.x2) + ' ' + r1(it.y2) + 'L' + r1(bx - uy * 2.9) + ' ' + r1(by + ux * 2.9) + 'L' + r1(bx + uy * 2.9) + ' ' + r1(by - ux * 2.9) + 'Z';
+    return { body, head };
   }
+
+  function itemSVG(it, i, C) {
+    const di = i == null ? '' : ' data-i="' + i + '"';
+    const tr = ' transform="translate(' + r1(it.x) + ' ' + r1(it.y) + ')"';
+    if (it.t === 'a' || it.t === 'b') {
+      const fill = C ? ' fill="' + (it.t === 'a' ? C.a : '#2563EB') + '" stroke="#FFFFFF"' : '';
+      return '<g class="bd-p bd-' + it.t + '"' + di + tr + '><circle r="7"' + fill + ' stroke-width="1.3"/>' +
+        '<text y="2.4" text-anchor="middle" font-size="6.8" font-weight="700" font-family="Helvetica, Arial, sans-serif"' + (C ? ' fill="#FFFFFF"' : '') + '>' + esc(it.n || '') + '</text></g>';
+    }
+    if (it.t === 'cone') {
+      return '<g class="bd-cone"' + di + tr + '><path d="M0-5.4L4.5 3.4h-9z"' + (C ? ' fill="#F2A900"' : '') + '/><path d="M-5.8 3.6h11.6" stroke-width="1.4" stroke-linecap="round"' + (C ? ' stroke="#F2A900"' : '') + '/><circle r="9" fill="transparent"/></g>';
+    }
+    if (it.t === 'ball') {
+      return '<g class="bd-ball"' + di + tr + '><circle r="3.5"' + (C ? ' fill="#FFFFFF" stroke="#111114"' : '') + ' stroke-width="1"/><circle r="8" fill="transparent"/></g>';
+    }
+    if (it.t === 'arrow') {
+      const g = arrowGeom(it);
+      const col = C ? ' stroke="#111114"' : '';
+      return '<g class="bd-arrow"' + di + '><path class="hit" d="M' + r1(it.x) + ' ' + r1(it.y) + 'L' + r1(it.x2) + ' ' + r1(it.y2) + '" stroke="transparent" stroke-width="10" fill="none"/>' +
+        '<path d="' + g.body + '" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"' + col + (it.k === 'pase' ? ' stroke-dasharray="3 2.4"' : '') + '/>' +
+        '<path class="head" d="' + g.head + '"' + (C ? ' fill="#111114"' : '') + '/></g>';
+    }
+    return '';
+  }
+
+  // Dibujo de cancha con (opcionalmente) jugadores, conos, balón y flechas.
+  function boardSVG(sport, d, opts) {
+    opts = opts || {};
+    const v = (d && d.v) || defaultVariant(sport);
+    const C = opts.export ? EXPORT_COLORS[sport] || EXPORT_COLORS.futbol : null;
+    const items = (d && d.items) || [];
+    const size = opts.export ? ' xmlns="http://www.w3.org/2000/svg" width="' + opts.export[0] + '" height="' + opts.export[1] + '"' : '';
+    return '<svg' + size + ' viewBox="0 0 160 200" preserveAspectRatio="' + (opts.fit || 'xMidYMid slice') + '" aria-hidden="true"' + (opts.cls ? ' class="' + opts.cls + '"' : '') + '>' +
+      (C ? '<rect width="160" height="200" fill="' + C.bg + '"/>' : '') +
+      '<g fill="none" stroke="' + (C ? C.line : 'currentColor') + '" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"' + (C ? ' color="' + C.line + '"' : '') + '>' + (COURT[sport + '-' + v] || COURT['futbol-full']) + '</g>' +
+      '<g class="bd-items">' + items.map((it, i) => itemSVG(it, opts.interactive ? i : null, C)).join('') + '</g></svg>';
+  }
+  const fieldArt = (sport) => boardSVG(sport, null);
 
   // ---------------------------------------------------------------- ejemplos (solo modo local)
   function seedData() {
     const t = Date.now() - 864e5 * 3;
     const ex = (o, i) => Object.assign({
-      favorite: false, mediaType: null, mediaId: null, thumbId: null, mediaDuration: 0, mediaAspect: null,
+      favorite: false, mediaType: null, mediaId: null, thumbId: null, mediaDuration: 0, mediaAspect: null, diagram: null,
       example: true, createdAt: t - i * 60000, updatedAt: t - i * 60000,
     }, o);
     return {
       exercises: [
-        ex({ id: 'ej-f1', sport: 'futbol', title: 'Rondo 4 contra 1', objective: 'Pase', level: 'Inicial', duration: 10, players: '5 por grupo', age: 'Desde Sub-8', material: '4 conos y 1 balón por grupo', description: 'Cuatro jugadores en un cuadrado de 6 × 6 m mantienen la posesión ante un defensor en el centro. Quien pierde el balón pasa a defender.', keyPoints: 'Perfil abierto antes de recibir\nPasar al pie alejado del defensor\nMáximo dos toques\nMoverse para ofrecer línea de pase', favorite: true }, 0),
-        ex({ id: 'ej-f2', sport: 'futbol', title: 'Conducción en slalom y remate', objective: 'Conducción', level: 'Intermedio', duration: 15, players: '6 a 12', age: 'Sub-10 a Sub-14', material: '8 conos, balones y 1 portería', description: 'Conducción entre seis conos separados 2 m y remate a portería desde el borde del área. Alternar pierna hábil y no hábil en cada serie.', keyPoints: 'Toques cortos y cabeza levantada\nUsar interior y exterior del pie\nAcelerar después del último cono\nRematar con el empeine' }, 1),
-        ex({ id: 'ej-f3', sport: 'futbol', title: '3 contra 3 a dos porterías', objective: 'Juego reducido', level: 'Avanzado', duration: 20, players: '6 + 2 porteros', age: 'Sub-12 en adelante', material: 'Petos, 2 porterías pequeñas, balones de reserva', description: 'Partido en un campo de 25 × 20 m. Series de 3 minutos con 1 minuto de descanso. El gol vale doble si llega tras robar en campo rival.', keyPoints: 'Presionar justo después de perder el balón\nOcupar los tres carriles\nComunicación constante' }, 2),
-        ex({ id: 'ej-b1', sport: 'basquet', title: 'Bote en zigzag con mano débil', objective: 'Bote', level: 'Inicial', duration: 10, players: 'Todo el grupo', age: 'Desde 8 años', material: '1 balón por jugador y 6 conos', description: 'Recorrido en zigzag de la línea de fondo a medio campo, con cambio de mano por delante en cada cono. A la vuelta, solo con la mano débil.', keyPoints: 'Bote a la altura de la cintura\nMirar al frente, no al balón\nProteger el balón con el cuerpo' }, 0),
-        ex({ id: 'ej-b2', sport: 'basquet', title: 'Rueda de bandejas', objective: 'Bandeja', level: 'Inicial', duration: 12, players: '8 a 14', age: 'Desde 9 años', material: '3 o 4 balones', description: 'Dos filas en el ala: una pasa y la otra entra a canasta. Tras la bandeja, cada jugador recoge su rebote y cambia de fila. Cada 2 minutos se cambia de lado.', keyPoints: 'Dos tiempos: derecha e izquierda por el lado derecho\nRodilla arriba en el salto\nApoyar el balón en el tablero', favorite: true }, 1),
-        ex({ id: 'ej-b3', sport: 'basquet', title: '2 contra 2 con ayuda defensiva', objective: 'Defensa', level: 'Avanzado', duration: 15, players: '4 por canasta', age: 'Sub-14 en adelante', material: '1 balón y petos', description: 'Ataque 2 contra 2 desde el perímetro. El defensor del jugador sin balón ayuda en la penetración y recupera a su par.', keyPoints: 'Posición de ayuda: ver balón y par\nCerrar la línea de fondo\nAvisar «ayuda» y «tengo»' }, 2),
+        ex({ id: 'ej-f1', sport: 'futbol', title: 'Rondo 4 contra 1', objective: 'Pase', level: 'Inicial', duration: 10, players: '5 por grupo', age: 'Desde Sub-8', material: '4 conos y 1 balón por grupo', description: 'Cuatro jugadores en un cuadrado de 6 × 6 m mantienen la posesión ante un defensor en el centro. Quien pierde el balón pasa a defender.', keyPoints: 'Perfil abierto antes de recibir\nPasar al pie alejado del defensor\nMáximo dos toques\nMoverse para ofrecer línea de pase', favorite: true, diagram: SEED_DIAGRAMS.rondo }, 0),
+        ex({ id: 'ej-f2', sport: 'futbol', title: 'Conducción en slalom y tiro', objective: 'Conducción', level: 'Intermedio', duration: 15, players: '6 a 12', age: 'Sub-10 a Sub-14', material: '8 conos, balones y 1 portería', description: 'Conducción entre seis conos separados 2 m y tiro a portería desde el borde del área. Alternar pierna hábil y no hábil en cada serie.', keyPoints: 'Toques cortos y cabeza levantada\nUsar interior y exterior del pie\nAcelerar después del último cono\nTirar con el empeine', diagram: SEED_DIAGRAMS.slalom }, 1),
+        ex({ id: 'ej-f3', sport: 'futbol', title: '3 contra 3 a dos porterías', objective: 'Juego reducido', level: 'Avanzado', duration: 20, players: '6 + 2 porteros', age: 'Sub-12 en adelante', material: 'Chalecos, 2 porterías pequeñas, balones de reserva', description: 'Partido en un campo de 25 × 20 m. Series de 3 minutos con 1 minuto de descanso. El gol vale doble si llega tras recuperar el balón en campo rival.', keyPoints: 'Presionar justo después de perder el balón\nOcupar los tres carriles\nComunicación constante' }, 2),
+        ex({ id: 'ej-b1', sport: 'basquet', title: 'Dribleo en zigzag con mano débil', objective: 'Dribleo', level: 'Inicial', duration: 10, players: 'Todo el grupo', age: 'Desde 8 años', material: '1 balón por jugador y 6 conos', description: 'Recorrido en zigzag de la línea de fondo a medio campo, con cambio de mano por delante en cada cono. De regreso, solo con la mano débil.', keyPoints: 'Driblar a la altura de la cintura\nMirar al frente, no al balón\nProteger el balón con el cuerpo', diagram: SEED_DIAGRAMS.zigzag }, 0),
+        ex({ id: 'ej-b2', sport: 'basquet', title: 'Rueda de entradas', objective: 'Entrada', level: 'Inicial', duration: 12, players: '8 a 14', age: 'Desde 9 años', material: '3 o 4 balones', description: 'Dos filas en el ala: una pasa y la otra entra a la canasta. Después de la entrada, cada jugador toma su rebote y cambia de fila. Cada 2 minutos se cambia de lado.', keyPoints: 'Dos tiempos: derecha e izquierda por el lado derecho\nRodilla arriba en el salto\nApoyar el balón en el tablero', favorite: true }, 1),
+        ex({ id: 'ej-b3', sport: 'basquet', title: '2 contra 2 con ayuda defensiva', objective: 'Defensa', level: 'Avanzado', duration: 15, players: '4 por canasta', age: 'Sub-14 en adelante', material: '1 balón y chalecos', description: 'Ataque 2 contra 2 desde el perímetro. El defensor del jugador sin balón ayuda en la penetración y regresa con su marca.', keyPoints: 'Posición de ayuda: ver balón y marca\nCerrar la línea de fondo\nAvisar «ayuda» y «tengo»' }, 2),
       ],
       classes: [
-        { id: 'cl-ej1', sport: 'futbol', name: 'Sub-12 · Técnica de pase', date: addDays(2), notes: 'Llevar petos de dos colores.', items: [{ exId: 'ej-f1', min: 10 }, { exId: 'ej-f2', min: 15 }, { exId: 'ej-f3', min: 20 }], example: true, createdAt: t, updatedAt: t },
+        { id: 'cl-ej1', sport: 'futbol', name: 'Sub-12 · Técnica de pase', date: addDays(2), groupId: 'gr-ej1', notes: 'Llevar chalecos de dos colores.', items: [{ exId: 'ej-f1', min: 10 }, { exId: 'ej-f2', min: 15 }, { exId: 'ej-f3', min: 20 }], example: true, createdAt: t, updatedAt: t },
+      ],
+      groups: [
+        { id: 'gr-ej1', name: 'Sub-12 A', sport: 'futbol', category: 'Sub-12', schedule: 'Mar y Jue 16:00', place: 'Cancha 1', example: true, createdAt: t, updatedAt: t },
       ],
     };
   }
+  const SEED_DIAGRAMS = {
+    rondo: { v: 'full', items: [
+      { t: 'cone', x: 50, y: 70 }, { t: 'cone', x: 110, y: 70 }, { t: 'cone', x: 110, y: 130 }, { t: 'cone', x: 50, y: 130 },
+      { t: 'a', x: 58, y: 78, n: 1 }, { t: 'a', x: 102, y: 78, n: 2 }, { t: 'a', x: 102, y: 122, n: 3 }, { t: 'a', x: 58, y: 122, n: 4 },
+      { t: 'b', x: 80, y: 100, n: 1 }, { t: 'ball', x: 66, y: 84 },
+      { t: 'arrow', k: 'pase', x: 66, y: 78, x2: 93, y2: 78 }, { t: 'arrow', k: 'pase', x: 102, y: 86, x2: 102, y2: 113 },
+    ] },
+    slalom: { v: 'half', items: [
+      { t: 'cone', x: 80, y: 160 }, { t: 'cone', x: 80, y: 144 }, { t: 'cone', x: 80, y: 128 }, { t: 'cone', x: 80, y: 112 }, { t: 'cone', x: 80, y: 96 }, { t: 'cone', x: 80, y: 80 },
+      { t: 'a', x: 80, y: 177, n: 1 }, { t: 'ball', x: 89, y: 172 },
+      { t: 'arrow', k: 'conduccion', x: 92, y: 164, x2: 92, y2: 78 },
+      { t: 'arrow', k: 'pase', x: 86, y: 68, x2: 80, y2: 24 },
+    ] },
+    zigzag: { v: 'half', items: [
+      { t: 'a', x: 40, y: 26, n: 1 }, { t: 'ball', x: 48, y: 31 },
+      { t: 'cone', x: 56, y: 50 }, { t: 'cone', x: 104, y: 72 }, { t: 'cone', x: 56, y: 94 }, { t: 'cone', x: 104, y: 116 },
+      { t: 'arrow', k: 'conduccion', x: 46, y: 36, x2: 92, y2: 64 }, { t: 'arrow', k: 'conduccion', x: 96, y: 78, x2: 66, y2: 92 },
+      { t: 'arrow', k: 'conduccion', x: 66, y: 100, x2: 94, y2: 114 },
+    ] },
+  };
 
   // ---------------------------------------------------------------- almacenamiento local
   function idbStore() {
     return new Promise((resolve, reject) => {
       if (!('indexedDB' in window)) { reject(new Error('no-idb')); return; }
       let req;
-      try { req = indexedDB.open('cancha', 1); } catch (e) { reject(e); return; }
+      try { req = indexedDB.open('cancha', 2); } catch (e) { reject(e); return; }
       req.onupgradeneeded = () => {
         const db = req.result;
         if (!db.objectStoreNames.contains('exercises')) db.createObjectStore('exercises', { keyPath: 'id' });
         if (!db.objectStoreNames.contains('classes')) db.createObjectStore('classes', { keyPath: 'id' });
+        if (!db.objectStoreNames.contains('groups')) db.createObjectStore('groups', { keyPath: 'id' });
         if (!db.objectStoreNames.contains('media')) db.createObjectStore('media');
         if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta');
       };
@@ -179,7 +305,7 @@
     });
   }
   function memStore() {
-    const m = { exercises: new Map(), classes: new Map(), media: new Map(), meta: new Map() };
+    const m = { exercises: new Map(), classes: new Map(), groups: new Map(), media: new Map(), meta: new Map() };
     return {
       all: async (n) => Array.from(m[n].values()),
       get: async (n, k) => m[n].get(k),
@@ -193,8 +319,8 @@
     const listeners = new Set();
     const urls = new Map();
     async function reload() {
-      const r = await Promise.all([st.all('exercises'), st.all('classes')]);
-      const snap = { exercises: r[0] || [], classes: r[1] || [], fromCache: false };
+      const r = await Promise.all([st.all('exercises'), st.all('classes'), st.all('groups')]);
+      const snap = { exercises: r[0] || [], classes: r[1] || [], groups: r[2] || [], fromCache: false };
       listeners.forEach((fn) => fn(snap));
     }
     if (!(await st.get('meta', 'seeded'))) {
@@ -203,8 +329,19 @@
         const seed = seedData();
         for (const x of seed.exercises) await st.put('exercises', x);
         for (const c of seed.classes) await st.put('classes', c);
+        for (const g of seed.groups) await st.put('groups', g);
       }
       await st.put('meta', true, 'seeded');
+      await st.put('meta', true, 'seeded-groups');
+    } else if (!(await st.get('meta', 'seeded-groups'))) {
+      // instalaciones anteriores: el grupo de ejemplo solo si la clase de ejemplo sigue ahí
+      const cl = await st.get('classes', 'cl-ej1');
+      if (cl && cl.example) {
+        const seed = seedData();
+        await st.put('groups', seed.groups[0]);
+        await st.put('classes', Object.assign({}, cl, { groupId: 'gr-ej1' }));
+      }
+      await st.put('meta', true, 'seeded-groups');
     }
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* opcional */ }
     return {
@@ -215,6 +352,10 @@
       async deleteExercise(id) { await st.del('exercises', id); await reload(); },
       async saveClass(c) { await st.put('classes', plain(c)); await reload(); },
       async deleteClass(id) { await st.del('classes', id); await reload(); },
+      async saveGroup(g) { await st.put('groups', plain(g)); await reload(); },
+      async deleteGroup(id) { await st.del('groups', id); await reload(); },
+      me: null,
+      profiles: async () => ({}),
       async putMedia(blob) {
         const id = uid();
         try { await st.put('media', blob, id); } catch (e) {
@@ -253,8 +394,10 @@
   }
   async function cloudBackend(db, assets, user) {
     let canWrite = !!assets;
-    if (user && canWrite) {
-      try { const c = await user.can('data.write'); if (c === false) canWrite = false; } catch (e) { /* sin información */ }
+    let me = null;
+    if (user) {
+      try { me = await user.id(); } catch (e) { /* sin identidad */ }
+      if (canWrite) { try { const c = await user.can('data.write'); if (c === false) canWrite = false; } catch (e) { /* sin información */ } }
     }
     const queues = new Map();
     const queue = (key, fn) => {
@@ -266,21 +409,31 @@
     return {
       kind: 'cloud',
       canWrite,
+      me,
+      async profiles(ids) {
+        if (!user || !ids.length) return {};
+        try { return (await user.profiles(ids)) || {}; } catch (e) { return {}; }
+      },
       subscribe(fn, onError) {
-        let ex = null; let cl = null; let exC = true; let clC = true;
-        const emit = () => { if (ex && cl) fn({ exercises: ex, classes: cl, fromCache: exC || clC }); };
+        let ex = null; let cl = null; let gr = null; let exC = true; let clC = true; let grC = true;
+        const emit = () => { if (ex && cl && gr) fn({ exercises: ex, classes: cl, groups: gr, fromCache: exC || clC || grC }); };
         const u1 = db.collection('exercises').onSnapshot((s) => {
           ex = s.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); exC = s.metadata.fromCache; emit();
         }, (e) => onError && onError(e));
         const u2 = db.collection('classes').onSnapshot((s) => {
           cl = s.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); clC = s.metadata.fromCache; emit();
         }, (e) => onError && onError(e));
-        return () => { u1(); u2(); };
+        const u3 = db.collection('groups').onSnapshot((s) => {
+          gr = s.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); grC = s.metadata.fromCache; emit();
+        }, (e) => onError && onError(e));
+        return () => { u1(); u2(); u3(); };
       },
       saveExercise: (x) => queue('e:' + x.id, () => withRetry(() => db.collection('exercises').doc(x.id).set(body(x)))),
       deleteExercise: (id) => queue('e:' + id, () => withRetry(() => db.collection('exercises').doc(id).delete())),
       saveClass: (c) => queue('c:' + c.id, () => withRetry(() => db.collection('classes').doc(c.id).set(body(c)))),
       deleteClass: (id) => queue('c:' + id, () => withRetry(() => db.collection('classes').doc(id).delete())),
+      saveGroup: (g) => queue('g:' + g.id, () => withRetry(() => db.collection('groups').doc(g.id).set(body(g)))),
+      deleteGroup: (id) => queue('g:' + id, () => withRetry(() => db.collection('groups').doc(id).delete())),
       async putMedia(blob, type) {
         const r = await withRetry(() => assets.upload(blob, type ? { type } : undefined), 'store_unavailable');
         return r.id;
@@ -308,7 +461,9 @@
   // ---------------------------------------------------------------- estado
   const S = {
     backend: null, ready: false, canWrite: false, stale: false, error: null,
-    exercises: [], classes: [],
+    exercises: [], classes: [], groups: [],
+    names: {}, namesAsked: new Set(),
+    clView: 'clases',
     tab: 'futbol',
     q: { futbol: '', basquet: '' },
     f: { futbol: 'all', basquet: 'all' },
@@ -317,6 +472,8 @@
   };
   const getEx = (id) => S.exercises.find((e) => e.id === id) || null;
   const getClass = (id) => S.classes.find((c) => c.id === id) || null;
+  const getGroup = (id) => (id ? S.groups.find((g) => g.id === id) || null : null);
+  const groupTint = (g) => (g && SPORTS[g.sport] ? g.sport : 'clases');
   const exOf = (sport) => S.exercises.filter((e) => e.sport === sport).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const classTotal = (c) => (c.items || []).reduce((s, it) => s + (Number(it.min) || 0), 0);
   function replaceLocal(kind, obj) {
@@ -339,29 +496,54 @@
   const openScreens = new Set();
   const framed = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
   const useHistory = !framed;
+  // El botón «atrás» del teléfono cierra la capa de arriba. Las entradas de historial
+  // se sincronizan con las capas abiertas en un solo paso (cerrar una y abrir otra en el
+  // mismo toque no toca el historial), y nunca se retrocede más allá de la app.
+  let histDepth = 0;
   let skipPop = 0;
+  let syncQueued = false;
 
   function syncLock() { document.documentElement.classList.toggle('locked', layers.length > 0); }
+  function syncHistory() {
+    if (!useHistory || skipPop > 0) return;
+    const want = layers.length;
+    try {
+      while (histDepth < want) { histDepth++; history.pushState({ pitazo: histDepth }, ''); }
+      if (histDepth > want) {
+        const n = histDepth - want;
+        histDepth = want;
+        skipPop++;
+        history.go(-n);
+      }
+    } catch (e) { /* historial no disponible */ }
+  }
+  function scheduleSync() {
+    if (!useHistory || syncQueued) return;
+    syncQueued = true;
+    setTimeout(() => { syncQueued = false; syncHistory(); }, 0);
+  }
   function pushLayer(layer) {
     layers.push(layer);
     syncLock();
-    if (useHistory) { try { history.pushState({ cancha: layers.length }, ''); } catch (e) { /* sin historial */ } }
+    scheduleSync();
   }
-  function popLayer(layer, fromHistory) {
+  function popLayer(layer) {
     const i = layers.lastIndexOf(layer);
     if (i < 0) return;
     layers.splice(i, 1);
     layer.close();
     syncLock();
-    if (useHistory && !fromHistory) { skipPop++; try { history.back(); } catch (e) { skipPop--; } }
+    scheduleSync();
   }
   window.addEventListener('popstate', () => {
-    if (skipPop > 0) { skipPop--; return; }
+    if (skipPop > 0) { skipPop--; scheduleSync(); return; }
+    if (histDepth > 0) histDepth--;
     const top = layers[layers.length - 1];
     if (top) {
-      if (top.onBack) { top.onBack(); if (useHistory) { try { history.pushState({ cancha: layers.length }, ''); } catch (e) { /* */ } } return; }
-      popLayer(top, true);
+      if (top.onBack) top.onBack();
+      else { layers.pop(); top.close(); syncLock(); }
     }
+    scheduleSync();
   });
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
@@ -549,7 +731,13 @@
     wrap.innerHTML =
       '<div class="scrim"></div><div class="as" role="dialog" aria-modal="true"' + (o.title ? ' aria-label="' + esc(o.title) + '"' : '') + '>' +
       '<div class="as-group">' + (o.title || o.message ? '<div class="as-title">' + (o.title ? '<b>' + esc(o.title) + '</b>' : '') + (o.message ? (o.title ? '<br>' : '') + esc(o.message) : '') + '</div>' : '') +
-      acts.map((a, i) => '<button type="button" class="as-btn' + (a.danger ? ' danger' : '') + (a.bold ? ' bold' : '') + '" data-i="' + i + '"><span class="as-row">' + (a.icon ? ic(a.icon) : '') + esc(a.label) + '</span>' + (a.sub ? '<small>' + esc(a.sub) + '</small>' : '') + '</button>').join('') +
+      acts.map((a, i) => {
+        const inner = '<span class="as-row">' + (a.icon ? ic(a.icon) : '') + esc(a.label) + '</span>' + (a.sub ? '<small>' + esc(a.sub) + '</small>' : '');
+        const cls = 'as-btn' + (a.danger ? ' danger' : '') + (a.bold ? ' bold' : '');
+        return a.href
+          ? '<a class="' + cls + '" href="' + esc(a.href) + '" target="_blank" rel="noopener noreferrer" data-i="' + i + '">' + inner + '</a>'
+          : '<button type="button" class="' + cls + '" data-i="' + i + '">' + inner + '</button>';
+      }).join('') +
       '</div><div class="as-group"><button type="button" class="as-btn bold" data-i="-1">' + esc(o.cancel || 'Cancelar') + '</button></div></div>';
     document.body.appendChild(wrap);
     const api = {
@@ -839,11 +1027,12 @@
     return u ? 'src="' + esc(u) + '"' : 'data-media="' + esc(id) + '"';
   }
   function thumbHTML(ex, cls) {
-    const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>' : '<span class="art">' + fieldArt(ex.sport) + '</span>';
+    const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>' : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram) : fieldArt(ex.sport)) + '</span>';
     let badge = '';
     if (cls !== 'mini') {
       if (ex.mediaType === 'video') badge = '<span class="badge">' + ic('play') + (ex.mediaDuration ? fmtClock(ex.mediaDuration) : 'Video') + '</span>';
       else if (ex.mediaType === 'image') badge = '<span class="badge">' + ic('photo') + 'Foto</span>';
+      else if (hasDiagram(ex)) badge = '<span class="badge">' + ic('board') + 'Pizarra</span>';
     }
     const extra = cls === 'mini' ? '' : (ex.favorite ? '<span class="fav" aria-label="Favorito">' + ic('heart-fill') + '</span>' : '') + (ex.example ? '<span class="pill-ex">Ejemplo</span>' : '');
     return '<span class="' + (cls || 'thumb') + '" data-tint="' + esc(ex.sport) + '">' + inner + badge + extra + '</span>';
@@ -873,6 +1062,7 @@
         '<div class="page">' +
         '<h1 class="large-title" id="h-' + t + '">' + TAB_META[t].label + '</h1>' +
         '<p class="subtitle" data-ref="count">&nbsp;</p>' +
+        (isSport ? '' : segHTML('clview', [['clases', 'Clases'], ['grupos', 'Grupos']], S.clView)) +
         (isSport ? '<label class="search">' + ic('search') + '<input type="search" id="q-' + t + '" placeholder="Buscar ejercicios" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios de ' + SPORTS[t].noun + '"></label><div class="chips" data-ref="chips" role="toolbar" aria-label="Filtrar por objetivo"></div>' : '') +
         '<div data-ref="note"></div><div data-ref="body"></div></div>';
     });
@@ -885,7 +1075,7 @@
     if (S.stale) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>Sin conexión.</b> Puede que lo que ves no esté al día.</span></div>');
     if (S.error) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>No se pudieron cargar tus datos.</b> Vuelve a abrir la app en un momento.</span></div>');
     if (S.ready && !S.canWrite) out.push('<div class="note">' + ic('lock') + '<span class="txt"><b>Solo lectura.</b> Puedes ver esta biblioteca, pero solo su dueño puede editarla.</span></div>');
-    const hasEx = tab === 'clases' ? S.classes.some((c) => c.example) : S.exercises.some((e) => e.example && e.sport === tab);
+    const hasEx = tab === 'clases' ? S.classes.some((c) => c.example) || S.groups.some((g) => g.example) : S.exercises.some((e) => e.example && e.sport === tab);
     if (S.ready && S.canWrite && hasEx) out.push('<div class="note">' + ic('sparkle') + '<span class="txt"><b>Ejemplos</b> para que veas cómo luce tu biblioteca.</span><button class="link" data-act="clear-examples">Borrar</button></div>');
     return out.join('');
   }
@@ -898,12 +1088,16 @@
     const sp = SPORTS[sport];
     const used = sp.tags.filter((t) => all.some((e) => e.objective === t));
     const extra = Array.from(new Set(all.map((e) => e.objective).filter((o) => o && sp.tags.indexOf(o) < 0)));
-    const chips = [['all', 'Todos']].concat(favs ? [['fav', 'Favoritos']] : [], used.concat(extra).map((t) => ['t:' + t, t]));
+    const me = S.backend && S.backend.me;
+    const authors = new Set(all.map((e) => e.authorId || ''));
+    const showMine = me && authors.size > 1 && authors.has(me);
+    const chips = [['all', 'Todos']].concat(showMine ? [['mine', 'Míos']] : [], favs ? [['fav', 'Favoritos']] : [], used.concat(extra).map((t) => ['t:' + t, t]));
     if (!chips.some((c) => c[0] === S.f[sport])) S.f[sport] = 'all';
     const chipsHTML = all.length > 1 ? chips.map((c) => '<button class="chip" data-chip="' + esc(c[0]) + '" aria-pressed="' + (c[0] === S.f[sport]) + '">' + (c[0] === 'fav' ? ic('heart-fill') : '') + esc(c[1]) + '</button>').join('') : '';
     let list = all;
     const f = S.f[sport];
     if (f === 'fav') list = list.filter((e) => e.favorite);
+    else if (f === 'mine') list = list.filter((e) => e.authorId === me);
     else if (f.indexOf('t:') === 0) list = list.filter((e) => e.objective === f.slice(2));
     const q = norm(S.q[sport]).trim();
     if (q) list = list.filter((e) => norm([e.title, e.objective, e.description, e.keyPoints, e.material, e.level, e.age].join(' ')).indexOf(q) >= 0);
@@ -944,6 +1138,7 @@
   }
 
   function renderClases() {
+    if (S.clView === 'grupos') { renderGroups(); return; }
     const list = S.classes.slice().sort(byUpcoming);
     const t = todayStr();
     const next = list.find((c) => c.date && c.date >= t);
@@ -961,7 +1156,7 @@
       if (up.length) body += '<p class="group-label">Próximas</p><div class="list">' + up.map(classCellHTML).join('') + '</div>';
       if (past.length) body += '<p class="group-label">Anteriores</p><div class="list">' + past.map(classCellHTML).join('') + '</div>';
     }
-    const sig = [S.ready, S.canWrite, body, noteHTML('clases')].join('|');
+    const sig = ['clases', S.ready, S.canWrite, body, noteHTML('clases')].join('|');
     if (S.sig.clases === sig) return;
     S.sig.clases = sig;
     ref('clases', 'note').innerHTML = noteHTML('clases');
@@ -976,9 +1171,10 @@
   function classCellHTML(c) {
     const n = (c.items || []).length;
     const sport = SPORTS[c.sport] ? c.sport : 'futbol';
+    const g = getGroup(c.groupId);
     return '<button class="cell" data-open-class="' + esc(c.id) + '" data-tint="' + sport + '">' + dateTileHTML(c.date) +
       '<span class="txt"><span class="t1">' + esc(c.name || 'Clase sin nombre') + (c.date === todayStr() ? '<span class="pill">Hoy</span>' : '') + '</span>' +
-      '<span class="t2">' + SPORTS[sport].name + ' · ' + plural(n, 'ejercicio', 'ejercicios') + ' · ' + classTotal(c) + ' min</span></span>' +
+      '<span class="t2">' + esc(g ? g.name : SPORTS[sport].name) + ' · ' + plural(n, 'ejercicio', 'ejercicios') + ' · ' + classTotal(c) + ' min' + (c.lastRunAt ? ' · dada' : '') + '</span></span>' +
       ic('chevR', 'chev') + '</button>';
   }
 
@@ -1001,7 +1197,7 @@
     $$('.screen').forEach((s) => s.classList.toggle('active', s.dataset.tab === t));
     $$('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
     $('.tabbar').style.setProperty('--i', TABS.indexOf(t));
-    $('#fab').setAttribute('aria-label', t === 'clases' ? 'Nueva clase' : 'Nuevo ejercicio de ' + SPORTS[t].noun);
+    $('#fab').setAttribute('aria-label', t === 'clases' ? (S.clView === 'grupos' ? 'Nuevo grupo' : 'Nueva clase') : 'Nuevo ejercicio de ' + SPORTS[t].noun);
     window.scrollTo(0, S.scroll[t] || 0);
     onWindowScroll();
     pref.set('tab', t);
@@ -1017,9 +1213,9 @@
   function showStatus() {
     const k = S.backend ? S.backend.kind : 'cloud';
     if (S.backend && !S.canWrite) return alertBox('Solo lectura', 'Estás viendo una biblioteca compartida. Solo su dueño puede agregar o cambiar ejercicios.');
-    if (k === 'cloud') return alertBox('Guardado en tu cuenta', 'Tus ejercicios, videos y clases se guardan en tu cuenta de Claude. Los ves igual en el celular y en la computadora.');
+    if (k === 'cloud') return alertBox('Biblioteca compartida', 'Tus ejercicios, videos, clases y grupos se guardan en tu cuenta de Claude y los ves en el celular y en la computadora. Para que otros profes vean y agreguen ejercicios, invítalos como Editores desde el botón Compartir de Claude (necesitan una cuenta de Claude).');
     if (k === 'memory') return alertBox('No se puede guardar', 'Este navegador no permite guardar datos (por ejemplo, en modo privado). Lo que agregues se perderá al cerrar.');
-    return alertBox('Guardado en este dispositivo', 'Tus ejercicios y videos se guardan en este dispositivo, sin internet. Si borras los datos del navegador, se pierden.');
+    return alertBox('Guardado en este dispositivo', 'Tus ejercicios, videos y clases se guardan solo en este dispositivo y funcionan sin internet. Si borras los datos del navegador, se pierden. Para compartir la biblioteca con otros profes, usa la versión de Pitazo en Claude.');
   }
 
   // ---------------------------------------------------------------- flujos: ejercicios
@@ -1072,8 +1268,10 @@
     let media = null; // nuevo archivo elegido
     let removeMedia = false;
     let dirty = false;
+    let diagram = ex.diagram ? plain(ex.diagram) : null;
+    let diagramChanged = false;
     const body =
-      '<div data-ref="media"></div>' +
+      '<div data-ref="media"></div><div data-ref="board"></div>' +
       segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquet']], ex.sport) +
       '<div class="group"><input class="field-lg" id="ex-title" placeholder="Nombre del ejercicio" maxlength="120" autocomplete="off" enterkeyhint="done" value="' + esc(ex.title) + '"></div>' +
       '<p class="group-label">Objetivo</p><div class="group pad"><div class="chips wrap" data-ref="tags" role="radiogroup" aria-label="Objetivo"></div></div>' +
@@ -1092,7 +1290,7 @@
       tint: ex.sport,
       confirmLabel: 'Guardar',
       bodyHTML: body,
-      isDirty: () => dirty || !!media || removeMedia,
+      isDirty: () => dirty || !!media || removeMedia || diagramChanged,
       onConfirm: save,
       onClose: () => { if (media && media.previewURL) URL.revokeObjectURL(media.previewURL); },
     });
@@ -1149,15 +1347,26 @@
       renderMedia();
     }
 
+    function renderBoardBlock() {
+      const box = $('[data-ref="board"]', root);
+      if (diagram && diagram.items && diagram.items.length) {
+        const n = diagram.items.length;
+        box.innerHTML = '<div class="board-prev"><button type="button" class="bp-art" data-board="edit" aria-label="Editar la pizarra"><span class="art">' + boardSVG(ex.sport, diagram) + '</span></button>' +
+          '<div class="bp-txt"><b>Pizarra</b><span>' + plural(n, 'elemento', 'elementos') + '</span><div class="bp-actions"><button type="button" class="cap" data-board="edit">Editar</button><button type="button" class="cap" data-board="remove">Quitar</button></div></div></div>';
+      } else {
+        box.innerHTML = '<button type="button" class="board-add" data-board="edit"><span class="ico">' + ic('board') + '</span><span class="txt"><b>Dibujar en la pizarra</b><span class="s">Jugadores, conos, balón y flechas</span></span>' + ic('chevR', 'chev') + '</button>';
+      }
+    }
     renderTags();
     renderMedia();
+    renderBoardBlock();
     if (opts.file) useFile(opts.file);
     $$('textarea', root).forEach((ta) => { autoGrow(ta); ta.addEventListener('input', () => autoGrow(ta)); });
     root.addEventListener('input', () => { dirty = true; });
     bindSeg(root, 'sport', (v) => {
       ex.sport = v;
       if (SPORTS[v].tags.indexOf(ex.objective) < 0) ex.objective = '';
-      sheet.setTint(v); renderTags(); dirty = true;
+      sheet.setTint(v); renderTags(); renderBoardBlock(); dirty = true;
     });
     bindSeg(root, 'level', (v) => { ex.level = v; dirty = true; });
     root.addEventListener('click', (e) => {
@@ -1174,6 +1383,12 @@
       }
       const pk = e.target.closest('[data-pick]');
       if (pk) { pickFile(pk.dataset.pick, useFile); return; }
+      const bd = e.target.closest('[data-board]');
+      if (bd) {
+        if (bd.dataset.board === 'remove') { diagram = null; diagramChanged = true; renderBoardBlock(); return; }
+        openBoard({ sport: ex.sport, diagram, onDone: (d) => { diagram = d; diagramChanged = true; renderBoardBlock(); } });
+        return;
+      }
       const ma = e.target.closest('[data-media-act]');
       if (ma) {
         if (ma.dataset.mediaAct === 'change') pickFile('pick', useFile);
@@ -1206,9 +1421,11 @@
         material: $('#ex-material', root).value.trim(),
         description: $('#ex-desc', root).value.trim(),
         keyPoints: $('#ex-points', root).value.trim(),
+        diagram: diagram && diagram.items && diagram.items.length ? diagram : null,
         example: false,
         updatedAt: Date.now(),
       });
+      if (!editing && S.backend.me) ex.authorId = S.backend.me;
       sheet.setBusy(true, 'Guardando…');
       const old = [];
       try {
@@ -1234,7 +1451,7 @@
         old.filter(Boolean).forEach((id) => S.backend.deleteMedia(id).catch(() => {}));
         sheet.setBusy(false);
         if (media && media.previewURL) URL.revokeObjectURL(media.previewURL);
-        media = null; dirty = false; removeMedia = false;
+        media = null; dirty = false; removeMedia = false; diagramChanged = false;
         sheet.dismiss();
         renderAll(); refreshScreens();
         haptic(12);
@@ -1259,7 +1476,11 @@
     if (ex.mediaType === 'image' && ex.mediaId) {
       return '<div class="d-frame"' + style + '><img alt="' + esc(ex.title) + '" data-media="' + esc(ex.mediaId) + '"></div>';
     }
+    if (hasDiagram(ex)) return boardFrameHTML(ex);
     return '<div class="d-frame art-frame"><span class="art">' + fieldArt(ex.sport) + '</span></div>';
+  }
+  function boardFrameHTML(ex) {
+    return '<div class="d-frame board-frame"><span class="art">' + boardSVG(ex.sport, ex.diagram, { fit: 'xMidYMid meet' }) + '</span></div>';
   }
   function bindVideoFallback(box) {
     const v = $('video', box);
@@ -1287,7 +1508,7 @@
     const points = String(ex.keyPoints || '').split('\n').map((s) => s.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
     const eyebrow = [ex.objective, ex.level].filter(Boolean).join(' · ') || SPORTS[ex.sport].name;
     let created = '';
-    try { created = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ex.createdAt || Date.now())); } catch (e) { /* */ }
+    try { created = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ex.createdAt || Date.now())); } catch (e) { /* */ }
     return '<div class="d-head"><p class="d-eyebrow">' + esc(eyebrow) + '</p><h1 class="d-title">' + esc(ex.title || 'Sin título') + '</h1>' +
       (ex.example ? '<span class="pill-ex inline">Ejemplo</span>' : '') + '</div>' +
       '<div class="stats">' +
@@ -1296,11 +1517,33 @@
       '<div class="stat"><span class="k">' + ic('age') + 'Edad</span>' + v(ex.age) + '</div></div>' +
       (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="add-to-class">' + ic('plus') + 'Añadir a una clase</button>' +
         '<button class="btn icon tinted" data-act="fav" aria-pressed="' + !!ex.favorite + '" aria-label="' + (ex.favorite ? 'Quitar de favoritos' : 'Marcar como favorito') + '">' + ic(ex.favorite ? 'heart-fill' : 'heart') + '</button></div>' : '') +
+      (ex.mediaId && hasDiagram(ex) ? sec('Pizarra', boardFrameHTML(ex)) : '') +
       (ex.description ? sec('Descripción', '<p>' + esc(ex.description) + '</p>') : '') +
       (points.length ? sec('Puntos clave', '<ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>') : '') +
       (ex.material ? sec('Material', '<p>' + esc(ex.material) + '</p>') : '') +
       (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row danger" data-act="delete">' + ic('trash') + 'Eliminar ejercicio</button></div>' : '') +
-      (created ? '<p class="foot">Agregado el ' + esc(created) + '</p>' : '');
+      footHTML(ex.authorId, created);
+  }
+
+  function authorLabel(id) {
+    if (!id || !S.backend) return '';
+    if (id === S.backend.me) return 'ti';
+    if (!(id in S.names)) { requestNames([id]); return ''; }
+    return S.names[id] || 'otro profe';
+  }
+  function requestNames(ids) {
+    const need = ids.filter((id) => id && !S.namesAsked.has(id));
+    if (!need.length || !S.backend) return;
+    need.forEach((id) => S.namesAsked.add(id));
+    S.backend.profiles(need).then((ps) => {
+      need.forEach((id) => { S.names[id] = (ps && ps[id] && ps[id].name) || ''; });
+      refreshScreens();
+    });
+  }
+  function footHTML(authorId, created) {
+    const who = authorLabel(authorId);
+    if (!who && !created) return '';
+    return '<p class="foot">Agregado' + (who ? ' por ' + esc(who) : '') + (created ? ' el ' + esc(created) : '') + '</p>';
   }
 
   function openExercise(id) {
@@ -1315,7 +1558,7 @@
       if (!e) { popLayer(scr); return; }
       scr.el.dataset.tint = e.sport;
       scr.setTitle(e.title);
-      const key = [e.mediaType, e.mediaId, e.thumbId].join(':');
+      const key = [e.mediaType, e.mediaId, e.thumbId, e.mediaId ? '' : JSON.stringify(e.diagram || null)].join(':');
       if (key !== mediaKey) {
         mediaKey = key;
         const box = $('[data-ref="media"]', scr.body);
@@ -1408,13 +1651,15 @@
     const editing = !!opts.cls;
     const c = editing ? plain(opts.cls) : {
       id: uid(), name: '', sport: opts.sport || (S.tab === 'basquet' ? 'basquet' : 'futbol'),
-      date: todayStr(), notes: '', items: opts.items || [], createdAt: Date.now(),
+      date: todayStr(), notes: '', items: opts.items || [], groupId: opts.groupId || null, createdAt: Date.now(),
     };
+    if (!editing && S.backend && S.backend.me) c.authorId = S.backend.me;
     let dirty = false;
     const body =
       '<div class="group"><input class="field-lg" id="cl-name" placeholder="Nombre de la clase" maxlength="80" autocomplete="off" enterkeyhint="done" value="' + esc(c.name) + '"></div>' +
       '<p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquet']], c.sport) +
-      '<div class="group"><label class="row"><span class="k">' + ic('calendar') + 'Fecha</span><input id="cl-date" type="date" value="' + esc(c.date || '') + '"></label></div>' +
+      '<div class="group"><label class="row"><span class="k">' + ic('calendar') + 'Fecha</span><input id="cl-date" type="date" value="' + esc(c.date || '') + '"></label>' +
+      '<button type="button" class="row row-btn" data-act="pick-group"><span class="k">' + ic('people') + 'Grupo</span><span class="val" data-ref="group-val"></span>' + ic('chevR', 'chev') + '</button></div>' +
       '<p class="group-label">Notas</p><div class="group"><textarea id="cl-notes" placeholder="Grupo, objetivo del día, recordatorios…" maxlength="2000">' + esc(c.notes) + '</textarea></div>' +
       (editing && c.items.length ? '' : (c.items.length ? '<p class="muted" style="margin:0 16px">Se añadirá «' + esc((getEx(c.items[0].exId) || {}).title || 'el ejercicio') + '».</p>' : ''));
     const sheet = openSheet({
@@ -1445,9 +1690,26 @@
       },
     });
     const root = sheet.body;
+    const groupOk = (g) => g && (g.sport === c.sport || !SPORTS[g.sport]);
+    function renderGroupVal() {
+      const g = getGroup(c.groupId);
+      $('[data-ref="group-val"]', root).textContent = g ? g.name : 'Sin grupo';
+    }
+    renderGroupVal();
     $$('textarea', root).forEach((ta) => { autoGrow(ta); ta.addEventListener('input', () => autoGrow(ta)); });
     root.addEventListener('input', () => { dirty = true; });
-    bindSeg(root, 'sport', (v) => { c.sport = v; sheet.setTint(v); dirty = true; });
+    bindSeg(root, 'sport', (v) => {
+      c.sport = v; sheet.setTint(v); dirty = true;
+      if (c.groupId && !groupOk(getGroup(c.groupId))) { c.groupId = null; renderGroupVal(); }
+    });
+    root.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-act="pick-group"]')) return;
+      const list = S.groups.filter(groupOk).sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      const actions = list.map((g) => ({ label: g.name, sub: [g.category, g.schedule].filter(Boolean).join(' · ') || undefined, onClick: () => { c.groupId = g.id; dirty = true; renderGroupVal(); } }));
+      if (c.groupId) actions.push({ label: 'Sin grupo', onClick: () => { c.groupId = null; dirty = true; renderGroupVal(); } });
+      actions.push({ label: 'Nuevo grupo', icon: 'plus', onClick: () => openGroupEditor({ sport: c.sport, onCreate: (g) => { c.groupId = g.id; dirty = true; renderGroupVal(); } }) });
+      actionSheet({ title: 'Grupo de la clase', actions, tint: c.sport });
+    });
   }
 
   function classDetailHTML(c, edit) {
@@ -1471,10 +1733,14 @@
         '<span class="txt"><span class="t1">' + esc(title) + '</span><span class="t2">' + esc(sub) + '</span></span>' + ic('chevR', 'chev') + '</button>';
     }).join('');
     const ops = [1, 0.72, 0.5, 0.34];
-    return '<div class="d-head"><p class="d-eyebrow">' + SPORTS[sport].name + ' · ' + esc(fmtDay(c.date)) + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1></div>' +
+    const g = getGroup(c.groupId);
+    return '<div class="d-head"><p class="d-eyebrow">' + SPORTS[sport].name + ' · ' + esc(fmtDay(c.date)) + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1>' +
+      (g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') + '</div>' +
       '<div class="c-summary"><div class="c-figs"><div><span class="num">' + total + '</span><span class="unit">min</span></div>' +
       '<div><span class="num">' + items.length + '</span><span class="unit">' + (items.length === 1 ? 'ejercicio' : 'ejercicios') + '</span></div></div>' +
-      (items.length ? '<div class="tl-bar" aria-hidden="true">' + items.map((it, i) => '<i style="flex-grow:' + Math.max(1, Number(it.min) || 0) + ';--o:' + ops[i % 4] + '"></i>').join('') + '</div>' : '') + '</div>' +
+      (items.length ? '<div class="tl-bar" aria-hidden="true">' + items.map((it, i) => '<i style="flex-grow:' + Math.max(1, Number(it.min) || 0) + ';--o:' + ops[i % 4] + '"></i>').join('') + '</div>' : '') +
+      (items.length && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar clase</button>' : '') +
+      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Dada el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div>' +
       '<div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Ordenar') + '</button>' : '') + '</div>' +
       '<div class="list">' + rows +
       (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Añadir ejercicios</span></button>' : '') +
@@ -1488,7 +1754,7 @@
     if (!c) return;
     haptic(4);
     let edit = false;
-    const scr = pushScreen({ tint: c.sport, rightHTML: S.canWrite ? '<button class="glass-btn cap" data-act="edit-class">Editar</button>' : '' });
+    const scr = pushScreen({ tint: c.sport, rightHTML: '<button class="glass-btn" data-act="share" aria-label="Compartir la clase">' + ic('share') + '</button>' + (S.canWrite ? '<button class="glass-btn cap" data-act="edit-class">Editar</button>' : '') });
     function render() {
       const cc = getClass(id);
       if (!cc) { popLayer(scr); return; }
@@ -1510,6 +1776,9 @@
       const i = Number(a.dataset.i);
       switch (a.dataset.act) {
         case 'edit-class': openClassEditor({ cls: cc }); break;
+        case 'share': shareClass(cc); break;
+        case 'start': runClass(id); break;
+        case 'open-group': if (cc.groupId) openGroup(cc.groupId); break;
         case 'toggle-edit': edit = !edit; haptic(5); render(); break;
         case 'add-ex': openPicker(id); break;
         case 'rm': mutateClass(id, (x) => { x.items.splice(i, 1); }); haptic(8); break;
@@ -1593,20 +1862,27 @@
   function clearExamples() {
     const exs = S.exercises.filter((e) => e.example);
     const cls = S.classes.filter((c) => c.example);
+    const grs = S.groups.filter((g) => g.example);
+    const parts = [exs.length ? plural(exs.length, 'ejercicio', 'ejercicios') : '', cls.length ? plural(cls.length, 'clase', 'clases') : '', grs.length ? plural(grs.length, 'grupo', 'grupos') : ''].filter(Boolean);
+    const joined = parts.length > 1 ? parts.slice(0, -1).join(', ') + ' y ' + parts[parts.length - 1] : parts.join('');
     actionSheet({
       title: '¿Borrar los ejemplos?',
-      message: 'Se borrarán ' + plural(exs.length, 'ejercicio', 'ejercicios') + (cls.length ? ' y ' + plural(cls.length, 'clase', 'clases') : '') + ' de ejemplo. Lo que tú agregaste no se toca.',
+      message: 'Se borrarán ' + joined + ' de ejemplo. Lo que tú agregaste no se toca.',
       actions: [{ label: 'Borrar ejemplos', danger: true, onClick: async () => {
         const exIds = new Set(exs.map((e) => e.id));
+        const grIds = new Set(grs.map((g) => g.id));
         S.exercises = S.exercises.filter((e) => !e.example);
         S.classes = S.classes.filter((c) => !c.example);
+        S.groups = S.groups.filter((g) => !g.example);
         renderAll(); refreshScreens();
         try {
           for (const c of cls) await S.backend.deleteClass(c.id);
+          for (const g of grs) await S.backend.deleteGroup(g.id);
           for (const c of S.classes) {
-            if ((c.items || []).some((it) => exIds.has(it.exId))) {
+            if ((c.items || []).some((it) => exIds.has(it.exId)) || grIds.has(c.groupId)) {
               const nc = plain(c);
-              nc.items = nc.items.filter((it) => !exIds.has(it.exId));
+              nc.items = (nc.items || []).filter((it) => !exIds.has(it.exId));
+              if (grIds.has(nc.groupId)) nc.groupId = null;
               replaceLocal('classes', nc);
               await S.backend.saveClass(nc);
             }
@@ -1621,6 +1897,724 @@
     });
   }
 
+  // ---------------------------------------------------------------- grupos
+  const groupClasses = (id) => S.classes.filter((c) => c.groupId === id);
+  function shake(el) {
+    const box = el.closest('.group') || el;
+    box.classList.remove('shake');
+    void box.offsetWidth;
+    box.classList.add('shake');
+    try { el.focus(); } catch (e) { /* */ }
+  }
+  function groupCellHTML(g) {
+    const n = groupClasses(g.id).length;
+    const meta = [g.category, g.schedule, plural(n, 'clase', 'clases')].filter(Boolean).join(' · ');
+    return '<button class="cell" data-open-group="' + esc(g.id) + '" data-tint="' + groupTint(g) + '"><span class="icon-sq">' + ic(SPORTS[g.sport] ? g.sport : 'people') + '</span>' +
+      '<span class="txt"><span class="t1">' + esc(g.name) + '</span><span class="t2">' + esc(meta) + '</span></span>' + ic('chevR', 'chev') + '</button>';
+  }
+  function renderGroups() {
+    const list = S.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    ref('clases', 'count').textContent = S.ready ? (list.length ? plural(list.length, 'grupo', 'grupos') : 'Sin grupos todavía') : 'Cargando…';
+    let body;
+    if (!S.ready) body = '<div class="list">' + [0, 1].map(() => '<div class="cell"><span class="icon-sq shimmer"></span><span class="txt"><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></span></div>').join('') + '</div>';
+    else if (!list.length) {
+      body = '<div class="empty"><div class="empty-art icon">' + ic('people') + '</div><h2>Organiza tus grupos</h2>' +
+        '<p>Crea un grupo por equipo o salón y asígnale sus clases para llevar su historial.</p>' +
+        (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-group">' + ic('plus') + 'Nuevo grupo</button></div>' : '') + '</div>';
+    } else body = '<div class="list">' + list.map(groupCellHTML).join('') + '</div>';
+    const sig = ['grupos', S.ready, S.canWrite, body, noteHTML('clases')].join('|');
+    if (S.sig.clases === sig) return;
+    S.sig.clases = sig;
+    ref('clases', 'note').innerHTML = noteHTML('clases');
+    ref('clases', 'body').innerHTML = body;
+  }
+
+  function openGroupEditor(opts) {
+    const editing = !!opts.group;
+    const g = editing ? plain(opts.group) : { id: uid(), name: '', sport: opts.sport || 'ambos', category: '', schedule: '', place: '', createdAt: Date.now() };
+    if (!editing && S.backend && S.backend.me) g.authorId = S.backend.me;
+    let dirty = false;
+    const sheet = openSheet({
+      title: editing ? 'Editar grupo' : 'Nuevo grupo',
+      tint: groupTint(g),
+      confirmLabel: editing ? 'Guardar' : 'Crear',
+      isDirty: () => dirty,
+      bodyHTML:
+        '<div class="group"><input class="field-lg" id="gr-name" placeholder="Nombre (Ej. Sub-12 A, 3.º B)" maxlength="60" autocomplete="off" enterkeyhint="done" value="' + esc(g.name) + '"></div>' +
+        '<p class="group-label">Deporte</p>' + segHTML('gsport', [['ambos', 'Ambos'], ['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], SPORTS[g.sport] ? g.sport : 'ambos') +
+        '<div class="group">' +
+        '<label class="row"><span class="k">' + ic('age') + 'Categoría</span><input id="gr-cat" placeholder="Ej. Sub-12, 4.º de primaria" maxlength="60" value="' + esc(g.category) + '"></label>' +
+        '<label class="row"><span class="k">' + ic('clock') + 'Horario</span><input id="gr-sched" placeholder="Ej. Lun y Mié 16:00" maxlength="60" value="' + esc(g.schedule) + '"></label>' +
+        '<label class="row"><span class="k">' + ic('flag') + 'Lugar</span><input id="gr-place" placeholder="Ej. Cancha 2" maxlength="60" value="' + esc(g.place) + '"></label>' +
+        '</div>',
+      onConfirm: async () => {
+        const root = sheet.body;
+        const name = $('#gr-name', root).value.trim();
+        if (!name) { shake($('#gr-name', root)); return; }
+        Object.assign(g, {
+          name,
+          category: $('#gr-cat', root).value.trim(),
+          schedule: $('#gr-sched', root).value.trim(),
+          place: $('#gr-place', root).value.trim(),
+          example: false,
+          updatedAt: Date.now(),
+        });
+        sheet.setBusy(true, 'Guardando…');
+        try {
+          replaceLocal('groups', plain(g));
+          await S.backend.saveGroup(g);
+          sheet.setBusy(false);
+          dirty = false;
+          sheet.dismiss();
+          renderAll(); refreshScreens();
+          haptic(12);
+          toast(editing ? 'Cambios guardados' : 'Grupo creado');
+          if (!editing) {
+            if (opts.onCreate) opts.onCreate(g);
+            else setTimeout(() => openGroup(g.id), 260);
+          }
+        } catch (e) { sheet.setBusy(false); showError(e); }
+      },
+    });
+    const root = sheet.body;
+    root.addEventListener('input', () => { dirty = true; });
+    bindSeg(root, 'gsport', (v) => { g.sport = v; sheet.setTint(groupTint(g)); dirty = true; });
+  }
+
+  function groupDetailHTML(g) {
+    const t = todayStr();
+    const cls = groupClasses(g.id).sort(byUpcoming);
+    const up = cls.filter((c) => !c.date || c.date >= t);
+    const past = cls.filter((c) => c.date && c.date < t);
+    const given = cls.filter((c) => c.lastRunAt || (c.date && c.date < t));
+    const minutes = given.reduce((sum, c) => sum + classTotal(c), 0);
+    const counts = {};
+    given.forEach((c) => (c.items || []).forEach((it) => { const e = getEx(it.exId); if (e && e.objective) counts[e.objective] = (counts[e.objective] || 0) + 1; }));
+    const worked = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 8);
+    const meta = [g.schedule ? ic('clock') + esc(g.schedule) : '', g.place ? ic('flag') + esc(g.place) : ''].filter(Boolean);
+    return '<div class="d-head"><p class="d-eyebrow">' + esc([SPORTS[g.sport] ? SPORTS[g.sport].name : 'Fútbol y básquetbol', g.category].filter(Boolean).join(' · ')) + '</p>' +
+      '<h1 class="d-title">' + esc(g.name) + '</h1>' + (meta.length ? '<p class="g-meta">' + meta.map((m) => '<span>' + m + '</span>').join('') + '</p>' : '') + '</div>' +
+      '<div class="c-summary"><div class="c-figs">' +
+      '<div><span class="num">' + given.length + '</span><span class="unit">' + (given.length === 1 ? 'clase dada' : 'clases dadas') + '</span></div>' +
+      '<div><span class="num">' + minutes + '</span><span class="unit">min</span></div></div>' +
+      (S.canWrite ? '<button class="btn filled start-btn" data-act="new-class">' + ic('plus') + 'Nueva clase para este grupo</button>' : '') + '</div>' +
+      (worked.length ? '<section class="sec"><h2>Lo que han trabajado</h2><div class="chips wrap static">' + worked.map((w) => '<span class="chip">' + esc(w) + ' <b>' + counts[w] + '</b></span>').join('') + '</div></section>' : '') +
+      (up.length ? '<p class="group-label">Próximas</p><div class="list">' + up.map(classCellHTML).join('') + '</div>' : '') +
+      (past.length ? '<p class="group-label">Anteriores</p><div class="list">' + past.map(classCellHTML).join('') + '</div>' : '') +
+      (!cls.length ? '<p class="muted center">Este grupo todavía no tiene clases.</p>' : '') +
+      (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row danger" data-act="delete-group">' + ic('trash') + 'Eliminar grupo</button></div>' : '');
+  }
+
+  function openGroup(id) {
+    const g0 = getGroup(id);
+    if (!g0) return;
+    haptic(4);
+    const scr = pushScreen({ tint: groupTint(g0), rightHTML: S.canWrite ? '<button class="glass-btn cap" data-act="edit-group">Editar</button>' : '' });
+    function render() {
+      const g = getGroup(id);
+      if (!g) { popLayer(scr); return; }
+      scr.el.dataset.tint = groupTint(g);
+      scr.setTitle(g.name);
+      scr.body.innerHTML = groupDetailHTML(g);
+    }
+    render();
+    scr.refresh = render;
+    scr.el.addEventListener('click', (ev) => {
+      const oc = ev.target.closest('[data-open-class]');
+      if (oc) { openClass(oc.dataset.openClass); return; }
+      const a = ev.target.closest('[data-act]');
+      const g = getGroup(id);
+      if (!a || !g) return;
+      switch (a.dataset.act) {
+        case 'edit-group': openGroupEditor({ group: g }); break;
+        case 'new-class': openClassEditor({ sport: SPORTS[g.sport] ? g.sport : undefined, groupId: g.id }); break;
+        case 'delete-group':
+          actionSheet({
+            title: '¿Eliminar el grupo «' + g.name + '»?',
+            message: 'Sus clases no se borran; solo quedan sin grupo.',
+            actions: [{ label: 'Eliminar grupo', danger: true, onClick: async () => {
+              const affected = groupClasses(id);
+              S.groups = S.groups.filter((x) => x.id !== id);
+              renderAll(); refreshScreens();
+              try {
+                for (const c of affected) {
+                  const nc = plain(c); nc.groupId = null; nc.updatedAt = Date.now();
+                  replaceLocal('classes', nc);
+                  await S.backend.saveClass(nc);
+                }
+                await S.backend.deleteGroup(id);
+                toast('Grupo eliminado', 'trash');
+              } catch (e) { showError(e, 'No se pudo eliminar'); }
+            } }],
+          });
+          break;
+        default: break;
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------- pizarra táctica
+  const BOARD_TOOLS = [
+    ['move', 'Mover', 'move'], ['a', 'Equipo A', null], ['b', 'Equipo B', null], ['cone', 'Cono', 'cone'], ['ball', 'Balón', null],
+    ['pase', 'Pase', 'arrowPass'], ['conduccion', 'Conducción', 'arrowDrib'], ['mov', 'Desplazamiento', 'arrowRun'], ['erase', 'Borrar', 'erase'],
+  ];
+  const BOARD_HINT = {
+    move: 'Arrastra un elemento para moverlo.',
+    a: 'Toca la cancha para poner un jugador del equipo A.',
+    b: 'Toca la cancha para poner un jugador del equipo B.',
+    cone: 'Toca la cancha para poner un cono.',
+    ball: 'Toca la cancha para poner el balón.',
+    pase: 'Arrastra para dibujar un pase.',
+    conduccion: 'Arrastra para dibujar una conducción.',
+    mov: 'Arrastra para dibujar un desplazamiento sin balón.',
+    erase: 'Toca un elemento para borrarlo.',
+  };
+  function openBoard(o) {
+    const sport = SPORTS[o.sport] ? o.sport : 'futbol';
+    const d = o.diagram ? plain(o.diagram) : { v: defaultVariant(sport), items: [] };
+    if (!VARIANTS[sport].some((x) => x[0] === d.v)) d.v = defaultVariant(sport);
+    d.items = d.items || [];
+    const hist = [];
+    let tool = d.items.length ? 'move' : 'a';
+    let changed = false;
+    let drag = null;
+    const wrap = document.createElement('div');
+    wrap.className = 'board-wrap';
+    wrap.dataset.tint = sport;
+    wrap.setAttribute('role', 'dialog');
+    wrap.setAttribute('aria-modal', 'true');
+    wrap.setAttribute('aria-label', 'Pizarra');
+    wrap.innerHTML =
+      '<div class="board-head"><button type="button" class="cap" data-bd="cancel">Cancelar</button><span class="sh-title">Pizarra</span><button type="button" class="cap filled" data-bd="done">Listo</button></div>' +
+      '<div class="board-sub">' + segHTML('variant', VARIANTS[sport], d.v) + '</div>' +
+      '<div class="board-stage"><div class="board-canvas art"></div></div>' +
+      '<p class="board-hint" aria-live="polite"></p>' +
+      '<div class="board-tools" role="toolbar" aria-label="Herramientas">' +
+      BOARD_TOOLS.map((t) => '<button type="button" class="bt" data-tool="' + t[0] + '" aria-pressed="false">' +
+        (t[0] === 'a' || t[0] === 'b' ? '<span class="dot dot-' + t[0] + '">' + t[0].toUpperCase() + '</span>' : ic(t[0] === 'ball' ? sport : t[2])) + '<span>' + t[1] + '</span></button>').join('') +
+      '<span class="bt-sep" aria-hidden="true"></span>' +
+      '<button type="button" class="bt" data-bd="undo">' + ic('undo') + '<span>Deshacer</span></button>' +
+      '<button type="button" class="bt" data-bd="clear">' + ic('trash') + '<span>Limpiar</span></button></div>';
+    document.body.appendChild(wrap);
+    const canvas = $('.board-canvas', wrap);
+
+    function render() {
+      canvas.innerHTML = boardSVG(sport, d, { interactive: true, fit: 'xMidYMid meet', cls: 'board-svg' });
+      $('[data-bd="undo"]', wrap).disabled = !hist.length;
+      $('[data-bd="clear"]', wrap).disabled = !d.items.length;
+    }
+    function setTool(t) {
+      tool = t;
+      $$('[data-tool]', wrap).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tool === t)));
+      $('.board-hint', wrap).textContent = BOARD_HINT[t] || '';
+      canvas.dataset.tool = t;
+    }
+    const snapshot = () => { hist.push(JSON.stringify(d.items)); if (hist.length > 60) hist.shift(); changed = true; };
+    const clampX = (x) => Math.min(154, Math.max(6, x));
+    const clampY = (y) => Math.min(194, Math.max(6, y));
+    function toBoard(e) {
+      const svg = $('svg', canvas);
+      const m = svg && svg.getScreenCTM();
+      if (!m) return null;
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      const p = pt.matrixTransform(m.inverse());
+      return { x: r1(p.x), y: r1(p.y) };
+    }
+    const nextNum = (team) => d.items.filter((it) => it.t === team).reduce((mx, it) => Math.max(mx, Number(it.n) || 0), 0) + 1;
+
+    canvas.addEventListener('pointerdown', (e) => {
+      const p = toBoard(e);
+      if (!p) return;
+      const hit = e.target.closest('[data-i]');
+      const hi = hit ? Number(hit.dataset.i) : -1;
+      if (tool === 'erase') {
+        if (hi >= 0) { snapshot(); d.items.splice(hi, 1); haptic(6); render(); }
+        return;
+      }
+      const startMove = () => { snapshot(); drag = { kind: 'move', i: hi, last: p }; try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* */ } };
+      if (tool === 'move') { if (hi >= 0) startMove(); return; }
+      if (tool === 'pase' || tool === 'conduccion' || tool === 'mov') {
+        snapshot();
+        d.items.push({ t: 'arrow', k: tool, x: clampX(p.x), y: clampY(p.y), x2: clampX(p.x), y2: clampY(p.y) });
+        drag = { kind: 'arrow', i: d.items.length - 1 };
+        try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* */ }
+        render();
+        return;
+      }
+      if (hi >= 0 && d.items[hi].t !== 'arrow') { startMove(); return; }
+      snapshot();
+      const it = { t: tool, x: clampX(p.x), y: clampY(p.y) };
+      if (tool === 'a' || tool === 'b') it.n = nextNum(tool);
+      if (tool === 'ball') d.items = d.items.filter((x) => x.t !== 'ball' || d.items.filter((y) => y.t === 'ball').length < 3);
+      d.items.push(it);
+      haptic(5);
+      render();
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const p = toBoard(e);
+      if (!p) return;
+      const it = d.items[drag.i];
+      if (!it) return;
+      if (drag.kind === 'arrow') { it.x2 = clampX(p.x); it.y2 = clampY(p.y); } else {
+        const dx = p.x - drag.last.x; const dy = p.y - drag.last.y;
+        drag.last = p;
+        it.x = clampX(r1(it.x + dx)); it.y = clampY(r1(it.y + dy));
+        if (it.t === 'arrow') { it.x2 = clampX(r1(it.x2 + dx)); it.y2 = clampY(r1(it.y2 + dy)); }
+      }
+      render();
+    });
+    const endDrag = () => {
+      if (!drag) return;
+      const it = d.items[drag.i];
+      if (drag.kind === 'arrow' && it && Math.hypot(it.x2 - it.x, it.y2 - it.y) < 7) { d.items.splice(drag.i, 1); hist.pop(); }
+      drag = null;
+      render();
+    };
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+
+    const layer = {
+      kind: 'board', el: wrap,
+      close() { wrap.classList.remove('open'); setTimeout(() => wrap.remove(), 450); },
+      onBack() { cancel(); },
+    };
+    function cancel() {
+      if (!changed) { popLayer(layer); return; }
+      actionSheet({ title: '¿Descartar los cambios de la pizarra?', actions: [{ label: 'Descartar cambios', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir dibujando' });
+    }
+    wrap.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-tool]');
+      if (t) { setTool(t.dataset.tool); haptic(4); return; }
+      const b = e.target.closest('[data-bd]');
+      if (!b) return;
+      switch (b.dataset.bd) {
+        case 'cancel': cancel(); break;
+        case 'done': popLayer(layer); o.onDone(d.items.length ? { v: d.v, items: d.items } : null); break;
+        case 'undo': if (hist.length) { d.items = JSON.parse(hist.pop()); render(); } break;
+        case 'clear': if (d.items.length) { snapshot(); d.items = []; render(); } break;
+        default: break;
+      }
+    });
+    bindSeg(wrap, 'variant', (v) => { d.v = v; changed = true; render(); });
+    setTool(tool);
+    render();
+    pushLayer(layer);
+    requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('open')));
+  }
+
+  // ---------------------------------------------------------------- modo clase (cronómetro + pitazo)
+  let audioCtx = null;
+  function unlockAudio() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audioCtx = audioCtx || new AC();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const b = audioCtx.createBuffer(1, 1, 22050);
+      const src = audioCtx.createBufferSource();
+      src.buffer = b; src.connect(audioCtx.destination); src.start(0);
+    } catch (e) { /* sin audio */ }
+  }
+  // Silbato de árbitro sintetizado: tono agudo con trino.
+  function whistle(pattern) {
+    try {
+      if (!audioCtx) unlockAudio();
+      if (!audioCtx) return;
+      const ctx = audioCtx;
+      const t0 = ctx.currentTime + 0.02;
+      const blow = (start, dur) => {
+        const o = ctx.createOscillator();
+        const lfo = ctx.createOscillator();
+        const depth = ctx.createGain();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = 2750;
+        lfo.frequency.value = 36;
+        depth.gain.value = 170;
+        lfo.connect(depth); depth.connect(o.frequency);
+        g.gain.setValueAtTime(0, start);
+        g.gain.linearRampToValueAtTime(0.32, start + 0.025);
+        g.gain.setValueAtTime(0.32, start + dur - 0.06);
+        g.gain.linearRampToValueAtTime(0, start + dur);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(start); lfo.start(start); o.stop(start + dur + 0.02); lfo.stop(start + dur + 0.02);
+      };
+      const seq = pattern === 'end' ? [[0, 0.22], [0.32, 0.22], [0.64, 0.75]] : pattern === 'start' ? [[0, 0.5]] : [[0, 0.35]];
+      seq.forEach((q) => blow(t0 + q[0], q[1]));
+    } catch (e) { /* sin audio */ }
+  }
+  const fmtTimer = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+
+  function runClass(id) {
+    const c = getClass(id);
+    if (!c) return;
+    const items = (c.items || []).map((it) => Object.assign({}, it, { ex: getEx(it.exId) })).filter((it) => it.ex);
+    if (!items.length) return;
+    unlockAudio();
+    const st = { i: 0, running: false, since: 0, acc: items.map(() => 0), extra: items.map(() => 0), whistled: items.map(() => false), started: false, done: false };
+    let wake = null;
+    const RING = 2 * Math.PI * 96;
+    const wrap = document.createElement('div');
+    wrap.className = 'run';
+    wrap.dataset.tint = SPORTS[c.sport] ? c.sport : 'futbol';
+    wrap.setAttribute('role', 'dialog');
+    wrap.setAttribute('aria-modal', 'true');
+    wrap.setAttribute('aria-label', 'Clase en curso');
+    wrap.innerHTML =
+      '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir del modo clase">' + ic('xmark') + '</button>' +
+      '<div class="run-hd"><span class="run-step" data-ref="step"></span><span class="run-class">' + esc(c.name || 'Clase') + '</span></div>' +
+      '<button type="button" class="glass-btn" data-run="whistle" aria-label="Pitazo">' + ic('whistle') + '</button></header>' +
+      '<div class="run-body" data-ref="body"></div>';
+    document.body.appendChild(wrap);
+    const body = $('[data-ref="body"]', wrap);
+
+    const elapsed = (i) => st.acc[i] + (st.running && st.i === i ? Date.now() - st.since : 0);
+    const durMs = (i) => (Number(items[i].min) + st.extra[i]) * 60000;
+    function commit() { if (st.running) { st.acc[st.i] += Date.now() - st.since; st.since = Date.now(); } }
+    function totalElapsed() { return items.reduce((s, it, i) => s + elapsed(i), 0); }
+    const plannedMs = () => items.reduce((s, it, i) => s + durMs(i), 0);
+
+    function renderBlock() {
+      const it = items[st.i];
+      const ex = it.ex;
+      const points = String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean).slice(0, 3);
+      let media;
+      if (ex.mediaType === 'video' && ex.mediaId) media = '<video muted playsinline loop autoplay preload="auto" data-media="' + esc(ex.mediaId) + '"' + (ex.thumbId ? ' data-poster="' + esc(ex.thumbId) + '"' : '') + '></video>';
+      else if (ex.mediaType === 'image' && ex.mediaId) media = '<img alt="" data-media="' + esc(ex.mediaId) + '">';
+      else media = '<span class="art">' + boardSVG(ex.sport, hasDiagram(ex) ? ex.diagram : null, { fit: 'xMidYMid meet' }) + '</span>';
+      const nxt = items[st.i + 1];
+      body.innerHTML = st.done ? doneHTML() :
+        '<div class="run-media">' + media + '</div>' +
+        '<div class="run-ex"><p class="d-eyebrow">' + esc([ex.objective, ex.level].filter(Boolean).join(' · ') || SPORTS[ex.sport].name) + '</p><h2>' + esc(ex.title) + '</h2></div>' +
+        '<div class="run-ring"><svg viewBox="0 0 220 220" aria-hidden="true"><circle class="rr-track" cx="110" cy="110" r="96"/><circle class="rr-bar" cx="110" cy="110" r="96" stroke-dasharray="' + RING.toFixed(1) + '" transform="rotate(-90 110 110)"/></svg>' +
+        '<div class="rr-txt"><span class="rr-time" data-ref="time">0:00</span><span class="rr-sub" data-ref="sub"></span></div></div>' +
+        '<div class="run-ctrls"><button type="button" class="rc" data-run="prev" aria-label="Ejercicio anterior"' + (st.i === 0 ? ' disabled' : '') + '>' + ic('prev') + '</button>' +
+        '<button type="button" class="rc big" data-run="toggle" aria-label="Iniciar o pausar"></button>' +
+        '<button type="button" class="rc" data-run="next" aria-label="' + (nxt ? 'Siguiente ejercicio' : 'Terminar la clase') + '">' + ic(nxt ? 'next' : 'flag') + '</button></div>' +
+        '<div class="run-sec"><button type="button" class="cap" data-run="plus">+1 min</button><span class="run-next">' + (nxt ? 'Sigue: <b>' + esc(nxt.ex.title) + '</b> · ' + nxt.min + ' min' : 'Es el último ejercicio') + '</span></div>' +
+        (points.length ? '<ul class="points run-points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
+        '<div class="run-foot"><div class="tl-bar" data-ref="bar">' + items.map((x, i) => '<i style="flex-grow:' + Math.max(1, Number(x.min) || 0) + '" class="' + (i < st.i ? 'past' : i === st.i ? 'cur' : '') + '"></i>').join('') + '</div>' +
+        '<p class="run-total" data-ref="total"></p></div>';
+      hydrate(body);
+      update();
+    }
+    function doneHTML() {
+      const tot = totalElapsed();
+      return '<div class="run-done"><div class="empty-art icon">' + ic('check') + '</div><h2>¡Clase terminada!</h2>' +
+        '<p>Duró ' + fmtTimer(tot) + ' de ' + Math.round(plannedMs() / 60000) + ' min planeados.</p>' +
+        '<button type="button" class="btn filled" data-run="exit">Listo</button></div>';
+    }
+    function update() {
+      if (st.done) return;
+      $('[data-ref="step"]', wrap).textContent = 'Ejercicio ' + (st.i + 1) + ' de ' + items.length;
+      const el = elapsed(st.i);
+      const dur = durMs(st.i);
+      const rem = dur - el;
+      const over = rem < 0;
+      const t = $('[data-ref="time"]', body);
+      if (!t) return;
+      t.textContent = over ? '+' + fmtTimer(-rem) : fmtTimer(rem);
+      $('[data-ref="sub"]', body).textContent = over ? 'Tiempo cumplido' : (st.running ? 'de ' : 'Pausado · ') + (Number(items[st.i].min) + st.extra[st.i]) + ' min';
+      wrap.classList.toggle('over', over);
+      wrap.classList.toggle('running', st.running);
+      const bar = $('.rr-bar', body);
+      if (bar) bar.style.strokeDashoffset = over ? '0' : (RING * Math.min(1, el / dur)).toFixed(1);
+      const tg = $('[data-run="toggle"]', body);
+      if (tg) {
+        const html = st.running ? ic('pause') : ic('play') + (!st.started ? '<span>Empezar</span>' : '');
+        if (tg.dataset.state !== String(st.running) + st.started) { tg.innerHTML = html; tg.dataset.state = String(st.running) + st.started; }
+        tg.classList.toggle('wide', !st.started);
+      }
+      $('[data-ref="total"]', body).textContent = 'Clase ' + fmtTimer(totalElapsed()) + ' / ' + fmtTimer(plannedMs());
+      const cur = $('[data-ref="bar"] .cur', body);
+      if (cur) cur.style.setProperty('--p', Math.min(100, Math.round((el / dur) * 100)) + '%');
+      if (over && !st.whistled[st.i] && st.running) {
+        st.whistled[st.i] = true;
+        whistle('end');
+        try { if (navigator.vibrate) navigator.vibrate([220, 120, 220, 120, 500]); } catch (e) { /* */ }
+      }
+    }
+    async function keepAwake() {
+      try { if (navigator.wakeLock && document.visibilityState === 'visible') wake = await navigator.wakeLock.request('screen'); } catch (e) { wake = null; }
+    }
+    function go(i) {
+      commit();
+      st.i = Math.max(0, Math.min(items.length - 1, i));
+      if (st.running) st.since = Date.now();
+      haptic(8);
+      renderBlock();
+    }
+    function finish() {
+      commit();
+      st.running = false;
+      st.done = true;
+      $('[data-ref="step"]', wrap).textContent = 'Terminada';
+      wrap.classList.remove('over', 'running');
+      whistle('end');
+      renderBlock();
+      if (S.canWrite) mutateClass(id, (x) => { x.lastRunAt = Date.now(); });
+    }
+    const onVis = () => { if (document.visibilityState === 'visible') { keepAwake(); update(); } };
+    document.addEventListener('visibilitychange', onVis);
+    const timer = setInterval(update, 250);
+    const layer = {
+      kind: 'run', el: wrap,
+      close() {
+        clearInterval(timer);
+        document.removeEventListener('visibilitychange', onVis);
+        try { if (wake) wake.release(); } catch (e) { /* */ }
+        wrap.classList.remove('open');
+        setTimeout(() => wrap.remove(), 450);
+      },
+      onBack() { exit(); },
+    };
+    function exit() {
+      if (st.done || !st.started) { popLayer(layer); return; }
+      actionSheet({ title: '¿Salir del modo clase?', message: 'Se perderá el tiempo que llevas.', actions: [{ label: 'Salir', danger: true, onClick: () => popLayer(layer) }], cancel: 'Seguir con la clase' });
+    }
+    wrap.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-run]');
+      if (!b) return;
+      switch (b.dataset.run) {
+        case 'close': exit(); break;
+        case 'exit': popLayer(layer); break;
+        case 'whistle': unlockAudio(); whistle('short'); haptic(20); break;
+        case 'toggle':
+          unlockAudio();
+          if (st.running) { commit(); st.running = false; } else {
+            if (!st.started) { st.started = true; whistle('start'); keepAwake(); }
+            st.running = true; st.since = Date.now();
+          }
+          haptic(10);
+          update();
+          break;
+        case 'prev': go(st.i - 1); break;
+        case 'next': if (st.i >= items.length - 1) finish(); else go(st.i + 1); break;
+        case 'plus':
+          st.extra[st.i] += 1;
+          if (durMs(st.i) - elapsed(st.i) > 0) st.whistled[st.i] = false;
+          haptic(6);
+          update();
+          break;
+        default: break;
+      }
+    });
+    renderBlock();
+    pushLayer(layer);
+    requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('open')));
+  }
+
+  // ---------------------------------------------------------------- compartir (WhatsApp, PDF, texto)
+  function longDate(s) {
+    const d = parseDay(s);
+    if (!d) return '';
+    try { return cap(new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(d)); } catch (e) { return s; }
+  }
+  function classText(c) {
+    const g = getGroup(c.groupId);
+    const items = (c.items || []).map((it) => Object.assign({}, it, { ex: getEx(it.exId) })).filter((it) => it.ex);
+    const total = items.reduce((s, it) => s + (Number(it.min) || 0), 0);
+    const lines = ['*' + (c.name || 'Clase') + '*', [SPORTS[c.sport] ? SPORTS[c.sport].name : '', longDate(c.date), g ? 'Grupo ' + g.name : ''].filter(Boolean).join(' · '), total + ' min · ' + plural(items.length, 'ejercicio', 'ejercicios'), ''];
+    let t = 0;
+    items.forEach((it) => {
+      const ex = it.ex;
+      lines.push('*' + t + '′ · ' + ex.title + '* (' + it.min + ' min)');
+      t += Number(it.min) || 0;
+      const meta = [ex.objective, ex.level, ex.players].filter(Boolean).join(' · ');
+      if (meta) lines.push(meta);
+      if (ex.material) lines.push('Material: ' + ex.material);
+      String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean).slice(0, 4).forEach((p) => lines.push('• ' + p));
+      lines.push('');
+    });
+    if (c.notes) { lines.push('Notas: ' + c.notes); lines.push(''); }
+    lines.push('Hecho con ' + APP_NAME);
+    return lines.join('\n');
+  }
+  function copyText(text) {
+    const fallback = () => {
+      const sheet = openSheet({ title: 'Copiar texto', cancelLabel: 'Cerrar', bodyHTML: '<p class="muted" style="margin:0 4px 10px">Mantén presionado el texto para copiarlo.</p><div class="group"><textarea id="copy-txt" readonly style="min-height:320px">' + esc(text) + '</textarea></div>' });
+      const ta = $('#copy-txt', sheet.body);
+      setTimeout(() => { try { ta.focus(); ta.select(); } catch (e) { /* */ } }, 450);
+    };
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) { fallback(); return; }
+      navigator.clipboard.writeText(text).then(() => toast('Texto copiado'), fallback);
+    } catch (e) { fallback(); }
+  }
+  function shareClass(c) {
+    const text = classText(c);
+    const actions = [];
+    if (!framed && navigator.share) actions.push({ label: 'Compartir…', icon: 'share', onClick: () => { navigator.share({ title: c.name, text }).catch(() => {}); } });
+    actions.push({ label: 'Enviar por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) });
+    actions.push({ label: 'Descargar PDF', icon: 'doc', onClick: () => exportPDF(c) });
+    actions.push({ label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) });
+    actionSheet({ title: 'Compartir «' + (c.name || 'la clase') + '»', actions, tint: SPORTS[c.sport] ? c.sport : 'futbol' });
+  }
+
+  // jsPDF va incluido en app/vendor (funciona sin internet); cdnjs queda de respaldo.
+  const JSPDF_URLS = ['app/vendor/jspdf.umd.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'];
+  let jspdfPromise = null;
+  function loadScript(src) {
+    return new Promise((res, rej) => {
+      const sc = document.createElement('script');
+      sc.src = src;
+      sc.async = true;
+      sc.onload = res;
+      sc.onerror = () => { sc.remove(); rej(new Error('script')); };
+      document.head.appendChild(sc);
+    });
+  }
+  function loadJsPDF() {
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    if (!jspdfPromise) {
+      jspdfPromise = (async () => {
+        for (const u of JSPDF_URLS) {
+          try { await loadScript(u); if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF; } catch (e) { /* siguiente */ }
+        }
+        jspdfPromise = null;
+        throw new Error('pdf');
+      })();
+    }
+    return jspdfPromise;
+  }
+  function imageToDataURL(src, w, h) {
+    return new Promise((res) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const cv = document.createElement('canvas');
+          cv.width = w; cv.height = h;
+          const ctx = cv.getContext('2d');
+          const s = Math.max(w / img.naturalWidth, h / img.naturalHeight) || 1;
+          const dw = img.naturalWidth * s; const dh = img.naturalHeight * s;
+          ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+          res(cv.toDataURL('image/jpeg', 0.86));
+        } catch (e) { res(null); }
+      };
+      img.onerror = () => res(null);
+      img.src = src;
+    });
+  }
+  async function exImage(ex) {
+    if (ex.thumbId) {
+      const u = await S.backend.mediaURL(ex.thumbId).catch(() => null);
+      if (u) { const r = await imageToDataURL(u, 240, 300); if (r) return r; }
+    }
+    const svg = boardSVG(ex.sport, hasDiagram(ex) ? ex.diagram : null, { export: [240, 300] });
+    return imageToDataURL('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg), 240, 300);
+  }
+  async function saveFile(blob, filename) {
+    const cl = window.claude;
+    if (framed && cl && typeof cl.use === 'function') {
+      const dl = await cl.use('downloads').catch(() => null);
+      if (!dl) { alertBox('No se puede descargar aquí', 'Abre Pitazo en el navegador de tu celular o computadora para descargar el PDF.'); return; }
+      try { const r = await dl.save({ filename, data: blob }); if (r && r.status === 'saved') toast('PDF descargado'); } catch (e) {
+        if (!e || e.code !== 'declined') alertBox('No se pudo descargar', 'Vuelve a intentarlo en un momento.');
+      }
+      return;
+    }
+    try {
+      const file = new File([blob], filename, { type: 'application/pdf' });
+      if (isTouch && navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: filename }); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+    toast('PDF descargado');
+  }
+  async function exportPDF(c) {
+    toast('Preparando el PDF…', 'doc');
+    let JsPDF;
+    try { JsPDF = await loadJsPDF(); } catch (e) { alertBox('No se pudo crear el PDF', 'Revisa tu conexión a internet y vuelve a intentarlo.'); return; }
+    try {
+      const doc = new JsPDF({ unit: 'pt', format: 'a4' });
+      const W = 595.28; const H = 841.89; const M = 46;
+      const tint = c.sport === 'basquet' ? [210, 85, 10] : [14, 138, 67];
+      const soft = (o) => tint.map((v) => Math.round(255 - (255 - v) * o));
+      const ink = [17, 17, 20]; const grey = [110, 110, 118];
+      const g = getGroup(c.groupId);
+      const items = (c.items || []).map((it) => Object.assign({}, it, { ex: getEx(it.exId) })).filter((it) => it.ex);
+      const total = items.reduce((s, it) => s + (Number(it.min) || 0), 0);
+      const imgs = await Promise.all(items.map((it) => exImage(it.ex).catch(() => null)));
+      let y = M + 4;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...tint);
+      doc.text(APP_NAME.toUpperCase(), M, y, { charSpace: 1.5 });
+      y += 26;
+      doc.setTextColor(...ink); doc.setFontSize(24);
+      const title = doc.splitTextToSize(c.name || 'Clase', W - 2 * M);
+      doc.text(title, M, y);
+      y += (title.length - 1) * 28 + 20;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...grey);
+      doc.text([SPORTS[c.sport] ? SPORTS[c.sport].name : '', longDate(c.date), g ? 'Grupo ' + g.name : ''].filter(Boolean).join('   ·   '), M, y);
+      y += 16;
+      doc.text(total + ' min   ·   ' + plural(items.length, 'ejercicio', 'ejercicios'), M, y);
+      y += 16;
+      if (total > 0) {
+        let x = M; const bw = W - 2 * M - (items.length - 1) * 3;
+        items.forEach((it, i) => {
+          const w = Math.max(3, (bw * (Number(it.min) || 0)) / total);
+          doc.setFillColor(...soft([1, 0.72, 0.5, 0.34][i % 4]));
+          doc.roundedRect(x, y, w, 7, 3.5, 3.5, 'F');
+          x += w + 3;
+        });
+      }
+      y += 30;
+      let t = 0;
+      const TX = M + 108; const TW = W - TX - M - 8;
+      items.forEach((it, i) => {
+        const ex = it.ex;
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+        const desc = ex.description ? doc.splitTextToSize(ex.description, TW) : [];
+        const pts = String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
+        const ptLines = pts.map((p) => doc.splitTextToSize(p, TW - 12));
+        const meta = [ex.objective, ex.level, (Number(it.min) || 0) + ' min', ex.players ? 'Jugadores: ' + ex.players : '', ex.age].filter(Boolean).join('  ·  ');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+        const tl = doc.splitTextToSize(ex.title, TW);
+        const textH = tl.length * 16 + 14 + (desc.length ? desc.length * 13 + 6 : 0) + ptLines.reduce((s, l) => s + l.length * 13 + 3, 0) + (ex.material ? 15 : 0);
+        const blockH = Math.max(84, textH) + 22;
+        if (y + blockH > H - M - 16) { doc.addPage(); y = M + 10; }
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...tint);
+        doc.text(t + "'", M, y + 12);
+        if (imgs[i]) { try { doc.addImage(imgs[i], 'JPEG', M + 38, y, 56, 70); } catch (e) { /* imagen no válida */ } }
+        let ty = y + 12;
+        doc.setTextColor(...ink); doc.text(tl, TX, ty);
+        ty += (tl.length - 1) * 16 + 15;
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...grey);
+        doc.text(meta, TX, ty);
+        ty += 15;
+        doc.setFontSize(10); doc.setTextColor(...ink);
+        if (desc.length) { doc.text(desc, TX, ty); ty += desc.length * 13 + 6; }
+        ptLines.forEach((l) => { doc.setTextColor(...tint); doc.text('•', TX, ty); doc.setTextColor(...ink); doc.text(l, TX + 12, ty); ty += l.length * 13 + 3; });
+        if (ex.material) { doc.setFontSize(9.5); doc.setTextColor(...grey); doc.text('Material: ' + ex.material, TX, ty + 2, { maxWidth: TW }); }
+        t += Number(it.min) || 0;
+        y += blockH;
+        doc.setDrawColor(225, 225, 230); doc.setLineWidth(0.6); doc.line(M, y - 12, W - M, y - 12);
+      });
+      if (c.notes) {
+        doc.setFontSize(10);
+        const nl = doc.splitTextToSize(c.notes, W - 2 * M);
+        if (y + nl.length * 13 + 30 > H - M - 16) { doc.addPage(); y = M + 10; }
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...ink); doc.text('Notas', M, y + 4);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.text(nl, M, y + 22);
+      }
+      const pages = doc.getNumberOfPages();
+      for (let p = 1; p <= pages; p++) {
+        doc.setPage(p);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...grey);
+        doc.text('Hecho con ' + APP_NAME + (pages > 1 ? '   ·   ' + p + ' de ' + pages : ''), W / 2, H - 24, { align: 'center' });
+      }
+      const name = (APP_NAME + ' - ' + (c.name || 'Clase')).replace(/[\\/:*?"<>|]+/g, '').slice(0, 80) + '.pdf';
+      await saveFile(doc.output('blob'), name);
+    } catch (e) {
+      alertBox('No se pudo crear el PDF', 'Vuelve a intentarlo en un momento.');
+    }
+  }
+
   // ---------------------------------------------------------------- eventos globales
   function bindGlobal() {
     $('#in-capture').addEventListener('change', onFileInput);
@@ -1632,7 +2626,7 @@
     $('#fab').addEventListener('click', () => {
       if (!S.ready || !S.canWrite) return;
       haptic(8);
-      if (S.tab === 'clases') openClassEditor({});
+      if (S.tab === 'clases') { if (S.clView === 'grupos') openGroupEditor({}); else openClassEditor({}); }
       else newExerciseFlow(S.tab);
     });
     $('#main').addEventListener('click', (e) => {
@@ -1640,6 +2634,8 @@
       if (card) { openExercise(card.dataset.openEx); return; }
       const cl = e.target.closest('[data-open-class]');
       if (cl) { openClass(cl.dataset.openClass); return; }
+      const gr = e.target.closest('[data-open-group]');
+      if (gr) { openGroup(gr.dataset.openGroup); return; }
       const chip = e.target.closest('[data-chip]');
       if (chip) {
         const sport = chip.closest('.screen').dataset.tab;
@@ -1655,12 +2651,19 @@
         case 'new-capture': pickFile('capture', (f) => editorWithFile(S.tab, f)); break;
         case 'new-pick': pickFile('pick', (f) => editorWithFile(S.tab, f)); break;
         case 'new-class': openClassEditor({}); break;
+        case 'new-group': openGroupEditor({}); break;
         case 'clear-examples': clearExamples(); break;
         default: break;
       }
     });
     ['futbol', 'basquet'].forEach((sport) => {
       $('#q-' + sport).addEventListener('input', (e) => { S.q[sport] = e.target.value; renderSport(sport); });
+    });
+    bindSeg($('#screen-clases'), 'clview', (v) => {
+      S.clView = v;
+      pref.set('clview', v);
+      $('#fab').setAttribute('aria-label', v === 'grupos' ? 'Nuevo grupo' : 'Nueva clase');
+      renderClases();
     });
     window.addEventListener('scroll', onWindowScroll, { passive: true });
     window.addEventListener('hashchange', () => {
@@ -1670,6 +2673,7 @@
   }
 
   async function boot() {
+    S.clView = pref.get('clview') === 'grupos' ? 'grupos' : 'clases';
     buildShell();
     bindGlobal();
     const h = location.hash.slice(1);
@@ -1683,6 +2687,7 @@
     backend.subscribe((data) => {
       S.exercises = data.exercises.slice();
       S.classes = data.classes.slice();
+      S.groups = (data.groups || []).slice();
       S.ready = true;
       if (!data.fromCache) { S.definitive = true; S.stale = false; clearTimeout(timer); }
       renderAll();
