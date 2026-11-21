@@ -5451,7 +5451,7 @@
     const cx = (id) => (CAT() ? CAT().exercises.find((e) => e.id === id) : null);
     if (kind === 'board') return '<div class="ta-board"><span class="art">' + boardSVG('futbol', TUT_BOARD, { crop: true }) + '</span></div>';
     if (kind === 'cards') {
-      return '<div class="ta-cards">' + [['cf-15', 'Escalera de coordinación', 'futbol'], ['cf-02', 'Rondo 4 contra 1', 'futbol'], ['cb-18', 'Circuito con escalera', 'basquet']].map((c, i) => {
+      return '<div class="ta-cards">' + [['cf-15', 'Escalera de coordinación', 'futbol'], ['cf-02', 'Rondo 4 contra 1', 'futbol'], ['cb-15', 'Escalera y tiro cercano', 'basquet']].map((c, i) => {
         const x = cx(c[0]);
         const meta = x ? [x.objective, x.duration ? x.duration + ' min' : ''].filter(Boolean).join(' · ') : SPORTS[c[2]].name;
         return '<span class="ta-card c' + i + '" data-tint="' + c[2] + '"><span class="ta-img"><img alt="" decoding="async" src="' + esc((x && x.thumbUrl) || 'app/videos/' + c[0] + '-t.jpg') + '"><span class="ta-play">' + ic('play') + '</span></span>' +
