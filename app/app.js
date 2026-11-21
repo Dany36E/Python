@@ -244,7 +244,8 @@
         { id: 'cl-ej1', sport: 'futbol', name: 'Sub-12 · Técnica de pase', date: addDays(2), groupId: 'gr-ej1', notes: 'Llevar chalecos de dos colores.', items: [{ exId: 'ej-f1', min: 10 }, { exId: 'ej-f2', min: 15 }, { exId: 'ej-f3', min: 20 }], example: true, createdAt: t, updatedAt: t },
       ],
       groups: [
-        { id: 'gr-ej1', name: 'Sub-12 A', sport: 'futbol', category: 'Sub-12', schedule: 'Mar y Jue 16:00', place: 'Cancha 1', example: true, createdAt: t, updatedAt: t },
+        { id: 'gr-ej1', name: 'Sub-12 A', sport: 'futbol', category: 'Sub-12', schedule: 'Mar y Jue 16:00', place: 'Cancha 1', example: true, createdAt: t, updatedAt: t,
+          students: ['Ana', 'Bruno', 'Camila', 'Diego', 'Emiliano', 'Fernanda', 'Mateo', 'Valeria'].map((n, i) => ({ id: 'al-ej' + (i + 1), name: n })) },
       ],
     };
   }
@@ -1174,7 +1175,7 @@
     const g = getGroup(c.groupId);
     return '<button class="cell" data-open-class="' + esc(c.id) + '" data-tint="' + sport + '">' + dateTileHTML(c.date) +
       '<span class="txt"><span class="t1">' + esc(c.name || 'Clase sin nombre') + (c.date === todayStr() ? '<span class="pill">Hoy</span>' : '') + '</span>' +
-      '<span class="t2">' + esc(g ? g.name : SPORTS[sport].name) + ' · ' + plural(n, 'ejercicio', 'ejercicios') + ' · ' + classTotal(c) + ' min' + (c.lastRunAt ? ' · dada' : '') + '</span></span>' +
+      '<span class="t2">' + esc(g ? g.name : SPORTS[sport].name) + ' · ' + plural(n, 'ejercicio', 'ejercicios') + ' · ' + classTotal(c) + ' min' + (c.lastRunAt || c.attendanceAt ? ' · dada' : '') + '</span></span>' +
       ic('chevR', 'chev') + '</button>';
   }
 
@@ -1745,6 +1746,7 @@
       '<div class="list">' + rows +
       (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Añadir ejercicios</span></button>' : '') +
       (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div>' +
+      attendanceSectionHTML(c) +
       (c.notes ? '<section class="sec"><h2>Notas</h2><p>' + esc(c.notes) + '</p></section>' : '') +
       (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar clase</button></div>' : '');
   }
@@ -1779,6 +1781,8 @@
         case 'share': shareClass(cc); break;
         case 'start': runClass(id); break;
         case 'open-group': if (cc.groupId) openGroup(cc.groupId); break;
+        case 'attendance': openAttendance(id); break;
+        case 'add-students': if (cc.groupId) openAddStudents(cc.groupId); break;
         case 'toggle-edit': edit = !edit; haptic(5); render(); break;
         case 'add-ex': openPicker(id); break;
         case 'rm': mutateClass(id, (x) => { x.items.splice(i, 1); }); haptic(8); break;
@@ -1908,7 +1912,8 @@
   }
   function groupCellHTML(g) {
     const n = groupClasses(g.id).length;
-    const meta = [g.category, g.schedule, plural(n, 'clase', 'clases')].filter(Boolean).join(' · ');
+    const ns = studentsOf(g).length;
+    const meta = [g.category, g.schedule, ns ? plural(ns, 'alumno', 'alumnos') : '', plural(n, 'clase', 'clases')].filter(Boolean).join(' · ');
     return '<button class="cell" data-open-group="' + esc(g.id) + '" data-tint="' + groupTint(g) + '"><span class="icon-sq">' + ic(SPORTS[g.sport] ? g.sport : 'people') + '</span>' +
       '<span class="txt"><span class="t1">' + esc(g.name) + '</span><span class="t2">' + esc(meta) + '</span></span>' + ic('chevR', 'chev') + '</button>';
   }
@@ -1986,7 +1991,7 @@
     const cls = groupClasses(g.id).sort(byUpcoming);
     const up = cls.filter((c) => !c.date || c.date >= t);
     const past = cls.filter((c) => c.date && c.date < t);
-    const given = cls.filter((c) => c.lastRunAt || (c.date && c.date < t));
+    const given = cls.filter((c) => c.lastRunAt || c.attendanceAt || (c.date && c.date < t));
     const minutes = given.reduce((sum, c) => sum + classTotal(c), 0);
     const counts = {};
     given.forEach((c) => (c.items || []).forEach((it) => { const e = getEx(it.exId); if (e && e.objective) counts[e.objective] = (counts[e.objective] || 0) + 1; }));
@@ -1996,8 +2001,10 @@
       '<h1 class="d-title">' + esc(g.name) + '</h1>' + (meta.length ? '<p class="g-meta">' + meta.map((m) => '<span>' + m + '</span>').join('') + '</p>' : '') + '</div>' +
       '<div class="c-summary"><div class="c-figs">' +
       '<div><span class="num">' + given.length + '</span><span class="unit">' + (given.length === 1 ? 'clase dada' : 'clases dadas') + '</span></div>' +
-      '<div><span class="num">' + minutes + '</span><span class="unit">min</span></div></div>' +
+      '<div><span class="num">' + minutes + '</span><span class="unit">min</span></div>' +
+      (groupRate(g) != null ? '<div><span class="num">' + groupRate(g) + '</span><span class="unit">% asistencia</span></div>' : '') + '</div>' +
       (S.canWrite ? '<button class="btn filled start-btn" data-act="new-class">' + ic('plus') + 'Nueva clase para este grupo</button>' : '') + '</div>' +
+      studentsSectionHTML(g) +
       (worked.length ? '<section class="sec"><h2>Lo que han trabajado</h2><div class="chips wrap static">' + worked.map((w) => '<span class="chip">' + esc(w) + ' <b>' + counts[w] + '</b></span>').join('') + '</div></section>' : '') +
       (up.length ? '<p class="group-label">Próximas</p><div class="list">' + up.map(classCellHTML).join('') + '</div>' : '') +
       (past.length ? '<p class="group-label">Anteriores</p><div class="list">' + past.map(classCellHTML).join('') + '</div>' : '') +
@@ -2022,11 +2029,27 @@
     scr.el.addEventListener('click', (ev) => {
       const oc = ev.target.closest('[data-open-class]');
       if (oc) { openClass(oc.dataset.openClass); return; }
+      const stb = ev.target.closest('[data-student]');
+      if (stb && S.canWrite) {
+        const sid = stb.dataset.student;
+        const st = studentsOf(getGroup(id)).find((x) => x.id === sid);
+        if (!st) return;
+        actionSheet({
+          title: st.name,
+          tint: groupTint(getGroup(id)),
+          actions: [
+            { label: 'Cambiar nombre', icon: 'pencil', onClick: () => openRenameStudent(id, sid) },
+            { label: 'Quitar del grupo', icon: 'trash', danger: true, onClick: () => { mutateGroup(id, (x) => { x.students = x.students.filter((y) => y.id !== sid); }); toast('Alumno quitado', 'trash'); } },
+          ],
+        });
+        return;
+      }
       const a = ev.target.closest('[data-act]');
       const g = getGroup(id);
       if (!a || !g) return;
       switch (a.dataset.act) {
         case 'edit-group': openGroupEditor({ group: g }); break;
+        case 'add-students': openAddStudents(id); break;
         case 'new-class': openClassEditor({ sport: SPORTS[g.sport] ? g.sport : undefined, groupId: g.id }); break;
         case 'delete-group':
           actionSheet({
@@ -2051,6 +2074,211 @@
         default: break;
       }
     });
+  }
+
+  // ---------------------------------------------------------------- asistencia
+  const ATT = {
+    p: { label: 'Asistió', short: 'Asistieron', glyph: 'check' },
+    t: { label: 'Retardo', short: 'Retardos', glyph: null },
+    f: { label: 'Falta', short: 'Faltas', glyph: 'xmark' },
+  };
+  const studentsOf = (g) => (g && Array.isArray(g.students) ? g.students : []);
+  const sortStudents = (arr) => arr.slice().sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+  function initials(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    return ((parts[0] || '?').charAt(0) + (parts.length > 1 ? parts[1].charAt(0) : '')).toUpperCase();
+  }
+  function attendanceCounts(c, g) {
+    const att = (c && c.attendance) || {};
+    const out = { p: 0, t: 0, f: 0, total: 0, marked: 0 };
+    studentsOf(g).forEach((s) => {
+      out.total++;
+      const v = att[s.id];
+      if (v === 'p' || v === 't' || v === 'f') { out[v]++; out.marked++; }
+    });
+    return out;
+  }
+  function studentRate(g, sid) {
+    let marked = 0; let ok = 0;
+    groupClasses(g.id).forEach((c) => {
+      const v = c.attendance && c.attendance[sid];
+      if (v) { marked++; if (v === 'p' || v === 't') ok++; }
+    });
+    return marked ? Math.round((ok * 100) / marked) : null;
+  }
+  function groupRate(g) {
+    let marked = 0; let ok = 0;
+    const ids = new Set(studentsOf(g).map((s) => s.id));
+    groupClasses(g.id).forEach((c) => {
+      Object.keys(c.attendance || {}).forEach((sid) => {
+        if (!ids.has(sid)) return;
+        const v = c.attendance[sid];
+        marked++;
+        if (v === 'p' || v === 't') ok++;
+      });
+    });
+    return marked ? Math.round((ok * 100) / marked) : null;
+  }
+
+  function mutateGroup(id, fn) {
+    const cur = getGroup(id);
+    if (!cur) return Promise.resolve();
+    const g = plain(cur);
+    g.students = studentsOf(g);
+    fn(g);
+    g.updatedAt = Date.now();
+    replaceLocal('groups', g);
+    renderAll(); refreshScreens();
+    return S.backend.saveGroup(g).catch((e) => showError(e));
+  }
+
+  function attendanceSectionHTML(c) {
+    const g = getGroup(c.groupId);
+    let inner;
+    if (!g) {
+      if (!S.canWrite) return '';
+      inner = '<p class="muted">Asigna un grupo a esta clase para pasar lista.</p>' +
+        '<button class="btn tinted" data-act="edit-class">' + ic('people') + 'Elegir grupo</button>';
+    } else if (!studentsOf(g).length) {
+      inner = '<p class="muted">El grupo ' + esc(g.name) + ' todavía no tiene alumnos.</p>' +
+        (S.canWrite ? '<button class="btn tinted" data-act="add-students">' + ic('plus') + 'Agregar alumnos</button>' : '');
+    } else {
+      const k = attendanceCounts(c, g);
+      inner = '<div class="att-figs">' +
+        '<div><span class="num">' + k.p + '</span><span class="unit">de ' + k.total + ' asistieron</span></div>' +
+        (k.t ? '<div><span class="num sm">' + k.t + '</span><span class="unit">' + (k.t === 1 ? 'retardo' : 'retardos') + '</span></div>' : '') +
+        (k.f ? '<div><span class="num sm">' + k.f + '</span><span class="unit">' + (k.f === 1 ? 'falta' : 'faltas') + '</span></div>' : '') + '</div>' +
+        (k.marked ? '' : '<p class="muted">Todavía no pasas lista en esta clase.</p>') +
+        (S.canWrite ? '<button class="btn ' + (k.marked ? 'tinted' : 'filled') + '" data-act="attendance">' + ic('check') + (k.marked ? 'Editar lista' : 'Pasar lista') + '</button>' : '');
+    }
+    return '<section class="sec"><h2>Asistencia</h2><div class="att-card">' + inner + '</div></section>';
+  }
+
+  function openAttendance(classId) {
+    const c = getClass(classId);
+    const g = c && getGroup(c.groupId);
+    if (!c || !g) return;
+    const att = Object.assign({}, c.attendance || {});
+    let dirty = false;
+    const list = sortStudents(studentsOf(g));
+    const sheet = openSheet({
+      title: 'Pasar lista',
+      tint: SPORTS[c.sport] ? c.sport : 'futbol',
+      confirmLabel: 'Guardar',
+      isDirty: () => dirty,
+      discardTitle: '¿Descartar la lista?',
+      bodyHTML:
+        '<p class="att-head"><b>' + esc(g.name) + '</b> · ' + esc(fmtDay(c.date)) + '</p>' +
+        '<div class="att-sum" data-ref="sum" aria-live="polite"></div>' +
+        '<button type="button" class="btn tinted att-all" data-att-all>' + ic('check') + 'Todos asistieron</button>' +
+        '<div class="list att-list">' + list.map((s) =>
+          '<div class="att-row" data-sid="' + esc(s.id) + '"><span class="avatar">' + esc(initials(s.name)) + '</span><span class="att-name">' + esc(s.name) + '</span>' +
+          '<span class="att-btns" role="group" aria-label="Asistencia de ' + esc(s.name) + '">' +
+          ['p', 't', 'f'].map((v) => '<button type="button" class="att-b att-' + v + '" data-v="' + v + '" aria-pressed="false" aria-label="' + ATT[v].label + '">' + (ATT[v].glyph ? ic(ATT[v].glyph) : 'R') + '</button>').join('') +
+          '</span></div>').join('') + '</div>',
+      onConfirm: () => {
+        const clean = {};
+        Object.keys(att).forEach((k) => { if (att[k]) clean[k] = att[k]; });
+        mutateClass(classId, (x) => { x.attendance = clean; x.attendanceAt = Date.now(); });
+        dirty = false;
+        sheet.dismiss();
+        haptic(12);
+        toast('Lista guardada');
+      },
+    });
+    const root = sheet.body;
+    function paint() {
+      $$('.att-row', root).forEach((row) => {
+        const v = att[row.dataset.sid] || '';
+        $$('.att-b', row).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+        row.dataset.state = v;
+      });
+      const k = { p: 0, t: 0, f: 0 };
+      list.forEach((s) => { const v = att[s.id]; if (k[v] !== undefined) k[v]++; });
+      const none = list.length - k.p - k.t - k.f;
+      $('[data-ref="sum"]', root).innerHTML =
+        ['p', 't', 'f'].map((v) => '<span class="att-chip att-' + v + '"><b>' + k[v] + '</b> ' + (k[v] === 1 ? ATT[v].label.toLowerCase() : ATT[v].short.toLowerCase()) + '</span>').join('') +
+        (none ? '<span class="att-chip"><b>' + none + '</b> sin marcar</span>' : '');
+    }
+    root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-att-all]')) {
+        list.forEach((s) => { if (!att[s.id]) att[s.id] = 'p'; });
+        dirty = true; haptic(10); paint(); return;
+      }
+      const b = e.target.closest('.att-b');
+      if (!b) return;
+      const sid = b.closest('.att-row').dataset.sid;
+      att[sid] = att[sid] === b.dataset.v ? '' : b.dataset.v;
+      dirty = true; haptic(5); paint();
+    });
+    paint();
+  }
+
+  function openAddStudents(groupId) {
+    const g = getGroup(groupId);
+    if (!g) return;
+    const sheet = openSheet({
+      title: 'Agregar alumnos',
+      tint: groupTint(g),
+      confirmLabel: 'Agregar',
+      isDirty: () => !!$('#st-names', sheet.body).value.trim(),
+      bodyHTML:
+        '<p class="group-label">Un nombre por línea</p>' +
+        '<div class="group"><textarea id="st-names" placeholder="Ana Martínez&#10;Diego López&#10;Valeria Ruiz" style="min-height:220px" autocapitalize="words"></textarea></div>' +
+        '<p class="muted" style="margin:0 16px">Puedes pegar la lista completa de tu grupo.</p>',
+      onConfirm: () => {
+        const ta = $('#st-names', sheet.body);
+        const have = new Set(studentsOf(getGroup(groupId)).map((s) => norm(s.name)));
+        const names = [];
+        ta.value.split(/\r?\n/).map((x) => x.replace(/^\s*\d+[.)-]?\s*/, '').replace(/\s+/g, ' ').trim()).filter(Boolean).forEach((n) => {
+          const k = norm(n);
+          if (!have.has(k)) { have.add(k); names.push(n.slice(0, 80)); }
+        });
+        if (!names.length) { shake(ta); return; }
+        mutateGroup(groupId, (x) => { names.forEach((n) => x.students.push({ id: uid(), name: n })); });
+        ta.value = '';
+        sheet.dismiss();
+        haptic(12);
+        toast(names.length === 1 ? 'Alumno agregado' : names.length + ' alumnos agregados');
+      },
+    });
+    setTimeout(() => { try { $('#st-names', sheet.body).focus({ preventScroll: true }); } catch (e) { /* */ } }, 450);
+  }
+
+  function openRenameStudent(groupId, sid) {
+    const g = getGroup(groupId);
+    const st = studentsOf(g).find((s) => s.id === sid);
+    if (!st) return;
+    const sheet = openSheet({
+      title: 'Cambiar nombre',
+      tint: groupTint(g),
+      confirmLabel: 'Guardar',
+      isDirty: () => $('#st-name', sheet.body).value.trim() !== st.name,
+      bodyHTML: '<div class="group"><input class="field-lg" id="st-name" maxlength="80" autocomplete="off" value="' + esc(st.name) + '"></div>',
+      onConfirm: () => {
+        const inp = $('#st-name', sheet.body);
+        const name = inp.value.replace(/\s+/g, ' ').trim();
+        if (!name) { shake(inp); return; }
+        mutateGroup(groupId, (x) => { const s = x.students.find((y) => y.id === sid); if (s) s.name = name; });
+        sheet.dismiss();
+        toast('Nombre actualizado');
+      },
+    });
+  }
+
+  function studentsSectionHTML(g) {
+    const list = sortStudents(studentsOf(g));
+    const rows = list.map((s) => {
+      const r = studentRate(g, s.id);
+      return '<button class="cell st-row" data-student="' + esc(s.id) + '"' + (S.canWrite ? '' : ' disabled') + '><span class="avatar">' + esc(initials(s.name)) + '</span>' +
+        '<span class="txt"><span class="t1">' + esc(s.name) + '</span></span>' +
+        (r == null ? '<span class="st-rate muted">—</span>' : '<span class="st-rate' + (r < 75 ? ' low' : '') + '">' + r + ' %</span>') + '</button>';
+    }).join('');
+    return '<div class="section-head"><h2>Alumnos</h2><span class="muted">' + (list.length ? list.length : '') + '</span></div>' +
+      '<div class="list st-list">' + rows +
+      (S.canWrite ? '<button class="cell add-row" data-act="add-students">' + ic('plus') + '<span>Agregar alumnos</span></button>' : '') +
+      (!list.length && !S.canWrite ? '<p class="muted pad">Sin alumnos.</p>' : '') + '</div>' +
+      (list.length ? '<p class="foot" style="margin-top:-12px;margin-bottom:22px">El porcentaje cuenta asistencias y retardos de las clases en que pasaste lista.</p>' : '');
   }
 
   // ---------------------------------------------------------------- pizarra táctica
@@ -2304,7 +2532,11 @@
       const tot = totalElapsed();
       return '<div class="run-done"><div class="empty-art icon">' + ic('check') + '</div><h2>¡Clase terminada!</h2>' +
         '<p>Duró ' + fmtTimer(tot) + ' de ' + Math.round(plannedMs() / 60000) + ' min planeados.</p>' +
-        '<button type="button" class="btn filled" data-run="exit">Listo</button></div>';
+        (canRoll() ? '<button type="button" class="btn filled" data-run="roll">' + ic('check') + 'Pasar lista</button><button type="button" class="btn tinted" data-run="exit">Listo</button>' : '<button type="button" class="btn filled" data-run="exit">Listo</button>') + '</div>';
+    }
+    function canRoll() {
+      const cc = getClass(id);
+      return S.canWrite && cc && studentsOf(getGroup(cc.groupId)).length > 0;
     }
     function update() {
       if (st.done) return;
@@ -2380,6 +2612,7 @@
       switch (b.dataset.run) {
         case 'close': exit(); break;
         case 'exit': popLayer(layer); break;
+        case 'roll': popLayer(layer); setTimeout(() => openAttendance(id), 380); break;
         case 'whistle': unlockAudio(); whistle('short'); haptic(20); break;
         case 'toggle':
           unlockAudio();
