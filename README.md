@@ -2,7 +2,7 @@
 
 Tu biblioteca de ejercicios de **fútbol** y **básquetbol** para preparar y dar clases. Graba o sube videos de cada ejercicio, dibújalos en la pizarra, arma clases por grupo y dalas con el cronómetro en la mano.
 
-Diseño: minimalismo nativo al estilo iOS (títulos grandes, listas agrupadas, hojas modales, barra de pestañas flotante de vidrio, modo claro y oscuro). El color de acento cambia según el deporte: verde cancha para fútbol y naranja para básquetbol; las pausas van en azul.
+Diseño: estructura nativa de iOS con identidad de cancha: pizarrón magnético con pasto en franjas o duela de madera, letra condensada de estadio (Big Shoulders Display, licencia OFL) para títulos y reloj, verde cancha para fútbol, naranja duela para básquetbol y azul para las pausas. Modo claro y oscuro.
 
 ## Qué puedes hacer
 
@@ -12,8 +12,10 @@ La app tiene tres pestañas: **Clases**, **Ejercicios** y **Grupos**. Arriba a l
 - **Pausas y series**: añade pausas al plan (hidratación, descanso, montar material) y divide un ejercicio en series de juego y descanso (por ejemplo 5 × 3′ con 1′ de descanso).
 - **Duplicar una clase** para otro grupo o fecha.
 - **Modo clase**: cronómetro por bloque con silbato, el video o la pizarra del ejercicio en pantalla, «+1 min», series con silbato al cambiar de juego a descanso, y la pantalla encendida mientras das la clase. Para terminar pide confirmación.
-- **Ejercicios**: de fútbol y de básquetbol, con búsqueda, filtros por objetivo y favoritos. Graba o sube un video o foto, o dibújalo en la **pizarra** (jugadores, conos, balón y flechas de pase, conducción/dribleo o desplazamiento sin balón).
-- **Grupos**: lista de alumnos en el orden de tu lista oficial (con número), «Pasar lista hoy», historial de clases y objetivos trabajados.
+- **Ejercicios**: de fútbol y de básquetbol, con búsqueda, filtros por objetivo y favoritos. Graba o sube un video o foto, pega un **link de YouTube**, o dibújalo en el **pizarrón** (jugadores, conos, balón y flechas de pase, conducción/dribleo o desplazamiento sin balón).
+- **La jugada se mueve**: el pizarrón reproduce el ejercicio paso a paso (el balón viaja por los pases y los jugadores corren por sus flechas). En el modo clase se repite mientras corre el bloque.
+- **De entrenadores**: 28 ejercicios reales (14 de fútbol y 14 de básquetbol, basados en FIFA 11+ Kids, The FA, US Soccer, FIBA, Jr. NBA y otras fuentes de entrenadores) y 4 clases completas para escuela y club. Agrega a tu biblioteca solo los que te sirvan o crea una clase desde una plantilla con un toque.
+- **Grupos**: lista de alumnos en el orden de tu lista oficial (con número), «Pasar lista hoy» (en iPad, en dos columnas), historial de clases y objetivos trabajados.
 - **Asistencia**: asistió, retardo o falta; cada alumno muestra su porcentaje.
 - **Reporte de asistencia en PDF** tamaño carta: este mes, mes pasado, **trimestre** (aproximado al calendario de la SEP) o fechas; con número de lista, totales por alumno, nombre de la escuela y del profe, y espacio para firma.
 - **Compartir una clase**: por WhatsApp, en PDF para imprimir, copiando el texto o como archivo para otro profe.
@@ -38,7 +40,9 @@ Es una app web instalable (PWA): no necesita App Store ni Google Play.
 ```
 index.html            Punto de entrada de la app
 app/styles.css        Estilos (tokens de color, modo claro/oscuro, componentes)
-app/app.js            Lógica: navegación, biblioteca, pizarra, clases, grupos, modo clase y almacenamiento
+app/app.js            Lógica: navegación, biblioteca, pizarrón, clases, grupos, modo clase y almacenamiento
+app/catalog.js        Ejercicios y clases de entrenadores («De entrenadores»)
+app/fonts/            Letra de estadio (Big Shoulders Display, OFL)
 manifest.webmanifest  Datos para instalarla como app
 sw.js                 Service worker (funciona sin conexión; sube VERSION en cada cambio publicado)
 icons/                Ícono de la app
