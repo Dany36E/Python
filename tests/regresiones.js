@@ -51,14 +51,14 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   // Catálogo · agregar un ejercicio y usar una clase lista
   await p.click('#tab-ejercicios'); await W(p);
   await p.click('[data-act="catalog"]'); await W(p, 900);
-  ok(await scr(p).locator('[data-open-cat]').count() === 14, 'De entrenadores: 14 ejercicios de fútbol');
+  ok(await scr(p).locator('[data-open-cat]').count() === 26, 'De entrenadores: 26 ejercicios de fútbol');
   await scr(p).locator('[data-open-cat]', { hasText: 'Rondo 4 contra 1' }).click(); await W(p, 900);
   await scr(p).locator('[data-act="adopt"]').click(); await W(p, 900);
   ok(await scr(p).locator('[data-act="open-mine"]').count() === 1, 'el ejercicio queda en tus ejercicios');
   await p.goBack(); await W(p, 500);
   ok(await scr(p).locator('[data-open-cat]', { hasText: 'Rondo 4 contra 1' }).locator('.in-lib').count() === 1, 'la tarjeta dice «En tus ejercicios»');
   await scr(p).locator('[data-seg="csport"] [data-val="basquet"]').click(); await W(p, 500);
-  ok(await scr(p).locator('[data-open-cat]').count() === 14, 'De entrenadores: 14 ejercicios de básquetbol');
+  ok(await scr(p).locator('[data-open-cat]').count() === 24, 'De entrenadores: 24 ejercicios de básquetbol');
   await scr(p).locator('[data-open-template]').nth(1).click(); await W(p, 800);
   await scr(p).locator('[data-act="use"]').click(); await W(p, 800);
   await sheet(p).locator('[data-sh="ok"]').click(); await W(p, 1500);

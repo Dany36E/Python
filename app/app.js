@@ -428,7 +428,7 @@
 
   // ---------------------------------------------------------------- ejemplos (solo modo local)
   // Versión 2: ejemplos revisados por un profe (sesión con inicio, pausa, series y cierre).
-  const SEED_VERSION = 3;
+  const SEED_VERSION = 4;
   function nextWeekday(days) {
     const d = new Date();
     for (let i = 1; i <= 7; i++) {
@@ -439,10 +439,13 @@
   }
   function seedFromCatalog(cat) {
     const t = Date.now() - 864e5 * 3;
-    const fut = cat.sessions.find((x) => x.sport === 'futbol');
-    const bas = cat.sessions.find((x) => x.sport === 'basquet');
+    // Clases de ejemplo: las de coordinación (con videos); la biblioteca también trae las de pase y dribleo.
+    const pick = (sport, re) => cat.sessions.find((x) => x.sport === sport && re.test(x.name)) || cat.sessions.find((x) => x.sport === sport);
+    const fut = pick('futbol', /coordinaci/i);
+    const bas = pick('basquet', /pies r|coordinaci/i);
     if (!fut || !bas) return null;
-    const ids = new Set(fut.items.concat(bas.items).map((it) => it.exId).filter(Boolean));
+    const firsts = ['futbol', 'basquet'].map((sp) => cat.sessions.find((x) => x.sport === sp)).filter(Boolean);
+    const ids = new Set([fut, bas].concat(firsts).reduce((a, ses) => a.concat(ses.items.map((it) => it.exId).filter(Boolean)), []));
     let n = 0;
     const exercises = cat.exercises.filter((x) => ids.has(x.id)).map((x) => Object.assign({}, x, {
       id: 'ex3-' + x.id, catalogId: x.id, favorite: false, mediaType: null, mediaId: null, thumbId: null, mediaDuration: 0, mediaAspect: null,
@@ -2279,10 +2282,28 @@
       tint: ex.sport,
       actions: [
         { label: 'Mandar por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) },
+      ].concat(ex.videoUrl || ex.mediaType === 'video' ? [{ label: 'Mandar el video', icon: 'video', onClick: () => shareVideo(ex) }] : []).concat([
         { label: 'Archivo para otro profe (con video)', icon: 'box', onClick: () => sendExercise(ex) },
         { label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) },
-      ],
+      ]),
     });
+  }
+  // El video del ejercicio (propio o de entrenador) como archivo: WhatsApp, AirDrop o Fotos.
+  async function shareVideo(ex) {
+    try {
+      const blob = ex.mediaType === 'video' && ex.mediaId ? await S.backend.mediaBlob(ex.mediaId) : await (await fetch(ex.videoUrl)).blob();
+      if (!blob) throw new Error('video');
+      const type = (blob.type || 'video/mp4').split(';')[0];
+      const name = safeName(ex.title || 'Ejercicio') + (type.indexOf('quicktime') >= 0 ? '.mov' : '.mp4');
+      const file = new File([blob], name, { type });
+      if (!framed && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: ex.title }); } catch (e) { if (!e || e.name !== 'AbortError') throw e; }
+        return;
+      }
+      await saveFile(file, name, 'Video');
+    } catch (e) {
+      alertBox('No se pudo preparar el video', 'Revisa tu conexión y vuelve a intentarlo.');
+    }
   }
 
   // ---------------------------------------------------------------- flujos: clases
