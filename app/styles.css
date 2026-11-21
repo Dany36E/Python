@@ -1689,3 +1689,53 @@ a.as-btn { text-decoration: none; }
 
 /* Apariencia fija en claro aunque el iPad esté en oscuro */
 :root[data-theme="light"] { color-scheme: light; }
+
+/* Buscador con filtros */
+.search-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.search-row .search { flex: 1; min-width: 0; margin: 0; }
+.filter-btn { position: relative; flex: none; width: 48px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--fill); color: var(--label); font-size: 21px; }
+.filter-btn.on { background: var(--tint); color: var(--tint-on); }
+.filter-btn b { position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--danger); color: #fff; font: 700 12px/20px var(--font-round); text-align: center; }
+.filter-btn b:empty { display: none; }
+.active-filters { margin: -2px 0 10px; }
+.active-filters:empty { display: none; }
+.chip.on-chip { background: color-mix(in srgb, var(--tint) 14%, transparent); color: var(--tint); font-weight: 600; }
+.chip.on-chip svg { font-size: 12px; color: currentColor; stroke-width: 2.6; }
+.fchips { margin: 0 0 6px; }
+.fchips .chip { background: var(--bg-elev); }
+.fchips .chip[aria-pressed="true"] { background: var(--tint); color: var(--tint-on); }
+.result-count { margin: 0 2px 12px; font-size: 15px; color: var(--label-2); }
+.no-results .link { margin-top: 8px; display: inline-block; }
+
+/* Secciones */
+.sec-strip { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gr)) 22px calc(-1 * var(--gl)); padding: 2px var(--gr) 4px var(--gl); scroll-snap-type: x proximity; }
+.sec-strip::-webkit-scrollbar { display: none; }
+.sec-card { flex: none; width: 150px; display: flex; flex-direction: column; gap: 3px; text-align: left; scroll-snap-align: start; }
+.sec-card:active .sec-mosaic { transform: scale(0.96); }
+.sec-mosaic { position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; width: 150px; height: 112px; border-radius: 18px; overflow: hidden; background: var(--fill); margin-bottom: 6px; transition: transform 0.2s var(--ease); }
+.sec-mosaic.n1 .mo-cell { grid-column: 1 / 3; grid-row: 1 / 3; }
+.sec-mosaic.n2 .mo-cell { grid-row: 1 / 3; }
+.sec-mosaic.n3 .mo-cell:first-child { grid-row: 1 / 3; }
+.mo-cell { position: relative; overflow: hidden; }
+.mo-cell svg, .mo-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mo-empty, .sec-new .sec-mosaic { grid-column: 1 / 3; grid-row: 1 / 3; display: grid; place-items: center; color: var(--tint); font-size: 30px; }
+.sec-new .sec-mosaic { display: grid; place-items: center; grid-template-columns: 1fr; border: 1.5px dashed color-mix(in srgb, var(--tint) 45%, transparent); background: transparent; }
+.sec-name { font-weight: 600; font-size: 16px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sec-count { font-size: 14px; color: var(--label-2); }
+.section-head .link { display: inline-flex; align-items: center; gap: 4px; }
+.sec-sub { margin: 6px 0 0; color: var(--label-2); font-size: 16px; }
+.in-sections { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: -2px 0 10px; color: var(--label-2); }
+.in-sections svg { font-size: 17px; }
+.grid.editing .card-wrap { position: relative; animation: wiggle 0.3s ease-in-out infinite alternate; }
+.card-wrap { position: relative; }
+.card-rm { position: absolute; top: -6px; left: -6px; width: 30px; height: 30px; border-radius: 50%; background: var(--danger); color: #fff; display: grid; place-items: center; font-size: 16px; box-shadow: 0 2px 8px var(--shadow-soft); z-index: 2; }
+.card-rm svg { stroke-width: 3; }
+@keyframes wiggle { from { transform: rotate(-0.8deg); } to { transform: rotate(0.8deg); } }
+@media (prefers-reduced-motion: reduce) { .grid.editing .card-wrap { animation: none; } }
+@media (min-width: 760px) { .sec-card { width: 190px; } .sec-mosaic { width: 190px; height: 140px; } }
+.fchips + .group-label, .fchips + .group, .fchips + .seg { margin-top: 18px; }
+
+/* Videos de entrenador (verticales, tipo Short) */
+.coach-video { --ar: 0.5625; max-width: calc(68vh * 0.5625); margin-left: auto; margin-right: auto; background: #0b2716; }
+.thumb img.poster { object-position: 50% 62%; }
+.badge.vid { left: auto; right: 8px; top: 8px; bottom: auto; }

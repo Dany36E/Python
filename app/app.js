@@ -86,6 +86,7 @@
     info: '<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.2M12 7.8v.2"/>',
     drop: '<path d="M12 3.2c3.3 4 5.6 7.2 5.6 10.4a5.6 5.6 0 0 1-11.2 0c0-3.2 2.3-6.4 5.6-10.4z"/><path d="M9.4 14.6a2.7 2.7 0 0 0 2.2 2.4"/>',
     sliders: '<path d="M4 7.5h9M19 7.5h1M4 16.5h3M13 16.5h7"/><circle cx="16" cy="7.5" r="2.4"/><circle cx="10" cy="16.5" r="2.4"/>',
+    folder: '<path d="M3.5 7.2c0-1 .8-1.8 1.8-1.8h4.1l2 2.1h7.3c1 0 1.8.8 1.8 1.8v8.4c0 1-.8 1.8-1.8 1.8H5.3c-1 0-1.8-.8-1.8-1.8z"/>',
     copy: '<rect x="8.6" y="8.6" width="11" height="11" rx="2.2"/><path d="M15.4 8.6V6.2c0-.9-.7-1.6-1.6-1.6H6.2c-.9 0-1.6.7-1.6 1.6v7.6c0 .9.7 1.6 1.6 1.6h2.4"/>',
   };
 
@@ -245,6 +246,31 @@
         '<path d="M0-5.4L4.6 3.4h-9.2z" fill="' + P.cone + '" stroke="' + P.coneEdge + '" stroke-width="0.6" stroke-linejoin="round"/>' +
         '<path d="M-1.6-1.6h3.2" stroke="#FFFFFF" stroke-width="0.9" stroke-linecap="round" opacity="0.7"/><circle r="9" fill="transparent"/></g>';
     }
+    if (it.t === 'ladder') {
+      // Escalera de coordinación: n travesaños cada 7 unidades, 10 de ancho; r 0 = vertical, 90 = horizontal.
+      const n = Math.max(2, Math.min(14, Math.round(Number(it.n) || 6)));
+      const L = n * 7; const h = L / 2;
+      let rungs = '';
+      for (let k = 0; k <= n; k++) rungs += '<path d="M-5 ' + r1(-h + k * 7) + 'h10"/>';
+      return '<g class="bd-gear bd-ladder"' + di + ' transform="translate(' + r1(it.x) + ' ' + r1(it.y) + ') rotate(' + (Number(it.r) === 90 ? 90 : 0) + ')">' +
+        '<rect x="-5.6" y="' + r1(-h - 0.6) + '" width="11.2" height="' + r1(L + 1.2) + '" fill="rgba(0,0,0,0.12)" rx="1"/>' +
+        '<g stroke="#FFD23F" stroke-width="1.3" stroke-linecap="round">' + rungs + '<path d="M-5 ' + r1(-h) + 'V' + r1(h) + 'M5 ' + r1(-h) + 'V' + r1(h) + '"/></g>' +
+        '<rect x="-7" y="' + r1(-h - 2) + '" width="14" height="' + r1(L + 4) + '" fill="transparent"/></g>';
+    }
+    if (it.t === 'hurdle') {
+      return '<g class="bd-gear bd-hurdle"' + di + ' transform="translate(' + r1(it.x) + ' ' + r1(it.y) + ') rotate(' + (Number(it.r) === 90 ? 90 : 0) + ')">' +
+        '<rect x="-5.6" y="-0.4" width="12.4" height="3" rx="1.4" fill="rgba(0,0,0,0.22)"/>' +
+        '<rect x="-6.2" y="-1.4" width="12.4" height="2.8" rx="1.4" fill="#F25C2A" stroke="#A8360F" stroke-width="0.5"/>' +
+        '<path d="M-6.2-3v6M6.2-3v6" stroke="#A8360F" stroke-width="1.2" stroke-linecap="round"/><rect x="-9" y="-6" width="18" height="12" fill="transparent"/></g>';
+    }
+    if (it.t === 'ring') {
+      return '<g class="bd-gear bd-ring"' + di + tr + '><circle cx="0.4" cy="0.8" r="5" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="1.8"/>' +
+        '<circle r="5" fill="none" stroke="#E83E8C" stroke-width="1.6"/><circle r="8" fill="transparent"/></g>';
+    }
+    if (it.t === 'pole') {
+      return '<g class="bd-gear bd-pole"' + di + tr + '><ellipse cx="1.6" cy="1.4" rx="2.6" ry="1.4" fill="rgba(0,0,0,0.25)"/>' +
+        '<circle r="2.4" fill="#FFFFFF" stroke="#D62828" stroke-width="1.2"/><circle r="0.8" fill="#D62828"/><circle r="8" fill="transparent"/></g>';
+    }
     if (it.t === 'ball') {
       const inner = sport === 'basquet'
         ? '<circle r="3.6" fill="#E8701E" stroke="#3A1A05" stroke-width="0.7"/><path d="M-3.6 0h7.2M0-3.6v7.2M-2.5-2.6a3.6 3.6 0 0 1 0 5.2M2.5-2.6a3.6 3.6 0 0 0 0 5.2" fill="none" stroke="#3A1A05" stroke-width="0.5"/>'
@@ -296,6 +322,7 @@
     return Array.from(groups.keys()).sort((a, b) => a - b).map((k) => groups.get(k));
   }
   const canPlay = (d) => diagramSteps(d).length > 0;
+  const MOVERS = { a: 1, b: 1, ball: 1 };
 
   function playDiagram(host, d, opts) {
     opts = opts || {};
@@ -316,7 +343,7 @@
       items.forEach((it, i) => {
         const el = pieceEl(i);
         if (!el) return;
-        if (it.t === 'arrow') { el.style.transition = 'none'; el.style.opacity = '0'; } else el.setAttribute('transform', 'translate(' + r1(it.x) + ' ' + r1(it.y) + ')');
+        if (it.t === 'arrow') { el.style.transition = 'none'; el.style.opacity = '0'; } else if (MOVERS[it.t]) el.setAttribute('transform', 'translate(' + r1(it.x) + ' ' + r1(it.y) + ')');
       });
     }
     function nearest(type, x, y, max) {
@@ -391,7 +418,7 @@
           items.forEach((it, i) => {
             const el = pieceEl(i);
             if (!el) return;
-            if (it.t === 'arrow') { el.style.transition = 'none'; el.style.opacity = '1'; } else el.setAttribute('transform', 'translate(' + r1(it.x) + ' ' + r1(it.y) + ')');
+            if (it.t === 'arrow') { el.style.transition = 'none'; el.style.opacity = '1'; } else if (MOVERS[it.t]) el.setAttribute('transform', 'translate(' + r1(it.x) + ' ' + r1(it.y) + ')');
           });
         }
       },
@@ -438,6 +465,16 @@
           students: kids('b', ['Acosta Medina Andrea', 'Bautista Rojas Emilio', 'Cervantes Lara Fernanda', 'Delgado Núñez Sebastián', 'Escobar Ríos Mariana', 'Fuentes Salas Daniel', 'Guerrero Peña Paola', 'Ibarra Campos Rodrigo', 'Juárez Molina Natalia', 'Navarro Lozano Jesús', 'Orozco Trejo Daniela', 'Vázquez Ponce Alejandro']) },
       ],
     };
+  }
+  // Tres secciones de ejemplo que se llenan con los ejercicios de ejemplo.
+  function defaultSections(exs, t) {
+    const ids = (fn) => exs.filter(fn).map((e) => e.id);
+    const primaria = (e) => { const r = ageRange(e.age); return e.school && (!r || r[0] <= 12); };
+    return [
+      { id: 'sc4-ej1', name: 'Calentamientos', exIds: ids((e) => e.objective === 'Calentamiento'), order: 1 },
+      { id: 'sc4-ej2', name: 'Coordinación y velocidad', exIds: ids((e) => e.objective === 'Coordinación' || e.objective === 'Velocidad y agilidad'), order: 2 },
+      { id: 'sc4-ej3', name: 'Para primaria', exIds: ids(primaria), order: 3 },
+    ].map((x) => Object.assign(x, { example: true, createdAt: t, updatedAt: t }));
   }
   function seedData(cat) {
     const fromCat = cat ? seedFromCatalog(cat) : null;
@@ -594,8 +631,8 @@
     let chain = Promise.resolve();
     let pending = 0;
     async function reload() {
-      const r = await Promise.all([st.all('exercises'), st.all('classes'), st.all('groups')]);
-      const snap = { exercises: r[0] || [], classes: r[1] || [], groups: r[2] || [], fromCache: false };
+      const r = await Promise.all([st.all('exercises'), st.all('classes'), st.all('groups'), st.get('meta', 'sections')]);
+      const snap = { exercises: r[0] || [], classes: r[1] || [], groups: r[2] || [], sections: Array.isArray(r[3]) ? r[3] : [], fromCache: false };
       listeners.forEach((fn) => fn(snap));
     }
     // Las escrituras van en fila; la pantalla se recarga desde la base solo cuando ya no hay pendientes.
@@ -625,6 +662,14 @@
         await migrateSeeds(st, cat);
         await st.put('meta', seedVersion, 'seed-version');
       }
+      // Secciones de ejemplo: se crean una vez; las que siguen intactas se rellenan con los ejemplos nuevos.
+      const secs = await st.get('meta', 'sections');
+      const exampleEx = (await st.all('exercises')).filter((e) => e.example);
+      const defs = defaultSections(exampleEx, Date.now() - 864e5 * 3);
+      if (!Array.isArray(secs)) await st.put('meta', defs, 'sections');
+      else if (version < seedVersion && secs.some((x) => x.example)) {
+        await st.put('meta', secs.map((x) => { const d = defs.find((y) => y.id === x.id); return x.example && d ? Object.assign({}, x, { exIds: d.exIds }) : x; }), 'sections');
+      }
       try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* opcional */ }
     }
     return {
@@ -637,6 +682,16 @@
       deleteClass: (id) => write(() => st.del('classes', id)),
       saveGroup: (g) => write(() => st.put('groups', plain(g))),
       deleteGroup: (id) => write(() => st.del('groups', id)),
+      saveSection: (sec) => write(async () => {
+        const list = (await st.get('meta', 'sections')) || [];
+        const i = list.findIndex((x) => x.id === sec.id);
+        if (i >= 0) list[i] = plain(sec); else list.push(plain(sec));
+        await st.put('meta', list, 'sections');
+      }),
+      deleteSection: (id) => write(async () => {
+        const list = (await st.get('meta', 'sections')) || [];
+        await st.put('meta', list.filter((x) => x.id !== id), 'sections');
+      }),
       me: null,
       profiles: async () => ({}),
       async putMedia(blob) {
@@ -714,8 +769,8 @@
         try { return (await user.profiles(ids)) || {}; } catch (e) { return {}; }
       },
       subscribe(fn, onError) {
-        let ex = null; let cl = null; let gr = null; let exC = true; let clC = true; let grC = true;
-        const emit = () => { if (ex && cl && gr) fn({ exercises: ex, classes: cl, groups: gr, fromCache: exC || clC || grC }); };
+        let ex = null; let cl = null; let gr = null; let sc = []; let exC = true; let clC = true; let grC = true;
+        const emit = () => { if (ex && cl && gr) fn({ exercises: ex, classes: cl, groups: gr, sections: sc, fromCache: exC || clC || grC }); };
         const u1 = db.collection('exercises').onSnapshot((s) => {
           ex = s.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); exC = s.metadata.fromCache; emit();
         }, (e) => onError && onError(e));
@@ -725,7 +780,11 @@
         const u3 = db.collection('groups').onSnapshot((s) => {
           gr = s.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); grC = s.metadata.fromCache; emit();
         }, (e) => onError && onError(e));
-        return () => { u1(); u2(); u3(); };
+        let u4 = () => {};
+        try {
+          u4 = db.collection('sections').onSnapshot((snp) => { sc = snp.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); emit(); }, () => {});
+        } catch (e) { /* sin secciones */ }
+        return () => { u1(); u2(); u3(); u4(); };
       },
       saveExercise: (x) => queue('e:' + x.id, () => withRetry(() => db.collection('exercises').doc(x.id).set(body(x)))),
       deleteExercise: (id) => queue('e:' + id, () => withRetry(() => db.collection('exercises').doc(id).delete())),
@@ -733,6 +792,8 @@
       deleteClass: (id) => queue('c:' + id, () => withRetry(() => db.collection('classes').doc(id).delete())),
       saveGroup: (g) => queue('g:' + g.id, () => withRetry(() => db.collection('groups').doc(g.id).set(body(g)))),
       deleteGroup: (id) => queue('g:' + id, () => withRetry(() => db.collection('groups').doc(id).delete())),
+      saveSection: (x) => queue('s:' + x.id, () => withRetry(() => db.collection('sections').doc(x.id).set(body(x)))),
+      deleteSection: (id) => queue('s:' + id, () => withRetry(() => db.collection('sections').doc(id).delete())),
       async putMedia(blob, type) {
         const r = await withRetry(() => assets.upload(blob, type ? { type } : undefined), 'store_unavailable');
         return r.id;
@@ -765,7 +826,8 @@
   // ---------------------------------------------------------------- estado
   const S = {
     backend: null, ready: false, canWrite: false, stale: false, error: null,
-    exercises: [], classes: [], groups: [],
+    exercises: [], classes: [], groups: [], sections: [],
+    fx: {},
     names: {}, namesAsked: new Set(),
     tab: 'clases',
     sport: 'futbol',
@@ -1398,10 +1460,13 @@
     return u ? 'src="' + esc(u) + '"' : 'data-media="' + esc(id) + '"';
   }
   function thumbHTML(ex, cls) {
-    const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>' : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram) : fieldArt(ex.sport)) + '</span>';
+    const inner = ex.thumbId ? '<img alt="" loading="lazy" decoding="async" ' + srcAttr(ex.thumbId) + '>'
+      : !ex.mediaId && ex.posterUrl && cls !== 'mini' ? '<img alt="" loading="lazy" decoding="async" class="poster" src="' + esc(ex.posterUrl) + '">'
+        : '<span class="art">' + (hasDiagram(ex) ? boardSVG(ex.sport, ex.diagram) : fieldArt(ex.sport)) + '</span>';
     let badge = '';
     if (cls !== 'mini') {
       if (ex.mediaType === 'video') badge = '<span class="badge">' + ic('play') + (ex.mediaDuration ? fmtClock(ex.mediaDuration) : 'Video') + '</span>';
+      else if (!ex.mediaId && ex.videoUrl) badge = '<span class="badge">' + ic('play') + 'Video</span>';
       else if (ex.mediaType === 'image') badge = '<span class="badge">' + ic('photo') + 'Foto</span>';
       else if (hasDiagram(ex)) badge = '<span class="badge">' + ic('board') + 'Pizarrón</span>';
     }
@@ -1452,7 +1517,9 @@
         '<p class="subtitle" data-ref="count">&nbsp;</p>' +
         (t === 'ejercicios'
           ? segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], S.sport) +
-            '<label class="search">' + ic('search') + '<input type="search" id="q-ejercicios" placeholder="Buscar ejercicios" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios"></label>' +
+            '<div class="search-row"><label class="search">' + ic('search') + '<input type="search" id="q-ejercicios" placeholder="Buscar por nombre, material, edad…" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios"></label>' +
+            '<button class="filter-btn" data-act="filters" aria-label="Filtros">' + ic('sliders') + '<b data-ref="fcount"></b></button></div>' +
+            '<div class="chips active-filters" data-ref="afilters" aria-label="Filtros activos"></div>' +
             '<div class="chips" data-ref="chips" role="toolbar" aria-label="Filtrar por objetivo"></div>'
           : '') +
         '<div data-ref="note"></div><div data-ref="body"></div></div>';
@@ -1475,7 +1542,7 @@
       const last = Number(pref.get('last-backup')) || 0;
       out.push('<div class="note">' + ic('box') + '<span class="txt"><b>Haz un respaldo.</b> ' + (last ? 'El último fue ' + fmtAgo(last) + '.' : 'Tus datos solo viven en este dispositivo.') + '</span><button class="link" data-act="backup-now">Respaldar</button></div>');
     }
-    const hasEx = tab === 'clases' && (S.classes.some((c) => c.example) || S.exercises.some((e) => e.example) || S.groups.some((g) => g.example));
+    const hasEx = tab === 'clases' && (S.classes.some((c) => c.example) || S.exercises.some((e) => e.example) || S.groups.some((g) => g.example) || S.sections.some((x) => x.example));
     if (S.ready && S.canWrite && hasEx) out.push('<div class="note quiet"><span class="txt">Lo que dice «Ejemplo» es para que veas cómo funciona.</span><button class="link" data-act="clear-examples">Borrar ejemplos</button></div>');
     return out.join('');
   }
@@ -1502,20 +1569,28 @@
     else if (f === 'mine') list = list.filter((e) => e.authorId === me);
     else if (f.indexOf('t:') === 0) list = list.filter((e) => e.objective === f.slice(2));
     const q = norm(S.q[sport]).trim();
-    if (q) list = list.filter((e) => norm([e.title, e.objective, e.description, e.keyPoints, e.material, e.level, e.age].join(' ')).indexOf(q) >= 0);
+    if (q) list = list.filter((e) => norm([e.title, e.objective, e.description, e.keyPoints, e.material, e.level, e.age, e.players, e.space, e.variations, sectionsOf(e.id).map((x) => x.name).join(' ')].join(' ')).indexOf(q) >= 0);
+    list = applyFilters(list, sport);
+    const nf = activeFilterCount(sport) + (fx(sport).sort !== 'recent' ? 1 : 0);
+    const plain0 = f === 'all' && !q && !nf;
 
     let body;
     if (!S.ready) body = '<div class="grid">' + [0, 1, 2, 3].map(() => '<div class="card"><span class="thumb shimmer"></span><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></div>').join('') + '</div>';
     else if (!all.length) body = emptyExercisesHTML(sport) + catEntryHTML(sport);
-    else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '».' : 'No hay ejercicios con este filtro.') + '</p>' + catEntryHTML(sport);
-    else body = (f === 'all' && !q ? catEntryHTML(sport) : '') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
+    else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '».' : 'No hay ejercicios con estos filtros.') + (nf ? '<br><button class="link" data-act="clear-filters">Quitar filtros</button>' : '') + '</p>' + catEntryHTML(sport);
+    else body = (plain0 ? sectionsStripHTML() + catEntryHTML(sport) : '<p class="result-count">' + plural(list.length, 'ejercicio', 'ejercicios') + '</p>') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
+    const afHTML = activeFiltersHTML(sport);
 
-    const sig = ['ej', sport, S.ready, S.canWrite, chipsHTML, body, noteHTML('ejercicios')].join('|');
+    const sig = ['ej', sport, S.ready, S.canWrite, chipsHTML, afHTML, body, noteHTML('ejercicios')].join('|');
     if (S.sig.ejercicios === sig) return;
     S.sig.ejercicios = sig;
     $('#screen-ejercicios .search').hidden = S.ready && !all.length;
     const chipsEl = ref('ejercicios', 'chips');
     if (chipsEl.innerHTML !== chipsHTML) chipsEl.innerHTML = chipsHTML;
+    ref('ejercicios', 'afilters').innerHTML = afHTML;
+    const fc = ref('ejercicios', 'fcount');
+    fc.textContent = activeFilterCount(sport) ? String(activeFilterCount(sport)) : '';
+    fc.closest('.filter-btn').classList.toggle('on', activeFilterCount(sport) > 0);
     ref('ejercicios', 'note').innerHTML = noteHTML('ejercicios');
     const b = ref('ejercicios', 'body');
     b.innerHTML = body;
@@ -1707,7 +1782,7 @@
   function autoGrow(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(88, ta.scrollHeight) + 'px'; }
 
   // Guarda primero y, si falla, regresa la pantalla a como estaba.
-  const SAVE = { exercises: 'saveExercise', classes: 'saveClass', groups: 'saveGroup' };
+  const SAVE = { exercises: 'saveExercise', classes: 'saveClass', groups: 'saveGroup', sections: 'saveSection' };
   async function commit(kind, obj, prev) {
     replaceLocal(kind, obj);
     renderAll(); refreshScreens();
@@ -1959,15 +2034,20 @@
     if (ex.mediaType === 'image' && ex.mediaId) {
       return '<div class="d-frame"' + style + '><img alt="' + esc(ex.title) + '" data-media="' + esc(ex.mediaId) + '"></div>';
     }
+    if (ex.videoUrl) return coachVideoHTML(ex);
     if (hasDiagram(ex)) return boardFrameHTML(ex);
     if (!S.canWrite) return '';
     return '<button type="button" class="board-add" data-act="board"><span class="ico">' + ic('board') + '</span><span class="txt"><b>Dibujar en el pizarrón</b><span class="s">Jugadores, conos y flechas</span></span>' + ic('chevR', 'chev') + '</button>';
   }
+  // Video vertical generado para los ejercicios de entrenador (app/videos/…): se ve como un Short.
+  function coachVideoHTML(ex) {
+    return '<div class="d-frame coach-video"><video playsinline muted loop autoplay preload="metadata" controls src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video></div>';
+  }
   function boardSummary(ex) {
     const its = (ex.diagram && ex.diagram.items) || [];
     const a = its.filter((i) => i.t === 'a').length; const b = its.filter((i) => i.t === 'b').length;
-    const arrows = its.filter((i) => i.t === 'arrow').length; const cones = its.filter((i) => i.t === 'cone').length;
-    return 'Pizarrón: ' + [a ? plural(a, 'jugador del equipo A', 'jugadores del equipo A') : '', b ? plural(b, 'jugador del equipo B', 'jugadores del equipo B') : '', cones ? plural(cones, 'cono', 'conos') : '', arrows ? plural(arrows, 'flecha', 'flechas') : ''].filter(Boolean).join(', ');
+    const arrows = its.filter((i) => i.t === 'arrow').length; const cones = its.filter((i) => i.t !== 'arrow' && i.t !== 'a' && i.t !== 'b' && i.t !== 'ball').length;
+    return 'Pizarrón: ' + [a ? plural(a, 'jugador del equipo A', 'jugadores del equipo A') : '', b ? plural(b, 'jugador del equipo B', 'jugadores del equipo B') : '', cones ? plural(cones, 'pieza de material', 'piezas de material') : '', arrows ? plural(arrows, 'flecha', 'flechas') : ''].filter(Boolean).join(', ');
   }
   function boardFrameHTML(ex) {
     const playable = canPlay(ex.diagram);
@@ -2025,8 +2105,10 @@
     return '<div class="d-head"><p class="d-tags">' + (ex.objective ? '<span class="tag">' + esc(ex.objective) + '</span>' : '<span class="tag">' + esc(SPORTS[ex.sport].name) + '</span>') + (ex.level ? '<span class="tag ghost">' + esc(ex.level) + '</span>' : '') + '</p><h1 class="d-title">' + esc(ex.title || 'Sin título') + '</h1></div>' +
       '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((s) => '<div class="stat"><span class="k">' + ic(s[0]) + s[1] + '</span><span class="v">' + esc(s[2]) + '</span></div>').join('') + '</div>' +
       (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="add-to-class">' + ic('plus') + 'Añadir a una clase</button>' +
+        '<button class="btn icon tinted" data-act="sections" aria-label="Guardar en sección">' + ic('folder') + '</button>' +
         '<button class="btn icon tinted" data-act="fav" aria-pressed="' + !!ex.favorite + '" aria-label="Favorito">' + ic(ex.favorite ? 'heart-fill' : 'heart') + '</button></div>' : '') +
-      (ex.mediaId && hasDiagram(ex) ? sec('Pizarrón', boardFrameHTML(ex)) : '') +
+      (sectionsOf(ex.id).length ? '<p class="in-sections">' + ic('folder') + sectionsOf(ex.id).map((x) => '<button class="link sm" data-open-section="' + esc(x.id) + '">' + esc(x.name) + '</button>').join('') + '</p>' : '') +
+      ((ex.mediaId || ex.videoUrl) && hasDiagram(ex) ? sec('Pizarrón', boardFrameHTML(ex)) : '') +
       (ex.description ? sec('Cómo se hace', '<p>' + esc(ex.description) + '</p>') : '') +
       (points.length ? sec('Puntos clave', '<ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>') : '') +
       (vars.length ? sec('Para ajustarlo', '<ul class="vars">' + varHTML + '</ul>') : '') +
@@ -2097,6 +2179,8 @@
     scr.refresh = render;
     scr.onClose = () => { if (player) player.stop(); };
     scr.el.addEventListener('click', (ev) => {
+      const so = ev.target.closest('[data-open-section]');
+      if (so) { openSection(so.dataset.openSection); return; }
       const a = ev.target.closest('[data-act]');
       if (!a) return;
       const e = getEx(id);
@@ -2106,6 +2190,7 @@
         case 'share': shareExercise(e); break;
         case 'board': if (S.canWrite) { if (player) player.stop(); openBoard({ sport: e.sport, diagram: e.diagram, onDone: (d) => { mutateExercise(id, (x) => { x.diagram = d; }); } }); } break;
         case 'play': haptic(6); play(150); break;
+        case 'sections': openExerciseSections(id); break;
         case 'fav': mutateExercise(id, (x) => { x.favorite = !x.favorite; }); haptic(10); break;
         case 'add-to-class': addToClassFlow(e); break;
         case 'delete': confirmDeleteExercise(id); break;
@@ -2612,6 +2697,9 @@
         S.exercises = S.exercises.filter((e) => exs.indexOf(e) < 0);
         S.classes = S.classes.filter((c) => !c.example);
         S.groups = S.groups.filter((g) => grs.indexOf(g) < 0);
+        const secs = S.sections.filter((x) => x.example);
+        snap.secs = secs.map(plain);
+        S.sections = S.sections.filter((x) => !x.example);
         adopt.forEach((p) => { const x = plain(p[1]); x.example = false; replaceLocal(p[0], x); });
         renderAll(); refreshScreens();
         try {
@@ -2619,6 +2707,7 @@
           for (const c of cls) await S.backend.deleteClass(c.id);
           for (const g of grs) await S.backend.deleteGroup(g.id);
           for (const e of exs) await S.backend.deleteExercise(e.id);
+          for (const x of snap.secs) await S.backend.deleteSection(x.id);
         } catch (e) { showError(e, 'No se pudieron borrar'); return; }
         toast('Ejemplos borrados', 'trash', {
           label: 'Deshacer',
@@ -2627,6 +2716,7 @@
               for (const e of snap.exs) { replaceLocal('exercises', e); await S.backend.saveExercise(e); }
               for (const g of snap.grs) { replaceLocal('groups', g); await S.backend.saveGroup(g); }
               for (const c of snap.cls) { replaceLocal('classes', c); await S.backend.saveClass(c); }
+              for (const x of snap.secs || []) { replaceLocal('sections', x); await S.backend.saveSection(x); }
               renderAll(); refreshScreens();
             } catch (e) { showError(e); }
           },
@@ -2634,6 +2724,291 @@
         });
       } }],
     });
+  }
+
+  // ---------------------------------------------------------------- secciones de la biblioteca
+  // Carpetas que arma el profe («Calentamientos», «Para primaria»…). Un ejercicio puede estar en varias.
+  const getSection = (id) => S.sections.find((x) => x.id === id) || null;
+  const sectionExercises = (sec) => (sec ? sec.exIds.map(getEx).filter(Boolean) : []);
+  const sectionsOf = (exId) => S.sections.filter((x) => x.exIds.indexOf(exId) >= 0);
+  function mutateSection(id, fn) {
+    const cur = getSection(id);
+    if (!cur) return Promise.resolve(false);
+    const x = plain(cur);
+    x.exIds = (x.exIds || []).slice();
+    fn(x);
+    x.exIds = Array.from(new Set(x.exIds));
+    x.example = false;
+    x.updatedAt = Date.now();
+    return commit('sections', x, cur);
+  }
+  function mosaicHTML(exs) {
+    const three = exs.slice(0, 3);
+    if (!three.length) return '<span class="mo-empty">' + ic('board') + '</span>';
+    return three.map((e) => '<span class="mo-cell">' + (e.thumbId ? '<img alt="" loading="lazy" ' + srcAttr(e.thumbId) + '>' : e.posterUrl ? '<img alt="" loading="lazy" src="' + esc(e.posterUrl) + '">' : boardSVG(e.sport, hasDiagram(e) ? e.diagram : null)) + '</span>').join('');
+  }
+  function sectionsStripHTML() {
+    const list = S.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+    if (!list.length && !S.canWrite) return '';
+    return '<div class="section-head"><h2>Secciones</h2>' + (S.canWrite ? '<button class="link" data-act="new-section">' + ic('plus') + 'Nueva</button>' : '') + '</div>' +
+      '<div class="sec-strip" role="list">' + list.map((sec) => {
+        const exs = sectionExercises(sec);
+        return '<button class="sec-card" role="listitem" data-open-section="' + esc(sec.id) + '"><span class="sec-mosaic n' + Math.min(3, exs.length) + '">' + mosaicHTML(exs) + '</span>' +
+          '<span class="sec-name">' + esc(sec.name) + '</span><span class="sec-count">' + plural(exs.length, 'ejercicio', 'ejercicios') + '</span></button>';
+      }).join('') +
+      (S.canWrite && !list.length ? '<button class="sec-card sec-new" data-act="new-section"><span class="sec-mosaic">' + ic('plus') + '</span><span class="sec-name">Nueva sección</span><span class="sec-count">Agrupa tus ejercicios</span></button>' : '') +
+      '</div>';
+  }
+  function openSectionEditor(opts) {
+    const editing = !!opts.section;
+    const sec = editing ? plain(opts.section) : { id: uid(), name: '', exIds: opts.exIds || [], createdAt: Date.now(), order: Date.now() };
+    const sheet = openSheet({
+      title: editing ? 'Editar sección' : 'Nueva sección',
+      confirmLabel: editing ? 'Guardar' : 'Crear',
+      isDirty: () => $('#sec-name', sheet.body).value.trim() !== (opts.section ? opts.section.name : ''),
+      bodyHTML: '<div class="group"><input class="field-lg" id="sec-name" placeholder="Ej. Calentamientos, Para 3.º B, Torneo" aria-label="Nombre de la sección" maxlength="40" autocomplete="off" enterkeyhint="done" value="' + esc(sec.name) + '"></div>' +
+        (editing ? '<div class="group" style="margin-top:28px"><button type="button" class="row danger" data-act="del-section">' + ic('trash') + 'Eliminar sección</button></div><p class="muted small" style="margin:0 16px">Los ejercicios no se borran, solo la sección.</p>' : ''),
+      onConfirm: async () => {
+        const inp = $('#sec-name', sheet.body);
+        const name = inp.value.replace(/\s+/g, ' ').trim();
+        if (!name) { shake(inp); return; }
+        Object.assign(sec, { name, example: false, updatedAt: Date.now() });
+        const ok = await commit('sections', plain(sec), editing ? opts.section : null);
+        if (!ok) return;
+        sheet.dismiss();
+        haptic(10);
+        toast(editing ? 'Sección guardada' : 'Sección creada');
+        if (!editing && !opts.exIds) setTimeout(() => openSection(sec.id), 280);
+        if (opts.onDone) opts.onDone(sec);
+      },
+    });
+    sheet.body.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-act="del-section"]')) return;
+      const prev = plain(opts.section);
+      sheet.dismiss();
+      S.sections = S.sections.filter((x) => x.id !== prev.id);
+      renderAll(); refreshScreens();
+      S.backend.deleteSection(prev.id).then(() => {
+        toast('Sección eliminada', 'trash', { label: 'Deshacer', onClick: () => commit('sections', prev, null) });
+      }).catch((err) => { replaceLocal('sections', prev); renderAll(); refreshScreens(); showError(err, 'No se pudo eliminar'); });
+    });
+    setTimeout(() => { try { $('#sec-name', sheet.body).focus({ preventScroll: true }); } catch (e) { /* */ } }, 420);
+  }
+  function openSection(id) {
+    const sec0 = getSection(id);
+    if (!sec0) return;
+    if (backToScreen('sec:' + id)) return;
+    haptic(4);
+    let editing = false;
+    const scr = pushScreen({ key: 'sec:' + id, tint: 'clases', rightHTML: S.canWrite ? '<button class="glass-btn cap" data-act="sec-edit">Editar</button>' : '' });
+    function render() {
+      const sec = getSection(id);
+      if (!sec) { popLayer(scr); return; }
+      const exs = sectionExercises(sec);
+      scr.setTitle(sec.name);
+      const bySport = ['futbol', 'basquet'].map((sp) => [sp, exs.filter((e) => e.sport === sp)]).filter((x) => x[1].length);
+      scr.body.innerHTML =
+        '<div class="d-head"><h1 class="d-title">' + esc(sec.name) + '</h1><p class="sec-sub">' + plural(exs.length, 'ejercicio', 'ejercicios') + '</p></div>' +
+        (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="sec-add">' + ic('plus') + 'Agregar ejercicios</button>' +
+          (exs.length ? '<button class="btn tinted" data-act="sec-toggle-edit">' + (editing ? 'Listo' : 'Quitar') + '</button>' : '') + '</div>' : '') +
+        (!exs.length ? '<p class="muted center">Esta sección está vacía. Agrega ejercicios de tu biblioteca.</p>' : '') +
+        bySport.map((x) => (bySport.length > 1 ? '<p class="group-label">' + SPORTS[x[0]].name + '</p>' : '') +
+          '<div class="grid' + (editing ? ' editing' : '') + '">' + x[1].map((e) => (editing
+            ? '<div class="card-wrap">' + cardHTML(e) + '<button class="card-rm" data-rm-ex="' + esc(e.id) + '" aria-label="Quitar «' + esc(e.title) + '» de la sección">' + ic('minus') + '</button></div>'
+            : cardHTML(e))).join('') + '</div>').join('');
+      hydrate(scr.body);
+    }
+    render();
+    scr.refresh = render;
+    scr.el.addEventListener('click', (e) => {
+      const rm = e.target.closest('[data-rm-ex]');
+      if (rm) {
+        const exId = rm.dataset.rmEx;
+        const sec = getSection(id);
+        const idx = sec ? sec.exIds.indexOf(exId) : -1;
+        mutateSection(id, (x) => { x.exIds = x.exIds.filter((y) => y !== exId); }).then((ok) => {
+          if (ok) toast('Quitado de la sección', 'trash', { label: 'Deshacer', onClick: () => mutateSection(id, (x) => { if (x.exIds.indexOf(exId) < 0) x.exIds.splice(Math.max(0, idx), 0, exId); }) });
+        });
+        return;
+      }
+      const card = e.target.closest('[data-open-ex]');
+      if (card && !editing) { openExercise(card.dataset.openEx); return; }
+      const a = e.target.closest('[data-act]');
+      if (!a) return;
+      if (a.dataset.act === 'sec-edit') openSectionEditor({ section: getSection(id) });
+      else if (a.dataset.act === 'sec-toggle-edit') { editing = !editing; render(); }
+      else if (a.dataset.act === 'sec-add') openSectionPicker(id);
+    });
+  }
+  // Elegir ejercicios de la biblioteca para una sección (los dos deportes).
+  function openSectionPicker(id) {
+    const sec = getSection(id);
+    if (!sec) return;
+    const chosen = new Set(sec.exIds);
+    let sport = S.sport;
+    let q = '';
+    const sheet = openSheet({
+      title: 'Agregar a «' + sec.name + '»',
+      confirmLabel: 'Listo',
+      bodyHTML: segHTML('pksport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], sport, 'Deporte') +
+        '<label class="search">' + ic('search') + '<input type="search" id="sp-q" placeholder="Buscar ejercicios" autocomplete="off" aria-label="Buscar ejercicios"></label>' +
+        '<div class="list pick-list" data-ref="list"></div>',
+      onConfirm: async () => {
+        const ok = await mutateSection(id, (x) => { x.exIds = x.exIds.filter((y) => chosen.has(y)).concat(Array.from(chosen).filter((y) => x.exIds.indexOf(y) < 0)); });
+        if (!ok) return;
+        sheet.dismiss();
+        toast('Sección actualizada');
+      },
+    });
+    const root = sheet.body;
+    function paint() {
+      const nq = norm(q).trim();
+      const list = exOf(sport).filter((e) => !nq || norm(e.title + ' ' + (e.objective || '')).indexOf(nq) >= 0);
+      $('[data-ref="list"]', root).innerHTML = list.length ? list.map((e) => '<button type="button" class="cell" role="checkbox" aria-checked="' + chosen.has(e.id) + '" data-pick-sec="' + esc(e.id) + '">' + thumbHTML(e, 'mini') +
+        '<span class="txt"><span class="t1">' + esc(e.title) + '</span><span class="t2">' + esc([e.objective, e.duration ? e.duration + ' min' : ''].filter(Boolean).join(', ')) + '</span></span><span class="check">' + ic('check') + '</span></button>').join('')
+        : '<p class="muted pad">No hay ejercicios' + (nq ? ' con esa búsqueda' : ' de ' + SPORTS[sport].noun) + '.</p>';
+      hydrate(root);
+    }
+    bindSeg(root, 'pksport', (v) => { sport = v; paint(); });
+    $('#sp-q', root).addEventListener('input', (e) => { q = e.target.value; paint(); });
+    root.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-pick-sec]');
+      if (!b) return;
+      const x = b.dataset.pickSec;
+      if (chosen.has(x)) chosen.delete(x); else chosen.add(x);
+      b.setAttribute('aria-checked', String(chosen.has(x)));
+      haptic(4);
+    });
+    paint();
+  }
+  // Desde un ejercicio: en qué secciones está.
+  function openExerciseSections(exId) {
+    const ex = getEx(exId);
+    if (!ex) return;
+    const sheet = openSheet({
+      title: 'Guardar en sección',
+      cancelLabel: 'Listo',
+      bodyHTML: '<p class="att-head"><b>' + esc(ex.title) + '</b></p><div class="group" data-ref="list"></div>' +
+        '<button type="button" class="btn tinted wide-btn" data-act="new-sec">' + ic('plus') + 'Nueva sección</button>',
+    });
+    const root = sheet.body;
+    function paint() {
+      const list = S.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+      $('[data-ref="list"]', root).innerHTML = list.length ? list.map((sec) => switchRow('sx-' + sec.id, ic('box'), esc(sec.name), plural(sectionExercises(sec).length, 'ejercicio', 'ejercicios'), sec.exIds.indexOf(exId) >= 0, false)).join('')
+        : '<p class="muted pad">Todavía no tienes secciones.</p>';
+    }
+    root.addEventListener('change', (e) => {
+      const inp = e.target.closest('input[id^="sx-"]');
+      if (!inp) return;
+      const secId = inp.id.slice(3);
+      mutateSection(secId, (x) => { if (inp.checked) x.exIds.push(exId); else x.exIds = x.exIds.filter((y) => y !== exId); });
+      haptic(6);
+    });
+    root.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-act="new-sec"]')) return;
+      openSectionEditor({ exIds: [exId], onDone: () => paint() });
+    });
+    paint();
+  }
+
+  // ---------------------------------------------------------------- filtros de la biblioteca
+  const AGE_BANDS = [['', 'Cualquiera'], ['6-8', '6 a 8'], ['9-10', '9 a 10'], ['11-12', '11 a 12'], ['13-14', '13 a 14'], ['15-18', '15 o más']];
+  const DUR_BANDS = [['', 'Cualquiera'], ['0-10', 'Hasta 10 min'], ['11-20', '11 a 20 min'], ['21-999', 'Más de 20']];
+  const SORTS = [['recent', 'Recientes'], ['az', 'A–Z'], ['short', 'Más cortos']];
+  const fx = (sport) => (S.fx[sport] = S.fx[sport] || { levels: [], age: '', dur: '', video: false, school: false, sort: 'recent' });
+  const hasVideo = (e) => e.mediaType === 'video' || !!e.videoUrl || !!e.link;
+  // «Sub-12» → 11 a 12; «9 a 15 años» → 9 a 15; sin edad → sirve para todos.
+  function ageRange(txtAge) {
+    const s = String(txtAge || '');
+    const nums = [];
+    s.replace(/sub-?\s*(\d{1,2})/gi, (m, n) => { nums.push(Number(n) - 1, Number(n)); return m; });
+    s.replace(/(\d{1,2})\s*(?:a|-|–)\s*(\d{1,2})\s*años/gi, (m, a, b) => { nums.push(Number(a), Number(b)); return m; });
+    s.replace(/(\d{1,2})\s*años/gi, (m, a) => { nums.push(Number(a)); return m; });
+    if (!nums.length) return null;
+    return [Math.min.apply(null, nums), /en adelante|o más|\+/i.test(s) ? 99 : Math.max.apply(null, nums)];
+  }
+  function activeFilterCount(sport) {
+    const f = fx(sport);
+    return f.levels.length + (f.age ? 1 : 0) + (f.dur ? 1 : 0) + (f.video ? 1 : 0) + (f.school ? 1 : 0);
+  }
+  function applyFilters(list, sport) {
+    const f = fx(sport);
+    let out = list;
+    if (f.levels.length) out = out.filter((e) => f.levels.indexOf(e.level || 'Inicial') >= 0);
+    if (f.age) { const [lo, hi] = f.age.split('-').map(Number); out = out.filter((e) => { const r = ageRange(e.age); return !r || (r[0] <= hi && r[1] >= lo); }); }
+    if (f.dur) { const [lo, hi] = f.dur.split('-').map(Number); out = out.filter((e) => (Number(e.duration) || 0) >= lo && (Number(e.duration) || 0) <= hi); }
+    if (f.video) out = out.filter(hasVideo);
+    if (f.school) out = out.filter((e) => e.school);
+    if (f.sort === 'az') out = out.slice().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es'));
+    else if (f.sort === 'short') out = out.slice().sort((a, b) => (Number(a.duration) || 0) - (Number(b.duration) || 0));
+    return out;
+  }
+  function activeFiltersHTML(sport) {
+    const f = fx(sport);
+    const chips = [];
+    f.levels.forEach((l) => chips.push(['lvl:' + l, l]));
+    if (f.age) chips.push(['age', (AGE_BANDS.find((x) => x[0] === f.age) || [])[1] + ' años']);
+    if (f.dur) chips.push(['dur', (DUR_BANDS.find((x) => x[0] === f.dur) || [])[1]]);
+    if (f.video) chips.push(['video', 'Con video']);
+    if (f.school) chips.push(['school', 'Para escuela']);
+    if (f.sort !== 'recent') chips.push(['sort', 'Orden: ' + (SORTS.find((x) => x[0] === f.sort) || [])[1]]);
+    return chips.map((c) => '<button class="chip on-chip" data-unfilter="' + esc(c[0]) + '" aria-label="Quitar filtro ' + esc(c[1]) + '">' + esc(c[1]) + ic('xmark') + '</button>').join('');
+  }
+  function removeFilter(sport, key) {
+    const f = fx(sport);
+    if (key.indexOf('lvl:') === 0) f.levels = f.levels.filter((l) => l !== key.slice(4));
+    else if (key === 'age') f.age = '';
+    else if (key === 'dur') f.dur = '';
+    else if (key === 'video') f.video = false;
+    else if (key === 'school') f.school = false;
+    else if (key === 'sort') f.sort = 'recent';
+  }
+  function openFilters(sport) {
+    const f = fx(sport);
+    const draft = JSON.parse(JSON.stringify(f));
+    const chipGroup = (name, opts, isOn) => '<div class="chips wrap static fchips" data-fgroup="' + name + '">' + opts.map((o) => '<button type="button" class="chip" data-fval="' + esc(o[0]) + '" aria-pressed="' + isOn(o[0]) + '">' + esc(o[1]) + '</button>').join('') + '</div>';
+    const sheet = openSheet({
+      title: 'Filtros',
+      tint: sport,
+      confirmLabel: 'Ver',
+      bodyHTML:
+        '<p class="group-label">Nivel</p>' + chipGroup('levels', LEVELS.map((l) => [l, l]), (v) => draft.levels.indexOf(v) >= 0) +
+        '<p class="group-label">Edad de tus alumnos</p>' + chipGroup('age', AGE_BANDS, (v) => draft.age === v) +
+        '<p class="group-label">Duración</p>' + chipGroup('dur', DUR_BANDS, (v) => draft.dur === v) +
+        '<div class="group" style="margin-top:20px">' + switchRow('f-video', ic('video'), 'Con video', 'Video propio, de entrenador o link', draft.video, false) +
+        switchRow('f-school', ic('people'), 'Para escuela', 'Sirven con 25 a 35 alumnos', draft.school, false) + '</div>' +
+        '<p class="group-label">Ordenar</p>' + segHTML('fsort', SORTS, draft.sort, 'Ordenar') +
+        '<button type="button" class="btn tinted wide-btn" data-act="f-clear">Quitar filtros</button>',
+      onConfirm: () => { S.fx[sport] = draft; S.sig = {}; renderEjercicios(); sheet.dismiss(); },
+    });
+    const root = sheet.body;
+    function count() {
+      const saved = S.fx[sport]; S.fx[sport] = draft;
+      const n = applyFilters(exOf(sport), sport).length;
+      S.fx[sport] = saved;
+      $('[data-sh="ok"]', sheet.el).textContent = 'Ver ' + n;
+    }
+    root.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-fval]');
+      if (b) {
+        const g = b.closest('[data-fgroup]').dataset.fgroup; const v = b.dataset.fval;
+        if (g === 'levels') draft.levels = draft.levels.indexOf(v) >= 0 ? draft.levels.filter((x) => x !== v) : draft.levels.concat(v);
+        else draft[g] = v;
+        $$('[data-fval]', b.parentNode).forEach((x) => x.setAttribute('aria-pressed', String(g === 'levels' ? draft.levels.indexOf(x.dataset.fval) >= 0 : draft[g] === x.dataset.fval)));
+        haptic(4); count(); return;
+      }
+      if (e.target.closest('[data-act="f-clear"]')) {
+        Object.assign(draft, { levels: [], age: '', dur: '', video: false, school: false, sort: 'recent' });
+        S.fx[sport] = draft; S.sig = {}; renderEjercicios(); sheet.dismiss();
+      }
+    });
+    root.addEventListener('change', (e) => {
+      if (e.target.id === 'f-video') draft.video = e.target.checked;
+      if (e.target.id === 'f-school') draft.school = e.target.checked;
+      count();
+    });
+    bindSeg(root, 'fsort', (v) => { draft.sort = v; count(); });
+    count();
   }
 
   // ---------------------------------------------------------------- grupos
@@ -3418,7 +3793,8 @@
       media[want[i]] = { path, type, size: blob.size };
       files.push({ name: path, data: blob });
     }
-    const manifest = { format: 'cancha', version: 2, app: APP_NAME, kind: opt.kind, title: opt.title, exportedAt: Date.now(), exercises, classes, groups, media };
+    const sections = opt.kind === 'respaldo' ? S.sections.map((x) => plain(x)) : [];
+    const manifest = { format: 'cancha', version: 3, app: APP_NAME, kind: opt.kind, title: opt.title, exportedAt: Date.now(), exercises, classes, groups, sections, media };
     files.unshift({ name: 'cancha.json', data: JSON.stringify(manifest) });
     const zip = await buildZip(files, (p) => onProgress && onProgress(0.5 + p * 0.5, 'Armando el archivo · ' + Math.round(p * 100) + '%'));
     return new File([zip], APP_NAME + ' - ' + safeName(opt.title) + ' - ' + shortDate() + '.zip', { type: 'application/zip' });
@@ -3559,10 +3935,12 @@
   const dayOk = (v) => { if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return ''; const d = parseDay(v); return d && dayStr(d) === v ? v : ''; };
   function cleanDiagram(d) {
     if (!d || typeof d !== 'object' || !Array.isArray(d.items)) return null;
-    const items = d.items.slice(0, 300).filter((it) => it && typeof it === 'object' && ['a', 'b', 'cone', 'ball', 'arrow'].indexOf(it.t) >= 0).map((it) => {
+    const items = d.items.slice(0, 300).filter((it) => it && typeof it === 'object' && ['a', 'b', 'cone', 'ball', 'arrow', 'ladder', 'hurdle', 'ring', 'pole'].indexOf(it.t) >= 0).map((it) => {
       const o = { t: it.t, x: numIn(it.x, 0, 160, 80), y: numIn(it.y, 0, 200, 100) };
+      if (it.t === 'ladder' || it.t === 'hurdle') o.r = Number(it.r) === 90 ? 90 : 0;
+      if (it.t === 'ladder') o.n = Math.round(numIn(it.n, 2, 14, 6));
       if (it.t === 'arrow') { o.k = ['pase', 'conduccion', 'mov'].indexOf(it.k) >= 0 ? it.k : 'pase'; o.x2 = numIn(it.x2, 0, 160, o.x); o.y2 = numIn(it.y2, 0, 200, o.y); }
-      if (it.n != null) o.n = Math.round(numIn(it.n, 0, 99, 1));
+      if (it.n != null && it.t !== 'ladder') o.n = Math.round(numIn(it.n, 0, 99, 1));
       if (it.t === 'arrow' && it.s != null) o.s = Math.round(numIn(it.s, 1, 50, 1));
       return o;
     });
@@ -3586,6 +3964,9 @@
       mediaType: mt, mediaId: mt && isId(x.mediaId) ? x.mediaId : null, thumbId: isId(x.thumbId) ? x.thumbId : null,
       mediaDuration: numIn(x.mediaDuration, 0, 36000, 0), mediaAspect: x.mediaAspect == null ? null : numIn(x.mediaAspect, 0.1, 10, null), diagram: cleanDiagram(x.diagram),
       catalogId: isId(x.catalogId) ? x.catalogId : undefined,
+      school: x.school === true,
+      videoUrl: typeof x.videoUrl === 'string' && /^app\/videos\/[\w-]+\.mp4$/.test(x.videoUrl) ? x.videoUrl : undefined,
+      posterUrl: typeof x.posterUrl === 'string' && /^app\/videos\/[\w-]+\.jpg$/.test(x.posterUrl) ? x.posterUrl : undefined,
     });
   }
   function cleanItem(it) {
@@ -3614,6 +3995,10 @@
     }
     if (x.lastRunAt) o.lastRunAt = numIn(x.lastRunAt, 0, 9e15, 0);
     return o;
+  }
+  function cleanSection(x) {
+    if (!x || typeof x !== 'object' || !isId(x.id)) return null;
+    return cleanBase(x, { name: txt(x.name, 40).trim() || 'Sección', exIds: (Array.isArray(x.exIds) ? x.exIds : []).filter(isId).slice(0, 500), order: numIn(x.order, 0, 9e15, 0) });
   }
   function cleanGroup(x) {
     if (!x || typeof x !== 'object' || !isId(x.id)) return null;
@@ -3651,10 +4036,11 @@
     const ex = bucket(m.exercises, cleanEx, getEx);
     const cl = bucket(m.classes, cleanClass, getClass);
     const gr = bucket(m.groups, cleanGroup, getGroup);
+    const sc = bucket(m.sections, cleanSection, getSection);
     const media = new Set();
     const mediaOk = (k) => k && m.media && m.media[k] && typeof m.media[k].path === 'string';
     ex.nuevos.concat(ex.actualiza, ex.copias).forEach((x) => { [x.mediaId, x.thumbId].forEach((k) => { if (mediaOk(k)) media.add(k); }); });
-    return { ex, cl, gr, media: Array.from(media) };
+    return { ex, cl, gr, sc, media: Array.from(media) };
   }
   function importLine(b, one, many, fem) {
     const n = b.nuevos.length + b.actualiza.length + b.iguales.length + b.copias.length;
@@ -3676,7 +4062,7 @@
     const mediaSize = plan.media.reduce((s, k) => s + (Number(m.media[k].size) || 0), 0);
     const mainMedia = plan.ex.nuevos.concat(plan.ex.actualiza, plan.ex.copias).filter((x) => x.mediaId && plan.media.indexOf(x.mediaId) >= 0).length;
     const changes = (b) => b.nuevos.length + b.actualiza.length + b.copias.length;
-    const nothing = !changes(plan.ex) && !changes(plan.cl) && !changes(plan.gr);
+    const nothing = !changes(plan.ex) && !changes(plan.cl) && !changes(plan.gr) && !changes(plan.sc);
     const copies = plan.ex.copias.length + plan.cl.copias.length + plan.gr.copias.length;
     let when = '';
     try { when = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(m.exportedAt)); } catch (e) { /* */ }
@@ -3686,7 +4072,7 @@
       bodyHTML:
         '<p class="att-head"><b>' + esc(txt(m.title, 80) || 'Archivo de Cancha') + '</b>' + (when ? ' · del ' + esc(when) : '') + '</p>' +
         '<div class="att-card imp-card">' +
-        importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') +
+        importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') + importLine(plan.sc, 'sección', 'secciones', true) +
         (mainMedia ? '<div class="imp-line"><b>' + plural(mainMedia, 'video o foto', 'videos y fotos') + '</b><span>' + fmtMB(mediaSize) + '</span></div>' : '') +
         '</div>' +
         '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? 'Ya tienes todo lo que trae este archivo.' : 'Si el archivo trae una versión más nueva de algo que no cambiaste aquí, se actualiza.' + (copies ? ' Lo que cambiaron los dos se guarda como copia: no pierdes tu versión.' : '')) + '</p>',
@@ -3766,6 +4152,13 @@
       replaceLocal('classes', nc);
       await S.backend.saveClass(nc);
       nCl++;
+    }
+    for (const x of plan.sc.nuevos.concat(plan.sc.actualiza, plan.sc.copias)) {
+      const sec = plain(x);
+      sec.exIds = sec.exIds.map((y) => exRe[y] || y);
+      if (plan.sc.copias.indexOf(x) >= 0) { sec.id = uid(); sec.name = sec.name + ' (copia)'; sec.example = false; } else sec.syncedAt = sec.updatedAt;
+      replaceLocal('sections', sec);
+      await S.backend.saveSection(sec);
     }
     renderAll(); refreshScreens();
     return { ex: nEx, cl: nCl, gr: nGr };
@@ -3874,7 +4267,7 @@
   function catCardHTML(cx) {
     const have = inLibrary(cx.id);
     const meta = [cx.duration ? cx.duration + ' min' : '', cx.age].filter(Boolean).join(', ');
-    return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb"><span class="art">' + boardSVG(cx.sport, cx.diagram) + '</span>' +
+    return '<button class="card" data-open-cat="' + esc(cx.id) + '"><span class="thumb">' + (cx.posterUrl ? '<img alt="" loading="lazy" decoding="async" class="poster" src="' + esc(cx.posterUrl) + '"><span class="badge vid">' + ic('play') + 'Video</span>' : '<span class="art">' + boardSVG(cx.sport, cx.diagram) + '</span>') +
       (have ? '<span class="badge in-lib">' + ic('check') + 'En tus ejercicios</span>' : cx.school ? '<span class="badge">Para escuela</span>' : '') + '</span>' +
       '<span class="card-body"><span class="title">' + esc(cx.title) + '</span><span class="meta">' + esc(meta) + '</span></span></button>';
   }
@@ -3947,8 +4340,8 @@
       const vars = String(cx.variations || '').split('\n').filter(Boolean);
       scr.setTitle(cx.title);
       scr.body.innerHTML =
-        '<div class="d-media"><div class="d-frame board-frame"><span class="art" role="img" aria-label="Pizarrón del ejercicio">' + boardSVG(cx.sport, cx.diagram, { fit: 'xMidYMid meet', anim: canPlay(cx.diagram) }) + '</span>' +
-        '<div class="bf-ctrls">' + (canPlay(cx.diagram) ? '<button type="button" class="bf-btn" data-act="play">' + ic('play') + '<span>Ver jugada</span></button>' : '') + '</div></div></div>' +
+        '<div class="d-media">' + (cx.videoUrl ? coachVideoHTML(cx) : '<div class="d-frame board-frame"><span class="art" role="img" aria-label="Pizarrón del ejercicio">' + boardSVG(cx.sport, cx.diagram, { fit: 'xMidYMid meet', anim: canPlay(cx.diagram) }) + '</span>' +
+        '<div class="bf-ctrls">' + (canPlay(cx.diagram) ? '<button type="button" class="bf-btn" data-act="play">' + ic('play') + '<span>Ver jugada</span></button>' : '') + '</div></div>') + '</div>' +
         '<div class="d-head"><p class="d-tags"><span class="tag">' + esc(cx.objective) + '</span><span class="tag ghost">' + esc(cx.level) + '</span>' + (cx.school ? '<span class="tag ghost">Para escuela</span>' : '') + '</p><h1 class="d-title">' + esc(cx.title) + '</h1></div>' +
         '<div class="stats" style="--cols:' + stats.length + '">' + stats.map((x) => '<div class="stat"><span class="k">' + ic(x[0]) + x[1] + '</span><span class="v">' + esc(x[2]) + '</span></div>').join('') + '</div>' +
         (S.canWrite ? '<div class="d-actions">' + (have
@@ -3967,7 +4360,7 @@
       player = playDiagram(frame, cx.diagram, { delay, onEnd: () => frame.classList.remove('playing') });
     }
     render();
-    if (!reduceMotion()) play(650);
+    if (!reduceMotion() && !cx.videoUrl) play(650);
     scr.refresh = () => { if (player) player.stop(); render(); };
     scr.onClose = () => { if (player) player.stop(); };
     scr.el.addEventListener('click', async (e) => {
@@ -4039,12 +4432,13 @@
 
   // ---------------------------------------------------------------- pizarra táctica
   // Pocas herramientas: poner piezas, una flecha (con su tipo) y borrar. Arrastrar siempre mueve.
-  const BOARD_TOOLS = [['a', 'Equipo A'], ['b', 'Equipo B'], ['cone', 'Cono'], ['ball', 'Balón'], ['arrow', 'Flecha'], ['erase', 'Borrar']];
+  const BOARD_TOOLS = [['a', 'Equipo A'], ['b', 'Equipo B'], ['cone', 'Material'], ['ball', 'Balón'], ['arrow', 'Flecha'], ['erase', 'Borrar']];
+  const GEAR_KINDS = [['cone', 'Cono'], ['ladder', 'Escalera'], ['hurdle', 'Valla'], ['ring', 'Aro'], ['pole', 'Pica']];
   const ARROW_KINDS = (sport) => [['pase', 'Pase'], ['conduccion', sport === 'basquet' ? 'Dribleo' : 'Conducción'], ['mov', 'Sin balón']];
   const BOARD_HINT = {
     a: 'Toca la cancha para poner un jugador. Arrastra para moverlo.',
     b: 'Toca la cancha para poner un rival. Arrastra para moverlo.',
-    cone: 'Toca la cancha para poner un cono. Arrastra para moverlo.',
+    cone: 'Toca para poner material. Toca una escalera o valla para girarla.',
     ball: 'Toca la cancha para poner el balón. Arrastra para moverlo.',
     arrow: 'Arrastra el dedo para dibujar la flecha.',
     erase: 'Toca lo que quieras borrar.',
@@ -4057,6 +4451,7 @@
     const hist = [];
     let tool = 'a';
     let arrowKind = 'pase';
+    let gearKind = 'cone';
     let changed = false;
     let drag = null;
     const toolIcon = (t) => (t === 'a' || t === 'b' ? '<span class="dot dot-' + t + '">' + t.toUpperCase() + '</span>' : ic(t === 'ball' ? sport : t === 'arrow' ? 'arrowPass' : t));
@@ -4071,6 +4466,7 @@
       '<div class="board-sub">' + segHTML('variant', VARIANTS[sport], d.v, 'Cancha') + '</div>' +
       '<div class="board-stage"><div class="board-canvas art"></div></div>' +
       '<div class="board-kind" data-ref="kind" hidden>' + segHTML('akind', ARROW_KINDS(sport), arrowKind, 'Tipo de flecha') + '</div>' +
+      '<div class="board-kind" data-ref="gear" hidden>' + segHTML('gkind', GEAR_KINDS, gearKind, 'Material') + '</div>' +
       '<p class="board-hint" aria-live="polite"></p>' +
       '<div class="board-tools" role="toolbar" aria-label="Herramientas">' +
       BOARD_TOOLS.map((t) => '<button type="button" class="bt" data-tool="' + t[0] + '" aria-pressed="false">' + toolIcon(t[0]) + '<span>' + t[1] + '</span></button>').join('') +
@@ -4090,6 +4486,7 @@
       $$('[data-tool]', wrap).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tool === t)));
       $('.board-hint', wrap).textContent = BOARD_HINT[t] || '';
       $('[data-ref="kind"]', wrap).hidden = t !== 'arrow';
+      $('[data-ref="gear"]', wrap).hidden = t !== 'cone';
       canvas.dataset.tool = t;
     }
     const snapshot = () => { hist.push(JSON.stringify({ v: d.v, items: d.items })); if (hist.length > 60) hist.shift(); changed = true; };
@@ -4140,7 +4537,9 @@
         return;
       }
       snapshot();
-      const it = { t: tool, x: clampX(p.x), y: clampY(p.y) };
+      const it = { t: tool === 'cone' ? gearKind : tool, x: clampX(p.x), y: clampY(p.y) };
+      if (it.t === 'ladder') { it.r = 0; it.n = 6; it.y = Math.min(194 - 21, Math.max(6 + 21, it.y)); }
+      if (it.t === 'hurdle') it.r = 0;
       if (tool === 'a' || tool === 'b') it.n = nextNum(tool);
       d.items.push(it);
       haptic(5);
@@ -4171,7 +4570,10 @@
         arrows.forEach((x, n) => { if (!(Number(x.s) > 0)) x.s = n + 1; });
         it.s = arrows.reduce((mx, x) => Math.max(mx, Number(x.s) || 0), 0) + 1;
       }
-      if (drag.kind === 'move' && !drag.moved) hist.pop();
+      if (drag.kind === 'move' && !drag.moved) {
+        // Un toque (sin arrastrar) sobre una escalera o valla la gira 90°.
+        if (it && (it.t === 'ladder' || it.t === 'hurdle')) { it.r = Number(it.r) === 90 ? 0 : 90; haptic(5); } else hist.pop();
+      }
       drag = null;
       render();
     };
@@ -4202,6 +4604,7 @@
     });
     bindSeg(wrap, 'variant', (v) => { if (v === d.v) return; snapshot(); d.v = v; render(); });
     bindSeg(wrap, 'akind', (v) => { arrowKind = v; });
+    bindSeg(wrap, 'gkind', (v) => { gearKind = v; });
     setTool(tool);
     render();
     pushLayer(layer);
@@ -4326,6 +4729,7 @@
     function mediaHTML(ex) {
       if (ex.mediaType === 'video' && ex.mediaId) return '<video muted playsinline loop autoplay preload="auto" data-media="' + esc(ex.mediaId) + '"' + (ex.thumbId ? ' data-poster="' + esc(ex.thumbId) + '"' : '') + '></video>';
       if (ex.mediaType === 'image' && ex.mediaId) return '<img alt="" data-media="' + esc(ex.mediaId) + '">';
+      if (ex.videoUrl) return '<video muted playsinline loop autoplay preload="auto" src="' + esc(ex.videoUrl) + '"' + (ex.posterUrl ? ' poster="' + esc(ex.posterUrl) + '"' : '') + '></video>';
       return '<span class="art">' + boardSVG(ex.sport, hasDiagram(ex) ? ex.diagram : null, { fit: 'xMidYMid meet', anim: hasDiagram(ex) && canPlay(ex.diagram) }) + '</span>';
     }
     let runPlayer = null;
@@ -4355,7 +4759,7 @@
         '<div class="run-foot"><div class="tl-bar" data-ref="bar">' + items.map((x, i) => '<i style="flex-grow:' + Math.max(1, itemMin(x)) + '" class="' + (x.pause ? 'pz ' : '') + (i < st.i ? 'past' : i === st.i ? 'cur' : '') + '"></i>').join('') + '</div>' +
         '<p class="run-total" data-ref="total"></p></div>';
       if (!it.pause) hydrate(body);
-      if (ex && !ex.mediaId && hasDiagram(ex) && canPlay(ex.diagram) && !reduceMotion()) runPlayer = playDiagram($('.run-media', body), ex.diagram, { loop: true, delay: 700 });
+      if (ex && !ex.mediaId && !ex.videoUrl && hasDiagram(ex) && canPlay(ex.diagram) && !reduceMotion()) runPlayer = playDiagram($('.run-media', body), ex.diagram, { loop: true, delay: 700 });
       update();
     }
     function doneHTML() {
@@ -4630,6 +5034,7 @@
     });
   }
   async function exImage(ex) {
+    if (!ex.thumbId && ex.posterUrl && !hasDiagram(ex)) { const r = await imageToDataURL(ex.posterUrl, 240, 300); if (r) return r; }
     if (ex.thumbId) {
       const u = await S.backend.mediaURL(ex.thumbId).catch(() => null);
       if (u) { const r = await imageToDataURL(u, 240, 300); if (r) return r; }
@@ -4805,6 +5210,9 @@
           case 'start-class': runClass(a.dataset.id); return;
           case 'roll-class': openAttendance(a.dataset.id); return;
           case 'catalog': openCatalog(S.sport); return;
+          case 'new-section': openSectionEditor({}); return;
+          case 'filters': openFilters(S.sport); return;
+          case 'clear-filters': S.fx[S.sport] = null; S.sig = {}; renderEjercicios(); return;
           default: break;
         }
       }
@@ -4814,6 +5222,10 @@
       if (gr) { openGroup(gr.dataset.openGroup); return; }
       const tp = e.target.closest('[data-open-template]');
       if (tp) { openTemplate(tp.dataset.openTemplate); return; }
+      const sc = e.target.closest('[data-open-section]');
+      if (sc) { openSection(sc.dataset.openSection); return; }
+      const uf = e.target.closest('[data-unfilter]');
+      if (uf) { removeFilter(S.sport, uf.dataset.unfilter); haptic(4); S.sig = {}; renderEjercicios(); return; }
       const chip = e.target.closest('[data-chip]');
       if (chip) {
         S.f[S.sport] = chip.dataset.chip;
@@ -4875,6 +5287,7 @@
       S.exercises = data.exercises.slice();
       S.classes = data.classes.slice();
       S.groups = (data.groups || []).slice();
+      S.sections = (data.sections || []).slice();
       S.ready = true;
       if (!data.fromCache) { S.definitive = true; S.stale = false; clearTimeout(timer); }
       // Una vez al abrir: borra videos que ya no usa ningún ejercicio (antes de que empieces a editar).
@@ -4907,6 +5320,8 @@
     });
   }
 
+  // Herramienta de videos (tools/video): usa el mismo dibujo del pizarrón sin arrancar la app.
+  if (window.CANCHA_RENDER_ONLY) { window.CanchaRender = { boardSVG, itemSVG, diagramSteps, r1 }; return; }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();
