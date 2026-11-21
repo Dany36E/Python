@@ -31,6 +31,7 @@
   const APP_NAME = 'Cancha';
   const PAUSES = ['Hidratación', 'Descanso', 'Preparar material'];
   const isPause = (it) => !!it && it.type === 'pause';
+  const pauseIc = (label) => (/hidrat|agua|tomar/i.test(label || '') ? 'drop' : 'timer');
   const itemMin = (it) => Math.max(0, Number(it && it.min) || 0);
   const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
   const CLOUD_LIMIT = Math.floor(19.5 * 1024 * 1024);
@@ -1535,7 +1536,7 @@
         '<p class="subtitle" data-ref="count">&nbsp;</p>' +
         (t === 'ejercicios'
           ? segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], S.sport) +
-            '<div class="search-row"><label class="search">' + ic('search') + '<input type="search" id="q-ejercicios" placeholder="Buscar por nombre, material, edad…" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios"></label>' +
+            '<div class="search-row"><label class="search">' + ic('search') + '<input type="search" id="q-ejercicios" placeholder="Buscar ejercicios" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios"></label>' +
             '<button class="filter-btn" data-act="filters" aria-label="Filtros">' + ic('sliders') + '<b data-ref="fcount"></b></button></div>' +
             '<div class="chips active-filters" data-ref="afilters" aria-label="Filtros activos"></div>' +
             '<div class="chips" data-ref="chips" role="toolbar" aria-label="Filtrar por objetivo"></div>'
@@ -2439,7 +2440,7 @@
           '<span class="moves"><button class="mv" data-act="move" data-d="-1" data-i="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Subir ' + esc(title) + '">' + ic('up') + '</button><button class="mv" data-act="move" data-d="1" data-i="' + i + '"' + (i === items.length - 1 ? ' disabled' : '') + ' aria-label="Bajar ' + esc(title) + '">' + ic('down') + '</button></span></div>';
       }
       const inner = '<span class="time">' + fmtMin(start) + '′</span>' +
-        (pause ? '<span class="mini pause-ico">' + ic('drop') + '</span>' : ex ? thumbHTML(ex, 'mini') : '<span class="mini"></span>') +
+        (pause ? '<span class="mini pause-ico">' + ic(pauseIc(title)) + '</span>' : ex ? thumbHTML(ex, 'mini') : '<span class="mini"></span>') +
         '<span class="txt"><span class="t1">' + esc(title) + '</span><span class="t2">' + esc([sub, mins + ' min'].filter(Boolean).join(' · ')) + '</span></span>';
       return ex ? '<button class="plan-row" data-open-ex="' + esc(it.exId) + '">' + inner + ic('chevR', 'chev') + '</button>'
         : '<div class="plan-row' + (pause ? ' pause' : '') + '">' + inner + '</div>';
@@ -3031,7 +3032,7 @@
         '<div class="group" style="margin-top:20px">' + switchRow('f-video', ic('video'), 'Con video', 'Tuyo, de Recomendados o de YouTube', draft.video, false) +
         switchRow('f-school', ic('people'), 'Grupos grandes', 'De 25 a 35 alumnos', draft.school, false) + '</div>' +
         '<p class="group-label">Ordenar</p>' + segHTML('fsort', SORTS, draft.sort, 'Ordenar') +
-        '<button type="button" class="btn tinted wide-btn" data-act="f-clear">Quitar filtros</button>',
+        (activeFilterCount(sport) || fx(sport).sort !== 'recent' ? '<button type="button" class="btn tinted wide-btn" data-act="f-clear">Quitar filtros</button>' : ''),
       onConfirm: () => { S.fx[sport] = draft; S.sig = {}; renderEjercicios(); sheet.dismiss(); },
     });
     const root = sheet.body;
@@ -3368,8 +3369,8 @@
         '<p class="hint">Si casi todos vinieron, toca «Todos asistieron» y luego marca a los que faltaron.</p>' +
         '<button type="button" class="btn tinted att-all" data-att-all>' + ic('check') + 'Todos asistieron</button>' +
         '<p class="att-sum" data-ref="sum" aria-live="polite"></p>' +
-        '<div class="list att-list">' + list.map((s, n) =>
-          '<div class="att-row" data-sid="' + esc(s.id) + '"><span class="att-n">' + (n + 1) + '</span><span class="att-name">' + esc(s.name) + '</span>' +
+        '<div class="list att-list" style="--rows:' + Math.ceil(list.length / 2) + '">' + list.map((s, n) =>
+          '<div class="att-row' + (n === Math.ceil(list.length / 2) ? ' col-top' : '') + '" data-sid="' + esc(s.id) + '"><span class="att-n">' + (n + 1) + '</span><span class="att-name">' + esc(s.name) + '</span>' +
           '<span class="att-btns" role="group" aria-label="' + esc(s.name) + '">' +
           ['p', 't', 'f'].map((v) => '<button type="button" class="att-b att-' + v + '" data-v="' + v + '" aria-pressed="false" aria-label="' + esc(s.name) + ': ' + ATT[v].label.toLowerCase() + '">' + (ATT[v].glyph ? ic(ATT[v].glyph) : 'R') + '</button>').join('') +
           '</span></div>').join('') + '</div>',
@@ -4479,7 +4480,7 @@
     let mt = 0;
     const rows = t.items.map((it) => {
       const start = mt; mt += itemMin(it);
-      if (isPause(it)) return '<div class="plan-row"><span class="time">' + fmtMin(start) + '′</span><span class="mini pause-ico">' + ic('drop') + '</span><span class="txt"><span class="t1">' + esc(it.label) + '</span><span class="t2">Pausa, ' + fmtMin(it.min) + ' min</span></span></div>';
+      if (isPause(it)) return '<div class="plan-row"><span class="time">' + fmtMin(start) + '′</span><span class="mini pause-ico">' + ic(pauseIc(it.label)) + '</span><span class="txt"><span class="t1">' + esc(it.label) + '</span><span class="t2">Pausa, ' + fmtMin(it.min) + ' min</span></span></div>';
       const cx = catEx(it.exId);
       return '<button class="plan-row" data-open-cat="' + esc(it.exId) + '"><span class="time">' + fmtMin(start) + '′</span><span class="mini">' + (cx && cx.thumbUrl ? '<img alt="" loading="lazy" src="' + esc(cx.thumbUrl) + '">' : '<span class="art">' + boardSVG(t.sport, cx && cx.diagram, { crop: true }) + '</span>') + '</span>' +
         '<span class="txt"><span class="t1">' + esc(cx ? cx.title : 'Ejercicio') + '</span><span class="t2">' + esc([cx ? cx.objective : '', fmtMin(it.min) + ' min', seriesText(it.series)].filter(Boolean).join(', ')) + '</span></span>' + ic('chevR', 'chev') + '</button>';
@@ -4849,7 +4850,7 @@
       const points = ex ? String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean).slice(0, 3) : [];
       body.innerHTML =
         (it.pause
-          ? '<div class="run-media run-pause">' + ic('drop') + '</div><div class="run-ex"><h2>' + esc(title(it)) + '</h2></div>'
+          ? '<div class="run-media run-pause">' + ic(pauseIc(it.label)) + '</div><div class="run-ex"><h2>' + esc(title(it)) + '</h2></div>'
           : '<div class="run-media">' + mediaHTML(ex) + '</div><div class="run-ex"><p class="d-eyebrow">' + esc([ex.objective, ex.space].filter(Boolean).join(' · ') || SPORTS[ex.sport].name) + '</p><h2>' + esc(ex.title) + '</h2></div>') +
         '<div class="run-ring"><svg viewBox="0 0 220 220" aria-hidden="true"><circle class="rr-track" cx="110" cy="110" r="96"/><circle class="rr-bar" cx="110" cy="110" r="96" stroke-dasharray="' + RING.toFixed(1) + '" transform="rotate(-90 110 110)"/></svg>' +
         '<div class="rr-txt"><span class="rr-time" data-ref="time">0:00</span><span class="rr-sub" data-ref="sub"></span></div></div>' +
@@ -4976,7 +4977,7 @@
     };
     function exit() {
       if (st.done || !st.started) { popLayer(layer); return; }
-      actionSheet({ title: '¿Salir de la clase?', message: 'Se borra el avance y no contará como dada.', actions: [{ label: 'Salir', danger: true, onClick: () => { clearRun(); popLayer(layer); } }], cancel: 'Seguir con la clase' });
+      actionSheet({ title: '¿Salir de la clase?', message: 'Se borra el avance y no contará como dada.', actions: [{ label: 'Salir', danger: true, onClick: () => { clearRun(); popLayer(layer); } }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint });
     }
     wrap.addEventListener('click', (e) => {
       const b = e.target.closest('[data-run]');
@@ -4998,8 +4999,8 @@
         case 'prev': go(st.i - 1); break;
         case 'next':
           if (st.i < items.length - 1) { go(st.i + 1); break; }
-          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir', onClick: () => popLayer(layer) }], cancel: 'Seguir con la clase' }); break; }
-          actionSheet({ title: '¿Terminar la clase?', actions: [{ label: 'Terminar clase', onClick: finish }], cancel: 'Seguir con la clase' });
+          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir', onClick: () => popLayer(layer) }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint }); break; }
+          actionSheet({ title: '¿Terminar la clase?', actions: [{ label: 'Terminar clase', onClick: finish }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint });
           break;
         case 'minus':
           st.extra[st.i] = Math.max(1 - baseMin(st.i), st.extra[st.i] - 1);
@@ -5528,7 +5529,7 @@
     wrap.setAttribute('aria-modal', 'true');
     wrap.setAttribute('aria-label', 'Cómo funciona Cancha');
     wrap.innerHTML =
-      '<div class="onb">' +
+      '<div class="onb" tabindex="-1">' +
       '<div class="onb-top"><span class="onb-step" aria-live="polite"></span><button type="button" class="onb-skip" data-onb="skip">Saltar</button></div>' +
       '<div class="onb-view"><div class="onb-track">' +
       slides.map((s, k) => '<section class="onb-slide" data-k="' + k + '" aria-hidden="true"><div class="onb-art">' + tutArtHTML(s.art) + '</div>' +
@@ -5564,7 +5565,7 @@
     }
     const layer = {
       kind: 'tutorial', el: wrap,
-      focusEl() { return nextBtn; },
+      focusEl() { return $('.onb', wrap); },
       close() { stopArt(); wrap.classList.remove('open'); setTimeout(() => wrap.remove(), 450); },
       onBack() { if (i > 0) go(i - 1); else finish(); },
     };
