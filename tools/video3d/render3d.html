@@ -477,7 +477,8 @@ window.setup = async function (id, opts) {
   const passes = P.balls.reduce((a, b) => a + b.segs.filter((sg) => sg.type === 'pass').length, 0);
   // Ejercicios de pases (rondos, ruedas): cámara fija que muestra a todos. Si alguien corre mucho, la cámara lo sigue.
   const passDrill = tight || (passes >= 3 && (ext.x1 - ext.x0) < 14 && (ext.z1 - ext.z0) < 16);
-  const follow = !passDrill && heroLen >= 4.5 && ((ext.x1 - ext.x0) > 2 * hw + 0.2 || (ext.z1 - ext.z0) > 2 * hd + 0.2);
+  const wide = (ext.x1 - ext.x0) > 2 * hw + 0.2 || (ext.z1 - ext.z0) > 2 * hd + 0.2;
+  const follow = !passDrill && wide && (heroLen >= 4.5 || (heroLen >= 2 && (ext.x1 - ext.x0) > 8));
   let focusAt = null;
   if (follow) {
     corners.length = 0;
@@ -495,7 +496,12 @@ window.setup = async function (id, opts) {
         let soon = null; (hero ? [hero] : P.players).forEach((pl) => pl.moves.forEach((m) => { if (m.t0 > t && m.t0 - t < 1200 && (!soon || m.t0 < soon.t0)) soon = m; }));
         if (soon) pts2.push(soon.from);
       }
-      P.balls.forEach((b) => b.segs.forEach((sg) => { if (sg.type === 'shot' && t >= sg.t0 - 700 && t < sg.t1 + 900) pts2.push(sg.hoop.rim); }));
+      P.balls.forEach((b) => b.segs.forEach((sg) => {
+        if (sg.type !== 'shot' || t < sg.t0 - 700 || t >= sg.t1 + 900) return;
+        // Tiro: el aro y el tirador juntos en cuadro.
+        const by = P.players.find((x) => x.i === sg.by);
+        pts2.length = 0; pts2.push(sg.hoop.rim); if (by) pts2.push(playerState(by, t).p);
+      }));
       if (pts2.length) last = pts2.reduce((a, q) => a.add(new THREE.Vector2(q.x / pts2.length, q.y / pts2.length)), new THREE.Vector2());
       f.push(last ? last.clone() : firstMove().clone());
     }
@@ -525,8 +531,13 @@ window.setup = async function (id, opts) {
   document.getElementById('v').classList.toggle('bare', !!opts.bare);
   const cycle = P.end + 1400;
   const total = Math.min(cycle * 2, Math.max(cycle, 15000));
+  // La neblina del fondo siempre más allá de la jugada (si la cámara está lejos, no se oscurece).
+  scene.fog.near = Math.max(scene.fog.near, base.dist * 1.3 + 6); scene.fog.far = Math.max(scene.fog.far, base.dist * 2.6 + 30);
+  // Miniatura y portada: a media jugada del protagonista (no al final, cuando ya están quietos).
+  let thumb = P.end * 0.45;
+  if (hero && hero.chains && hero.chains.length) { const c = hero.chains[0]; thumb = c.t0 + (c.t1 - c.t0) * 0.55; }
   X = { ex, s, P, scene, camera, target, center: target.clone(), base, caps, cycle, total, side, dirFor, indoor, focusAt, shotAt: X.shotAt };
-  return { total, cycle, poster: Math.min(P.end - 150, cycle - 1) };
+  return { total, cycle, poster: Math.min(P.end - 150, cycle - 1), thumb };
 };
 
 function ballState(b, t, ex) {

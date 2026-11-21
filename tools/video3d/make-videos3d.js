@@ -48,10 +48,10 @@ async function work(browser, queue) {
       await done;
     }
     // Portada (con textos) y miniatura sin textos, recortada a 4:5 alrededor de la acción.
-    await page.evaluate((ms) => window.frameAt(ms), info.poster);
+    await page.evaluate((ms) => window.frameAt(ms), info.thumb);
     await ffmpeg(['-f', 'image2pipe', '-c:v', 'mjpeg', '-i', '-', '-vf', 'scale=360:640', '-q:v', '5', path.join(OUT, id + '.jpg')], await page.screenshot({ type: 'jpeg', quality: 92 }));
     await page.evaluate(() => document.getElementById('v').classList.add('bare'));
-    await page.evaluate((ms) => window.frameAt(ms), info.poster);
+    await page.evaluate((ms) => window.frameAt(ms), info.thumb);
     await ffmpeg(['-f', 'image2pipe', '-c:v', 'mjpeg', '-i', '-', '-vf', 'crop=720:900:0:250,scale=320:400', '-q:v', '5', path.join(OUT, id + '-t.jpg')], await page.screenshot({ type: 'jpeg', quality: 92 }));
     await page.evaluate(() => document.getElementById('v').classList.remove('bare'));
     const kb = fs.existsSync(file) ? Math.round(fs.statSync(file).size / 1024) : 0;
