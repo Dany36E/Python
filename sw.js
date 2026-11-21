@@ -1,5 +1,8 @@
-/* Cancha — service worker: la app funciona sin conexión. */
-const CACHE = 'cancha-v3';
+/* Cancha — service worker: la app funciona sin conexión.
+   Cada versión usa su propia caché: al publicar cambios, sube VERSION para que todos reciban
+   la app completa de una sola vez (sin mezclar archivos viejos y nuevos). */
+const VERSION = 'v4';
+const CACHE = 'cancha-' + VERSION;
 const SHELL = [
   './',
   './index.html',
@@ -14,18 +17,22 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.indexOf('cancha-') === 0 && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-// Primero la caché, y en segundo plano se actualiza desde la red.
+// La app sale de la caché de su versión; lo demás va a la red y se guarda por si no hay conexión.
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -35,13 +42,14 @@ self.addEventListener('fetch', (event) => {
     caches.open(CACHE).then(async (cache) => {
       const key = req.mode === 'navigate' ? './index.html' : req;
       const cached = await cache.match(key, { ignoreSearch: true });
-      const network = fetch(req)
-        .then((res) => {
-          if (res && res.ok && res.type === 'basic') cache.put(key, res.clone());
-          return res;
-        })
-        .catch(() => cached);
-      return cached || network;
+      if (cached) return cached;
+      try {
+        const res = await fetch(req);
+        if (res && res.ok && res.type === 'basic') cache.put(key, res.clone());
+        return res;
+      } catch (e) {
+        return Response.error();
+      }
     })
   );
 });
