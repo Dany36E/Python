@@ -249,11 +249,12 @@ function pose(P, o) {
     // Pase con el interior: pie de apoyo junto al balón, armado corto, golpe con el tobillo firme y el pie abierto, y acompaña.
     const base = snapJ(P);
     const k = Math.min(o.kick, 1);
-    const KF = [[0, -0.1, 0.0, 0.0, 0.1], [0.38, -0.13, -0.3, 0.17, 0.35], [0.6, -0.1, 0.17, 0.035, -0.1], [0.84, -0.07, 0.42, 0.15, 0.0], [1, -0.09, 0.08, 0.0, 0.0]];
+    const r0 = o.feet ? o.feet.R : { x: -0.1, z: 0 };
+    const KF = [[0, r0.x, r0.z, 0.0, 0.1], [0.38, -0.12, -0.3, 0.16, 0.35], [0.6, -0.1, 0.03, 0.035, -0.1], [0.84, -0.08, 0.38, 0.14, 0.0], [1, -0.1, 0.0, 0.0, 0.0]];
     let j = 0; while (j < KF.length - 2 && k > KF[j + 1][0]) j++;
     const a = KF[j]; const b = KF[j + 1]; const u = smooth((k - a[0]) / (b[0] - a[0]));
     const kf = { x: lerp(a[1], b[1], u), z: lerp(a[2], b[2], u), y: lerp(a[3], b[3], u), pitch: lerp(a[4], b[4], u) };
-    const sf = { x: 0.11, z: 0.1, y: 0, pitch: 0 };
+    const sf = o.feet && o.feet.L.plant ? { x: o.feet.L.x, z: o.feet.L.z, y: 0, pitch: 0 } : { x: 0.1, z: 0.02, y: 0, pitch: 0 };
     kickHy = ikHeight({ L: sf, R: kf }, 0.74);
     legIK(P.legL, 1, kickHy, sf); legIK(P.legR, -1, kickHy, kf);
     P.legR.ankle.rotation.y = -0.95 * smooth((k - 0.15) / 0.3) * (1 - smooth((k - 0.86) / 0.14));
@@ -267,12 +268,12 @@ function pose(P, o) {
     // Apoyo en una pierna: pasa el peso a la pierna de apoyo, sube la rodilla libre y abre los brazos poco a poco.
     const w = o.poseW == null ? 1 : o.poseW; const base = snapJ(P);
     const free = o.pose === 'oneLegL' ? P.legL : P.legR; const st = o.pose === 'oneLegL' ? P.legR : P.legL;
-    free.hip.rotation.set(-1.2 * smooth(w * 1.4 - 0.4) - 0.1, 0, 0.04); free.knee.rotation.x = 1.55; free.ankle.rotation.x = 0.25;
-    st.hip.rotation.set(-0.16, 0, 0); st.knee.rotation.x = 0.28; st.ankle.rotation.x = -0.12;
+    free.hip.rotation.set(-1.45 * smooth(w * 1.4 - 0.4) - 0.1, 0, 0.04); free.knee.rotation.x = 1.6; free.ankle.rotation.x = 0.25;
+    st.hip.rotation.set(-0.2, 0, 0); st.knee.rotation.x = 0.24; st.ankle.rotation.x = -0.04;
     setArm(P.armL, -0.1, 0.75, -0.25); setArm(P.armR, -0.1, -0.75, -0.25);
     mixJ(P, base, w);
     P.body.rotation.z = Math.sin(o.t * 0.0062 + o.seed) * 0.03 * w; P.body.position.x = (o.pose === 'oneLegL' ? -1 : 1) * 0.06 * w;
-    hy = lerp(hy, 0.76, w); lean = lerp(lean, 0.03, w); override = true;
+    hy = lerp(hy, 0.75, w); lean = lerp(lean, 0.03, w); override = true;
   }
   if (o.signal != null) { const k = Math.sin(clamp(o.signal, 0, 1) * Math.PI); P.armR.sh.rotation.set(-2.7 * k, 0, -0.15); P.armR.el.rotation.x = -0.2; }
   if (o.tagArm != null) { const k = Math.sin(clamp(o.tagArm, 0, 1) * Math.PI); P.armR.sh.rotation.set(-1.35 * k, 0, 0.15); P.armR.el.rotation.x = -0.15; }
@@ -392,6 +393,7 @@ function plan3d(ex, d, S, ch) {
   }
   R.diagramSteps(d).forEach((group, gi) => {
     const sNum = Number(group[0].it.s) || gi + 1;
+    const pos0 = {}; players.forEach((p) => { pos0[p.i] = Object.assign({}, plPos[p.i]); });
     let gmax = 0; let hold = 0;
     const runs = group.filter((g) => g.it.k !== 'pase'); const passes = group.filter((g) => g.it.k === 'pase');
     const crowd = runs.length >= 3;
@@ -451,17 +453,19 @@ function plan3d(ex, d, S, ch) {
       // Quien pasa: el que llega a ese punto en este paso, o el que está ahí.
       let passer = null; let pd = 1.2;
       players.forEach((p) => p.chains.forEach((c) => { if (c.step !== sNum) return; const e = c.pts[c.pts.length - 1]; const dd = e.distanceTo(from); if (dd < pd) { pd = dd; passer = p; } }));
-      if (!passer) passer = nearestBy(players, (o) => plPos[o.i], it.x, it.y, 13);
+      if (!passer) passer = nearestBy(players, (o) => pos0[o.i], it.x, it.y, 13) || nearestBy(players, (o) => plPos[o.i], it.x, it.y, 13);
       const hoop = sport === 'basquet' ? nearHoop(to) : null;
       let type = hoop ? 'shot' : sport === 'basquet' && L < 1.3 ? 'handoff' : 'pass';
       if (sport === 'futbol' && it.y2 < 16 && Math.abs(it.x2 - 80) < 18) type = 'goal';
-      const speed = type === 'goal' ? 12 : sport === 'basquet' ? 8.5 : 6.0;
-      const dur = type === 'shot' ? 1100 : type === 'handoff' ? 360 : Math.max(420, (L / speed) * 1000 * (sport === 'futbol' ? 1.35 : 1) + 80);
-      const receiver = type === 'shot' ? null : nearestBy(players.filter((p) => p !== passer), (o) => plPos[o.i], it.x2, it.y2, 14);
+      const speed = type === 'goal' ? 12 : sport === 'basquet' ? 8.5 : 7.5;
+      const dur = type === 'shot' ? 1100 : type === 'handoff' ? 360 : Math.max(380, (L / speed) * 1000 * (sport === 'futbol' ? 1.3 : 1) + 60);
+      // Quien recibe: el más cercano al final de la flecha, ya sea donde estaba al empezar el paso o a donde llega.
+      let receiver = null;
+      if (type !== 'shot') { let rd = 14; players.forEach((p) => { if (p === passer) return; [pos0[p.i], plPos[p.i]].forEach((q) => { const dd = Math.hypot(q.x - it.x2, q.y - it.y2); if (dd < rd) { rd = dd; receiver = p; } }); }); }
       let t0p = t;
       if (passer && seqEnd.has(passer)) {
         const here = passer.chains.filter((c) => c.step === sNum && c.pts[c.pts.length - 1].distanceTo(from) < 0.9).pop();
-        if (here) t0p = Math.max(t, here.t1 - 150);
+        if (here) t0p = Math.max(t, here.t1 + (sport === 'futbol' ? 260 : -150));
       }
       t0p += Number(it.dt) || 0;
       const seg = { type, t0: t0p, t1: t0p + dur, to, hoop, by: passer ? passer.i : null, rcv: receiver ? receiver.i : null, bounce: !!it.bounce, reb: it.reb || null, stop: !!it.stop };
@@ -485,6 +489,7 @@ function plan3d(ex, d, S, ch) {
     b.segs.sort((p, q) => p.t0 - q.t0);
     const out = [];
     b.segs.forEach((sg) => { const prev = out[out.length - 1]; if (prev && prev.type === 'carry' && sg.type === 'carry' && prev.by === sg.by && sg.t0 - prev.t1 <= 120) { prev.t1 = sg.t1; prev.mv2 = sg.mv; } else out.push(sg); });
+    out.forEach((sg, i) => { const nx = out[i + 1]; if (sg.type === 'carry' && nx && nx.type !== 'carry' && nx.t0 < sg.t1) sg.t1 = Math.max(sg.t0 + 100, nx.type === 'shot' && nx.layup ? sg.t1 : nx.t0); });
     b.segs = out;
   });
   players.forEach((pl) => pl.moves.forEach((m) => { m.t0 = m.a0; }));
@@ -812,7 +817,7 @@ function ownedPos(pl, t, sport, r) {
   const st = playerState(pl, t); const h = headingOf(pl, t); const f = fwdOf(h);
   if (sport === 'basquet') return new THREE.Vector3(st.p.x + f.x * 0.3, 1.02, st.p.y + f.y * 0.3);
   const rt = rightOf(h);
-  return new THREE.Vector3(st.p.x + f.x * 0.3 + rt.x * 0.1, r, st.p.y + f.y * 0.3 + rt.y * 0.1);
+  return new THREE.Vector3(st.p.x + f.x * 0.2 + rt.x * 0.1, r, st.p.y + f.y * 0.2 + rt.y * 0.1);
 }
 // Fútbol: el balón solo cambia de rumbo cuando el pie derecho lo toca (interior para un lado, exterior para el otro).
 function buildTouches(sg, r) {
@@ -823,7 +828,7 @@ function buildTouches(sg, r) {
     if (skip > 0) { skip--; return; }
     const st = playerState(pl, q.t); const m = st.cur ? st.cur.m : sg.mv;
     const f = fwdOf(q.h || headingOf(pl, q.t)); const rt = rightOf(q.h || headingOf(pl, q.t));
-    T.push({ t: q.t, p: new THREE.Vector3(q.p.x + f.x * 0.17 - rt.x * 0.04, r, q.p.y + f.y * 0.17 - rt.y * 0.04) });
+    T.push({ t: q.t, p: new THREE.Vector3(q.p.x + f.x * 0.17 - rt.x * 0.04, r, q.p.y + f.y * 0.17 - rt.y * 0.04), long: !!m.long });
     skip = m.long ? 3 : m.mode === 'fdribble' ? 1 : 0;
   });
   T.forEach((q, i) => {
@@ -832,17 +837,19 @@ function buildTouches(sg, r) {
     const cr = h.x * dv.y - h.y * dv.x; const ang = Math.atan2(cr, h.dot(dv));
     q.kind = Math.abs(ang) < 0.25 ? 'str' : ang > 0 ? 'out' : 'in';
   });
+  // Primer toque (control orientado): si el balón llega parado, el pie lo empuja al arrancar.
+  if (T.length && T[0].t - sg.t0 > 260) T.unshift({ t: sg.t0 + 90, p: null, first: true });
   sg.touches = T;
 }
 function footballCarry(sg, t, r) {
   const T = sg.touches || [];
   const start = sg.p0 || ownedPos(X.P.players.find((x) => x.i === sg.by), sg.t0, 'futbol', r);
   const endP = ownedPos(X.P.players.find((x) => x.i === sg.by), sg.t1, 'futbol', r);
-  const pts = [{ t: sg.t0, p: start }].concat(T).concat([{ t: sg.t1, p: endP }]);
+  const pts = [{ t: sg.t0, p: start }].concat(T.map((q) => (q.first ? { t: q.t, p: start, first: true } : q))).concat([{ t: sg.t1, p: endP }]);
   let i = 0; while (i < pts.length - 2 && t >= pts[i + 1].t) i++;
   const a = pts[i]; const b = pts[i + 1];
   const tau = clamp((t - a.t) / Math.max(1, b.t - a.t), 0, 1);
-  const e = i === 0 ? smooth(tau) : 1 - Math.pow(1 - tau, 1.7);
+  const e = i === 0 && !b.first ? smooth(tau) : 1 - Math.pow(1 - tau, a.long ? 3.4 : 1.7);
   return new THREE.Vector3().lerpVectors(a.p, b.p, e);
 }
 function carryPos(sg, t, sport, r) {
@@ -1185,7 +1192,7 @@ window.setup = async function (id, opts) {
         if (cam.track) cam.track.forEach((e) => { if (t >= timeOf(e)) who = P.players.find((p) => p.key === e.to) || who; });
         f = playerState(who, t).p.clone();
       }
-      if (focusMode === 'center') f = V2(X.center.x, f ? f.y : X.center.y);
+      if (focusMode === 'center') f = V2(f && cam.fxb ? lerp(X.center.x, f.x, cam.fxb) : X.center.x, f ? f.y : X.center.y);
       if (cam.with && f) { const w2 = P.players.find((p) => p.key === cam.with); if (w2) { const q = playerState(w2, t).p; f = V2((f.x + q.x) / 2, (f.y + q.y) / 2); } }
       if (cam.fz != null && f) f.y = lerp(f.y, X.center.y, cam.fz);
       let w = 0;
@@ -1197,7 +1204,8 @@ window.setup = async function (id, opts) {
     const sm = (arr, i, R2) => { let a = 0; let n = 0; for (let k = -R2; k <= R2; k++) { const w = R2 + 1 - Math.abs(k); a += arr[clamp(i + k, 0, arr.length - 1)] * w; n += w; } return a / n; };
     const at = (arr, t, R2) => { const u = t / 100; const i = Math.floor(u); return lerp(sm(arr, i, R2), sm(arr, i + 1, R2), smooth(u - i)); };
     const dist = cam.dist || 7; const pitch = deg(cam.pitch || 28); const fov = cam.fov || 40;
-    follow = (t) => { const sw = smooth(at(shotW, t, 6)); return { look: new THREE.Vector3(at(fx, t, 9), lerp(0.8, 1.5, sw), at(fz, t, 9)), dist: dist * (1 + 0.3 * sw), pitch: pitch + deg(4) * sw, az, fov: lerp(fov, fov + 4, sw), offX: 0, offY: 0.08 }; };
+    const LAG = cam.lag || 9;
+    follow = (t) => { const sw = smooth(at(shotW, t, 6)); return { look: new THREE.Vector3(at(fx, t, LAG), lerp(0.8, 1.5, sw), at(fz, t, LAG)), dist: dist * (1 + 0.3 * sw), pitch: pitch + deg(4) * sw, az, fov: lerp(fov, fov + 4, sw), offX: 0, offY: 0.08 }; };
   }
   // El recorrido, dibujado en el piso como en el pizarrón (se desvanece cuando empieza la acción).
   const arrows = d.items.filter((it) => it.t === 'arrow' && !it.nr && (!ch.route || ch.route.includes(Number(it.s))));
@@ -1289,11 +1297,12 @@ function drawScene(t) {
         o.phase = phaseAt(c, t);
         const g = GAIT[m.mode];
         o.hy = g ? HY[m.mode] || 0.76 : m.mode === 'walk' || v < 1.8 ? 0.776 : 0.772 - 0.012 * v;
-        if (/dribble/.test(m.mode)) o.hy -= 0.035;
+        if (/dribble/.test(m.mode)) o.hy = Math.min(o.hy, 0.722);
+        const toEnd = c.t1 - t; if (toEnd < 900 && v > 0.15) o.hy -= 0.055 * smooth((900 - toEnd) / 450) * clamp(v / 1.2, 0, 1);
         if (!g && v >= 1.8) o.hy -= 0.022 * clamp((v - 1.6) / 1.5, 0, 1) * Math.cos(2 * (o.phase - Math.PI / 2) - 0.6);
         if (m.mode === 'carioca') o.hipYaw = 0.6 * Math.sin(o.phase / 2 + 0.3);
         // Se inclina hacia adentro en las curvas (el tronco), sin exagerar.
-        if (!(g && g.side)) { const d1 = pathHeading(c, st.cur.d - 0.3); const d2 = pathHeading(c, st.cur.d + 0.3); let dw = d2 - d1; while (dw > Math.PI) dw -= 2 * Math.PI; while (dw < -Math.PI) dw += 2 * Math.PI; o.roll = clamp(-Math.atan((v * v * (dw / 0.6)) / 9.8), -0.22, 0.22); }
+        if (!(g && g.side)) { const d1 = pathHeading(c, st.cur.d - 0.3); const d2 = pathHeading(c, st.cur.d + 0.3); let dw = d2 - d1; while (dw > Math.PI) dw -= 2 * Math.PI; while (dw < -Math.PI) dw += 2 * Math.PI; o.roll = clamp(-Math.atan((v * v * (dw / 0.6)) / 9.8), -0.22, 0.22); o.hy -= Math.min(0.05, Math.abs(dw) * 0.06); }
         // Parada en un tiempo: saltito al final del dribleo.
         if (c.hop && t > c.hop.t) { const u = clamp((t - c.hop.t) / c.hop.dur, 0, 1); o.lift = 0.09 * Math.sin(Math.PI * u); o.hopK = Math.sin(Math.PI * u) * 0.6; }
       }
@@ -1301,6 +1310,8 @@ function drawScene(t) {
       // Esperando: pasa el peso de un pie al otro y sigue con la mirada la acción.
       const sw = Math.sin(t * 0.0012 + k * 2.1) * 0.6 + Math.sin(t * 0.0031 + k) * 0.4; const rt = rightOf(h);
       px += rt.x * 0.03 * sw; pz += rt.y * 0.03 * sw; o.hy = 0.782 - 0.01 * Math.abs(sw);
+      const soon = pl.moves.find((m) => m.t0 > t && m.t0 - t < 3500);
+      if (soon) o.hy -= 0.014 * (0.5 + 0.5 * Math.sin(t * 0.011 + k * 1.3)); // listo para salir: rebota suave en las rodillas
       const look = X.lookPt; if (look) { const dx = look.x - px; const dz = look.z - pz; if (Math.hypot(dx, dz) > 1.2) { let dy = Math.atan2(dx, dz) - h; while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; o.headYaw = clamp(dy, -0.8, 0.8) + Math.sin(t * 0.0009 + k * 3) * 0.12; } }
     }
     pl.rig.root.position.set(px, 0, pz);
@@ -1397,7 +1408,7 @@ window.__feet = (key, t0, t1, dt) => {
   for (let t = t0; t <= t1; t += dt) { drawScene(t); const st = playerState(pl, t); out.push([t, fp(pl.rig.legL), fp(pl.rig.legR), footAt(pl.feet[1], t).plant ? 1 : 0, footAt(pl.feet[-1], t).plant ? 1 : 0, +(st.cur ? st.cur.v : 0).toFixed(2), +pl.rig.hips.position.y.toFixed(3)]); }
   X.noRender = false; return out;
 };
-window.__ev = () => ({ cycle: Math.round(X.cycle), steps: Object.fromEntries(Object.entries(X.P.stepT).map(([k, v]) => [k, [Math.round(v.t0), Math.round(v.t1)]])), shots: X.P.balls.flatMap((b) => b.segs.filter((s) => s.type === 'shot').map((s) => ({ layup: s.layup, gather: s.gather ? Math.round(s.gather.a0) : null, jump: Math.round(s.jumpT), rel: Math.round(s.t0), in: Math.round(s.t1), stopAt: s.stopAt ? Math.round(s.stopAt) : null }))), passes: X.P.balls.flatMap((b) => b.segs.filter((s) => s.type !== 'shot' && s.type !== 'carry').map((s) => [s.type, Math.round(s.t0), Math.round(s.t1)])), tag: X.tag ? [Math.round(X.tag.t), +X.tag.d.toFixed(2)] : null });
+window.__ev = () => ({ cycle: Math.round(X.cycle), steps: Object.fromEntries(Object.entries(X.P.stepT).map(([k, v]) => [k, [Math.round(v.t0), Math.round(v.t1)]])), shots: X.P.balls.flatMap((b) => b.segs.filter((s) => s.type === 'shot').map((s) => ({ layup: s.layup, gather: s.gather ? Math.round(s.gather.a0) : null, jump: Math.round(s.jumpT), rel: Math.round(s.t0), in: Math.round(s.t1), stopAt: s.stopAt ? Math.round(s.stopAt) : null }))), passes: X.P.balls.flatMap((b) => b.segs.filter((s) => s.type !== 'shot' && s.type !== 'carry').map((s) => [s.type, Math.round(s.t0), Math.round(s.t1), s.by != null ? X.P.players.find((p) => p.i === s.by).key : null, s.rcv != null ? X.P.players.find((p) => p.i === s.rcv).key : null])), tag: X.tag ? [Math.round(X.tag.t), +X.tag.d.toFixed(2)] : null });
 window.__hands = (ts, k) => { X.noRender = true; const out = ts.map((t) => { drawScene(t); const pl = X.P.players[k || 0]; const w = new THREE.Vector3(); const hs = [pl.rig.armL, pl.rig.armR].map((a) => { a.el.children[1].getWorldPosition(w); return [+w.x.toFixed(2), +w.y.toFixed(2), +w.z.toFixed(2)]; }); const b = X.P.balls[0].mesh.position; const hd = new THREE.Vector3(); pl.rig.headG.getWorldPosition(hd); return [t, 'ball', +b.x.toFixed(2), +b.y.toFixed(2), +b.z.toFixed(2), 'L', ...hs[0], 'R', ...hs[1], 'head', +hd.y.toFixed(2), 'hold', !!pl.rig.state.hold]; }); X.noRender = false; return out; };
 window.__ball = (ts) => ts.map((t) => { const b = X.P.balls[0]; const bs = ballState(b, t, X.ex.sport); const pl = X.P.players[0]; const st = playerState(pl, t); return [t, +bs.p.x.toFixed(2), +bs.p.y.toFixed(2), +bs.p.z.toFixed(2), '|', +st.p.x.toFixed(2), +st.p.y.toFixed(2), bs.carry ? 'carry' : bs.hand ? 'hand' : bs.held ? 'held' : '-', st.cur ? st.cur.m.mode : 'idle']; });
 window.__dbg = () => ({ gear: X.P.gear.map((g) => [g.t, +g.p.x.toFixed(2), +g.p.y.toFixed(2)]), lad: X.P.players.map((pl) => pl.moves.filter((m) => m.feet).map((m) => ({ pat: m.feet.pat, from: [m.from.x, m.from.y], C: m.feet.C.map((c) => [c.foot, +c.p.x.toFixed(2), +c.p.y.toFixed(2)]) }))) });
