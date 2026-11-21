@@ -15,11 +15,11 @@
   const SPORTS = {
     futbol: {
       name: 'Fútbol', noun: 'fútbol',
-      tags: ['Calentamiento', 'Pase', 'Conducción', 'Control', 'Tiro', 'Defensa', 'Táctica', 'Portero', 'Coordinación y físico', 'Juego reducido', 'Vuelta a la calma'],
+      tags: ['Calentamiento', 'Pase', 'Conducción', 'Control', 'Tiro', 'Defensa', 'Táctica', 'Portero', 'Coordinación', 'Velocidad y agilidad', 'Fuerza y resistencia', 'Juego reducido', 'Vuelta a la calma'],
     },
     basquet: {
       name: 'Básquetbol', noun: 'básquetbol',
-      tags: ['Calentamiento', 'Dribleo', 'Pase', 'Tiro', 'Entrada', 'Defensa', 'Rebote', 'Táctica', 'Coordinación y físico', 'Juego reducido', 'Vuelta a la calma'],
+      tags: ['Calentamiento', 'Dribleo', 'Pase', 'Tiro', 'Entrada', 'Defensa', 'Rebote', 'Táctica', 'Coordinación', 'Velocidad y agilidad', 'Fuerza y resistencia', 'Juego reducido', 'Vuelta a la calma'],
     },
   };
   const LEVELS = ['Inicial', 'Intermedio', 'Avanzado'];
