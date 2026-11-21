@@ -78,6 +78,9 @@
     flag: '<path d="M5.5 21V4.2M5.5 4.6h11.6l-2.4 4 2.4 4H5.5"/>',
     chat: '<path d="M4.4 19.6l1.3-3.8a7.9 7.9 0 1 1 3 2.6z"/><path d="M9 10.6c.3 1.6 1.8 3.2 3.6 3.8l1.1-1.1 1.8.8-.4 1.6c-3 .3-6.6-2.8-6.9-6.2l1.5-.5.8 1.8z" fill="currentColor" stroke="none"/>',
     doc: '<path d="M7 3.5h7l4.5 4.5v11.5c0 .8-.7 1.5-1.5 1.5H7c-.8 0-1.5-.7-1.5-1.5v-14.5c0-.8.7-1.5 1.5-1.5z"/><path d="M13.6 3.6V8.4h4.8M8.8 13h6.4M8.8 16.4h4.4"/>',
+    box: '<rect x="3.5" y="4.5" width="17" height="5" rx="1.6"/><path d="M5 9.5v8.8c0 1 .8 1.7 1.8 1.7h10.4c1 0 1.8-.7 1.8-1.7V9.5M10 13.2h4"/>',
+    download: '<path d="M12 4v11.5M7.2 10.7L12 15.5l4.8-4.8M5 15v3.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8V15"/>',
+    info: '<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.2M12 7.8v.2"/>',
     copy: '<rect x="8.6" y="8.6" width="11" height="11" rx="2.2"/><path d="M15.4 8.6V6.2c0-.9-.7-1.6-1.6-1.6H6.2c-.9 0-1.6.7-1.6 1.6v7.6c0 .9.7 1.6 1.6 1.6h2.4"/>',
   };
 
@@ -367,6 +370,15 @@
         return id;
       },
       cachedURL: (id) => urls.get(id) || null,
+      async mediaBlob(id) {
+        const v = await st.get('media', id);
+        if (!v) return null;
+        return v instanceof Blob ? v : new Blob([v.buf], { type: v.type });
+      },
+      async mediaSize(id) {
+        const v = await st.get('media', id);
+        return v ? (v instanceof Blob ? v.size : v.buf.byteLength) : 0;
+      },
       async mediaURL(id) {
         if (!id) return null;
         if (urls.has(id)) return urls.get(id);
@@ -440,6 +452,11 @@
         return r.id;
       },
       cachedURL: (id) => (id ? '/_blob/' + id : null),
+      async mediaBlob(id) {
+        const r = await fetch('/_blob/' + id);
+        if (!r.ok) throw new Error('fetch');
+        return r.blob();
+      },
       mediaURL: async (id) => (id ? '/_blob/' + id : null),
       async deleteMedia(id) { if (!id || !assets) return; try { await assets.delete(id); } catch (e) { /* ya no existe */ } },
     };
@@ -811,7 +828,7 @@
   let fileCb = null;
   function pickFile(mode, cb) {
     fileCb = cb;
-    const inp = $(mode === 'capture' ? '#in-capture' : '#in-pick');
+    const inp = $(mode === 'capture' ? '#in-capture' : mode === 'import' ? '#in-import' : '#in-pick');
     inp.value = '';
     inp.click();
   }
@@ -1053,13 +1070,14 @@
       '<div id="layers"></div>' +
       '<div class="toast" id="toast" role="status" aria-live="polite"></div>' +
       '<input class="sr" type="file" id="in-capture" accept="video/*" capture="environment" tabindex="-1" aria-hidden="true">' +
-      '<input class="sr" type="file" id="in-pick" accept="video/*,image/*" tabindex="-1" aria-hidden="true">';
+      '<input class="sr" type="file" id="in-pick" accept="video/*,image/*" tabindex="-1" aria-hidden="true">' +
+      '<input class="sr" type="file" id="in-import" accept=".zip,.json,application/zip,application/json" tabindex="-1" aria-hidden="true">';
     TABS.forEach((t) => {
       const el = $('#screen-' + t);
       const isSport = t !== 'clases';
       el.innerHTML =
         '<header class="navbar"><span></span><span class="nav-title">' + TAB_META[t].label + '</span>' +
-        '<span class="nav-right"><button class="glass-btn status-btn" data-act="status" aria-label="Dónde se guardan tus datos">' + ic('cloud') + '</button></span></header>' +
+        '<span class="nav-right"><button class="glass-btn status-btn" data-act="status" aria-label="Tu biblioteca: exportar, importar y dónde se guarda">' + ic('cloud') + '</button></span></header>' +
         '<div class="page">' +
         '<h1 class="large-title" id="h-' + t + '">' + TAB_META[t].label + '</h1>' +
         '<p class="subtitle" data-ref="count">&nbsp;</p>' +
@@ -1551,7 +1569,7 @@
     const ex = getEx(id);
     if (!ex) return;
     haptic(4);
-    const scr = pushScreen({ tint: ex.sport, rightHTML: S.canWrite ? '<button class="glass-btn cap" data-act="edit">Editar</button>' : '' });
+    const scr = pushScreen({ tint: ex.sport, rightHTML: '<button class="glass-btn" data-act="send-ex" aria-label="Enviar a otro profe">' + ic('share') + '</button>' + (S.canWrite ? '<button class="glass-btn cap" data-act="edit">Editar</button>' : '') });
     scr.body.innerHTML = '<div class="d-media" data-ref="media"></div><div data-ref="info"></div>';
     let mediaKey = null;
     function render() {
@@ -1578,6 +1596,7 @@
       if (!e) return;
       switch (a.dataset.act) {
         case 'edit': openExerciseEditor({ exercise: e }); break;
+        case 'send-ex': sendExercise(e); break;
         case 'fav': mutateExercise(id, (x) => { x.favorite = !x.favorite; }); haptic(10); break;
         case 'add-to-class': addToClassFlow(e); break;
         case 'delete':
@@ -2507,6 +2526,360 @@
     return a && b && a.getDate() === 1 && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear() && new Date(b.getFullYear(), b.getMonth() + 1, 0).getDate() === b.getDate();
   }
 
+  // ---------------------------------------------------------------- exportar e importar (archivo .zip)
+  // Un archivo .zip con cancha.json (ejercicios, clases, grupos) y la carpeta media/ con videos y fotos.
+  // Se manda por AirDrop o WhatsApp y sirve como respaldo en Archivos / iCloud Drive.
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+    return t;
+  })();
+  function crc32(buf, crc) {
+    const u = new Uint8Array(buf);
+    for (let i = 0; i < u.length; i++) crc = CRC_TABLE[(crc ^ u[i]) & 0xFF] ^ (crc >>> 8);
+    return crc;
+  }
+  const ZIP_CHUNK = 4 * 1024 * 1024;
+  async function buildZip(files, onProgress) {
+    const enc = new TextEncoder();
+    const now = new Date();
+    const time = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+    const date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+    const total = files.reduce((s, f) => s + (typeof f.data === 'string' ? f.data.length : f.data.size), 0) || 1;
+    const parts = []; const central = [];
+    let offset = 0; let done = 0;
+    for (const f of files) {
+      const blob = typeof f.data === 'string' ? new Blob([enc.encode(f.data)]) : f.data;
+      const name = enc.encode(f.name);
+      let crc = 0xFFFFFFFF;
+      for (let pos = 0; pos < blob.size; pos += ZIP_CHUNK) {
+        crc = crc32(await blob.slice(pos, pos + ZIP_CHUNK).arrayBuffer(), crc);
+        done += Math.min(ZIP_CHUNK, blob.size - pos);
+        if (onProgress) onProgress(done / total);
+      }
+      crc = (crc ^ 0xFFFFFFFF) >>> 0;
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+      lh.setUint16(10, time, true); lh.setUint16(12, date, true); lh.setUint32(14, crc, true);
+      lh.setUint32(18, blob.size, true); lh.setUint32(22, blob.size, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+      parts.push(lh.buffer, name, blob);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+      ch.setUint16(12, time, true); ch.setUint16(14, date, true); ch.setUint32(16, crc, true); ch.setUint32(20, blob.size, true); ch.setUint32(24, blob.size, true);
+      ch.setUint16(28, name.length, true); ch.setUint16(30, 0, true); ch.setUint16(32, 0, true); ch.setUint16(34, 0, true); ch.setUint16(36, 0, true);
+      ch.setUint32(38, 0, true); ch.setUint32(42, offset, true);
+      central.push(ch.buffer, name);
+      offset += 30 + name.length + blob.size;
+    }
+    const cdSize = central.reduce((s, p) => s + p.byteLength, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(4, 0, true); end.setUint16(6, 0, true);
+    end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, cdSize, true); end.setUint32(16, offset, true); end.setUint16(20, 0, true);
+    return new Blob(parts.concat(central, [end.buffer]), { type: 'application/zip' });
+  }
+  async function readZip(file) {
+    const tailLen = Math.min(file.size, 65557);
+    const tail = new DataView(await file.slice(file.size - tailLen).arrayBuffer());
+    let eocd = -1;
+    for (let i = tailLen - 22; i >= 0; i--) { if (tail.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+    if (eocd < 0) throw new Error('not-zip');
+    const count = tail.getUint16(eocd + 10, true);
+    const cdSize = tail.getUint32(eocd + 12, true);
+    const cdOff = tail.getUint32(eocd + 16, true);
+    const cd = new DataView(await file.slice(cdOff, cdOff + cdSize).arrayBuffer());
+    const dec = new TextDecoder();
+    const entries = {};
+    let p = 0;
+    for (let i = 0; i < count; i++) {
+      if (cd.getUint32(p, true) !== 0x02014b50) throw new Error('not-zip');
+      const nlen = cd.getUint16(p + 28, true); const xlen = cd.getUint16(p + 30, true); const clen = cd.getUint16(p + 32, true);
+      const name = dec.decode(new Uint8Array(cd.buffer, cd.byteOffset + p + 46, nlen));
+      entries[name] = { method: cd.getUint16(p + 10, true), csize: cd.getUint32(p + 20, true), lho: cd.getUint32(p + 42, true) };
+      p += 46 + nlen + xlen + clen;
+    }
+    async function blobOf(name, type) {
+      const e = entries[name] || entries[Object.keys(entries).find((k) => k.endsWith('/' + name) && k.indexOf('__MACOSX') < 0)];
+      if (!e) return null;
+      const lh = new DataView(await file.slice(e.lho, e.lho + 30).arrayBuffer());
+      const start = e.lho + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+      const raw = file.slice(start, start + e.csize);
+      if (e.method === 0) return new Blob([raw], { type: type || '' });
+      if (e.method === 8 && typeof DecompressionStream !== 'undefined') {
+        const out = await new Response(raw.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
+        return new Blob([out], { type: type || '' });
+      }
+      throw new Error('zip-method');
+    }
+    return { blobOf };
+  }
+
+  const EXT = { 'video/mp4': 'mp4', 'video/quicktime': 'mov', 'video/webm': 'webm', 'video/x-m4v': 'm4v', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+  const safeName = (s) => String(s || '').replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+  function shortDate() { const d = new Date(); return d.getDate() + ' ' + MONTHS[d.getMonth()].toLowerCase() + ' ' + d.getFullYear(); }
+
+  async function buildExport(opt, onProgress) {
+    const exercises = S.exercises.filter((e) => opt.exIds.has(e.id)).map((e) => plain(e));
+    const classes = S.classes.filter((c) => opt.classIds.has(c.id)).map((c) => {
+      const x = plain(c);
+      if (!opt.groupIds.has(x.groupId)) { delete x.attendance; delete x.attendanceAt; delete x.groupId; }
+      return x;
+    });
+    const groups = S.groups.filter((g) => opt.groupIds.has(g.id)).map((g) => plain(g));
+    const want = [];
+    exercises.forEach((e) => { if (e.thumbId) want.push(e.thumbId); if (opt.withMedia && e.mediaId) want.push(e.mediaId); });
+    const media = {}; const files = [];
+    for (let i = 0; i < want.length; i++) {
+      if (onProgress) onProgress(i / Math.max(1, want.length) * 0.5, 'Reuniendo videos y fotos · ' + (i + 1) + ' de ' + want.length);
+      const blob = await S.backend.mediaBlob(want[i]).catch(() => null);
+      if (!blob || !blob.size) continue;
+      const type = (blob.type || '').split(';')[0] || 'application/octet-stream';
+      const path = 'media/' + String(want[i]).replace(/[^A-Za-z0-9_-]/g, '') + '.' + (EXT[type] || 'bin');
+      media[want[i]] = { path, type, size: blob.size };
+      files.push({ name: path, data: blob });
+    }
+    const manifest = { format: 'cancha', version: 1, app: APP_NAME, kind: opt.kind, title: opt.title, exportedAt: Date.now(), exercises, classes, groups, media };
+    files.unshift({ name: 'cancha.json', data: JSON.stringify(manifest) });
+    const zip = await buildZip(files, (p) => onProgress && onProgress(0.5 + p * 0.5, 'Armando el archivo · ' + Math.round(p * 100) + '%'));
+    return new File([zip], APP_NAME + ' - ' + safeName(opt.title) + ' - ' + shortDate() + '.zip', { type: 'application/zip' });
+  }
+
+  // Comparte el archivo ya creado: en Claude se descarga; en iPad abre el menú de compartir (AirDrop, WhatsApp, Archivos).
+  async function deliverFile(file, what) {
+    const cl = window.claude;
+    if (framed && cl && typeof cl.use === 'function') { await saveFile(file, file.name); return; }
+    const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch (e) { return false; } })();
+    const sheet = openSheet({
+      title: 'Archivo listo',
+      cancelLabel: 'Cerrar',
+      bodyHTML:
+        '<div class="file-card"><span class="file-ico">' + ic('box') + '</span><span class="txt"><b>' + esc(file.name) + '</b><span>' + esc(what) + ' · ' + fmtMB(file.size) + '</span></span></div>' +
+        '<button type="button" class="btn filled wide-btn" data-file-share>' + ic('share') + (canShare ? 'Compartir o guardar' : 'Descargar archivo') + '</button>' +
+        (canShare
+          ? '<div class="help"><p><b>Para mandarlo a otro iPad:</b> toca «Compartir o guardar» y elige <b>AirDrop</b> (o WhatsApp).</p>' +
+            '<p><b>Para tener un respaldo:</b> elige <b>Guardar en Archivos</b> y guárdalo en <b>iCloud Drive</b>.</p>'
+          : '<div class="help"><p><b>Descarga el archivo</b> y compártelo desde tu carpeta de descargas por AirDrop, WhatsApp o correo. También te sirve como respaldo.</p>') +
+        '<p><b>En el otro iPad:</b> guarda el archivo en Archivos, abre Cancha y entra a Biblioteca → <b>Importar archivo</b>.</p></div>',
+    });
+    sheet.body.addEventListener('click', async (e) => {
+      if (!e.target.closest('[data-file-share]')) return;
+      if (canShare) {
+        try { await navigator.share({ files: [file], title: file.name }); return; } catch (err) { if (err && err.name === 'AbortError') return; }
+      }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(file);
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 8000);
+    });
+  }
+
+  async function runExport(opt, what) {
+    const sheet = openSheet({ title: 'Preparando archivo', cancelLabel: 'Cerrar', bodyHTML: '<div class="media-preview loading prep"><span class="spinner"></span><span data-ref="lbl">Preparando…</span></div>' });
+    sheet.setBusy(true, 'Preparando…');
+    try {
+      const file = await buildExport(opt, (p, label) => { sheet.progress(p, label); });
+      sheet.setBusy(false);
+      sheet.dismiss();
+      setTimeout(() => deliverFile(file, what), 350);
+    } catch (e) {
+      sheet.setBusy(false);
+      sheet.dismiss();
+      alertBox('No se pudo crear el archivo', e && e.name === 'QuotaExceededError' ? 'No hay espacio suficiente en el dispositivo.' : 'Vuelve a intentarlo. Si tu biblioteca tiene muchos videos, prueba exportando sin videos.');
+    }
+  }
+
+  function switchRow(id, iconHTML, label, sub, checked, disabled) {
+    return '<label class="row sw-row' + (disabled ? ' off' : '') + '"><span class="k">' + iconHTML + '<span class="sw-txt"><span>' + label + '</span>' + (sub ? '<small>' + sub + '</small>' : '') + '</span></span>' +
+      '<span class="switch"><input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + (disabled ? ' disabled' : '') + ' role="switch"><i></i></span></label>';
+  }
+  function openExportSheet() {
+    const nF = S.exercises.filter((e) => e.sport === 'futbol').length;
+    const nB = S.exercises.filter((e) => e.sport === 'basquet').length;
+    const nC = S.classes.length; const nG = S.groups.length;
+    const sheet = openSheet({
+      title: 'Exportar',
+      confirmLabel: 'Exportar',
+      bodyHTML:
+        '<p class="att-head">Elige qué guardar en el archivo. Sirve para mandarlo a otro profe o como respaldo.</p>' +
+        '<div class="group">' +
+        switchRow('xp-f', ic('futbol'), 'Ejercicios de fútbol', plural(nF, 'ejercicio', 'ejercicios'), nF > 0, !nF) +
+        switchRow('xp-b', ic('basquet'), 'Ejercicios de básquetbol', plural(nB, 'ejercicio', 'ejercicios'), nB > 0, !nB) +
+        switchRow('xp-c', ic('clases'), 'Clases', plural(nC, 'clase', 'clases') + ' con sus ejercicios', nC > 0, !nC) +
+        switchRow('xp-g', ic('people'), 'Grupos y asistencia', nG ? 'Incluye nombres de alumnos' : 'Sin grupos', false, !nG) +
+        '</div><div class="group">' +
+        switchRow('xp-m', ic('video'), 'Videos y fotos', 'Sin ellos el archivo pesa muy poco', true, false) +
+        '</div><p class="muted xp-sum" data-ref="sum"></p>',
+      onConfirm: () => {
+        const o = collect();
+        if (!o.exIds.size && !o.classIds.size && !o.groupIds.size) return;
+        sheet.dismiss();
+        const parts = [o.exIds.size ? plural(o.exIds.size, 'ejercicio', 'ejercicios') : '', o.classIds.size ? plural(o.classIds.size, 'clase', 'clases') : '', o.groupIds.size ? plural(o.groupIds.size, 'grupo', 'grupos') : ''].filter(Boolean);
+        setTimeout(() => runExport(Object.assign(o, { kind: o.groupIds.size ? 'respaldo' : 'biblioteca', title: o.groupIds.size ? 'Respaldo' : 'Biblioteca' }), parts.join(', ')), 300);
+      },
+    });
+    const root = sheet.body;
+    function collect() {
+      const on = (id) => { const el = $('#' + id, root); return el && el.checked && !el.disabled; };
+      const exIds = new Set(); const classIds = new Set(); const groupIds = new Set();
+      if (on('xp-f')) S.exercises.forEach((e) => { if (e.sport === 'futbol') exIds.add(e.id); });
+      if (on('xp-b')) S.exercises.forEach((e) => { if (e.sport === 'basquet') exIds.add(e.id); });
+      if (on('xp-c')) S.classes.forEach((c) => { classIds.add(c.id); (c.items || []).forEach((it) => { if (getEx(it.exId)) exIds.add(it.exId); }); });
+      if (on('xp-g')) S.groups.forEach((g) => { groupIds.add(g.id); groupClasses(g.id).forEach((c) => { classIds.add(c.id); (c.items || []).forEach((it) => { if (getEx(it.exId)) exIds.add(it.exId); }); }); });
+      return { exIds, classIds, groupIds, withMedia: on('xp-m') };
+    }
+    async function summary() {
+      const o = collect();
+      const exs = S.exercises.filter((e) => o.exIds.has(e.id));
+      const nMedia = o.withMedia ? exs.filter((e) => e.mediaId).length : 0;
+      let size = null;
+      if (o.withMedia && S.backend.mediaSize) {
+        const sizes = await Promise.all(exs.map((e) => (e.mediaId ? S.backend.mediaSize(e.mediaId).catch(() => null) : 0)));
+        if (sizes.every((x) => x != null)) size = sizes.reduce((a, b) => a + b, 0);
+      }
+      const parts = [o.exIds.size ? plural(o.exIds.size, 'ejercicio', 'ejercicios') : '', o.classIds.size ? plural(o.classIds.size, 'clase', 'clases') : '', o.groupIds.size ? plural(o.groupIds.size, 'grupo', 'grupos') : '', nMedia ? plural(nMedia, 'video o foto', 'videos y fotos') : ''].filter(Boolean);
+      $('[data-ref="sum"]', root).textContent = parts.length ? 'Se guardarán ' + parts.join(', ') + (size ? ' (cerca de ' + fmtMB(size) + ')' : '') + '.' : 'Elige al menos una opción.';
+      sheet.setConfirm(parts.length > 0);
+    }
+    root.addEventListener('change', summary);
+    summary();
+  }
+
+  function sendExercise(ex) {
+    runExport({ exIds: new Set([ex.id]), classIds: new Set(), groupIds: new Set(), withMedia: true, kind: 'ejercicio', title: ex.title }, 'Ejercicio «' + ex.title + '»');
+  }
+  function sendClass(c) {
+    const exIds = new Set((c.items || []).map((it) => it.exId).filter((id) => getEx(id)));
+    runExport({ exIds, classIds: new Set([c.id]), groupIds: new Set(), withMedia: true, kind: 'clase', title: c.name || 'Clase' }, 'Clase con ' + plural(exIds.size, 'ejercicio', 'ejercicios'));
+  }
+
+  // --- importar
+  function planImport(m) {
+    const bucket = (list, get) => {
+      const out = { nuevos: [], actualiza: [], iguales: [] };
+      (list || []).forEach((x) => {
+        if (!x || !x.id) return;
+        const cur = get(x.id);
+        if (!cur) out.nuevos.push(x);
+        else if ((Number(x.updatedAt) || 0) > (Number(cur.updatedAt) || 0)) out.actualiza.push(x);
+        else out.iguales.push(x);
+      });
+      return out;
+    };
+    const ex = bucket(m.exercises, getEx);
+    const cl = bucket(m.classes, getClass);
+    const gr = bucket(m.groups, getGroup);
+    const media = new Set();
+    ex.nuevos.concat(ex.actualiza).forEach((x) => { [x.mediaId, x.thumbId].forEach((k) => { if (k && m.media && m.media[k]) media.add(k); }); });
+    return { ex, cl, gr, media: Array.from(media) };
+  }
+  function importLine(b, one, many, fem) {
+    const n = b.nuevos.length + b.actualiza.length + b.iguales.length;
+    if (!n) return '';
+    const o = fem ? 'a' : 'o';
+    const bits = [b.nuevos.length ? b.nuevos.length + ' nuev' + o + (b.nuevos.length === 1 ? '' : 's') : '', b.actualiza.length ? b.actualiza.length + ' se actualiza' + (b.actualiza.length === 1 ? '' : 'n') : '', b.iguales.length ? b.iguales.length + ' ya ' + (fem ? 'la' : 'lo') + (b.iguales.length === 1 ? '' : 's') + ' tienes' : ''].filter(Boolean);
+    return '<div class="imp-line"><b>' + plural(n, one, many) + '</b><span>' + bits.join(' · ') + '</span></div>';
+  }
+  async function startImport(file) {
+    let m; let zip = null;
+    try {
+      const isJSON = /\.json$/i.test(file.name || '') || file.type === 'application/json';
+      if (isJSON) m = JSON.parse(await file.text());
+      else { zip = await readZip(file); const mb = await zip.blobOf('cancha.json', 'application/json'); m = mb ? JSON.parse(await mb.text()) : null; }
+    } catch (e) { m = null; }
+    if (!m || m.format !== 'cancha') { alertBox('Ese archivo no es de Cancha', 'Elige un archivo .zip que hayas exportado desde Cancha.'); return; }
+    const plan = planImport(m);
+    const mediaSize = plan.media.reduce((s, k) => s + (Number(m.media[k].size) || 0), 0);
+    const mainMedia = plan.ex.nuevos.concat(plan.ex.actualiza).filter((x) => x.mediaId && m.media && m.media[x.mediaId]).length;
+    const nothing = !plan.ex.nuevos.length && !plan.ex.actualiza.length && !plan.cl.nuevos.length && !plan.cl.actualiza.length && !plan.gr.nuevos.length && !plan.gr.actualiza.length;
+    let when = '';
+    try { when = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(m.exportedAt)); } catch (e) { /* */ }
+    const sheet = openSheet({
+      title: 'Importar',
+      confirmLabel: 'Importar',
+      bodyHTML:
+        '<p class="att-head"><b>' + esc(m.title || 'Archivo de Cancha') + '</b>' + (when ? ' · exportado el ' + esc(when) : '') + '</p>' +
+        '<div class="att-card imp-card">' +
+        importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') +
+        (mainMedia ? '<div class="imp-line"><b>' + plural(mainMedia, 'video o foto', 'videos y fotos') + '</b><span>' + fmtMB(mediaSize) + '</span></div>' : '') +
+        '</div>' +
+        '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? 'Ya tienes todo lo que trae este archivo.' : 'Lo que ya tienes no se duplica. Si el archivo trae una versión más nueva, se actualiza.') + '</p>',
+      onConfirm: async () => {
+        sheet.setBusy(true, 'Importando…');
+        try {
+          const r = await applyImport(m, zip, plan, (p, label) => sheet.progress(p, label));
+          sheet.setBusy(false);
+          sheet.dismiss();
+          haptic(14);
+          const parts = [r.ex ? plural(r.ex, 'ejercicio', 'ejercicios') : '', r.cl ? plural(r.cl, 'clase', 'clases') : '', r.gr ? plural(r.gr, 'grupo', 'grupos') : ''].filter(Boolean);
+          toast(parts.length ? 'Se importaron ' + parts.join(', ') : 'Importación lista');
+        } catch (e) {
+          sheet.setBusy(false);
+          showError(e, 'No se pudo importar');
+        }
+      },
+    });
+    sheet.setConfirm(!nothing);
+  }
+  async function applyImport(m, zip, plan, onProgress) {
+    const idMap = {};
+    for (let i = 0; i < plan.media.length; i++) {
+      const key = plan.media[i];
+      const info = m.media[key];
+      onProgress(i / Math.max(1, plan.media.length), 'Importando videos y fotos · ' + (i + 1) + ' de ' + plan.media.length);
+      let blob = zip ? await zip.blobOf(info.path, info.type) : null;
+      if (!blob || !blob.size) continue;
+      let type = info.type;
+      if (S.backend.kind === 'cloud' && String(type).indexOf('video/') === 0) {
+        const r = await prepareCloudVideo(new File([blob], info.path.split('/').pop(), { type }), (p) => onProgress(i / plan.media.length, 'Reduciendo video ' + (i + 1) + ' de ' + plan.media.length + ' · ' + Math.round(p * 100) + '% · mantén la app abierta'));
+        blob = r.blob; type = r.type;
+      }
+      idMap[key] = await S.backend.putMedia(blob, type);
+    }
+    onProgress(null, 'Guardando…');
+    let nEx = 0; let nCl = 0; let nGr = 0;
+    for (const x of plan.gr.nuevos.concat(plan.gr.actualiza)) {
+      const g = plain(x);
+      replaceLocal('groups', g);
+      await S.backend.saveGroup(g);
+      nGr++;
+    }
+    for (const x of plan.ex.nuevos.concat(plan.ex.actualiza)) {
+      const cur = getEx(x.id);
+      const nx = plain(x);
+      const old = [];
+      if (x.mediaId && idMap[x.mediaId]) { nx.mediaId = idMap[x.mediaId]; if (cur && cur.mediaId) old.push(cur.mediaId); } else if (cur && cur.mediaId) {
+        Object.assign(nx, { mediaId: cur.mediaId, mediaType: cur.mediaType, mediaDuration: cur.mediaDuration, mediaAspect: cur.mediaAspect });
+      } else Object.assign(nx, { mediaId: null, mediaType: null, mediaDuration: 0 });
+      if (x.thumbId && idMap[x.thumbId]) { nx.thumbId = idMap[x.thumbId]; if (cur && cur.thumbId) old.push(cur.thumbId); } else nx.thumbId = cur ? cur.thumbId || null : null;
+      replaceLocal('exercises', nx);
+      await S.backend.saveExercise(nx);
+      old.filter((id) => id !== nx.mediaId && id !== nx.thumbId).forEach((id) => S.backend.deleteMedia(id).catch(() => {}));
+      nEx++;
+    }
+    for (const x of plan.cl.nuevos.concat(plan.cl.actualiza)) {
+      const cur = getClass(x.id);
+      const nc = plain(x);
+      if (!nc.groupId || !getGroup(nc.groupId)) nc.groupId = cur && cur.groupId ? cur.groupId : null;
+      if (!nc.attendance && cur && cur.attendance) { nc.attendance = cur.attendance; nc.attendanceAt = cur.attendanceAt; }
+      replaceLocal('classes', nc);
+      await S.backend.saveClass(nc);
+      nCl++;
+    }
+    renderAll(); refreshScreens();
+    return { ex: nEx, cl: nCl, gr: nGr };
+  }
+
+  function openLibraryMenu() {
+    const k = S.backend ? S.backend.kind : 'cloud';
+    const where = !S.canWrite ? 'Estás viendo una biblioteca compartida.' : k === 'cloud' ? 'Tus datos se guardan en tu cuenta de Claude.' : k === 'memory' ? 'Este navegador no permite guardar datos.' : 'Tus datos se guardan en este dispositivo.';
+    const actions = [{ label: 'Exportar o respaldar', icon: 'upload', onClick: () => openExportSheet() }];
+    if (S.canWrite) actions.push({ label: 'Importar archivo', icon: 'download', onClick: () => pickFile('import', startImport) });
+    actions.push({ label: '¿Dónde se guardan mis datos?', icon: 'info', onClick: () => showStatus() });
+    actionSheet({ title: 'Tu biblioteca', message: where, actions, tint: S.tab });
+  }
+
   // ---------------------------------------------------------------- pizarra táctica
   const BOARD_TOOLS = [
     ['move', 'Mover', 'move'], ['a', 'Equipo A', null], ['b', 'Equipo B', null], ['cone', 'Cono', 'cone'], ['ball', 'Balón', null],
@@ -2907,6 +3280,7 @@
     const actions = [];
     if (!framed && navigator.share) actions.push({ label: 'Compartir…', icon: 'share', onClick: () => { navigator.share({ title: c.name, text }).catch(() => {}); } });
     actions.push({ label: 'Enviar por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) });
+    actions.push({ label: 'Enviar a otro profe (archivo)', icon: 'box', onClick: () => sendClass(c) });
     actions.push({ label: 'Descargar PDF', icon: 'doc', onClick: () => exportPDF(c) });
     actions.push({ label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) });
     actionSheet({ title: 'Compartir «' + (c.name || 'la clase') + '»', actions, tint: SPORTS[c.sport] ? c.sport : 'futbol' });
@@ -3078,6 +3452,7 @@
   function bindGlobal() {
     $('#in-capture').addEventListener('change', onFileInput);
     $('#in-pick').addEventListener('change', onFileInput);
+    $('#in-import').addEventListener('change', onFileInput);
     $('.tabbar').addEventListener('click', (e) => {
       const b = e.target.closest('.tab');
       if (b) { haptic(4); setTab(b.dataset.tab); }
@@ -3106,7 +3481,7 @@
       const a = e.target.closest('[data-act]');
       if (!a) return;
       switch (a.dataset.act) {
-        case 'status': showStatus(); break;
+        case 'status': openLibraryMenu(); break;
         case 'new-capture': pickFile('capture', (f) => editorWithFile(S.tab, f)); break;
         case 'new-pick': pickFile('pick', (f) => editorWithFile(S.tab, f)); break;
         case 'new-class': openClassEditor({}); break;

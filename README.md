@@ -14,6 +14,7 @@ Diseño: minimalismo nativo al estilo iOS (títulos grandes, listas agrupadas, h
 - **Grupos**: cada grupo guarda su historial de clases, los minutos acumulados y los objetivos que ha trabajado.
 - **Asistencia**: lista de alumnos por grupo (puedes pegarla completa) y «Pasar lista» en cada clase con asistió, retardo o falta; cada alumno muestra su porcentaje de asistencia, y puedes sacar un reporte en PDF por mes, por dos meses o por fechas.
 - **Compartir una clase**: por WhatsApp, en PDF o copiando el texto.
+- **Exportar e importar**: guarda ejercicios, clases o toda la biblioteca (con videos) en un archivo .zip y mándalo a otro profe por AirDrop o WhatsApp; también sirve como respaldo en Archivos / iCloud Drive. Al importar no se duplica lo que ya tienes.
 - **Funciona sin internet** una vez instalada.
 
 ## Cómo instalarla en tu celular
@@ -21,12 +22,12 @@ Diseño: minimalismo nativo al estilo iOS (títulos grandes, listas agrupadas, h
 Es una app web instalable (PWA): no necesita App Store ni Google Play.
 
 1. Publica este repositorio con **GitHub Pages**: en GitHub, *Settings → Pages → Build and deployment*, elige *Deploy from a branch*, rama `main` y carpeta `/ (root)`.
-2. Abre la dirección que te da GitHub (algo como `https://<usuario>.github.io/python/`) en el celular.
+2. Abre https://dany36e.github.io/Python/ en el celular o iPad.
 3. **iPhone** (Safari): botón Compartir → *Agregar a inicio*. **Android** (Chrome): menú ⋮ → *Instalar app*.
 
 ## Dónde se guardan tus datos
 
-- **App instalada**: todo se guarda en el propio dispositivo, en IndexedDB. No sale de tu teléfono. Si borras los datos del navegador, se pierden.
+- **App instalada**: todo se guarda en el propio dispositivo, en IndexedDB. No sale de tu teléfono o iPad. Si borras los datos del navegador, se pierden, así que conviene exportar un respaldo de vez en cuando (Biblioteca → Exportar o respaldar).
 - **Abierta como Artifact en Claude**: se guarda en tu cuenta de Claude y la ves igual en el celular y en la computadora. Otros profes pueden ver y agregar ejercicios si los invitas como Editores desde el botón Compartir de Claude. Los videos de más de 20 MB se reducen automáticamente antes de subirse.
 
 ## Estructura
