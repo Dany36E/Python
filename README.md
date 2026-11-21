@@ -35,6 +35,12 @@ Es una app web instalable (PWA): no necesita App Store ni Google Play.
 - **App instalada**: todo se guarda en el propio dispositivo, en IndexedDB. No sale de tu teléfono o iPad. Si borras los datos del navegador, se pierden, así que conviene hacer un respaldo de vez en cuando (botón **Respaldo** → «Hacer respaldo completo»). La app te lo recuerda.
 - **Abierta como Artifact en Claude**: se guarda en tu cuenta de Claude y la ves igual en el celular y en la computadora. Otros profes pueden ver y agregar ejercicios si los invitas como Editores desde el botón Compartir de Claude. Los videos de más de 20 MB se reducen automáticamente antes de subirse.
 
+## Calidad
+
+- **Pruebas automáticas** en `tests/` (cómo correrlas: [tests/README.md](tests/README.md)).
+- **Prueba en un iPad real** antes de recomendarla o después de cambios grandes: [docs/prueba-en-ipad.md](docs/prueba-en-ipad.md).
+- **Revisión de los ejercicios de entrenadores** por un profe: [docs/revision-ejercicios.md](docs/revision-ejercicios.md). Las fuentes están en `tools/catalogo/` y `node tools/catalogo/build_catalog.js` regenera `app/catalog.js`.
+
 ## Estructura
 
 ```

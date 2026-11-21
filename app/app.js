@@ -4175,7 +4175,31 @@
 
   // ---------------------------------------------------------------- modo clase (cronómetro + silbato)
   let audioCtx = null;
+  let silentEl = null;
+  function silentWavURL() {
+    const rate = 8000; const n = rate / 2;
+    const buf = new ArrayBuffer(44 + n);
+    const v = new DataView(buf);
+    const str = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+    str(0, 'RIFF'); v.setUint32(4, 36 + n, true); str(8, 'WAVE'); str(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true);
+    v.setUint32(28, rate, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); str(36, 'data'); v.setUint32(40, n, true);
+    for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+    return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+  }
+  function audioPlayback(on) {
+    try {
+      if (navigator.audioSession) { navigator.audioSession.type = on ? 'playback' : 'auto'; return; }
+      if (!isAppleMobile()) return;
+      if (on) {
+        if (!silentEl) { silentEl = new Audio(silentWavURL()); silentEl.loop = true; silentEl.setAttribute('playsinline', ''); }
+        const pr = silentEl.play();
+        if (pr && pr.catch) pr.catch(() => {});
+      } else if (silentEl) silentEl.pause();
+    } catch (e) { /* sin audio */ }
+  }
   function unlockAudio() {
+    audioPlayback(true);
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
@@ -4393,6 +4417,7 @@
       focusEl() { return $('[data-run="toggle"]', wrap) || $('[data-run="close"]', wrap); },
       close() {
         clearInterval(timer);
+        audioPlayback(false);
         if (runPlayer) runPlayer.stop();
         document.removeEventListener('visibilitychange', onVis);
         try { if (wake) wake.release(); } catch (e) { /* */ }
