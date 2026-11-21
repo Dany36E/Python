@@ -13,6 +13,7 @@ const dump = (p) => p.evaluate(() => new Promise((res) => { const r = indexedDB.
   let srv = await serve(OLD);
   const b = await chromium.launch();
   const ctx = await b.newContext({ ...devices['iPad (gen 7)'], deviceScaleFactor: 1, serviceWorkers: 'block' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('cancha:onboarded', '1'); } catch (e) { /* */ } });
   await ctx.route('**/*', (r) => r.continue());
   const p = await ctx.newPage();
   const errors = []; p.on('pageerror', (e) => errors.push(e.message));

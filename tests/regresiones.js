@@ -11,13 +11,14 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   const b = await chromium.launch();
   async function fresh(opts) {
     const ctx = await b.newContext({ ...devices['iPhone 13'], deviceScaleFactor: 1, serviceWorkers: 'block', acceptDownloads: true });
+    if (!(opts && opts.tutorial)) await ctx.addInitScript(() => { try { localStorage.setItem('cancha:onboarded', '1'); } catch (e) { /* */ } });
     const p = await ctx.newPage();
     p.errs = [];
     p.on('pageerror', (e) => p.errs.push(e.message));
     p.on('console', (m) => { if (m.type() === 'error') p.errs.push(m.text()); });
     if (opts && opts.time) await p.clock.install({ time: opts.time }); else await p.clock.install();
     await p.goto(BASE + 'index.html');
-    await p.waitForSelector('#screen-clases.active'); await W(p, 1300);
+    await p.waitForSelector('#screen-clases.active'); await W(p, (opts && opts.tutorial) ? 2400 : 1300);
     return { ctx, p };
   }
   const scr = (p) => p.locator('.stack-screen.in').last();
@@ -90,6 +91,7 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   // Apariencia: en un iPad en modo oscuro, «Claro» en Ajustes deja la app en claro y se recuerda
   {
     const ctx = await b.newContext({ ...devices['iPad (gen 7)'], deviceScaleFactor: 1, serviceWorkers: 'block', colorScheme: 'dark' });
+    await ctx.addInitScript(() => { try { localStorage.setItem('cancha:onboarded', '1'); } catch (e) { /* */ } });
     const p = await ctx.newPage();
     await p.goto(BASE + 'index.html'); await W(p, 1200);
     const bg = () => p.evaluate(() => getComputedStyle(document.body).backgroundColor);
@@ -133,7 +135,7 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
     await p.fill('#q-ejercicios', 'rondo'); await W(p, 500);
     ok(await p.locator('#screen-ejercicios [data-open-cat]').count() >= 1, 'buscar «rondo» muestra un ejercicio recomendado');
     await p.fill('#q-ejercicios', ''); await W(p, 400);
-    ok(await p.locator('#screen-ejercicios .badge', { hasText: 'Video' }).count() > 0, 'los ejemplos traen video');
+    ok(await p.locator('#screen-ejercicios .badge.vid', { hasText: 'Video' }).count() > 0, 'los ejemplos traen video');
     // Modo clase: si la app se cierra, se puede seguir
     await p.click('#tab-clases'); await W(p, 400);
     await p.locator('.today [data-act="start-class"]').click(); await W(p, 700);
@@ -144,6 +146,27 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
     await p.locator('.as-wrap.open .as-btn', { hasText: 'Seguir con la clase' }).click(); await W(p, 800);
     ok((await p.locator('[data-ref="step"]').textContent()).includes('Ejercicio 2'), 'sigue en el mismo bloque');
     ok(p.errs.length === 0, 'sin errores en biblioteca y modo clase: ' + p.errs.join(' / '));
+    await ctx.close();
+  }
+
+  // Tutorial de la primera vez: aparece solo una vez, se puede saltar y se vuelve a ver desde Ajustes
+  {
+    const { ctx, p } = await fresh({ tutorial: true });
+    ok(await p.locator('.onb-wrap.open').count() === 1, 'la primera vez aparece el tutorial');
+    ok(await p.locator('.onb-wrap [data-dot]').count() === 5, 'el tutorial tiene 5 pasos');
+    ok((await p.locator('.onb-slide.on h2').innerText()) === 'Bienvenido a Cancha', 'empieza con la bienvenida');
+    for (let i = 0; i < 4; i++) { await p.click('[data-onb="next"]'); await W(p, 650); }
+    ok((await p.locator('[data-onb="next"]').innerText()).includes('Empezar'), 'el último paso dice «Empezar»');
+    await p.click('[data-onb="next"]'); await W(p, 900);
+    ok(await p.locator('.onb-wrap').count() === 0, 'al terminar se cierra');
+    await p.reload(); await W(p, 2400);
+    ok(await p.locator('.onb-wrap').count() === 0, 'no vuelve a salir al abrir otra vez');
+    await p.click('#screen-clases [data-act="settings"]'); await W(p, 700);
+    await p.locator('.sheet-wrap.open [data-st="tutorial"]').click(); await W(p, 1100);
+    ok(await p.locator('.onb-wrap.open').count() === 1, 'se vuelve a ver desde Ajustes');
+    await p.click('[data-onb="skip"]'); await W(p, 900);
+    ok(await p.locator('.onb-wrap').count() === 0, '«Saltar» lo cierra');
+    ok(p.errs.length === 0, 'sin errores en el tutorial: ' + p.errs.join(' / '));
     await ctx.close();
   }
 

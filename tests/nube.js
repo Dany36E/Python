@@ -8,6 +8,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
 (async () => {
   const b = await chromium.launch();
   const ctx = await b.newContext({ ...devices['iPhone 13'], deviceScaleFactor: 1, serviceWorkers: 'block' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('cancha:onboarded', '1'); } catch (e) { /* */ } });
   await ctx.addInitScript(() => {
     const cols = {}; const subs = {};
     const snap = (n) => ({ docs: Object.entries(cols[n] || {}).map(([id, d]) => ({ id, exists: true, data: () => Object.freeze(JSON.parse(JSON.stringify(d))), metadata: { fromCache: false, hasPendingWrites: false } })), metadata: { fromCache: false, hasPendingWrites: false } });

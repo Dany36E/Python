@@ -10,6 +10,7 @@ const ok = (cond, msg) => { console.log((cond ? 'PASS ' : 'FAIL ') + msg); if (!
 
 async function setup(browser, dev, scheme) {
   const ctx = await browser.newContext({ ...dev, deviceScaleFactor: 1, serviceWorkers: 'block', acceptDownloads: true, colorScheme: scheme || 'light' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('cancha:onboarded', '1'); } catch (e) { /* */ } });
   const page = await ctx.newPage();
   page.errs = [];
   page.on('pageerror', (e) => page.errs.push('pageerror: ' + e.message));
@@ -78,7 +79,7 @@ async function shot(p, name) { await wait(p, 500); await p.screenshot({ path: OU
   ok(await p.locator('.as-wrap.open').count() === 1, 'terminar pide confirmación');
   await asBtn(p, 'Terminar clase').click();
   await wait(p, 600);
-  ok((await p.locator('.run-done').innerText()).includes('¡Clase terminada!'), 'pantalla de clase terminada');
+  ok((await p.locator('.run-done').innerText()).includes('Clase terminada'), 'pantalla de clase terminada');
   await p.click('[data-run="roll"]');
   await wait(p, 900);
 
@@ -159,7 +160,10 @@ async function shot(p, name) { await wait(p, 500); await p.screenshot({ path: OU
   ok((await p.locator('#screen-ejercicios [data-ref="count"]').innerText()).includes('básquetbol'), 'cambia a básquetbol');
   await p.locator('#screen-ejercicios [data-open-ex]').first().click();
   await wait(p, 700);
-  await screen(p).locator('[data-act="board"]').first().click();
+  ok(await screen(p).locator('.coach-video').count() === 1 && await screen(p).locator('[data-act="board"]').count() === 0, 'el recomendado muestra su video, sin repetir el pizarrón');
+  await screen(p).locator('[data-act="edit"]').click();
+  await wait(p, 800);
+  await sheet(p).locator('[data-board="edit"]').first().click();
   await wait(p, 700);
   ok(await p.locator('.board-wrap.open').count() === 1, 'abre la pizarra');
   ok(await p.locator('.board-wrap .bt[data-tool]').count() === 6, 'pizarra con 6 herramientas');
@@ -174,6 +178,9 @@ async function shot(p, name) { await wait(p, 500); await p.screenshot({ path: OU
   await shot(p, 'e3_10_pizarra');
   await p.click('.board-wrap [data-bd="done"]');
   await wait(p, 600);
+  await sheet(p).locator('[data-sh="ok"]').click();
+  await wait(p, 1000);
+  ok(await screen(p).locator('.coach-video').count() === 0 && await screen(p).locator('.board-frame').count() === 1, 'al cambiar el dibujo se quita el video que ya no coincide');
   for (let i = 0; i < 3 && await p.locator('.stack-screen.in').count(); i++) { await p.goBack(); await wait(p, 500); }
 
   // Marcar favorito en un ejemplo de fútbol (lo vuelve «tuyo») para probar el conflicto al importar
