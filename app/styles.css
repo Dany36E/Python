@@ -1686,3 +1686,6 @@ a.as-btn { text-decoration: none; }
   .screen-body:has(> .d-media .board-frame) > .d-media { position: sticky; top: 64px; margin-top: 6px; }
   .screen-body:has(> .d-media .board-frame) .board-frame { max-width: none; }
 }
+
+/* Apariencia fija en claro aunque el iPad esté en oscuro */
+:root[data-theme="light"] { color-scheme: light; }

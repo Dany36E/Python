@@ -85,6 +85,7 @@
     download: '<path d="M12 4v11.5M7.2 10.7L12 15.5l4.8-4.8M5 15v3.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8V15"/>',
     info: '<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.2M12 7.8v.2"/>',
     drop: '<path d="M12 3.2c3.3 4 5.6 7.2 5.6 10.4a5.6 5.6 0 0 1-11.2 0c0-3.2 2.3-6.4 5.6-10.4z"/><path d="M9.4 14.6a2.7 2.7 0 0 0 2.2 2.4"/>',
+    sliders: '<path d="M4 7.5h9M19 7.5h1M4 16.5h3M13 16.5h7"/><circle cx="16" cy="7.5" r="2.4"/><circle cx="10" cy="16.5" r="2.4"/>',
     copy: '<rect x="8.6" y="8.6" width="11" height="11" rx="2.2"/><path d="M15.4 8.6V6.2c0-.9-.7-1.6-1.6-1.6H6.2c-.9 0-1.6.7-1.6 1.6v7.6c0 .9.7 1.6 1.6 1.6h2.4"/>',
   };
 
@@ -1444,7 +1445,7 @@
       '<input class="sr" type="file" id="in-import" accept=".zip,.json,application/zip,application/json" tabindex="-1" aria-hidden="true">';
     TABS.forEach((t) => {
       $('#screen-' + t).innerHTML =
-        '<header class="navbar"><span></span><span class="nav-title">' + title[t] + '</span>' +
+        '<header class="navbar"><span class="nav-left"><button class="glass-btn" data-act="settings" aria-label="Ajustes">' + ic('sliders') + '</button></span><span class="nav-title">' + title[t] + '</span>' +
         '<span class="nav-right"><button class="glass-btn cap backup-btn" data-act="backup">Respaldo</button></span></header>' +
         '<div class="page">' +
         '<h1 class="large-title" id="h-' + t + '">' + title[t] + '</h1>' +
@@ -3770,6 +3771,40 @@
     return { ex: nEx, cl: nCl, gr: nGr };
   }
 
+  // --- Apariencia: «Automático» sigue al iPad (modo oscuro de noche si así está); «Claro» y «Oscuro» la fijan.
+  const prefersDark = () => { try { return matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return false; } };
+  function applyTheme(t) {
+    const root = document.documentElement;
+    if (t === 'light' || t === 'dark') root.dataset.theme = t; else delete root.dataset.theme;
+    const dark = t === 'dark' || (t !== 'light' && prefersDark());
+    $$('meta[name="theme-color"]').forEach((m) => m.remove());
+    const m = document.createElement('meta');
+    m.name = 'theme-color';
+    m.content = dark ? '#000000' : '#F2F2F7';
+    document.head.appendChild(m);
+  }
+  function openSettings() {
+    const cur = pref.get('theme') || 'auto';
+    const sheet = openSheet({
+      title: 'Ajustes',
+      cancelLabel: 'Cerrar',
+      bodyHTML:
+        '<p class="group-label">Apariencia</p>' + segHTML('theme', [['auto', 'Automático'], ['light', 'Claro'], ['dark', 'Oscuro']], cur, 'Apariencia') +
+        '<p class="muted small" style="margin:-12px 16px 22px">«Automático» usa el mismo modo que tu iPad o celular.</p>' +
+        '<div class="group">' +
+        '<button type="button" class="row row-act" data-st="backup">' + ic('box') + '<span>Respaldo</span>' + ic('chevR', 'chev') + '</button>' +
+        '<button type="button" class="row row-act" data-st="where">' + ic('info') + '<span>¿Dónde se guardan mis datos?</span>' + ic('chevR', 'chev') + '</button>' +
+        '</div>',
+    });
+    bindSeg(sheet.body, 'theme', (v) => { pref.set('theme', v); applyTheme(v); });
+    sheet.body.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-st]');
+      if (!b) return;
+      sheet.dismiss();
+      setTimeout(() => (b.dataset.st === 'backup' ? openBackupSheet() : showStatus()), 320);
+    });
+  }
+
   // --- Respaldo: un toque para guardarlo todo; también mandar a otro profe e importar.
   function openBackupSheet() {
     const k = S.backend ? S.backend.kind : 'cloud';
@@ -4760,6 +4795,7 @@
       if (a) {
         switch (a.dataset.act) {
           case 'backup': openBackupSheet(); return;
+          case 'settings': openSettings(); return;
           case 'backup-now': backupAll(true); return;
           case 'install-help': showInstallHelp(); return;
           case 'clear-examples': clearExamples(); return;
@@ -4812,6 +4848,8 @@
   }
 
   async function boot() {
+    applyTheme(pref.get('theme') || 'auto');
+    try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(pref.get('theme') || 'auto')); } catch (e) { /* navegador viejo */ }
     S.sport = pref.get('sport') === 'basquet' ? 'basquet' : 'futbol';
     buildShell();
     bindGlobal();

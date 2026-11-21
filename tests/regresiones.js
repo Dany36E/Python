@@ -87,6 +87,25 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   ok(/abril al 20 de julio de 2027/.test(rng), 'agosto: 3.er trimestre 2026-2027 (' + rng + ')');
   await ctx.close();
 
+  // Apariencia: en un iPad en modo oscuro, «Claro» en Ajustes deja la app en claro y se recuerda
+  {
+    const ctx = await b.newContext({ ...devices['iPad (gen 7)'], deviceScaleFactor: 1, serviceWorkers: 'block', colorScheme: 'dark' });
+    const p = await ctx.newPage();
+    await p.goto(BASE + 'index.html'); await W(p, 1200);
+    const bg = () => p.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    ok(/rgb\(0, 0, 0\)/.test(await bg()), 'sin ajuste sigue al iPad (oscuro)');
+    await p.click('#screen-clases [data-act="settings"]'); await W(p, 700);
+    await p.locator('.sheet-wrap.open [data-seg="theme"] [data-val="light"]').click(); await W(p, 500);
+    ok(await p.evaluate(() => document.documentElement.dataset.theme) === 'light' && !/rgb\(0, 0, 0\)/.test(await bg()), '«Claro» pone la app en claro');
+    await p.screenshot({ path: OUT + 'rg_ajustes_claro.png' });
+    await p.reload(); await W(p, 1200);
+    ok(await p.evaluate(() => document.documentElement.dataset.theme) === 'light', 'al volver a abrir se queda en claro');
+    await p.click('#screen-clases [data-act="settings"]'); await W(p, 700);
+    await p.locator('.sheet-wrap.open [data-seg="theme"] [data-val="auto"]').click(); await W(p, 400);
+    ok(!p.evaluate || (await p.evaluate(() => !document.documentElement.dataset.theme)), '«Automático» vuelve a seguir al iPad');
+    await ctx.close();
+  }
+
   await b.close();
   console.log(fails ? fails + ' FALLAS' : 'TODO BIEN');
   process.exit(fails ? 1 : 0);
