@@ -1754,7 +1754,7 @@
       '</div></div>';
   }
   function renderClases() {
-    const list = S.classes.slice().sort(byUpcoming);
+    const list = realClasses().sort(byUpcoming);
     const t = todayStr();
     const todays = list.filter((c) => c.date === t).sort((a, b) => ((b.items || []).length ? 1 : 0) - ((a.items || []).length ? 1 : 0));
     // Arriba va la próxima clase que tiene plan (hoy o en los próximos 7 días); si no hay, la de hoy.
@@ -1765,7 +1765,7 @@
     let body;
     if (!S.ready) body = '<div class="list">' + [0, 1, 2].map(() => '<div class="cell"><span class="date-tile shimmer"></span><span class="txt"><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></span></div>').join('') + '</div>';
     else if (!list.length) {
-      body = '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('futbol') + '</span></div><h2>Arma tu primera clase</h2>' +
+      body = (savedClasses().length ? savedStripHTML() : '') + '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('futbol') + '</span></div><h2>Arma tu primera clase</h2>' +
         '<p>Elige ejercicios, ordénalos y ajusta los minutos. Luego la das con el cronómetro.</p>' +
         (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' + (CAT() ? '<button class="btn tinted" data-act="catalog">Ver clases recomendadas</button>' : '') + '</div>' : '') + '</div>';
     } else {
@@ -1774,6 +1774,7 @@
       const past = rest.filter((c) => c.date && c.date < t);
       body = (next ? todayCardHTML(next) : '');
       if (up.length) body += '<p class="group-label">Próximas</p><div class="list">' + up.map((c) => classCellHTML(c)).join('') + '</div>';
+      if (S.ready) body += savedStripHTML();
       if (past.length) body += '<p class="group-label">Anteriores</p><div class="list">' + past.map((c) => classCellHTML(c)).join('') + '</div>';
     }
     if (S.ready && S.canWrite) body += templatesHTML();
@@ -2464,11 +2465,11 @@
 
   // adopt: para un Recomendado, lo guarda en tus ejercicios hasta que eliges la clase (cancelar no deja nada).
   function addToClassFlow(ex, adopt) {
-    const list = S.classes.filter((c) => c.sport === ex.sport).sort(byUpcoming).slice(0, 6);
+    const list = realClasses().filter((c) => c.sport === ex.sport).sort(byUpcoming).slice(0, 6).concat(savedClasses().filter((c) => c.sport === ex.sport).slice(0, 4));
     const min = ex.duration || 10;
     const actions = list.map((c) => ({
       label: c.name || 'Clase sin nombre',
-      sub: fmtDay(c.date) + ' · ' + fmtMin(classTotal(c)) + ' min',
+      sub: (isSaved(c) ? savedNoun(c) : fmtDay(c.date)) + ' · ' + fmtMin(classTotal(c)) + ' min',
       onClick: async () => {
         const real = adopt ? await adopt() : ex;
         if (!real) return;
@@ -2591,6 +2592,65 @@
   const groupKind = (g) => (g && TEAM_CATS.indexOf(g.category) >= 0 ? 'entrenamiento' : 'clase');
   const kindNoun = (k, many) => (k === 'entrenamiento' ? (many ? 'entrenamientos' : 'entrenamiento') : many ? 'clases' : 'clase');
   // Días de la misma serie (la clase que se creó para varios días), en orden.
+  // ---------------------------------------------------------------- clases guardadas
+  // Planes listos para reusar: ejercicios, pausas, series, temas y duración, sin fecha ni grupo.
+  // Viven con las clases (template: true); al programarlas se copian a una clase con fecha.
+  const isSaved = (c) => !!(c && c.template);
+  const realClasses = () => S.classes.filter((c) => !c.template);
+  const savedClasses = () => S.classes.filter((c) => c.template).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  const timesUsed = (t) => realClasses().filter((c) => c.fromTemplate === t.id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  function planSummary(c) {
+    const n = (c.items || []).filter((it) => !isPause(it)).length;
+    const pz = (c.items || []).length - n;
+    return [plural(n, 'ejercicio', 'ejercicios'), pz ? plural(pz, 'pausa', 'pausas') : ''].filter(Boolean).join(' y ');
+  }
+  const savedNoun = (c) => (kindOf(c) === 'entrenamiento' ? 'Entrenamiento guardado' : 'Clase guardada');
+  // «Guardar para reusar»: copia el plan de una clase (sin fecha, grupo ni asistencia).
+  function saveAsTemplate(c, prepare) {
+    const sheet = openSheet({
+      title: 'Guardar para reusar',
+      tint: SPORTS[c.sport] ? c.sport : 'futbol',
+      confirmLabel: 'Guardar',
+      bodyHTML: '<div class="group"><input class="field-lg" id="tpl-name" aria-label="Nombre" maxlength="120" autocomplete="off" enterkeyhint="done" value="' + esc(c.name || '') + '"></div>' +
+        '<p class="att-head">Se guarda el plan: ' + esc(planSummary(c)) + ' · ' + fmtMin(classTotal(c)) + ' min' + ((c.focus || []).length ? ', ' + esc(listEs(lowerRest(c.focus))).toLowerCase() : '') + '. Luego la programas para cualquier grupo y fecha.</p>',
+      onConfirm: async () => {
+        const inp = $('#tpl-name', sheet.body);
+        const name = inp.value.replace(/\s+/g, ' ').trim();
+        if (!name) { shake(inp); return; }
+        sheet.setBusy(true, 'Guardando…');
+        const items = prepare ? await prepare() : plain(c.items || []);
+        if (!items) { sheet.setBusy(false); return; }
+        const t = { id: uid(), template: true, name, sport: SPORTS[c.sport] ? c.sport : 'futbol', items, focus: (c.focus || []).slice(), notes: c.notes || '', groupId: null, date: '', createdAt: Date.now(), updatedAt: Date.now() };
+        if (c.target) t.target = c.target;
+        if (kindOf(c) === 'entrenamiento') t.kind = 'entrenamiento';
+        if (S.backend && S.backend.me) t.authorId = S.backend.me;
+        const ok = await commit('classes', t, null);
+        sheet.setBusy(false);
+        if (!ok) return;
+        sheet.dismiss();
+        haptic(12);
+        toast('Guardada en «Clases guardadas»', 'check', { label: 'Ver', onClick: () => openClass(t.id) });
+      },
+    });
+    setTimeout(() => { try { const i = $('#tpl-name', sheet.body); i.focus({ preventScroll: true }); i.select(); } catch (e) { /* */ } }, 420);
+  }
+  // Tarjetas de «Clases guardadas» en la pestaña Clases.
+  function tplCardHTML(t) {
+    const sp = SPORTS[t.sport] ? t.sport : 'futbol';
+    const total = classTotal(t);
+    return '<button class="tpl-card" role="listitem" data-open-class="' + esc(t.id) + '" data-tint="' + sp + '">' +
+      '<span class="tpl-band band-' + sp + '"><span class="tpl-kind">' + ic(sp) + (kindOf(t) === 'entrenamiento' ? 'Entrenamiento' : 'Clase') + '</span><span class="tpl-min">' + (total ? fmtMin(total) + '′' : '—') + '</span></span>' +
+      '<span class="tpl-body"><span class="tpl-name">' + esc(t.name || 'Sin nombre') + '</span><span class="tpl-meta">' + esc((t.items || []).length ? planSummary(t) : 'Sin ejercicios todavía') + '</span></span></button>';
+  }
+  function savedStripHTML() {
+    const list = savedClasses();
+    if (!list.length && !S.canWrite) return '';
+    return '<div class="section-head"><h2>Clases guardadas</h2>' + (S.canWrite ? '<button class="link" data-act="new-saved">' + ic('plus') + 'Nueva</button>' : '') + '</div>' +
+      '<div class="tpl-strip" role="list">' + list.map(tplCardHTML).join('') +
+      (S.canWrite && !list.length ? '<button class="tpl-card tpl-new" data-act="new-saved"><span class="tpl-band">' + ic('plus') + '</span><span class="tpl-body"><span class="tpl-name">Guarda tus clases</span><span class="tpl-meta">Ábrela y toca «Guardar para reusar», o crea una aquí.</span></span></button>' : '') +
+      '</div>';
+  }
+
   // «de hoy al vie 27», «de mañana al lun 30», «del lun 23 al vie 27»
   function rangeText(a, b) {
     const one = (d, first) => { const f = fmtDay(d); return f === 'Hoy' ? (first ? 'de hoy' : 'a hoy') : f === 'Mañana' ? (first ? 'de mañana' : 'a mañana') : (first ? 'del ' : 'al ') + f.toLowerCase(); };
@@ -2632,6 +2692,11 @@
     if (!editing && opts.target) c.target = opts.target;
     if (!editing && S.backend && S.backend.me) c.authorId = S.backend.me;
     let kind = editing ? kindOf(c) : opts.kind || groupKind(firstGroup);
+    // Clase guardada (plan sin fecha ni grupo): al crearla o editarla no se pregunta grupo ni días.
+    const tplMode = editing ? isSaved(opts.cls) : !!opts.asTemplate;
+    // «Empezar desde» una clase guardada (al crear una clase con fecha).
+    const saved = !editing && !tplMode && !opts.prepare && !(opts.items && opts.items.length) ? savedClasses() : [];
+    let fromTpl = null;
     let kindTouched = editing || !!opts.kind;
     let focus = (c.focus || []).slice();
     // El nombre se arma con los temas mientras el profe no escriba otro.
@@ -2643,17 +2708,18 @@
     let datesTouched = editing || !!opts.date;
     let weeks = 1;
     let dirty = false;
-    const multi = !editing;
-    const titleFor = () => (editing ? 'Editar ' : kind === 'entrenamiento' ? 'Nuevo ' : 'Nueva ') + kindNoun(kind);
+    const multi = !editing && !tplMode;
+    const titleFor = () => (tplMode ? (editing ? 'Editar ' : kind === 'entrenamiento' ? 'Nuevo ' : 'Nueva ') + (kind === 'entrenamiento' ? 'entrenamiento guardado' : 'clase guardada') : (editing ? 'Editar ' : kind === 'entrenamiento' ? 'Nuevo ' : 'Nueva ') + kindNoun(kind));
     const body =
+      (saved.length ? '<p class="group-label" id="lbl-from">Empezar desde</p><div class="group pad from-tpl"><div class="chips wrap" data-ref="from" role="group" aria-labelledby="lbl-from"></div><p class="fb-note from-note" data-ref="from-note" hidden></p></div>' : '') +
       segHTML('kind', KINDS, kind, '¿Es clase o entrenamiento?') +
-      '<div class="group"><input class="field-lg" id="cl-name" placeholder="Nombre (opcional)" aria-label="Nombre" maxlength="120" autocomplete="off" enterkeyhint="done" value="' + esc(c.name) + '"></div>' +
-      '<p class="group-label" id="lbl-group">Grupo o equipo</p><div class="group pad"><div class="chips wrap" data-ref="groups" role="group" aria-labelledby="lbl-group"></div></div>' +
+      '<div class="group"><input class="field-lg" id="cl-name" placeholder="' + (tplMode ? 'Nombre (Ej. Pase y control 5.º)' : 'Nombre (opcional)') + '" aria-label="Nombre" maxlength="120" autocomplete="off" enterkeyhint="done" value="' + esc(c.name) + '"></div>' +
+      (tplMode ? '' : '<p class="group-label" id="lbl-group">Grupo o equipo</p><div class="group pad"><div class="chips wrap" data-ref="groups" role="group" aria-labelledby="lbl-group"></div></div>') +
       '<div data-ref="sport-box"><p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], c.sport, 'Deporte') + '</div>' +
       '<p class="group-label" id="lbl-focus">¿Qué van a trabajar?<span class="gl-hint">Con esto se nombra</span></p><div class="group pad"><div class="chips wrap" data-ref="focus" role="group" aria-labelledby="lbl-focus"></div></div>' +
-      '<div class="group fgroup"><div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + (multi ? 'Días' : 'Fecha') + '</span><span class="fb-val" data-ref="date-val"></span></div><div data-ref="dates"></div>' +
+      '<div class="group fgroup">' + (tplMode ? '' : '<div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + (multi ? 'Días' : 'Fecha') + '</span><span class="fb-val" data-ref="date-val"></span></div><div data-ref="dates"></div>' +
       (multi ? '<div class="quick-row" data-ref="quick"></div>' : '') +
-      '<label class="row inline-row"><span class="k">Otra fecha</span><input id="cl-date" type="date" aria-label="Otra fecha" value="' + esc(c.date || '') + '"></label></div>' +
+      '<label class="row inline-row"><span class="k">Otra fecha</span><input id="cl-date" type="date" aria-label="Otra fecha" value="' + esc(c.date || '') + '"></label></div>') +
       (multi ? '<div class="fblock"><div class="fb-head"><span class="k">' + ic('timer') + '¿Cuántas semanas?</span></div>' +
         optChipsHTML('weeks', [['1', 'Solo una'], ['2', '2 semanas'], ['3', '3 semanas'], ['4', '4 semanas']], ['1'], { multi: false, label: '¿Cuántas semanas?' }) +
         '<p class="fb-note" data-ref="dates-note" hidden></p></div>' : '') +
@@ -2694,6 +2760,21 @@
           if (!items) { sheet.setBusy(false); return; }
           c.items = items;
         }
+        // Clase guardada: sin fecha ni grupo.
+        if (tplMode) {
+          Object.assign(c, { template: true, date: '', groupId: null, name: typed || autoName(focus) || (kind === 'entrenamiento' ? 'Entrenamiento guardado' : 'Clase guardada') });
+          delete c.serie; delete c.fromTemplate;
+          const ok = await commit('classes', plain(c), editing ? opts.cls : null);
+          sheet.setBusy(false);
+          if (!ok) return;
+          dirty = false;
+          sheet.dismiss();
+          haptic(12);
+          toast(editing ? 'Cambios guardados' : 'Guardada en «Clases guardadas»');
+          if (!editing) setTimeout(() => { openClass(c.id); if (!c.items.length) setTimeout(() => openPicker(c.id), 480); }, 260);
+          return;
+        }
+        if (fromTpl) c.fromTemplate = fromTpl.id; else delete c.fromTemplate;
         // Una sola fecha (o editar): como siempre.
         if (list.length <= 1) {
           c.date = list[0] || '';
@@ -2739,6 +2820,7 @@
       return out.sort();
     }
     function renderDates() {
+      if (tplMode) return;
       const g = getGroup(c.groupId);
       const gdays = groupDays(g);
       $('[data-ref="dates"]', root).innerHTML = dateChipsHTML(dates, gdays, multi);
@@ -2767,8 +2849,11 @@
     function setKind(k) {
       kind = k; setSeg('kind', k); sheet.setTitle(titleFor()); renderDates();
     }
+    // Con una clase guardada solo salen los grupos de su deporte (o de los dos).
+    const fitsTpl = (g) => !fromTpl || !SPORTS[g.sport] || g.sport === fromTpl.sport;
     function renderGroups() {
-      const list = S.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      if (tplMode) return;
+      const list = S.groups.filter(fitsTpl).sort((a, b) => a.name.localeCompare(b.name, 'es'));
       $('[data-ref="groups"]', root).innerHTML = list.map((g) => '<button type="button" class="chip" data-gpick="' + esc(g.id) + '" aria-pressed="' + (g.id === c.groupId) + '">' + esc(g.name) + '</button>').join('') +
         '<button type="button" class="chip" data-gpick="" aria-pressed="' + !c.groupId + '">Sin grupo</button>' +
         '<button type="button" class="chip add-chip" data-act="new-group">' + ic('plus') + 'Nuevo grupo</button>';
@@ -2780,7 +2865,7 @@
       el.classList.toggle('none', !c.target);
     }
     function renderGroupVal() {
-      const g = getGroup(c.groupId);
+      const g = tplMode ? null : getGroup(c.groupId);
       renderGroups();
       // si el grupo es de un solo deporte, la clase usa ese deporte y no se pregunta
       const fixed = g && SPORTS[g.sport];
@@ -2796,9 +2881,41 @@
       if (g && !kindTouched) setKind(groupKind(g));
       renderGroupVal();
     }
+    // «Empezar desde»: En blanco o una clase guardada (copia su plan, temas, duración y notas).
+    function renderFrom() {
+      const box = $('[data-ref="from"]', root);
+      if (!box) return;
+      box.innerHTML = '<button type="button" class="chip" data-from="" aria-pressed="' + !fromTpl + '">En blanco</button>' +
+        saved.map((t) => '<button type="button" class="chip" data-from="' + esc(t.id) + '" aria-pressed="' + (fromTpl && fromTpl.id === t.id) + '">' + esc(t.name) + '<b>' + fmtMin(classTotal(t)) + '′</b></button>').join('');
+      const note = $('[data-ref="from-note"]', root);
+      note.hidden = !fromTpl;
+      if (fromTpl) note.innerHTML = 'Se copia su plan: <b>' + esc(planSummary(fromTpl)) + ' · ' + fmtMin(classTotal(fromTpl)) + ' min</b>. Solo elige grupo y días.';
+    }
+    function applyFrom(t) {
+      fromTpl = t || null;
+      if (t) {
+        c.items = plain(t.items || []);
+        focus = (t.focus || []).filter((x) => themeTags(t.sport).indexOf(x) >= 0);
+        if (t.target) { c.target = t.target; c.targetTouched = true; }
+        $('#cl-notes', root).value = t.notes || '';
+        $('#cl-name', root).value = t.name || ''; nameAuto = false;
+        if (c.groupId && !fitsTpl(getGroup(c.groupId))) c.groupId = null;
+        if (SPORTS[t.sport] && c.sport !== t.sport) { c.sport = t.sport; sheet.setTint(c.sport); setSeg('sport', c.sport); }
+        if (!kindTouched) setKind(kindOf(t));
+        renderGroupVal();
+      } else {
+        c.items = []; focus = []; c.target = getGroup(c.groupId) && getGroup(c.groupId).classMin || 0; c.targetTouched = false;
+        $('#cl-notes', root).value = ''; if (!nameAuto) { $('#cl-name', root).value = ''; nameAuto = true; }
+      }
+      $$('[data-opts="target"] [data-opt]', root).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.opt === String(c.target))));
+      renderFocus(); paintTarget(); renderFrom();
+      autoGrow($('#cl-notes', root));
+    }
     renderFocus();
     renderGroupVal();
     paintTarget();
+    renderFrom();
+    if (opts.template) applyFrom(opts.template);
     $$('textarea', root).forEach((ta) => { autoGrow(ta); ta.addEventListener('input', () => autoGrow(ta)); });
     root.addEventListener('input', (e) => {
       dirty = true;
@@ -2828,6 +2945,8 @@
         if (nameAuto) $('#cl-name', root).value = autoName(focus);
         dirty = true; haptic(4); return;
       }
+      const fr = e.target.closest('[data-from]');
+      if (fr) { applyFrom(saved.find((t) => t.id === fr.dataset.from) || null); dirty = true; haptic(4); return; }
       const qd = e.target.closest('[data-days]');
       if (qd) {
         const g = getGroup(c.groupId);
@@ -2910,20 +3029,26 @@
     const si = serie.findIndex((x) => x.id === c.id);
     const toCopy = serie.filter((x) => x.id !== c.id && notGiven(x)).length;
     const kn = kindNoun(kindOf(c));
-    return '<div class="d-head"><p class="d-eyebrow">' + ic(sport) + (kindOf(c) === 'entrenamiento' ? 'Entrenamiento · ' : '') + esc(c.date ? longDate(c.date) : 'Sin fecha') + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1>' +
-      (g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') +
+    const tpl = isSaved(c);
+    const used = tpl ? timesUsed(c) : [];
+    return '<div class="d-head"><p class="d-eyebrow">' + ic(sport) + (tpl ? savedNoun(c) + ' · ' + SPORTS[sport].name : (kindOf(c) === 'entrenamiento' ? 'Entrenamiento · ' : '') + esc(c.date ? longDate(c.date) : 'Sin fecha')) + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1>' +
+      (!tpl && g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') +
       (serie.length > 1 ? '<p class="c-serie">' + ic('calendar') + 'Día ' + (si + 1) + ' de ' + serie.length + ' · ' + esc(rangeText(serie[0].date, serie[serie.length - 1].date)) + '</p>' : '') + '</div>' +
       '<div class="c-layout"><div class="c-sum"><div class="c-summary"><p class="c-line"><span class="c-total">' + fmtMin(total) + '<small> min</small></span><span class="c-sub">' + (c.target ? '<span class="c-target' + (total > c.target ? ' over' : '') + '">' + (total > c.target ? fmtMin(total - c.target) + ' min de más' : total < c.target ? 'faltan ' + fmtMin(c.target - total) + ' de ' + c.target + ' min' : 'justo ' + c.target + ' min') + '</span>' : '') + plural(nEx, 'ejercicio', 'ejercicios') + (nP ? ' y ' + plural(nP, 'pausa', 'pausas') : '') + '</span></p>' +
       (items.length ? '<div class="tl" aria-hidden="true">' + segs + '<b class="tl-end">' + fmtMin(total) + '′</b></div>' : '') +
-      (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + (savedRun() && savedRun().id === c.id ? 'Seguir ' : 'Iniciar ') + kn + '</button>' : '') +
-      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya l' + KW(c).o + ' diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div></div>' +
+      (tpl ? (S.canWrite && !edit ? '<button class="btn filled start-btn" data-act="schedule">' + ic('calendar') + 'Programar</button>' : '') +
+        '<p class="c-done">' + ic('copy') + (used.length ? 'La programaste ' + (used.length === 1 ? 'una vez' : used.length + ' veces') + (used[0].date ? ' · la última, ' + esc(fmtDay(used[0].date).toLowerCase()) : '') : 'Aún no la programas. Toca «Programar» y elige grupo y días.') + '</p>'
+      : (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + (savedRun() && savedRun().id === c.id ? 'Seguir ' : 'Iniciar ') + kn + '</button>' : '')) +
+      (!tpl && c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya l' + KW(c).o + ' diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div></div>' +
       '<div class="c-plan"><div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Cambiar plan') + '</button>' : '') + '</div>' +
       '<div class="list">' + planRowsHTML(c, edit) +
       (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Agregar ejercicios</span></button><button class="cell add-row" data-act="add-pause">' + ic('drop') + '<span>Agregar pausa</span></button>' : '') +
       (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div></div>' +
-      '<div class="c-rest">' + attendanceSectionHTML(c) +
+      '<div class="c-rest">' + (tpl ? '' : attendanceSectionHTML(c)) +
       (c.notes ? '<section class="sec"><h2>Notas</h2><p>' + esc(c.notes) + '</p></section>' : '') +
-      (S.canWrite ? '<div class="group" style="margin-top:28px">' + (toCopy && items.length ? '<button class="row row-act" data-act="copy-serie">' + ic('copy') + 'Copiar este plan a ' + plural(toCopy, 'día más', 'días más') + '</button>' : '') + '<button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar ' + KW(c).n + '</button></div>' : '') + '</div></div>';
+      (S.canWrite ? (tpl
+        ? '<div class="group" style="margin-top:28px"><button class="row row-act" data-act="dup-tpl">' + ic('copy') + 'Hacer una copia para cambiarla</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar ' + savedNoun(c).toLowerCase() + '</button></div>'
+        : '<div class="group" style="margin-top:28px">' + (items.length ? '<button class="row row-act" data-act="save-tpl">' + ic('folder') + 'Guardar para reusar</button>' : '') + (toCopy && items.length ? '<button class="row row-act" data-act="copy-serie">' + ic('copy') + 'Copiar este plan a ' + plural(toCopy, 'día más', 'días más') + '</button>' : '') + '<button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar ' + KW(c).n + '</button></div>') : '') + '</div></div>';
   }
 
   function openClass(id) {
@@ -2965,6 +3090,9 @@
         case 'series': openSeriesSheet(id, i); break;
         case 'duplicate': openDuplicate(id); break;
         case 'copy-serie': copyPlanToSerie(id); break;
+        case 'schedule': openClassEditor({ template: cc }); break;
+        case 'save-tpl': saveAsTemplate(cc); break;
+        case 'dup-tpl': saveAsTemplate(Object.assign(plain(cc), { name: (cc.name || 'Clase') + ' (copia)' })); break;
         case 'rm': {
           const removed = plain(cc.items[i]);
           const before = JSON.stringify(cc.items);
@@ -2990,8 +3118,8 @@
         case 'delete-class':
           actionSheet({
             title: '¿Eliminar «' + (cc.name || KW(cc).esta) + '»?',
-            message: cc.attendance && Object.keys(cc.attendance).length ? 'También se elimina su asistencia. Tus ejercicios se quedan.' : 'Tus ejercicios se quedan.',
-            actions: [{ label: 'Eliminar ' + KW(cc).n, danger: true, onClick: () => deleteClassWithUndo(id) }],
+            message: isSaved(cc) ? 'Las clases que ya programaste con ella se quedan, igual que tus ejercicios.' : cc.attendance && Object.keys(cc.attendance).length ? 'También se elimina su asistencia. Tus ejercicios se quedan.' : 'Tus ejercicios se quedan.',
+            actions: [{ label: 'Eliminar ' + (isSaved(cc) ? savedNoun(cc).toLowerCase() : KW(cc).n), danger: true, onClick: () => deleteClassWithUndo(id) }],
           });
           break;
         default: break;
@@ -3010,7 +3138,7 @@
       return;
     }
     const kw = KW(prev);
-    toast(kw.N + ' eliminad' + kw.o, 'trash', { label: 'Deshacer', onClick: () => commit('classes', plain(prev), null).then((ok) => { if (ok) toast(kw.N + ' recuperad' + kw.o); }) });
+    toast((isSaved(prev) ? savedNoun(prev) : kw.N) + ' eliminad' + kw.o, 'trash', { label: 'Deshacer', onClick: () => commit('classes', plain(prev), null).then((ok) => { if (ok) toast(kw.N + ' recuperad' + kw.o); }) });
   }
 
   function addPauseFlow(classId) {
@@ -4719,7 +4847,7 @@
     const mine = (x) => !x.example;
     const nF = S.exercises.filter((e) => mine(e) && e.sport === 'futbol').length;
     const nB = S.exercises.filter((e) => mine(e) && e.sport === 'basquet').length;
-    const nC = S.classes.filter(mine).length; const nG = S.groups.filter(mine).length;
+    const nC = realClasses().filter(mine).length; const nT = savedClasses().filter(mine).length; const nG = S.groups.filter(mine).length;
     const sheet = openSheet({
       title: 'Mandar a otro profe',
       confirmLabel: 'Crear archivo',
@@ -4729,6 +4857,7 @@
         switchRow('xp-f', ic('futbol'), 'Ejercicios de fútbol', plural(nF, 'ejercicio', 'ejercicios'), nF > 0, !nF) +
         switchRow('xp-b', ic('basquet'), 'Ejercicios de básquetbol', plural(nB, 'ejercicio', 'ejercicios'), nB > 0, !nB) +
         switchRow('xp-c', ic('clases'), 'Clases', plural(nC, 'clase', 'clases') + ' con sus ejercicios', nC > 0, !nC) +
+        switchRow('xp-t', ic('folder'), 'Clases guardadas', nT ? plural(nT, 'plan listo', 'planes listos') + ' para programar' : 'Todavía no tienes', nT > 0, !nT) +
         switchRow('xp-g', ic('people'), 'Grupos y asistencia', nG ? 'Incluye nombres de alumnos' : 'Sin grupos', false, !nG) +
         '</div><div class="group">' +
         switchRow('xp-m', ic('video'), 'Videos y fotos', 'Si los quitas, el archivo pesa mucho menos', true, false) +
@@ -4748,7 +4877,8 @@
       const addCls = (c) => { classIds.add(c.id); (c.items || []).forEach((it) => { if (it.exId && getEx(it.exId)) exIds.add(it.exId); }); };
       if (on('xp-f')) S.exercises.forEach((e) => { if (mine(e) && e.sport === 'futbol') exIds.add(e.id); });
       if (on('xp-b')) S.exercises.forEach((e) => { if (mine(e) && e.sport === 'basquet') exIds.add(e.id); });
-      if (on('xp-c')) S.classes.filter(mine).forEach(addCls);
+      if (on('xp-c')) realClasses().filter(mine).forEach(addCls);
+      if (on('xp-t')) savedClasses().filter(mine).forEach(addCls);
       if (on('xp-g')) S.groups.filter(mine).forEach((g) => { groupIds.add(g.id); groupClasses(g.id).forEach(addCls); });
       return { exIds, classIds, groupIds, withMedia: on('xp-m') };
     }
@@ -4846,6 +4976,7 @@
       items: (Array.isArray(x.items) ? x.items : []).slice(0, 80).map(cleanItem).filter(Boolean), notes: txt(x.notes, 4000),
       focus: arrIn(x.focus, null, 6), target: x.target ? Math.round(numIn(x.target, 0, 300, 0)) || undefined : undefined,
       kind: x.kind === 'entrenamiento' ? 'entrenamiento' : undefined, serie: isId(x.serie) ? x.serie : undefined,
+      template: x.template === true ? true : undefined, fromTemplate: isId(x.fromTemplate) ? x.fromTemplate : undefined,
     });
     if (x.attendance && typeof x.attendance === 'object') {
       const att = {};
@@ -5293,12 +5424,27 @@
       '<div class="d-head"><p class="d-eyebrow">' + ic(t.sport) + esc(SPORTS[t.sport].name + (t.age ? ', ' + t.age : '')) + '</p><h1 class="d-title">' + esc(t.name) + '</h1></div>' +
       '<div class="c-summary"><p class="c-line"><span class="c-total">' + total + '<small> min</small></span><span class="c-sub">' + plural(nEx, 'ejercicio', 'ejercicios') + '</span></p>' +
       '<div class="tl" aria-hidden="true">' + segs + '<b class="tl-end">' + total + '′</b></div>' +
-      (S.canWrite ? '<button class="btn filled start-btn" data-act="use">' + ic('plus') + 'Usar esta clase</button>' : '') + '</div>' +
+      (S.canWrite ? '<div class="tp-actions"><button class="btn filled" data-act="use">' + ic('calendar') + 'Programar</button><button class="btn tinted" data-act="keep">' + ic('folder') + 'Guardar en mis clases</button></div>' : '') + '</div>' +
       (t.notes ? '<section class="sec"><h2>Objetivo</h2><p>' + esc(t.notes) + '</p></section>' : '') +
       '<div class="section-head"><h2>Plan</h2></div><div class="list">' + rows + '</div>';
     scr.el.addEventListener('click', (e) => {
       const c = e.target.closest('[data-open-cat]');
       if (c) { openCatalogEx(c.dataset.openCat); return; }
+      const prepare = async () => {
+        const out = [];
+        for (const it of t.items) {
+          if (isPause(it)) { out.push({ type: 'pause', label: it.label, min: it.min }); continue; }
+          const cx = catEx(it.exId);
+          if (!cx) continue;
+          const ex = await adoptCatalogEx(cx, true);
+          if (!ex) return null;
+          const o = { exId: ex.id, min: it.min };
+          if (it.series) o.series = Object.assign({}, it.series);
+          out.push(o);
+        }
+        return out;
+      };
+      if (e.target.closest('[data-act="keep"]')) { saveAsTemplate({ name: t.name, sport: t.sport, notes: t.notes || '', items: t.items, target: total }, prepare); return; }
       if (!e.target.closest('[data-act="use"]')) return;
       openClassEditor({
         sport: t.sport, name: t.name, notes: t.notes || '', target: t.items.reduce((sum, it) => sum + itemMin(it), 0),
@@ -6466,6 +6612,7 @@
           case 'clear-examples': clearExamples(); return;
           case 'new-ex': openExerciseEditor({ sport: S.sport }); return;
           case 'new-class': openClassEditor({}); return;
+          case 'new-saved': openClassEditor({ asTemplate: true }); return;
           case 'new-group': openGroupEditor({}); return;
           case 'start-class': runClass(a.dataset.id); return;
           case 'roll-class': openAttendance(a.dataset.id); return;

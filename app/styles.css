@@ -2520,6 +2520,30 @@ body:has(.as-wrap) .toast.show, body:has(.alert-wrap) .toast.show { transform: t
 /* Reporte: la hoja no brinca al cambiar de periodo (alto de la opción más larga) */
 @media (min-width: 720px) { .sheet.report-sheet { min-height: min(660px, 90vh); } }
 
+/* Clases guardadas: tira de tarjetas en la pestaña Clases */
+.tpl-strip { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gr)) 22px calc(-1 * var(--gl)); padding: 2px var(--gr) 8px var(--gl); scroll-snap-type: x proximity; scroll-padding-inline: var(--gl) var(--gr); }
+.tpl-strip::-webkit-scrollbar { display: none; }
+.tpl-card { flex: none; width: 212px; display: flex; flex-direction: column; text-align: left; border-radius: 20px; overflow: hidden; background: var(--bg-elev); box-shadow: var(--lift); scroll-snap-align: start; transition: transform 0.2s var(--ease); }
+.tpl-card:active { transform: scale(0.97); }
+.tpl-band { position: relative; height: 78px; padding: 10px 14px 9px; display: flex; flex-direction: column; justify-content: space-between; }
+.tpl-kind { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; }
+.tpl-kind svg { font-size: 14px; }
+.tpl-min { align-self: flex-end; font: 800 36px/0.85 var(--font-score); font-variant-numeric: tabular-nums; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12); }
+.tpl-body { flex: 1; padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 4px; }
+.tpl-name { font-weight: 600; font-size: 16px; line-height: 1.25; color: var(--label); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em; }
+.tpl-meta { font-size: 13px; line-height: 1.3; color: var(--label-2); }
+.tpl-new { border: 1.5px dashed rgba(var(--tint-rgb), 0.45); background: transparent; box-shadow: none; }
+.tpl-new .tpl-band { align-items: flex-start; justify-content: center; color: var(--tint); font-size: 30px; }
+@media (min-width: 760px) { .tpl-card { width: 236px; } }
+/* «Empezar desde» en Nueva clase */
+.from-tpl .chips.wrap { padding: 14px 16px 6px; }
+.from-tpl .chip b { margin-left: 4px; font-weight: 600; color: var(--label-2); font-variant-numeric: tabular-nums; }
+.from-tpl .chip[aria-pressed="true"] b { color: inherit; opacity: 0.8; }
+.from-note { margin: 0 16px 14px; }
+/* Recomendadas: Programar y Guardar en mis clases */
+.tp-actions { display: flex; gap: 10px; margin-top: 16px; }
+.tp-actions .btn { flex: 1; }
+
 /* <respaldo-ipad-viejo> generado por tools/css-viejo.py: no editar a mano */
 @supports not (color: color-mix(in srgb, red 50%, blue)) {
   .empty-art.icon { background: rgba(var(--tint-rgb), 0.1); }
