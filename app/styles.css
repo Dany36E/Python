@@ -1451,7 +1451,9 @@ a.as-btn { text-decoration: none; }
 .more-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
 .sh-x { width: 40px; min-width: 40px; height: 40px; font-size: 17px; color: var(--label-2); background: var(--fill); border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .sh-x svg { stroke-width: 2.5; }
-.sheet-wrap.closing { pointer-events: none; }
+/* Mientras una hoja se cierra, el fondo se traga los toques (un doble toque no abre lo de abajo) */
+.sheet-wrap.closing { pointer-events: auto; }
+.sheet-wrap.closing > * { pointer-events: none; }
 .link.sm { font-size: 14px; padding: 8px 0 4px; min-height: 32px; text-align: left; }
 .series-sum { margin: 2px 16px 0; font-size: 15px; line-height: 1.45; color: var(--label-2); }
 .series-sum b { color: var(--label); font-weight: 600; }
@@ -2399,6 +2401,84 @@ a.as-btn { text-decoration: none; }
 .sheet-body > .seg:first-child { margin-bottom: 16px; }
 .c-serie { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 15px; color: var(--label-2); }
 .c-serie svg { color: var(--tint); font-size: 16px; }
+
+/* QA en iPad: tanda A */
+/* El aviso (Deshacer) sube cuando hay una hoja de acciones o alerta abierta: no tapa sus botones */
+body:has(.as-wrap) .toast, body:has(.alert-wrap) .toast { top: calc(var(--safe-t) + 10px); bottom: auto; transform: translate(-50%, calc(-100% - 40px)); }
+body:has(.as-wrap) .toast.show, body:has(.alert-wrap) .toast.show { transform: translate(-50%, 0); }
+.search-x { flex: none; width: 44px; height: 40px; margin-right: -12px; display: grid; place-items: center; color: var(--label-2); font-size: 16px; }
+.search-x svg { stroke-width: 2.6; }
+.search-x[hidden] { display: none; }
+.rr-time.long { transform: scale(0.7); }
+.no-results .link + .link { margin-left: 18px; }
+
+/* QA en iPad: tanda C (diseño) */
+/* Zonas de toque de al menos 44 px sin agrandar lo que se ve */
+.cap, .link, .seg button, .group-chip, .toast-act, .card-rm, .mp-btn, .st-btn, .chip:not(.gday), .filter-btn { position: relative; }
+.cap::before, .link::before, .group-chip::before, .toast-act::before, .mp-btn::before, .chip:not(.gday)::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 44px; min-width: 44px; transform: translateY(-50%); }
+.card-rm::before { content: ""; position: absolute; inset: -8px; }
+.seg button::before, .st-btn::before { content: ""; position: absolute; inset: -4px 0; }
+.onb-dots button { width: 36px; height: 44px; }
+.onb-skip { min-height: 44px; }
+#ex-duration { min-height: 40px; }
+/* Contraste: textos de ayuda legibles */
+.gl-hint, .fb-val.none, .onb-step { color: var(--label-2); }
+.cap:disabled { opacity: 0.5; }
+/* En oscuro, las hojas se separan del fondo negro */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sheet { --bg: #1C1C1E; --bg-elev: #2C2C2E; box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.12), 0 -8px 40px rgba(0, 0, 0, 0.6); }
+}
+:root[data-theme="dark"] .sheet { --bg: #1C1C1E; --bg-elev: #2C2C2E; box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.12), 0 -8px 40px rgba(0, 0, 0, 0.6); }
+/* En iPad, las hojas de acciones («¿Salir sin guardar?») van al centro, como alerta */
+@media (min-width: 700px) {
+  .as { top: 50%; bottom: auto; width: min(420px, calc(100% - 48px)); max-width: none; left: 50%; right: auto; margin: 0; transform: translate(-50%, -46%) scale(0.96); opacity: 0; transition: transform 0.35s var(--ease), opacity 0.25s; }
+  .open > .as { transform: translate(-50%, -50%); opacity: 1; }
+}
+/* Nombres largos de grupo: dos renglones como máximo, sin salirse */
+.g-name { min-width: 0; }
+.g-name b { overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* Textos que se cortaban con «…»: hasta dos renglones */
+.sec-name { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.cell .t2 { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.run-next { white-space: normal; }
+/* iPad horizontal: Clases y Grupos en un ancho cómodo; Recomendados y secciones como la lista */
+@media (min-width: 1000px) {
+  #screen-clases .page, #screen-grupos .page { max-width: 900px; }
+  .screen-body.cat-body, .screen-body.sec-body { max-width: 1120px; }
+}
+/* Selector de ejercicios: altura fija (no brinca al escribir) y barra de tiempo pegada al fondo */
+.sheet.pk-sheet { height: min(88vh, 900px); }
+.pk-sheet .sheet-body { padding-bottom: 0; }
+@media (min-width: 720px) { .sheet.pk-sheet { bottom: auto; } }
+.pk-time { bottom: 0; margin: 18px calc(-1 * var(--gr)) 0 calc(-1 * var(--gl)); border-radius: 0; padding: 14px var(--gr) calc(14px + env(safe-area-inset-bottom)) var(--gl); box-shadow: 0 -0.5px 0 var(--sep), 0 -10px 24px var(--shadow-soft); }
+/* Cambiar plan: «Dividir en series» solo donde está el texto */
+.plan-row .link.sm { justify-self: start; width: auto; }
+/* Modo clase */
+.run-ex .d-eyebrow { text-align: center; }
+.run-series { margin-bottom: 14px; }
+/* Pizarrón: sin marco cuadrado alrededor del campo redondeado */
+.board-frame { box-shadow: none; }
+.board-frame .art { box-shadow: var(--lift-hi); }
+.board-tools { justify-content: center; }
+.board-wrap .bt span, .board-wrap .bt small { font-size: 13px; }
+/* Recomendados: el botón de filtros arriba, junto al primer renglón de tipos */
+.cat-tools { align-items: flex-start; }
+/* Reporte: espacio antes de «Datos que salen en el reporte» */
+.att-card + .group-label { margin-top: 22px; }
+/* Agregar alumnos: más renglones a la vista */
+#st-names { min-height: 220px; }
+@media (min-width: 720px) { #st-names { min-height: 46vh; } }
+/* Recomendados: dibujar solo lo que se ve (iPads lentos) */
+.grid .card { content-visibility: auto; contain-intrinsic-size: 200px 320px; }
+
+.onb-ctrls { display: flex; gap: 10px; margin: 0 22px; }
+.onb-ctrls .onb-next { margin: 0; flex: 1; }
+.onb-back { flex: none; width: 56px; height: 56px; padding: 0; border-radius: 18px; justify-content: center; }
+.onb-back svg { font-size: 20px; stroke-width: 2.6; }
+.onb-back[hidden] { display: none; }
+
+.run-date { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 10px; margin: 0 0 18px; font-size: 15px; color: var(--label-2); text-align: center; }
+.run-date svg { color: var(--tint); font-size: 17px; }
 
 /* <respaldo-ipad-viejo> generado por tools/css-viejo.py: no editar a mano */
 @supports not (color: color-mix(in srgb, red 50%, blue)) {

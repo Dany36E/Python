@@ -20,6 +20,11 @@ for (const sport of ['futbol', 'basquet']) {
     const o = {};
     FIELDS.forEach((k) => { if (x[k] !== undefined) o[k] = x[k]; });
     o.sport = sport;
+    // Comillas latinas y espacio duro entre número y unidad («10 × 10 m» no se parte en dos renglones).
+    ['description', 'keyPoints', 'variations', 'players', 'space', 'material'].forEach((k) => {
+      if (typeof o[k] !== 'string') return;
+      o[k] = o[k].replace(/'([^'\n]+)'/g, '«$1»').replace(/(\d) (?=(m|cm|min|s|seg|kg)\b)/g, '$1\u00a0').replace(/(\d) × (\d)/g, '$1\u00a0×\u00a0$2');
+    });
     const fc = FACETAS[o.id];
     if (!fc) throw new Error('faltan las opciones de ' + o.id + ' en facetas.json');
     if (fc.tags[0] !== o.objective) throw new Error('el primer tipo de ' + o.id + ' debe ser ' + o.objective);

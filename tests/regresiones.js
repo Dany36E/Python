@@ -143,7 +143,7 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
     await p.click('[data-run="next"]'); await W(p, 1300);
     await p.reload(); await W(p, 2200);
     ok((await p.locator('.as-wrap.open').innerText()).includes('Tienes una clase sin terminar'), 'al volver a abrir ofrece seguir la clase');
-    await p.locator('.as-wrap.open .as-btn', { hasText: 'Seguir con la clase' }).click(); await W(p, 800);
+    await p.locator('.as-wrap.open .as-btn', { hasText: 'Seguir donde iba' }).click(); await W(p, 800);
     ok((await p.locator('[data-ref="step"]').textContent()).includes('Ejercicio 2'), 'sigue en el mismo bloque');
     ok(p.errs.length === 0, 'sin errores en biblioteca y modo clase: ' + p.errs.join(' / '));
     await ctx.close();
