@@ -2480,6 +2480,46 @@ body:has(.as-wrap) .toast.show, body:has(.alert-wrap) .toast.show { transform: t
 .run-date { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 10px; margin: 0 0 18px; font-size: 15px; color: var(--label-2); text-align: center; }
 .run-date svg { color: var(--tint); font-size: 17px; }
 
+/* Correcciones finales del QA */
+/* Pizarrón en iPad horizontal: el campo a la izquierda, a todo lo alto; las herramientas a la derecha */
+@media (min-width: 900px) and (orientation: landscape) {
+  .board-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: auto auto auto auto 1fr; column-gap: 24px; }
+  .board-head { grid-column: 1 / -1; grid-row: 1; }
+  .board-stage { grid-column: 1; grid-row: 2 / 6; padding-bottom: 14px; }
+  .board-sub { grid-column: 2; grid-row: 2; padding: 0 var(--gr) 0 0; }
+  .board-sub .seg { margin: 4px 0 12px; max-width: none; }
+  .board-kinds { grid-column: 2; grid-row: 3; min-height: 0; }
+  .board-kind { padding: 0 var(--gr) 0 0; }
+  .board-kind .seg { margin: 0 0 10px; max-width: none; }
+  .board-hint { grid-column: 2; grid-row: 4; text-align: left; padding: 0 var(--gr) 0 0; margin: 4px 0 10px; font-size: 14px; }
+  .board-tools { grid-column: 2; grid-row: 5; align-self: start; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 var(--gr) 14px 0; overflow: visible; }
+  .board-tools .bt { min-width: 0; height: 72px; }
+  .board-tools .bt-sep { display: none; }
+}
+/* Nueva sección dentro de «Guardar en sección» */
+.group.new-sec { display: flex; align-items: center; gap: 10px; padding-right: 12px; }
+.group.new-sec .row { flex: 1; min-width: 0; }
+.group.new-sec .row input { text-align: left; }
+.group.new-sec .cap { flex: none; }
+/* Tutorial: en iPad el aparato es un iPad (más ancho, esquinas más rectas, sin «notch») */
+.ts-dev.ipad { left: 20px; width: 200px; height: 246px; border-radius: 18px; }
+.ts-dev.ipad .ts-cam { top: 4px; width: 5px; height: 5px; }
+.ts-dev.pc { left: 10px; top: 30px; width: 230px; height: 160px; border-radius: 12px; }
+/* «Ver jugada» se queda a la vista mientras corre (tocarla la repite) */
+.board-frame.playing .bf-btn[data-act="play"] { opacity: 0.6; pointer-events: auto; }
+/* Modo clase en horizontal: la línea de arriba alineada con el título; en las pausas, todo al centro */
+@media (min-width: 900px) and (orientation: landscape) {
+  .run-ex .d-eyebrow { text-align: inherit; }
+  .run-body:has(.run-pause) .run-ex { text-align: center; }
+  .run-next { overflow-wrap: anywhere; }
+}
+/* Flechas de Cambiar plan: zona de toque de 44 px */
+.mv { position: relative; }
+.mv::before { content: ""; position: absolute; inset: -4px 0; }
+
+/* Reporte: la hoja no brinca al cambiar de periodo (alto de la opción más larga) */
+@media (min-width: 720px) { .sheet.report-sheet { min-height: min(660px, 90vh); } }
+
 /* <respaldo-ipad-viejo> generado por tools/css-viejo.py: no editar a mano */
 @supports not (color: color-mix(in srgb, red 50%, blue)) {
   .empty-art.icon { background: rgba(var(--tint-rgb), 0.1); }

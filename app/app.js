@@ -117,7 +117,7 @@
   })();
   // </facetas>
   const VARIANTS = {
-    futbol: [['full', 'Campo completo'], ['half', 'Medio campo']],
+    futbol: [['full', 'Cancha completa'], ['half', 'Media cancha']],
     basquet: [['half', 'Media cancha'], ['full', 'Cancha completa']],
   };
   const APP_NAME = 'Cancha';
@@ -3485,7 +3485,8 @@
       confirmLabel: 'Listo',
       onConfirm: () => sheet.dismiss(),
       bodyHTML: '<p class="att-head"><b>' + esc(ex.title) + '</b></p><div class="group" data-ref="list"></div>' +
-        '<button type="button" class="btn tinted wide-btn" data-act="new-sec">' + ic('plus') + 'Nueva sección</button>',
+        '<div class="group new-sec"><label class="row"><span class="k">' + ic('plus') + '</span><input id="nsx-name" placeholder="Nueva sección" aria-label="Nombre de la sección nueva" maxlength="40" autocomplete="off" enterkeyhint="done"></label>' +
+        '<button type="button" class="cap filled" data-act="new-sec" disabled>Crear</button></div>',
     });
     const root = sheet.body;
     function paint() {
@@ -3500,10 +3501,23 @@
       mutateSection(secId, (x) => { if (inp.checked) x.exIds.push(exId); else x.exIds = x.exIds.filter((y) => y !== exId); }).then(() => paint());
       haptic(6);
     });
-    root.addEventListener('click', (e) => {
-      if (!e.target.closest('[data-act="new-sec"]')) return;
-      openSectionEditor({ exIds: [exId], onDone: () => paint() });
-    });
+    const nameInp = $('#nsx-name', root);
+    const createBtn = $('[data-act="new-sec"]', root);
+    async function createSection() {
+      const name = nameInp.value.replace(/\s+/g, ' ').trim();
+      if (!name) { shake(nameInp); return; }
+      const sec = { id: uid(), name, exIds: [exId], createdAt: Date.now(), updatedAt: Date.now(), order: Date.now(), example: false };
+      createBtn.disabled = true;
+      const ok = await commit('sections', sec, null);
+      if (!ok) { createBtn.disabled = false; return; }
+      nameInp.value = '';
+      haptic(10);
+      toast('Sección «' + name + '» creada');
+      paint();
+    }
+    nameInp.addEventListener('input', () => { createBtn.disabled = !nameInp.value.trim(); });
+    nameInp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); createSection(); } });
+    root.addEventListener('click', (e) => { if (e.target.closest('[data-act="new-sec"]')) createSection(); });
     paint();
   }
 
@@ -4322,6 +4336,7 @@
     const sheet = openSheet({
       title: 'Reporte de asistencia',
       tint: groupTint(g),
+      cls: 'report-sheet',
       confirmLabel: 'Crear PDF',
       bodyHTML:
         '<p class="att-head"><b>' + esc(g.name) + '</b> · ' + plural(studentsOf(g).length, 'alumno', 'alumnos') + '</p>' +
@@ -6264,7 +6279,7 @@
           '<span class="tr-mark">' + (k[1] === 'p' ? ic('check') : k[1] === 't' ? '<b>R</b>' : ic('xmark')) + '</span></div>').join('') +
         '<span class="tr-pdf">' + ic('doc') + 'Reporte de asistencia.pdf</span></div>';
     }
-    return '<div class="ta-safe" data-tint="clases"><span class="ts-dev"><span class="ts-cam"></span><span class="ts-app">' + ic('clases') + '</span></span>' +
+    return '<div class="ta-safe" data-tint="clases"><span class="ts-dev' + (devWord() === 'iPad' ? ' ipad' : devWord() === 'computadora' ? ' pc' : '') + '"><span class="ts-cam"></span><span class="ts-app">' + ic('clases') + '</span></span>' +
       '<span class="ts-file">' + ic('box') + 'Respaldo</span><span class="ts-ok">' + ic('check') + '</span></div>';
   }
 

@@ -87,6 +87,15 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   ok((await db(p, 'exercises')).length === before, 'cancelar «Agregar a una clase» no guarda el recomendado');
   await p.goBack(); await W(p, 500); await p.goBack(); await W(p, 500);
 
+  // «Guardar en sección»: la sección nueva se crea ahí mismo (sin otra hoja encima)
+  await p.locator('#screen-ejercicios .grid [data-open-ex]').first().click(); await W(p, 900);
+  await scr(p).locator('[data-act="sections"]').click(); await W(p, 800);
+  await sheet(p).locator('#nsx-name').fill('Días de lluvia');
+  await sheet(p).locator('[data-act="new-sec"]').click(); await W(p, 900);
+  ok(await p.locator('.sheet-wrap.open').count() === 1 && await sheet(p).locator('.sw-row', { hasText: 'Días de lluvia' }).locator('input:checked').count() === 1, 'la sección nueva se crea en la misma hoja y ya trae el ejercicio');
+  await sheet(p).locator('[data-sh="ok"]').click(); await W(p, 600);
+  await p.goBack(); await W(p, 500);
+
   // Filtro «Menos de 10» encuentra ejercicios
   await p.click('#screen-ejercicios [data-act="filters"]'); await W(p, 700);
   await sheet(p).locator('[data-opts="sizes"] [data-opt="s"]').click(); await W(p, 200);
@@ -122,6 +131,17 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   const cls = await db(p, 'classes');
   const moved = cls.find((c) => /Pies r/.test(c.name));
   ok(moved && moved.date === '2026-11-23', 'al pasar lista la clase quedó con fecha de hoy (' + (moved && moved.date) + ')');
+
+  // Reporte de asistencia: la hoja no brinca al cambiar de periodo
+  await p.keyboard.press('Escape').catch(() => {}); await W(p, 400);
+  for (let i = 0; i < 3 && await p.locator('.sheet-wrap.open').count(); i++) { await sheet(p).locator('.sh-x').click(); await W(p, 600); }
+  for (let i = 0; i < 3 && await p.locator('.stack-screen.in').count(); i++) { await p.goBack(); await W(p, 500); }
+  await p.click('#tab-grupos'); await W(p);
+  await p.locator('[data-open-group]', { hasText: '5.º A' }).click(); await W(p, 800);
+  await scr(p).locator('[data-act="report"]').first().click(); await W(p, 900);
+  const tops = [];
+  for (const v of ['mes', 'trimestre', 'fechas']) { await sheet(p).locator('[data-seg="period"] [data-val="' + v + '"]').click(); await W(p, 500); tops.push(await sheet(p).locator('.sheet').evaluate((el) => Math.round(el.getBoundingClientRect().top))); }
+  ok(tops.every((t) => t === tops[0]), 'el reporte no brinca al cambiar de periodo (' + tops.join(', ') + ')');
 
   ok(p.errs.length === 0, 'sin errores: ' + p.errs.join(' / '));
   await ctx.close();
