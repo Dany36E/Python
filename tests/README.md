@@ -7,6 +7,7 @@ Pruebas automáticas que abren la app en un navegador y usan todo como lo haría
 | `flujo-completo.js` | Clase con pausa y series, modo clase con reloj simulado, pase de lista, duplicar, «Pasar lista hoy», deshacer (también con doble toque), reporte PDF por trimestre, pizarrón, respaldo e importación en otro iPad con un conflicto, iPhone y iPad en claro y oscuro. |
 | `regresiones.js` | Errores que encontró el QA (doble toque, terminar sin empezar, trimestre en agosto), Recomendados y clases listas, PDF de clase, apariencia, secciones, filtros, búsqueda, seguir una clase a medias y el tutorial de la primera vez. |
 | `opciones.js` | Formularios con opciones para tocar: ejercicio con varias opciones por grupo (edad, alumnos, organización, espacio, material), filtros con las mismas opciones (también en Recomendados), grupo con días y hora, clase con temas y duración, y el selector que filtra por el grupo. |
+| `qa-ipad.js` | Errores que encontró la revisión de calidad en iPad: lista pegada con números, doble toque al cerrar hojas, aviso que tapaba botones, equipos como entrenamiento, edad de «3 C», búsqueda con ✕, recomendados que se guardaban al cancelar, filtro «Menos de 10», cambio de deporte, seguir una clase a medias y la fecha al dar la clase de otro día. |
 | `nube.js` | La versión que vive en Claude (almacenamiento simulado): foto, grupo, clase con pausa y modo clase. |
 | `actualizacion.js` | Instala la versión publicada, guarda datos de un profe y actualiza a la nueva: no se pierde nada y llegan los ejemplos nuevos. Necesita `OLD` (carpeta con la versión publicada). |
 
@@ -21,6 +22,7 @@ python3 -m http.server 8765        # en otra terminal, desde la carpeta del proy
 node tests/flujo-completo.js
 node tests/regresiones.js
 node tests/opciones.js
+node tests/qa-ipad.js
 node tests/nube.js
 ```
 

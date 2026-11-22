@@ -67,6 +67,8 @@
       const one = t.match(/(\d+)/);
       if (/todo el grupo/.test(t) && !m) { lo = 1; hi = 99; } else if (m) { lo = Number(m[1]); hi = Number(m[2]); } else if (one) { lo = hi = Number(one[1]); }
       const out = lo ? SIZES.filter((b) => b[2] <= hi && b[3] >= lo).map((b) => b[0]) : [];
+      // Lo pensado para 10 a 12 también funciona con 8 o 9.
+      if (lo && lo <= 12 && out.indexOf('s') < 0) out.push('s');
       if (school) ['l', 'xl', 'xxl'].forEach((k) => { if (out.indexOf(k) < 0) out.push(k); });
       return SIZES.map((b) => b[0]).filter((k) => out.indexOf(k) >= 0);
     }
@@ -1139,7 +1141,7 @@
     if (o.z) wrap.style.zIndex = o.z;
     wrap.innerHTML =
       '<div class="scrim"></div>' +
-      '<div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(o.title) + '" tabindex="-1">' +
+      '<div class="sheet' + (o.cls ? ' ' + o.cls : '') + '" role="dialog" aria-modal="true" aria-label="' + esc(o.title) + '" tabindex="-1">' +
       '<div class="sheet-head"><span class="grabber" aria-hidden="true"></span>' +
       '<span class="sh-left"><button type="button" class="glass-btn sh-x" data-sh="cancel" aria-label="' + esc(o.cancelLabel || 'Cancelar') + '">' + ic('xmark') + '</button></span>' +
       '<h2 class="sh-title">' + esc(o.title) + '</h2>' +
@@ -1605,7 +1607,8 @@
     return Date.now() - last > 7 * 864e5;
   }
   function fmtAgo(ts) {
-    const d = Math.floor((Date.now() - ts) / 864e5);
+    const day = (t) => { const x = new Date(t); return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); };
+    const d = Math.round((day(Date.now()) - day(ts)) / 864e5);
     if (d <= 0) return 'hoy';
     if (d === 1) return 'ayer';
     return 'hace ' + d + ' días';
@@ -1636,7 +1639,7 @@
         '<p class="subtitle" data-ref="count">&nbsp;</p>' +
         (t === 'ejercicios'
           ? segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], S.sport) +
-            '<div class="search-row"><label class="search">' + ic('search') + '<input type="search" id="q-ejercicios" placeholder="Buscar ejercicios" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios"></label>' +
+            '<div class="search-row"><label class="search">' + ic('search') + '<input type="search" id="q-ejercicios" placeholder="Buscar ejercicios" autocomplete="off" enterkeyhint="search" aria-label="Buscar ejercicios"><button type="button" class="search-x" data-act="clear-search" aria-label="Borrar búsqueda" hidden>' + ic('xmark') + '</button></label>' +
             '<button class="filter-btn" data-act="filters" aria-label="Filtros">' + ic('sliders') + '<b data-ref="fcount"></b></button></div>' +
             '<div class="chips active-filters" data-ref="afilters" aria-label="Filtros activos"></div>' +
             '<div class="chips" data-ref="chips" role="toolbar" aria-label="Filtrar por tipo"></div>'
@@ -1693,7 +1696,7 @@
     let body;
     if (!S.ready) body = '<div class="grid">' + [0, 1, 2, 3].map(() => '<div class="card"><span class="thumb shimmer"></span><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></div>').join('') + '</div>';
     else if (!all.length) body = emptyExercisesHTML(sport);
-    else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '» en tus ejercicios.' : 'No hay ejercicios con estos filtros.') + (nf || quick ? '<br><button class="link" data-act="clear-filters">Quitar filtros</button>' : '') + '</p>';
+    else if (!list.length) body = '<p class="no-results">' + (q ? 'Nada coincide con «' + esc(S.q[sport]) + '» en tus ejercicios.' : 'No hay ejercicios con estos filtros.') + '<br>' + (q ? '<button class="link" data-act="clear-search">Borrar búsqueda</button>' : '') + (nf || quick ? '<button class="link" data-act="clear-filters">Quitar filtros</button>' : '') + '</p>';
     else body = (plain0 ? sectionsStripHTML() + catEntryHTML(sport) + shareCardHTML() : '<p class="result-count">' + plural(list.length, 'ejercicio', 'ejercicios') + (q ? ' tuyos' : '') + '</p>') + '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
     if (q && S.ready) {
       const recs = applyFilters(catExercises(sport).filter((cx) => !inLibrary(cx.id) && haystack(cx).indexOf(q) >= 0), sport, Object.assign({}, f, { fav: false, mine: false }));
@@ -1705,7 +1708,9 @@
     const sig = ['ej', sport, S.ready, S.canWrite, chipsHTML, afHTML, body, noteHTML('ejercicios')].join('|');
     if (S.sig.ejercicios === sig) return;
     S.sig.ejercicios = sig;
-    $('#screen-ejercicios .search').hidden = S.ready && !all.length;
+    $('#screen-ejercicios .search-row').hidden = S.ready && !all.length;
+    const qx = $('#screen-ejercicios .search-x');
+    if (qx) qx.hidden = !S.q[sport];
     const chipsEl = ref('ejercicios', 'chips');
     if (chipsEl.innerHTML !== chipsHTML) chipsEl.innerHTML = chipsHTML;
     ref('ejercicios', 'afilters').innerHTML = afHTML;
@@ -1744,7 +1749,7 @@
       '<span class="today-body"><span class="today-name">' + esc(c.name || 'Clase sin nombre') + '</span>' +
       '<span class="today-meta">' + (kindOf(c) === 'entrenamiento' ? '<span class="mini-chip">Entrenamiento</span>' : '') + (g ? '<span class="mini-chip">' + ic('people') + esc(g.name) + '</span>' : '') + '<span>' + plural(n, 'ejercicio', 'ejercicios') + '</span></span></span></button>' +
       '<div class="today-actions">' +
-      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar ' + kindNoun(kindOf(c)) + '</button>' : S.canWrite ? '<button class="btn filled" data-act="plan-class" data-id="' + esc(c.id) + '">' + ic('plus') + 'Agregar ejercicios</button>' : '') +
+      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + (savedRun() && savedRun().id === c.id ? 'Seguir ' : 'Iniciar ') + kindNoun(kindOf(c)) + '</button>' : S.canWrite ? '<button class="btn filled" data-act="plan-class" data-id="' + esc(c.id) + '">' + ic('plus') + 'Agregar ejercicios</button>' : '') +
       (canRoll ? '<button class="btn tinted" data-act="roll-class" data-id="' + esc(c.id) + '">' + ic('check') + 'Pasar lista</button>' : '') +
       '</div></div>';
   }
@@ -1785,6 +1790,12 @@
     if (!d) return '<span class="date-tile" aria-hidden="true">' + ic('calendar') + '</span>';
     return '<span class="date-tile" aria-hidden="true"><span class="dm">' + MONTHS[d.getMonth()] + '</span><span class="dd">' + d.getDate() + '</span></span>';
   }
+  // «36 de 40 asistieron» para una clase que solo tiene lista.
+  function rollSummary(c) {
+    const vals = Object.keys(c.attendance || {}).map((k) => c.attendance[k]);
+    const came = vals.filter((v) => v === 'p' || v === 't').length;
+    return came + ' de ' + vals.length + ' asistieron';
+  }
   function classCellHTML(c, inGroup) {
     const n = (c.items || []).filter((it) => !isPause(it)).length;
     const sport = SPORTS[c.sport] ? c.sport : 'futbol';
@@ -1793,7 +1804,7 @@
     const done = c.lastRunAt || c.attendanceAt;
     return '<button class="cell" data-open-class="' + esc(c.id) + '" data-tint="' + sport + '">' + dateTileHTML(c.date) +
       '<span class="txt"><span class="t1">' + esc(c.name || 'Clase sin nombre') + (c.date === todayStr() ? '<span class="pill">Hoy</span>' : '') + '</span>' +
-      '<span class="t2">' + (kindOf(c) === 'entrenamiento' ? 'Entrenamiento · ' : '') + (inGroup ? '' : esc(first) + ' · ') + plural(n, 'ejercicio', 'ejercicios') + ' · ' + fmtMin(classTotal(c)) + ' min</span></span>' +
+      '<span class="t2">' + (kindOf(c) === 'entrenamiento' ? 'Entrenamiento · ' : '') + (inGroup ? '' : esc(first) + ' · ') + (n ? plural(n, 'ejercicio', 'ejercicios') + ' · ' + fmtMin(classTotal(c)) + ' min' : c.attendance && Object.keys(c.attendance).length ? 'Solo lista · ' + rollSummary(c) : 'Sin ejercicios todavía') + '</span></span>' +
       (done ? '<span class="done-mark" title="Dada" aria-label="Dada">' + ic('check') + '</span>' : '') + ic('chevR', 'chev') + '</button>';
   }
 
@@ -1899,8 +1910,8 @@
   const DUR_QUICK = [5, 8, 10, 12, 15, 20, 30];
   function stepValue(v, dir) {
     v = Math.round(Number(v) || 0);
-    if (dir > 0) return Math.min(240, v < 5 ? v + 1 : Math.floor(v / 5) * 5 + 5);
-    return Math.max(1, v <= 5 ? v - 1 : Math.ceil(v / 5) * 5 - 5);
+    if (dir > 0) return Math.min(240, v < 20 ? v + 1 : Math.floor(v / 5) * 5 + 5);
+    return Math.max(1, v <= 20 ? v - 1 : Math.ceil(v / 5) * 5 - 5);
   }
   function autoGrow(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(88, ta.scrollHeight) + 'px'; }
 
@@ -2194,9 +2205,11 @@
       renderAll(); refreshScreens();
       haptic(12);
       toast(editing ? 'Cambios guardados' : 'Ejercicio guardado');
-      if (!editing) {
-        if (S.tab === 'ejercicios' && nx.sport !== S.sport) setSport(nx.sport);
-        if (opts.afterCreate) opts.afterCreate(nx);
+      if (S.tab === 'ejercicios' && nx.sport !== S.sport) setSport(nx.sport);
+      if (!editing && opts.afterCreate) opts.afterCreate(nx);
+      if (editing && nx.sport !== opts.exercise.sport) {
+        const other = S.classes.filter((c) => c.sport !== nx.sport && (c.items || []).some((it) => it.exId === nx.id));
+        if (other.length) setTimeout(() => toast('Sigue en ' + plural(other.length, 'clase', 'clases') + ' de ' + SPORTS[opts.exercise.sport].noun, 'info'), 1600);
       }
     }
   }
@@ -2273,8 +2286,9 @@
   // Ficha del ejercicio: tipos y niveles, cifras, organización y material (de lo elegido o del texto).
   function exTagsHTML(ex) {
     const z = facetsOf(ex);
-    const tags = z.tags.length ? z.tags : [SPORTS[ex.sport] ? SPORTS[ex.sport].name : 'Ejercicio'];
+    const tags = z.tags;
     const lv = z.levels.length === LEVELS.length ? ['Todos los niveles'] : inOrder('levels', z.levels, ex.sport).map(lvl);
+    if (!tags.length && !lv.length) return '';
     return '<p class="d-tags">' + tags.map((t) => '<span class="tag">' + esc(t) + '</span>').join('') + lv.map((l) => '<span class="tag ghost">' + esc(l) + '</span>').join('') + '</p>';
   }
   function exStatsHTML(ex) {
@@ -2305,7 +2319,6 @@
         '<button class="btn icon tinted" data-act="sections" aria-label="Guardar en sección">' + ic('folder') + '</button>' +
         '<button class="btn icon tinted" data-act="fav" aria-pressed="' + !!ex.favorite + '" aria-label="Favorito">' + ic(ex.favorite ? 'heart-fill' : 'heart') + '</button></div>' : '') +
       (sectionsOf(ex.id).length ? '<p class="in-sections">' + ic('folder') + sectionsOf(ex.id).map((x) => '<button class="link sm" data-open-section="' + esc(x.id) + '">' + esc(x.name) + '</button>').join('') + '</p>' : '') +
-      (ex.mediaId && hasDiagram(ex) ? sec('Pizarrón', boardFrameHTML(ex)) : '') +
       (ex.description ? sec('Cómo se hace', '<p>' + esc(ex.description) + '</p>') : '') +
       (points.length ? sec('Puntos clave', '<ul class="points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>') : '') +
       (vars.length ? sec('Variantes', '<ul class="vars">' + varHTML + '</ul>') : '') +
@@ -2368,7 +2381,7 @@
         mediaKey = key;
         if (player) { player.stop(); player = null; }
         const box = $('[data-ref="media"]', scr.body);
-        box.innerHTML = mediaDetailHTML(e);
+        box.innerHTML = mediaDetailHTML(e) + (e.mediaId && hasDiagram(e) ? '<section class="sec"><h2>Pizarrón</h2>' + boardFrameHTML(e) + '</section>' : '');
         bindVideoFallback(box);
         hydrate(box);
         $('[data-ref="info"]', scr.body).innerHTML = exerciseInfoHTML(e);
@@ -2449,18 +2462,23 @@
     });
   }
 
-  function addToClassFlow(ex) {
+  // adopt: para un Recomendado, lo guarda en tus ejercicios hasta que eliges la clase (cancelar no deja nada).
+  function addToClassFlow(ex, adopt) {
     const list = S.classes.filter((c) => c.sport === ex.sport).sort(byUpcoming).slice(0, 6);
     const min = ex.duration || 10;
     const actions = list.map((c) => ({
       label: c.name || 'Clase sin nombre',
       sub: fmtDay(c.date) + ' · ' + fmtMin(classTotal(c)) + ' min',
-      onClick: () => {
-        if ((c.items || []).some((it) => it.exId === ex.id)) { toast('Ya está en «' + (c.name || 'la clase') + '»', 'check'); return; }
-        mutateClass(c.id, (cc) => { cc.items.push({ exId: ex.id, min }); }).then((ok) => { if (ok) toast('Agregado a «' + (c.name || 'la clase') + '»'); });
+      onClick: async () => {
+        const real = adopt ? await adopt() : ex;
+        if (!real) return;
+        if ((c.items || []).some((it) => it.exId === real.id)) { toast('Ya está en «' + (c.name || 'la clase') + '»', 'check'); return; }
+        mutateClass(c.id, (cc) => { cc.items.push({ exId: real.id, min }); }).then((ok) => { if (ok) toast('Agregado a «' + (c.name || 'la clase') + '»'); });
       },
     }));
-    actions.push({ label: 'Nueva clase', icon: 'plus', onClick: () => openClassEditor({ sport: ex.sport, items: [{ exId: ex.id, min }] }) });
+    actions.push({ label: 'Nueva clase', icon: 'plus', onClick: () => openClassEditor(adopt
+      ? { sport: ex.sport, templateNote: 'Se agregará «' + ex.title + '».', prepare: async () => { const real = await adopt(); return real ? [{ exId: real.id, min }] : null; } }
+      : { sport: ex.sport, items: [{ exId: ex.id, min }] }) });
     actionSheet({ title: 'Agregar a una clase de ' + SPORTS[ex.sport].noun, actions, tint: ex.sport });
   }
 
@@ -2524,7 +2542,7 @@
   // ---------------------------------------------------------------- fechas y horario para tocar
   const WD = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   const WD_LONG = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-  const CLASS_MINS = [30, 40, 45, 50, 60, 90];
+  const CLASS_MINS = [30, 40, 45, 50, 60, 75, 90];
   // Días y hora que se pueden leer de un horario escrito a mano («Lun y Mié 9:00»).
   function parseSchedule(txt0) {
     const t = norm(txt0);
@@ -2562,12 +2580,22 @@
   }
 
   // Clase de Educación Física o entrenamiento (equipos extracurriculares, club).
+  // Palabras con su artículo: KW(c).la = «la clase» / «el entrenamiento», KW(c).o = terminación (dada/dado).
+  function KW(c) {
+    const e = c && c.kind === 'entrenamiento';
+    return { n: e ? 'entrenamiento' : 'clase', N: e ? 'Entrenamiento' : 'Clase', ns: e ? 'entrenamientos' : 'clases', la: e ? 'el entrenamiento' : 'la clase', dela: e ? 'del entrenamiento' : 'de la clase', una: e ? 'un entrenamiento' : 'una clase', esta: e ? 'este entrenamiento' : 'esta clase', o: e ? 'o' : 'a' };
+  }
   const KINDS = [['clase', 'Clase'], ['entrenamiento', 'Entrenamiento']];
   const TEAM_CATS = ['Equipo extracurricular', 'Club o selección'];
   const kindOf = (c) => (c && c.kind === 'entrenamiento' ? 'entrenamiento' : 'clase');
   const groupKind = (g) => (g && TEAM_CATS.indexOf(g.category) >= 0 ? 'entrenamiento' : 'clase');
   const kindNoun = (k, many) => (k === 'entrenamiento' ? (many ? 'entrenamientos' : 'entrenamiento') : many ? 'clases' : 'clase');
   // Días de la misma serie (la clase que se creó para varios días), en orden.
+  // «de hoy al vie 27», «de mañana al lun 30», «del lun 23 al vie 27»
+  function rangeText(a, b) {
+    const one = (d, first) => { const f = fmtDay(d); return f === 'Hoy' ? (first ? 'de hoy' : 'a hoy') : f === 'Mañana' ? (first ? 'de mañana' : 'a mañana') : (first ? 'del ' : 'al ') + f.toLowerCase(); };
+    return one(a, true) + ' ' + one(b, false);
+  }
   const serieOf = (c) => (c && c.serie ? S.classes.filter((x) => x.serie === c.serie).sort((a, b) => String(a.date).localeCompare(String(b.date))) : []);
   const notGiven = (x) => !x.lastRunAt && !x.attendanceAt;
   function copyPlanToSerie(id) {
@@ -2578,7 +2606,7 @@
     const k = kindOf(c);
     actionSheet({
       title: 'Copiar el plan a ' + plural(others.length, 'día más', 'días más'),
-      message: others.map((x) => fmtDay(x.date)).join(', ') + '.' + (withPlan ? (withPlan === 1 ? ' Uno ya tiene plan y se reemplaza.' : ' ' + withPlan + ' ya tienen plan y se reemplaza.') : ''),
+      message: others.map((x) => fmtDay(x.date)).join(', ') + '.' + (withPlan ? (withPlan === 1 ? ' Uno ya tiene plan y se reemplaza.' : ' ' + withPlan + ' ya tienen plan y se reemplazan.') : ''),
       tint: SPORTS[c.sport] ? c.sport : 'futbol',
       actions: [{ label: 'Copiar plan', icon: 'copy', onClick: async () => {
         let n = 0;
@@ -2601,6 +2629,7 @@
     };
     if (!editing && opts.name) c.name = opts.name;
     if (!editing && firstGroup && firstGroup.classMin) c.target = firstGroup.classMin;
+    if (!editing && opts.target) c.target = opts.target;
     if (!editing && S.backend && S.backend.me) c.authorId = S.backend.me;
     let kind = editing ? kindOf(c) : opts.kind || groupKind(firstGroup);
     let kindTouched = editing || !!opts.kind;
@@ -2618,9 +2647,10 @@
     const titleFor = () => (editing ? 'Editar ' : kind === 'entrenamiento' ? 'Nuevo ' : 'Nueva ') + kindNoun(kind);
     const body =
       segHTML('kind', KINDS, kind, '¿Es clase o entrenamiento?') +
-      '<div class="group"><input class="field-lg" id="cl-name" placeholder="Nombre (opcional)" aria-label="Nombre" maxlength="80" autocomplete="off" enterkeyhint="done" value="' + esc(c.name) + '"></div>' +
+      '<div class="group"><input class="field-lg" id="cl-name" placeholder="Nombre (opcional)" aria-label="Nombre" maxlength="120" autocomplete="off" enterkeyhint="done" value="' + esc(c.name) + '"></div>' +
       '<p class="group-label" id="lbl-group">Grupo o equipo</p><div class="group pad"><div class="chips wrap" data-ref="groups" role="group" aria-labelledby="lbl-group"></div></div>' +
-      '<p class="group-label" id="lbl-focus">¿Qué van a trabajar?<span class="gl-hint">Le pone nombre</span></p><div class="group pad"><div class="chips wrap" data-ref="focus" role="group" aria-labelledby="lbl-focus"></div></div>' +
+      '<div data-ref="sport-box"><p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], c.sport, 'Deporte') + '</div>' +
+      '<p class="group-label" id="lbl-focus">¿Qué van a trabajar?<span class="gl-hint">Con esto se nombra</span></p><div class="group pad"><div class="chips wrap" data-ref="focus" role="group" aria-labelledby="lbl-focus"></div></div>' +
       '<div class="group fgroup"><div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + (multi ? 'Días' : 'Fecha') + '</span><span class="fb-val" data-ref="date-val"></span></div><div data-ref="dates"></div>' +
       (multi ? '<div class="quick-row" data-ref="quick"></div>' : '') +
       '<label class="row inline-row"><span class="k">Otra fecha</span><input id="cl-date" type="date" aria-label="Otra fecha" value="' + esc(c.date || '') + '"></label></div>' +
@@ -2629,7 +2659,6 @@
         '<p class="fb-note" data-ref="dates-note" hidden></p></div>' : '') +
       '<div class="fblock"><div class="fb-head"><span class="k">' + ic('clock') + 'Duración</span><span class="fb-val" data-ref="target-val"></span></div>' +
       optChipsHTML('target', CLASS_MINS.map((m) => [String(m), m + ' min']), c.target ? [String(c.target)] : [], { multi: false, label: 'Duración' }) + '</div></div>' +
-      '<div data-ref="sport-box"><p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], c.sport, 'Deporte') + '</div>' +
       '<p class="group-label" id="lbl-notes">Notas</p><div class="group"><textarea id="cl-notes" aria-labelledby="lbl-notes" placeholder="Objetivo del día, recordatorios…" maxlength="2000">' + esc(c.notes) + '</textarea></div>' +
       (opts.templateNote ? '<p class="muted" style="margin:0 16px">' + esc(opts.templateNote) + '</p>'
         : !editing && c.items.length && c.items[0].exId ? '<p class="muted" style="margin:0 16px">Se agregará «' + esc((getEx(c.items[0].exId) || {}).title || 'el ejercicio') + '».</p>' : '');
@@ -2726,7 +2755,7 @@
         (gd.length && !same(gd, wk) ? '<button type="button" class="chip quick-chip" data-days="group" aria-pressed="' + same(dates.slice().sort(), gd) + '">Días de ' + esc(g.name) + ' (' + esc(scheduleText(gdays, '')) + ')</button>' : '');
       const note = $('[data-ref="dates-note"]', root);
       note.hidden = list.length < 2;
-      if (list.length > 1) note.innerHTML = 'Se crean <b>' + plural(list.length, kindNoun(kind), kindNoun(kind, true)) + '</b>, del ' + esc(fmtDay(list[0]).toLowerCase()) + ' al ' + esc(fmtDay(list[list.length - 1]).toLowerCase()) + ', con el mismo plan.';
+      if (list.length > 1) note.innerHTML = 'Se crean <b>' + plural(list.length, kindNoun(kind), kindNoun(kind, true)) + '</b>, ' + esc(rangeText(list[0], list[list.length - 1])) + ', con el mismo plan.';
       sheet.setConfirm(true, list.length > 1 ? 'Guardar (' + list.length + ')' : 'Guardar');
     }
     function setSeg(name, v) {
@@ -2870,7 +2899,7 @@
     let at = 0; let lastLabel = -1;
     const segs = items.map((it) => {
       const m = itemMin(it);
-      const room = total ? (at - lastLabel) / total >= 0.12 && (total - at) / total >= 0.1 : at === 0;
+      const room = total ? (at - lastLabel) / total >= 0.12 && (total - at) / total >= 0.15 : at === 0;
       const label = at === 0 || (lastLabel >= 0 && room);
       if (label) lastLabel = at;
       const h = '<span class="tl-seg' + (isPause(it) ? ' p' : '') + '" style="flex-grow:' + Math.max(1, m) + ';--o:' + (isPause(it) ? 1 : ops[(k++) % 4]) + '"><i></i>' + (label ? '<b>' + fmtMin(at) + '′</b>' : '') + '</span>';
@@ -2883,18 +2912,18 @@
     const kn = kindNoun(kindOf(c));
     return '<div class="d-head"><p class="d-eyebrow">' + ic(sport) + (kindOf(c) === 'entrenamiento' ? 'Entrenamiento · ' : '') + esc(c.date ? longDate(c.date) : 'Sin fecha') + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1>' +
       (g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') +
-      (serie.length > 1 ? '<p class="c-serie">' + ic('calendar') + 'Día ' + (si + 1) + ' de ' + serie.length + ' · del ' + esc(fmtDay(serie[0].date).toLowerCase()) + ' al ' + esc(fmtDay(serie[serie.length - 1].date).toLowerCase()) + '</p>' : '') + '</div>' +
+      (serie.length > 1 ? '<p class="c-serie">' + ic('calendar') + 'Día ' + (si + 1) + ' de ' + serie.length + ' · ' + esc(rangeText(serie[0].date, serie[serie.length - 1].date)) + '</p>' : '') + '</div>' +
       '<div class="c-layout"><div class="c-sum"><div class="c-summary"><p class="c-line"><span class="c-total">' + fmtMin(total) + '<small> min</small></span><span class="c-sub">' + (c.target ? '<span class="c-target' + (total > c.target ? ' over' : '') + '">' + (total > c.target ? fmtMin(total - c.target) + ' min de más' : total < c.target ? 'faltan ' + fmtMin(c.target - total) + ' de ' + c.target + ' min' : 'justo ' + c.target + ' min') + '</span>' : '') + plural(nEx, 'ejercicio', 'ejercicios') + (nP ? ' y ' + plural(nP, 'pausa', 'pausas') : '') + '</span></p>' +
       (items.length ? '<div class="tl" aria-hidden="true">' + segs + '<b class="tl-end">' + fmtMin(total) + '′</b></div>' : '') +
-      (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar ' + kn + '</button>' : '') +
-      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya la diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div></div>' +
+      (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + (savedRun() && savedRun().id === c.id ? 'Seguir ' : 'Iniciar ') + kn + '</button>' : '') +
+      (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya l' + KW(c).o + ' diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div></div>' +
       '<div class="c-plan"><div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Cambiar plan') + '</button>' : '') + '</div>' +
       '<div class="list">' + planRowsHTML(c, edit) +
       (S.canWrite && !edit ? '<button class="cell add-row" data-act="add-ex">' + ic('plus') + '<span>Agregar ejercicios</span></button><button class="cell add-row" data-act="add-pause">' + ic('drop') + '<span>Agregar pausa</span></button>' : '') +
       (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div></div>' +
       '<div class="c-rest">' + attendanceSectionHTML(c) +
       (c.notes ? '<section class="sec"><h2>Notas</h2><p>' + esc(c.notes) + '</p></section>' : '') +
-      (S.canWrite ? '<div class="group" style="margin-top:28px">' + (toCopy && items.length ? '<button class="row row-act" data-act="copy-serie">' + ic('copy') + 'Copiar este plan a ' + plural(toCopy, 'día más', 'días más') + '</button>' : '') + '<button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar clase</button></div>' : '') + '</div></div>';
+      (S.canWrite ? '<div class="group" style="margin-top:28px">' + (toCopy && items.length ? '<button class="row row-act" data-act="copy-serie">' + ic('copy') + 'Copiar este plan a ' + plural(toCopy, 'día más', 'días más') + '</button>' : '') + '<button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar ' + KW(c).n + '</button></div>' : '') + '</div></div>';
   }
 
   function openClass(id) {
@@ -2960,9 +2989,9 @@
         }
         case 'delete-class':
           actionSheet({
-            title: '¿Eliminar «' + (cc.name || 'esta clase') + '»?',
+            title: '¿Eliminar «' + (cc.name || KW(cc).esta) + '»?',
             message: cc.attendance && Object.keys(cc.attendance).length ? 'También se elimina su asistencia. Tus ejercicios se quedan.' : 'Tus ejercicios se quedan.',
-            actions: [{ label: 'Eliminar clase', danger: true, onClick: () => deleteClassWithUndo(id) }],
+            actions: [{ label: 'Eliminar ' + KW(cc).n, danger: true, onClick: () => deleteClassWithUndo(id) }],
           });
           break;
         default: break;
@@ -2980,7 +3009,8 @@
       showError(e, 'No se pudo eliminar');
       return;
     }
-    toast('Clase eliminada', 'trash', { label: 'Deshacer', onClick: () => commit('classes', plain(prev), null).then((ok) => { if (ok) toast('Clase recuperada'); }) });
+    const kw = KW(prev);
+    toast(kw.N + ' eliminad' + kw.o, 'trash', { label: 'Deshacer', onClick: () => commit('classes', plain(prev), null).then((ok) => { if (ok) toast(kw.N + ' recuperad' + kw.o); }) });
   }
 
   function addPauseFlow(classId) {
@@ -3054,7 +3084,7 @@
     if (base && c.date >= t) { const d = new Date(base); d.setDate(d.getDate() + 7); date = dayStr(d); }
     let groupId = c.groupId || null;
     const sheet = openSheet({
-      title: 'Duplicar clase',
+      title: 'Duplicar ' + KW(c).n,
       tint: c.sport,
       confirmLabel: 'Duplicar',
       bodyHTML:
@@ -3069,7 +3099,7 @@
         const ok = await commit('classes', nc, null);
         if (!ok) return;
         sheet.dismiss();
-        toast('Clase duplicada');
+        toast(KW(c).N + ' duplicad' + KW(c).o);
         setTimeout(() => openClass(nc.id), 300);
       },
     });
@@ -3089,11 +3119,12 @@
   // y cuántos son (de la lista de alumnos o de lo que se eligió al crearlo).
   function gradeAges(g) {
     const t = norm((g.category || '') + ' ' + (g.name || ''));
-    const m = t.match(/(\d)\s*\.?\s*(?:º|°|o\b)/);
+    const WORDS = ['primero', 'segundo', 'tercero', 'cuarto', 'quinto', 'sexto'];
+    const m = t.match(/\b([1-6])\s*(?:\.?\s*(?:º|°|o|ro|do|er|to)\b)?(?=\s*[a-z]?\b)/) || t.match(new RegExp('\\b(' + WORDS.join('|') + ')\\b'));
     if (m && /primaria|secundaria|prepa/.test(t)) {
-      const n = Number(m[1]);
+      const n = /\d/.test(m[1]) ? Number(m[1]) : WORDS.indexOf(m[1]) + 1;
       const age = /secundaria/.test(t) ? n + 11 : /prepa/.test(t) ? n + 14 : n + 5;
-      return FACETS.AGES.filter((a) => { const sp = FACETS.span(a[0]); return sp[0] <= age + 1 && sp[1] >= age; }).map((a) => a[0]);
+      return FACETS.AGES.filter((a) => { const sp = FACETS.span(a[0]); return sp[0] <= age && sp[1] >= age; }).map((a) => a[0]);
     }
     if (/preescolar|kinder/.test(t)) return ['4-5'];
     return FACETS.infer.ages((g.category || '') + ' ' + (g.name || ''));
@@ -3128,6 +3159,7 @@
     const sheet = openSheet({
       title: 'Agregar ejercicios',
       tint: sport,
+      cls: 'pk-sheet',
       confirmLabel: 'Agregar',
       bodyHTML: '<label class="search">' + ic('search') + '<input type="search" id="pk-q" placeholder="Buscar en ' + SPORTS[sport].noun + '" autocomplete="off" aria-label="Buscar ejercicios"></label>' +
         '<div class="chips pk-chips" data-ref="chips" role="toolbar" aria-label="Filtrar"></div>' +
@@ -3177,13 +3209,14 @@
     }
     // Sin búsqueda ni tipos elegidos, la lista sigue el orden de una clase: calentamiento, tema, cierre.
     function sectionsOf(list) {
-      const order = [['Calentamiento', (e) => facetsOf(e).tags[0] === 'Calentamiento']];
-      if (focus.length) order.push([cap(listEs(lowerRest(focus))), (e) => anyOf(focus, facetsOf(e).tags)]);
-      order.push(['Vuelta a la calma', (e) => facetsOf(e).tags.indexOf('Vuelta a la calma') >= 0]);
-      const used = new Set();
-      const out = order.map(([label, fn]) => { const xs = list.filter((e) => !used.has(e.id) && fn(e)); xs.forEach((e) => used.add(e.id)); return [label, xs]; });
-      out.push([focus.length ? 'Otros ejercicios' : 'Parte principal', list.filter((e) => !used.has(e.id))]);
-      return out.filter((x) => x[1].length);
+      const isWarm = (e) => facetsOf(e).tags[0] === 'Calentamiento';
+      const isCool = (e) => facetsOf(e).tags.indexOf('Vuelta a la calma') >= 0;
+      const warm = list.filter(isWarm);
+      const cool = list.filter((e) => !isWarm(e) && isCool(e));
+      const rest = list.filter((e) => !isWarm(e) && !isCool(e));
+      const theme = focus.length ? rest.filter((e) => anyOf(focus, facetsOf(e).tags)) : [];
+      const others = rest.filter((e) => theme.indexOf(e) < 0);
+      return [['Calentamiento', warm], [cap(listEs(lowerRest(focus))), theme], [focus.length ? 'Otros ejercicios' : 'Parte principal', others], ['Vuelta a la calma', cool]].filter((x) => x[1].length);
     }
     const hereLast = (xs) => xs.filter((e) => !inClass.has(e.id)).concat(xs.filter((e) => inClass.has(e.id)));
     function render() {
@@ -3218,7 +3251,7 @@
       const pc = e.target.closest('[data-pchip]');
       if (pc) {
         const k = pc.dataset.pchip;
-        if (k === 'all') { pf.tags = []; forGroup = false; } else if (k === 'group') forGroup = !forGroup;
+        if (k === 'all') { pf.tags = []; forGroup = false; if (pc.closest('.muted')) { q = ''; $('#pk-q', root).value = ''; } } else if (k === 'group') forGroup = !forGroup;
         else { const t = k.slice(2); pf.tags = pf.tags.indexOf(t) >= 0 ? pf.tags.filter((x) => x !== t) : pf.tags.concat(t); }
         haptic(4); render(); return;
       }
@@ -3258,6 +3291,7 @@
         S.sections = S.sections.filter((x) => !x.example);
         adopt.forEach((p) => { const x = plain(p[1]); x.example = false; replaceLocal(p[0], x); });
         renderAll(); refreshScreens();
+        window.scrollTo(0, 0);
         try {
           for (const p of adopt) await S.backend[SAVE[p[0]]](Object.assign(plain(p[1]), { example: false }));
           for (const c of cls) await S.backend.deleteClass(c.id);
@@ -3358,6 +3392,7 @@
     haptic(4);
     let editing = false;
     const scr = pushScreen({ key: 'sec:' + id, tint: 'clases', rightHTML: S.canWrite ? '<button class="glass-btn" data-act="sec-share" aria-label="Compartir con otros profes">' + ic('share') + '</button><button class="glass-btn cap" data-act="sec-edit">Editar</button>' : '' });
+    scr.body.classList.add('wide');
     function render() {
       const sec = getSection(id);
       if (!sec) { popLayer(scr); return; }
@@ -3446,21 +3481,23 @@
     if (!ex) return;
     const sheet = openSheet({
       title: 'Guardar en sección',
-      cancelLabel: 'Listo',
+      cancelLabel: 'Cerrar',
+      confirmLabel: 'Listo',
+      onConfirm: () => sheet.dismiss(),
       bodyHTML: '<p class="att-head"><b>' + esc(ex.title) + '</b></p><div class="group" data-ref="list"></div>' +
         '<button type="button" class="btn tinted wide-btn" data-act="new-sec">' + ic('plus') + 'Nueva sección</button>',
     });
     const root = sheet.body;
     function paint() {
       const list = S.sections.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
-      $('[data-ref="list"]', root).innerHTML = list.length ? list.map((sec) => switchRow('sx-' + sec.id, ic('box'), esc(sec.name), plural(sectionExercises(sec).length, 'ejercicio', 'ejercicios'), sec.exIds.indexOf(exId) >= 0, false)).join('')
+      $('[data-ref="list"]', root).innerHTML = list.length ? list.map((sec) => switchRow('sx-' + sec.id, ic('folder'), esc(sec.name), plural(sectionExercises(sec).length, 'ejercicio', 'ejercicios'), sec.exIds.indexOf(exId) >= 0, false)).join('')
         : '<p class="muted pad">Todavía no tienes secciones.</p>';
     }
     root.addEventListener('change', (e) => {
       const inp = e.target.closest('input[id^="sx-"]');
       if (!inp) return;
       const secId = inp.id.slice(3);
-      mutateSection(secId, (x) => { if (inp.checked) x.exIds.push(exId); else x.exIds = x.exIds.filter((y) => y !== exId); });
+      mutateSection(secId, (x) => { if (inp.checked) x.exIds.push(exId); else x.exIds = x.exIds.filter((y) => y !== exId); }).then(() => paint());
       haptic(6);
     });
     root.addEventListener('click', (e) => {
@@ -3477,7 +3514,9 @@
     let f = facetMemo.get(e);
     if (f) return f;
     const cx = e.catalogId && CAT() ? catEx(e.catalogId) : null;
-    const same = (keys) => cx && keys.every((k) => String(cx[k] || '') === String(e[k] || ''));
+    // El texto de Recomendados pudo cambiar de comillas o espacios: se compara sin eso.
+    const flat = (v) => norm(String(v || '').replace(/\u00a0/g, ' ').replace(/[«»'"]/g, ''));
+    const same = (keys) => cx && keys.every((k) => flat(cx[k]) === flat(e[k]));
     const pick = (k, src, guess) => (Array.isArray(e[k]) ? e[k] : same(src) && Array.isArray(cx[k]) ? cx[k] : guess());
     const sp = SPORTS[e.sport] ? e.sport : 'futbol';
     f = {
@@ -3719,7 +3758,7 @@
     const sub = [SPORTS[g.sport] ? SPORTS[g.sport].name : 'Fútbol y básquetbol', g.category].filter(Boolean).join(' · ');
     const facts = ['<span><b>' + ns + '</b>' + (ns === 1 ? 'alumno' : 'alumnos') + '</span>'];
     if (rate != null) facts.push('<span><b' + (rate < 75 ? ' class="low"' : '') + '>' + rate + '%</b>asistencia</span>');
-    if (next) facts.push('<span><b>' + esc(fmtDay(next.date)) + '</b>próxima clase</span>');
+    if (next) facts.push('<span><b>' + esc(fmtDay(next.date)) + '</b>' + (groupKind(g) === 'entrenamiento' ? 'próximo entrenamiento' : 'próxima clase') + '</span>');
     return '<button class="g-card" data-open-group="' + esc(g.id) + '" data-tint="' + groupTint(g) + '">' +
       '<span class="g-top"><span class="group-badge band-' + sp + '" aria-hidden="true">' + esc(groupShort(g.name)) + '</span>' +
       '<span class="g-name"><b>' + esc(g.name) + '</b><small>' + esc(sub) + '</small></span>' + ic('chevR', 'chev') + '</span>' +
@@ -3765,7 +3804,7 @@
           : facetBlockHTML('sizes', 'people', '¿Cuántos son?', st.sizes, 'futbol', { multi: false })) + '</div>' +
         '<p class="group-label">¿Cuándo y dónde?</p><div class="group fgroup">' +
         '<div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + 'Días de clase o entrenamiento</span><span class="fb-val" data-ref="sched-val"></span></div>' + optChipsHTML('days', dayOpts, st.days.map(String), { label: 'Días de clase' }) +
-        '<div class="quick-row"><button type="button" class="chip quick-chip" data-act="weekdays">Lunes a viernes</button></div>' +
+        '<div class="quick-row"><button type="button" class="chip quick-chip" data-act="weekdays" aria-pressed="false">Lunes a viernes</button></div>' +
         '<label class="row inline-row"><span class="k">' + ic('clock') + 'Hora</span><input id="gr-time" type="time" aria-label="Hora" value="' + esc(st.time) + '"></label></div>' +
         '<div class="fblock"><div class="fb-head"><span class="k">' + ic('timer') + 'Duración de cada sesión</span><span class="fb-val" data-ref="min-val"></span></div>' + optChipsHTML('classMin', CLASS_MINS.map((m) => [String(m), m + ' min']), st.classMin ? [String(st.classMin)] : [], { multi: false, label: 'Duración de cada sesión' }) + '</div>' +
         '<div class="fblock"><div class="fb-head"><span class="k">' + ic('flag') + 'Lugar</span></div>' + optChipsHTML('place', places.map((x) => [x, x]), [g.place], { multi: false, label: 'Lugar' }) +
@@ -3802,6 +3841,8 @@
     const root = sheet.body;
     const setPressed = (name, v) => $$('[data-opts="' + name + '"] [data-opt]', root).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.opt === v)));
     function paint() {
+      const wkb = $('[data-act="weekdays"]', root);
+      if (wkb) wkb.setAttribute('aria-pressed', String(st.days.length === 5 && [1, 2, 3, 4, 5].every((d) => st.days.indexOf(d) >= 0)));
       const sv = $('[data-ref="sched-val"]', root);
       const t = scheduleText(st.days, $('#gr-time', root).value);
       sv.textContent = t || (g.schedule && !schedTouched ? g.schedule : 'Sin elegir');
@@ -3831,7 +3872,8 @@
     });
     root.addEventListener('click', (e) => {
       if (e.target.closest('[data-act="weekdays"]')) {
-        st.days = [1, 2, 3, 4, 5]; schedTouched = true; dirty = true; haptic(4);
+        const isWk = st.days.length === 5 && [1, 2, 3, 4, 5].every((d) => st.days.indexOf(d) >= 0);
+        st.days = isWk ? [] : [1, 2, 3, 4, 5]; schedTouched = true; dirty = true; haptic(4);
         $$('[data-opts="days"] [data-opt]', root).forEach((b) => b.setAttribute('aria-pressed', String(st.days.indexOf(Number(b.dataset.opt)) >= 0)));
         paint(); return;
       }
@@ -3852,8 +3894,9 @@
   function groupDetailHTML(g, showAll) {
     const t = todayStr();
     const cls = groupClasses(g.id).sort(byUpcoming);
-    const up = cls.filter((c) => !c.date || c.date >= t);
-    const past = cls.filter((c) => c.date && c.date < t);
+    const doneToday = (c) => c.date === t && (c.lastRunAt || c.attendanceAt);
+    const up = cls.filter((c) => (!c.date || c.date >= t) && !doneToday(c));
+    const past = cls.filter((c) => (c.date && c.date < t) || doneToday(c)).sort((a, b) => String(b.date).localeCompare(String(a.date)));
     const given = cls.filter(classGiven);
     const minutes = given.reduce((sum, c) => sum + classTotal(c), 0);
     const rate = groupRate(g);
@@ -3865,18 +3908,18 @@
     return '<div class="d-head"><p class="d-eyebrow">' + esc([SPORTS[g.sport] ? SPORTS[g.sport].name : 'Fútbol y básquetbol', g.category].filter(Boolean).join(' · ')) + '</p>' +
       '<h1 class="d-title">' + esc(g.name) + '</h1>' + (meta.length ? '<p class="g-meta">' + meta.map((m) => '<span>' + m + '</span>').join('') + '</p>' : '') + '</div>' +
       '<div class="c-summary">' +
-      (given.length || rate != null ? '<div class="c-figs' + (rate != null ? ' g3' : '') + '"><div><span class="num">' + given.length + '</span><span class="unit">' + (given.length === 1 ? 'clase dada' : 'clases dadas') + '</span></div>' +
+      (given.length || rate != null ? '<div class="c-figs' + (rate != null ? ' g3' : '') + '"><div><span class="num">' + given.length + '</span><span class="unit">' + (groupKind(g) === 'entrenamiento' ? (given.length === 1 ? 'entrenamiento' : 'entrenamientos') : (given.length === 1 ? 'clase dada' : 'clases dadas')) + '</span></div>' +
       '<div><span class="num">' + minutes + '</span><span class="unit">minutos</span></div>' +
       (rate != null ? '<div><span class="num">' + rate + '%</span><span class="unit">asistencia</span></div>' : '') + '</div>' : '') +
       (S.canWrite ? '<div class="g-actions">' +
         (hasStudents ? '<button class="btn filled" data-act="roll-today">' + ic('check') + 'Pasar lista hoy</button>' : '<button class="btn filled" data-act="add-students">' + ic('plus') + 'Agregar alumnos</button>') +
-        '<button class="btn tinted" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' +
+        '<button class="btn tinted" data-act="new-class">' + ic('plus') + (groupKind(g) === 'entrenamiento' ? 'Nuevo entrenamiento' : 'Nueva clase') + '</button>' +
         (hasStudents ? '<button class="btn tinted" data-act="report">' + ic('doc') + 'Reporte de asistencia</button>' : '') + '</div>'
         : hasStudents ? '<div class="g-actions"><button class="btn tinted" data-act="report">' + ic('doc') + 'Reporte de asistencia</button></div>' : '') +
       '</div>' +
       (up.length ? '<p class="group-label">Próximas</p><div class="list">' + up.map((c) => classCellHTML(c, true)).join('') + '</div>' : '') +
       (past.length ? '<p class="group-label">Anteriores</p><div class="list">' + past.map((c) => classCellHTML(c, true)).join('') + '</div>' : '') +
-      (!cls.length ? '<p class="muted center">Este grupo todavía no tiene clases.</p>' : '') +
+      (!cls.length ? '<p class="muted center">' + (groupKind(g) === 'entrenamiento' ? 'Este equipo todavía no tiene entrenamientos.' : 'Este grupo todavía no tiene clases.') + '</p>' : '') +
       (worked.length ? '<section class="sec"><h2>Lo que han trabajado</h2><div class="chips wrap static">' + worked.map((w) => '<span class="chip">' + esc(w) + ' <b>' + counts[w] + '</b></span>').join('') + '</div></section>' : '') +
       studentsSectionHTML(g, showAll) +
       (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row danger" data-act="delete-group">' + ic('trash') + 'Eliminar grupo</button></div>' : '');
@@ -4045,7 +4088,9 @@
     const c = todays.find((x) => (x.items || []).length) || todays[0];
     if (c) { openAttendance(c.id); return; }
     // Si hoy no hay clase de este grupo, se crea al guardar la lista (si la descartas, no queda nada).
-    const draft = { id: uid(), name: 'Clase del ' + fmtLong(Date.now()), sport: SPORTS[g.sport] ? g.sport : S.sport || 'futbol', date: t, groupId, items: [], notes: '', createdAt: Date.now(), updatedAt: Date.now() };
+    const team = groupKind(g) === 'entrenamiento';
+    const draft = { id: uid(), name: (team ? 'Entrenamiento del ' : 'Clase del ') + fmtLong(Date.now()), sport: SPORTS[g.sport] ? g.sport : S.sport || 'futbol', date: t, groupId, items: [], notes: '', createdAt: Date.now(), updatedAt: Date.now() };
+    if (team) draft.kind = 'entrenamiento';
     if (S.backend && S.backend.me) draft.authorId = S.backend.me;
     openAttendance(draft);
   }
@@ -4138,13 +4183,13 @@
       isDirty: () => !!$('#st-names', sheet.body).value.trim(),
       bodyHTML:
         '<p class="group-label" id="lbl-st">Un nombre por renglón, en el orden de tu lista</p>' +
-        '<div class="group"><textarea id="st-names" aria-labelledby="lbl-st" placeholder="Ana Martínez&#10;Diego López&#10;Valeria Ruiz" style="min-height:220px" autocapitalize="words"></textarea></div>' +
+        '<div class="group"><textarea id="st-names" aria-labelledby="lbl-st" placeholder="Ana Martínez&#10;Diego López&#10;Valeria Ruiz" autocapitalize="words"></textarea></div>' +
         '<p class="muted" style="margin:0 16px">Puedes pegar la lista completa de tu grupo.</p>',
       onConfirm: async () => {
         const ta = $('#st-names', sheet.body);
         const have = new Set(studentsOf(getGroup(groupId)).map((s) => norm(s.name)));
         const names = []; let skipped = 0;
-        ta.value.split(/\r?\n/).map((x) => x.replace(/^\s*\d{1,3}\s*[.)\-]\s*/, '').replace(/\s+/g, ' ').trim()).filter(Boolean).forEach((n) => {
+        ta.value.split(/\r?\n/).map((x) => x.replace(/^\s*\d{1,3}[\s.)\-–:º°]*(?=\p{L})/u, '').replace(/\s+/g, ' ').trim()).filter(Boolean).forEach((n) => {
           if (have.has(norm(n))) { skipped++; return; }
           names.push(n.slice(0, 80));
         });
@@ -4154,10 +4199,13 @@
         ta.value = '';
         sheet.dismiss();
         haptic(12);
-        toast((names.length === 1 ? 'Alumno agregado' : names.length + ' alumnos agregados') + (skipped ? ', ' + skipped + ' ya estaban' : ''));
+        toast((names.length === 1 ? 'Alumno agregado' : names.length + ' alumnos agregados') + (skipped ? ', ' + skipped + (skipped === 1 ? ' ya estaba' : ' ya estaban') : ''));
       },
     });
-    setTimeout(() => { try { $('#st-names', sheet.body).focus({ preventScroll: true }); } catch (e) { /* */ } }, 450);
+    // El botón dice cuántos se van a agregar
+    const taN = $('#st-names', sheet.body);
+    taN.addEventListener('input', () => { const n = taN.value.split(/\r?\n/).filter((x) => x.trim()).length; sheet.setConfirm(true, n > 1 ? 'Agregar ' + n : 'Agregar'); });
+    setTimeout(() => { try { taN.focus({ preventScroll: true }); } catch (e) { /* */ } }, 450);
   }
 
   function openRenameStudent(groupId, sid) {
@@ -4174,12 +4222,15 @@
         const inp = $('#st-name', sheet.body);
         const name = inp.value.replace(/\s+/g, ' ').trim();
         if (!name) { shake(inp); return; }
+        const gg = getGroup(groupId);
+        if (gg && studentsOf(gg).some((y) => y.id !== sid && norm(y.name) === norm(name))) { shake(inp); toast('Ya hay un alumno con ese nombre', 'warn'); return; }
         const ok = await mutateGroup(groupId, (x) => { const s = x.students.find((y) => y.id === sid); if (s) s.name = name; });
         if (!ok) return;
         sheet.dismiss();
         toast('Nombre actualizado');
       },
     });
+    setTimeout(() => { try { const i = $('#st-name', sheet.body); i.focus({ preventScroll: true }); i.select(); } catch (e) { /* */ } }, 450);
   }
 
   function studentsSectionHTML(g, showAll) {
@@ -4326,8 +4377,10 @@
       const ink = [17, 17, 20]; const grey = [100, 100, 108]; const faint = [190, 190, 198];
       const { rows, tot } = reportStats(g, cls);
       const numW = 22; const nameW = 170; const totCols = [['Asist.', 'p'], ['Ret.', 't'], ['Faltas', 'f'], ['%', 'rate']]; const totW = 38;
-      const rowH = 16.5;
       const tableTop = 150;
+      // Renglones más bajos si así cabe todo el grupo en una hoja (hasta unos 45 alumnos).
+      const roomH = H - M - 92 - tableTop;
+      const rowH = rows.length * 16.5 <= roomH ? 16.5 : Math.max(11.5, roomH / rows.length);
       const avail = W - 2 * M - numW - nameW - totCols.length * totW;
       const perCols = Math.max(1, Math.floor(avail / 21));
       const perRows = Math.max(1, Math.floor((H - M - 92 - tableTop) / rowH));
@@ -4350,7 +4403,9 @@
       }
       function table(colSet, rowSet, last) {
         const colW = Math.min(30, avail / Math.max(1, colSet.length));
-        const x0 = M; const xn = M + numW; const xd = xn + nameW; const xt = xd + colSet.length * colW;
+        // Con pocas clases, el nombre usa el ancho que sobra (hasta 330 pt) y la tabla llena la hoja.
+        const nameW2 = nameW + Math.min(160, Math.max(0, avail - colSet.length * colW));
+        const x0 = M; const xn = M + numW; const xd = xn + nameW2; const xt = xd + colSet.length * colW;
         const right = xt + totCols.length * totW;
         let y = tableTop;
         doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...grey);
@@ -4368,11 +4423,11 @@
         doc.setDrawColor(...faint); doc.setLineWidth(0.6); doc.line(x0, y, right, y);
         rowSet.forEach((r, ri) => {
           if (ri % 2 === 1) { doc.setFillColor(245, 245, 247); doc.rect(x0, y, right - x0, rowH, 'F'); }
-          const ty = y + 11.5;
+          const ty = y + rowH * 0.7;
           doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...grey);
           doc.text(String(r.n), x0 + numW / 2, ty, { align: 'center' });
           doc.setFontSize(10); doc.setTextColor(...ink);
-          doc.text(fit(r.s.name, nameW - 8), xn + 4, ty);
+          doc.text(fit(r.s.name, nameW2 - 8), xn + 4, ty);
           colSet.forEach((c, i) => {
             const v = c.attendance[r.s.id];
             const cx = xd + i * colW + colW / 2;
@@ -4537,7 +4592,7 @@
   }
 
   const EXT = { 'video/mp4': 'mp4', 'video/quicktime': 'mov', 'video/webm': 'webm', 'video/x-m4v': 'm4v', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
-  const safeName = (s) => cutText(String(s || '').replace(/[\\/:*?"<>|º°ª]+/g, '').replace(/\s+/g, ' ').trim(), 60);
+  const safeName = (s) => cutText(String(s || '').replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ').trim(), 60);
   function shortDate() { const d = new Date(); return d.getDate() + ' ' + MONTHS[d.getMonth()].toLowerCase() + ' ' + d.getFullYear(); }
   // El .zip usa posiciones de 32 bits: más de ~4 GB no se puede abrir después.
   const ZIP_MAX = 3.8e9;
@@ -4566,7 +4621,7 @@
       media[want[i]] = { path, type, size: blob.size };
       files.push({ name: path, data: blob });
     }
-    const sections = opt.kind === 'respaldo' ? S.sections.map((x) => plain(x)) : [];
+    const sections = opt.kind === 'respaldo' ? S.sections.filter((x) => !x.example).map((x) => plain(x)) : [];
     const manifest = { format: 'cancha', version: 3, app: APP_NAME, kind: opt.kind, title: opt.title, from: opt.from || undefined, exportedAt: Date.now(), exercises, classes, groups, sections, media };
     files.unshift({ name: 'cancha.json', data: JSON.stringify(manifest) });
     const zip = await buildZip(files, (p) => onProgress && onProgress(0.5 + p * 0.5, 'Armando el archivo · ' + Math.round(p * 100) + '%'));
@@ -4587,7 +4642,7 @@
       cancelLabel: 'Cerrar',
       bodyHTML:
         '<div class="file-card"><span class="file-ico">' + ic('box') + '</span><span class="txt"><b>' + esc(file.name) + '</b><span>' + esc(what) + ' · ' + fmtSize(file.size) + '</span></span></div>' +
-        '<button type="button" class="btn filled wide-btn" data-file-share>' + ic('share') + (canShare ? (isBackup ? 'Guardar respaldo' : 'Compartir') : 'Descargar archivo') + '</button>' +
+        '<button type="button" class="btn filled wide-btn" data-file-share>' + ic(canShare ? 'share' : 'download') + (canShare ? (isBackup ? 'Guardar respaldo' : 'Compartir') : 'Descargar archivo') + '</button>' +
         '<div class="help">' + (isBackup
           ? (canShare ? '<p>Elige <b>AirDrop</b> o <b>Guardar en Archivos</b> → <b>iCloud Drive</b>. Así lo recuperas si cambias de iPad.</p>' : '<p>Descarga el archivo y guárdalo en un lugar seguro (por ejemplo, tu nube).</p>')
           : (canShare ? '<p>Elige <b>WhatsApp</b> (puede ser el grupo de profes) o <b>AirDrop</b>.</p>' : '<p>Descarga el archivo y mándalo por WhatsApp, AirDrop o correo.</p>')) +
@@ -4611,16 +4666,19 @@
   }
 
   async function runExport(opt, what) {
-    const sheet = openSheet({ title: 'Preparando archivo', cancelLabel: 'Cerrar', bodyHTML: '<div class="media-preview loading prep"><span class="spinner"></span><span data-ref="lbl">Preparando…</span></div>' });
-    sheet.setBusy(true, 'Preparando…');
+    let sheet = null;
+    const slow = setTimeout(() => {
+      sheet = openSheet({ title: 'Preparando archivo', cancelLabel: 'Cerrar', bodyHTML: '<div class="media-preview loading prep"><span class="spinner"></span><span data-ref="lbl">Preparando…</span></div>' });
+      sheet.setBusy(true, 'Preparando…');
+    }, 350);
+    const done = () => { clearTimeout(slow); if (sheet) { sheet.setBusy(false); sheet.dismiss(); } };
     try {
-      const file = await buildExport(opt, (p, label) => { sheet.progress(p, label); });
-      sheet.setBusy(false);
-      sheet.dismiss();
-      setTimeout(() => deliverFile(file, what, opt.kind === 'respaldo', opt), 350);
+      const file = await buildExport(opt, (p, label) => { if (sheet) sheet.progress(p, label); });
+      const hadSheet = !!sheet;
+      done();
+      setTimeout(() => deliverFile(file, what, opt.kind === 'respaldo', opt), hadSheet ? 350 : 0);
     } catch (e) {
-      sheet.setBusy(false);
-      sheet.dismiss();
+      done();
       alertBox('No se pudo crear el archivo',
         e && e.code === 'too-big' ? 'Hay demasiados videos para un solo archivo. En «Mandar a otro profe» apaga «Videos y fotos» o manda por partes.'
           : e && e.name === 'QuotaExceededError' ? 'No hay espacio suficiente en el dispositivo.'
@@ -4632,6 +4690,7 @@
     const classIds = new Set(S.classes.filter((c) => !c.example).map((c) => c.id));
     const groupIds = new Set(S.groups.filter((g) => !g.example).map((g) => g.id));
     S.classes.forEach((c) => { if (classIds.has(c.id)) (c.items || []).forEach((it) => { if (it.exId && getEx(it.exId)) exIds.add(it.exId); }); if (classIds.has(c.id) && c.groupId && getGroup(c.groupId)) groupIds.add(c.groupId); });
+    S.sections.filter((x) => !x.example).forEach((x) => (x.exIds || []).forEach((id) => { if (getEx(id)) exIds.add(id); }));
     if (!exIds.size && !classIds.size && !groupIds.size) { alertBox('Nada que respaldar', 'Todavía no tienes ejercicios, clases ni grupos propios.'); return; }
     runExport({ exIds, classIds, groupIds, withMedia: withMedia !== false, kind: 'respaldo', title: 'Respaldo' },
       [exIds.size ? plural(exIds.size, 'ejercicio', 'ejercicios') : '', classIds.size ? plural(classIds.size, 'clase', 'clases') : '', groupIds.size ? plural(groupIds.size, 'grupo', 'grupos') : ''].filter(Boolean).join(', '));
@@ -4642,14 +4701,15 @@
       '<span class="switch"><input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + (disabled ? ' disabled' : '') + ' role="switch"><i></i></span></label>';
   }
   function openExportSheet() {
-    const nF = S.exercises.filter((e) => e.sport === 'futbol').length;
-    const nB = S.exercises.filter((e) => e.sport === 'basquet').length;
-    const nC = S.classes.length; const nG = S.groups.length;
+    const mine = (x) => !x.example;
+    const nF = S.exercises.filter((e) => mine(e) && e.sport === 'futbol').length;
+    const nB = S.exercises.filter((e) => mine(e) && e.sport === 'basquet').length;
+    const nC = S.classes.filter(mine).length; const nG = S.groups.filter(mine).length;
     const sheet = openSheet({
       title: 'Mandar a otro profe',
       confirmLabel: 'Crear archivo',
       bodyHTML:
-        '<p class="att-head">Elige qué mandar. El otro profe lo abre en su Cancha, en «Respaldo».</p>' +
+        '<p class="att-head">Elige qué mandar. El otro profe guarda el archivo, abre Cancha y toca <b>Ejercicios → Abrir los que me mandaron</b>.</p>' +
         '<div class="group">' +
         switchRow('xp-f', ic('futbol'), 'Ejercicios de fútbol', plural(nF, 'ejercicio', 'ejercicios'), nF > 0, !nF) +
         switchRow('xp-b', ic('basquet'), 'Ejercicios de básquetbol', plural(nB, 'ejercicio', 'ejercicios'), nB > 0, !nB) +
@@ -4671,10 +4731,10 @@
       const on = (id) => { const el = $('#' + id, root); return el && el.checked && !el.disabled; };
       const exIds = new Set(); const classIds = new Set(); const groupIds = new Set();
       const addCls = (c) => { classIds.add(c.id); (c.items || []).forEach((it) => { if (it.exId && getEx(it.exId)) exIds.add(it.exId); }); };
-      if (on('xp-f')) S.exercises.forEach((e) => { if (e.sport === 'futbol') exIds.add(e.id); });
-      if (on('xp-b')) S.exercises.forEach((e) => { if (e.sport === 'basquet') exIds.add(e.id); });
-      if (on('xp-c')) S.classes.forEach(addCls);
-      if (on('xp-g')) S.groups.forEach((g) => { groupIds.add(g.id); groupClasses(g.id).forEach(addCls); });
+      if (on('xp-f')) S.exercises.forEach((e) => { if (mine(e) && e.sport === 'futbol') exIds.add(e.id); });
+      if (on('xp-b')) S.exercises.forEach((e) => { if (mine(e) && e.sport === 'basquet') exIds.add(e.id); });
+      if (on('xp-c')) S.classes.filter(mine).forEach(addCls);
+      if (on('xp-g')) S.groups.filter(mine).forEach((g) => { groupIds.add(g.id); groupClasses(g.id).forEach(addCls); });
       return { exIds, classIds, groupIds, withMedia: on('xp-m') };
     }
     async function summary() {
@@ -4875,9 +4935,10 @@
           sheet.dismiss();
           haptic(14);
           const parts = [r.ex ? plural(r.ex, 'ejercicio', 'ejercicios') : '', r.cl ? plural(r.cl, 'clase', 'clases') : '', r.gr ? plural(r.gr, 'grupo', 'grupos') : ''].filter(Boolean);
+          const firstN = r.ex || r.cl || r.gr;
           const secId = from ? await fileIntoSharedSection(from, r.exIds).catch(() => null) : null;
-          if (secId) toast('Se agregaron ' + plural(r.ex, 'ejercicio', 'ejercicios') + ' de ' + from, 'check', { label: 'Ver', onClick: () => openSection(secId) });
-          else toast(parts.length ? 'Se agregaron ' + parts.join(', ') : 'Listo');
+          if (secId) toast((r.ex === 1 ? 'Se agregó ' : 'Se agregaron ') + plural(r.ex, 'ejercicio', 'ejercicios') + ' de ' + from, 'check', { label: 'Ver', onClick: () => openSection(secId) });
+          else toast(parts.length ? (firstN === 1 && parts.length === 1 ? 'Se agregó ' : 'Llegaron ') + listEs(parts) : 'Listo');
         } catch (e) {
           sheet.setBusy(false);
           renderAll(); refreshScreens();
@@ -5095,6 +5156,7 @@
     if (backToScreen('cat')) return;
     let sport = SPORTS[sport0] ? sport0 : S.sport;
     const scr = pushScreen({ key: 'cat', tint: sport });
+    scr.body.classList.add('wide');
     function render() {
       scr.el.dataset.tint = sport;
       scr.setTitle('Recomendados');
@@ -5182,7 +5244,7 @@
       if (!a) return;
       if (a.dataset.act === 'play') { play(150); return; }
       if (a.dataset.act === 'open-mine') { const m = inLibrary(id); if (m) openExercise(m.id); return; }
-      if (a.dataset.act === 'adopt-class') { const ex = await adoptCatalogEx(cx, true); if (ex) addToClassFlow(ex); return; }
+      if (a.dataset.act === 'adopt-class') { const mine = inLibrary(cx.id); if (mine) addToClassFlow(mine); else addToClassFlow(cx, () => adoptCatalogEx(cx, true)); return; }
       if (a.dataset.act === 'adopt') {
         a.disabled = true;
         const ex = await adoptCatalogEx(cx);
@@ -5206,10 +5268,10 @@
     let mt = 0;
     const rows = t.items.map((it) => {
       const start = mt; mt += itemMin(it);
-      if (isPause(it)) return '<div class="plan-row"><span class="time">' + fmtMin(start) + '′</span><span class="mini pause-ico">' + ic(pauseIc(it.label)) + '</span><span class="txt"><span class="t1">' + esc(it.label) + '</span><span class="t2">Pausa, ' + fmtMin(it.min) + ' min</span></span></div>';
+      if (isPause(it)) return '<div class="plan-row"><span class="time">' + fmtMin(start) + '′</span><span class="mini pause-ico">' + ic(pauseIc(it.label)) + '</span><span class="txt"><span class="t1">' + esc(it.label) + '</span><span class="t2">Pausa · ' + fmtMin(it.min) + ' min</span></span></div>';
       const cx = catEx(it.exId);
       return '<button class="plan-row" data-open-cat="' + esc(it.exId) + '"><span class="time">' + fmtMin(start) + '′</span><span class="mini">' + (cx && cx.thumbUrl ? '<img alt="" loading="lazy" src="' + esc(cx.thumbUrl) + '">' : '<span class="art">' + boardSVG(t.sport, cx && cx.diagram, { crop: true }) + '</span>') + '</span>' +
-        '<span class="txt"><span class="t1">' + esc(cx ? cx.title : 'Ejercicio') + '</span><span class="t2">' + esc([cx ? cx.objective : '', fmtMin(it.min) + ' min', seriesText(it.series)].filter(Boolean).join(', ')) + '</span></span>' + ic('chevR', 'chev') + '</button>';
+        '<span class="txt"><span class="t1">' + esc(cx ? cx.title : 'Ejercicio') + '</span><span class="t2">' + esc([cx ? cx.objective : '', fmtMin(it.min) + ' min', seriesText(it.series)].filter(Boolean).join(' · ')) + '</span></span>' + ic('chevR', 'chev') + '</button>';
     }).join('');
     scr.setTitle(t.name);
     scr.body.innerHTML =
@@ -5224,7 +5286,7 @@
       if (c) { openCatalogEx(c.dataset.openCat); return; }
       if (!e.target.closest('[data-act="use"]')) return;
       openClassEditor({
-        sport: t.sport, name: t.name, notes: t.notes || '',
+        sport: t.sport, name: t.name, notes: t.notes || '', target: t.items.reduce((sum, it) => sum + itemMin(it), 0),
         items: t.items.map((it) => Object.assign({}, it)),
         templateNote: 'Se copia el plan completo. Sus ' + plural(nEx, 'ejercicio', 'ejercicios') + ' también quedan en Ejercicios.',
         prepare: async () => {
@@ -5516,15 +5578,19 @@
     const c = r && getClass(r.id);
     if (!c) { if (r) clearRun(); return; }
     actionSheet({
-      title: 'Tienes una clase sin terminar',
-      message: (c.name || 'Clase') + (() => { const it = (c.items || [])[r.i]; const nm = !it ? '' : isPause(it) ? (it.label || 'Pausa') : ((getEx(it.exId) || {}).title || ''); return nm ? ' · ibas en «' + nm + '»' : ''; })(),
+      title: 'Tienes ' + KW(c).una + ' sin terminar',
+      message: (c.name || KW(c).N) + (() => { const it = (c.items || [])[r.i]; const nm = !it ? '' : isPause(it) ? (it.label || 'Pausa') : ((getEx(it.exId) || {}).title || ''); return nm ? ' · ibas en «' + nm + '»' : ''; })(),
       tint: SPORTS[c.sport] ? c.sport : 'futbol',
-      actions: [{ label: 'Seguir con la clase', icon: 'play', onClick: () => runClass(r.id, r) }, { label: 'No seguir', danger: true, onClick: clearRun }],
+      actions: [{ label: 'Seguir donde iba', icon: 'play', onClick: () => runClass(r.id, r) }, { label: 'Empezar de nuevo', onClick: () => { clearRun(); runClass(r.id); } }],
+      cancel: 'Ahora no',
     });
   }
   function runClass(id, resume) {
     const c = getClass(id);
     if (!c) return;
+    // Si quedó a medias (se cerró la app o se tocó «Ahora no»), «Iniciar» sigue donde iba.
+    if (!resume) { const r = savedRun(); if (r && r.id === id) resume = r; }
+    const kw = KW(c);
     const items = (c.items || []).map((it) => (isPause(it) ? Object.assign({}, it, { pause: true }) : Object.assign({}, it, { ex: getEx(it.exId) }))).filter((it) => it.pause || it.ex);
     const exCount = items.filter((it) => !it.pause).length;
     if (!exCount) return;
@@ -5537,10 +5603,10 @@
     wrap.dataset.tint = SPORTS[c.sport] ? c.sport : 'futbol';
     wrap.setAttribute('role', 'dialog');
     wrap.setAttribute('aria-modal', 'true');
-    wrap.setAttribute('aria-label', 'Clase en curso');
+    wrap.setAttribute('aria-label', kw.N + ' en curso');
     wrap.innerHTML =
-      '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir de la clase">' + ic('xmark') + '</button>' +
-      '<div class="run-hd"><span class="run-step" data-ref="step" aria-live="polite"></span><span class="run-class">' + esc(c.name || 'Clase') + '</span></div>' +
+      '<header class="run-head"><button type="button" class="glass-btn" data-run="close" aria-label="Salir ' + kw.dela + '">' + ic('xmark') + '</button>' +
+      '<div class="run-hd"><span class="run-step" data-ref="step" aria-live="polite"></span><span class="run-class">' + esc(c.name || kw.N) + '</span></div>' +
       '<button type="button" class="glass-btn" data-run="whistle" aria-label="Tocar el silbato">' + ic('whistle') + '</button></header>' +
       '<div class="run-body" data-ref="body"></div>';
     document.body.appendChild(wrap);
@@ -5583,10 +5649,10 @@
         (it.series && it.series.n > 1 ? '<div class="run-series" data-ref="dots" aria-hidden="true"></div>' : '') +
         '<div class="run-ctrls"><button type="button" class="rc" data-run="prev" aria-label="Anterior"' + (st.i === 0 ? ' disabled' : '') + '>' + ic('prev') + '</button>' +
         '<button type="button" class="rc big" data-run="toggle" aria-label="Empezar"></button>' +
-        '<button type="button" class="rc" data-run="next" aria-label="' + (nxt ? 'Siguiente' : 'Terminar la clase') + '">' + ic(nxt ? 'next' : 'flag') + '<span class="rc-lbl" aria-hidden="true">' + (nxt ? 'Siguiente' : 'Terminar') + '</span></button></div>' +
+        '<button type="button" class="rc" data-run="next" aria-label="' + (nxt ? 'Siguiente' : 'Terminar ' + kw.la) + '">' + ic(nxt ? 'next' : 'flag') + '<span class="rc-lbl" aria-hidden="true">' + (nxt ? 'Siguiente' : 'Terminar') + '</span></button></div>' +
         '<div class="run-sec"><span class="run-adj"><button type="button" class="cap" data-run="minus" aria-label="Quitar un minuto">−1 min</button><button type="button" class="cap" data-run="plus" aria-label="Agregar un minuto">+1 min</button></span>' +
         '<button type="button" class="cap skip-rest" data-run="skiprest" hidden>Saltar descanso</button><span class="run-next">' +
-        (nxt ? 'Después: <b>' + esc(title(nxt)) + '</b> · ' + esc(fmtMin(itemMin(nxt))) + ' min' : 'Es lo último de la clase') + '</span></div>' +
+        (nxt ? 'Después: <b>' + esc(title(nxt)) + '</b> · ' + esc(fmtMin(itemMin(nxt))) + ' min' : 'Es lo último ' + kw.dela) + '</span></div>' +
         (points.length ? '<ul class="points run-points">' + points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
         '<div class="run-foot"><div class="tl-bar" data-ref="bar">' + items.map((x, i) => '<i style="flex-grow:' + Math.max(1, itemMin(x)) + '" class="' + (x.pause ? 'pz ' : '') + (i < st.i ? 'past' : i === st.i ? 'cur' : '') + '"></i>').join('') + '</div>' +
         '<p class="run-total" data-ref="total"></p></div>';
@@ -5598,8 +5664,10 @@
       const tot = totalElapsed();
       const cc = getClass(id);
       const rolled = cc && cc.attendance && Object.keys(cc.attendance).length;
-      return '<div class="run-done"><div class="empty-art icon">' + ic('check') + '</div><h2>Clase terminada</h2>' +
+      return '<div class="run-done"><div class="empty-art icon">' + ic('check') + '</div><h2>' + kw.N + ' terminad' + kw.o + '</h2>' +
         '<p>Duró ' + Math.max(1, Math.round(tot / 60000)) + ' de ' + Math.round(plannedMs() / 60000) + ' min planeados.</p>' +
+        // Si era de otro día (por ejemplo la de mañana), se avisa; al pasar lista se cambia a hoy.
+        (S.canWrite && cc && cc.date && cc.date !== todayStr() ? '<p class="run-date">' + ic('calendar') + '<span>Estaba para el ' + esc(fmtDay(cc.date).toLowerCase()) + '. ' + (canRoll() && !rolled ? 'Al pasar lista queda con fecha de hoy.' : '') + '</span>' + (canRoll() && !rolled ? '' : '<button type="button" class="link" data-run="today">Pasar a hoy</button>') + '</p>' : '') +
         (canRoll() && !rolled ? '<button type="button" class="btn filled" data-run="roll">' + ic('check') + 'Pasar lista</button><button type="button" class="btn tinted" data-run="exit">Listo</button>' : '<button type="button" class="btn filled" data-run="exit">Listo</button>') + '</div>';
     }
     function canRoll() {
@@ -5622,6 +5690,7 @@
       const t = $('[data-ref="time"]', body);
       if (!t) return;
       t.textContent = ph ? fmtTimer(ph.left) : over ? '+' + fmtTimer(-rem) : fmtTimer(rem);
+      t.classList.toggle('long', t.textContent.length > 5);
       const mins = esc(fmtMin(baseMin(st.i) + st.extra[st.i]));
       $('[data-ref="sub"]', body).textContent = ph
         ? (st.running ? '' : 'Pausado · ') + (ph.rest ? 'Descanso · luego serie ' + (ph.k + 2) : 'Serie ' + (ph.k + 1) + ' de ' + ph.n)
@@ -5703,7 +5772,7 @@
     };
     function exit() {
       if (st.done || !st.started) { popLayer(layer); return; }
-      actionSheet({ title: '¿Salir de la clase?', message: 'Se borra el avance y no contará como dada.', actions: [{ label: 'Salir', danger: true, onClick: () => { clearRun(); popLayer(layer); } }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint });
+      actionSheet({ title: '¿Salir ' + kw.dela + '?', message: 'Se borra el avance y no contará como dad' + kw.o + '.', actions: [{ label: 'Salir', danger: true, onClick: () => { clearRun(); popLayer(layer); } }], cancel: 'Seguir con ' + kw.la, tint: wrap.dataset.tint });
     }
     wrap.addEventListener('click', (e) => {
       const b = e.target.closest('[data-run]');
@@ -5711,7 +5780,14 @@
       switch (b.dataset.run) {
         case 'close': exit(); break;
         case 'exit': popLayer(layer); break;
-        case 'roll': popLayer(layer); setTimeout(() => openAttendance(id), 380); break;
+        case 'roll': {
+          const cc = getClass(id);
+          const move = cc && cc.date && cc.date !== todayStr() ? mutateClass(id, (x) => { x.date = todayStr(); }) : Promise.resolve(true);
+          popLayer(layer);
+          move.then(() => setTimeout(() => openAttendance(id), 380));
+          break;
+        }
+        case 'today': mutateClass(id, (x) => { x.date = todayStr(); }).then((ok) => { if (ok) { toast('Ahora es de hoy'); renderBlock(); } }); break;
         case 'whistle': unlockAudio(); whistle('short'); haptic(20); break;
         case 'toggle':
           unlockAudio();
@@ -5725,8 +5801,8 @@
         case 'prev': go(st.i - 1); break;
         case 'next':
           if (st.i < items.length - 1) { go(st.i + 1); break; }
-          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: 'La clase no se marcará como dada.', actions: [{ label: 'Salir', onClick: () => popLayer(layer) }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint }); break; }
-          actionSheet({ title: '¿Terminar la clase?', actions: [{ label: 'Terminar clase', onClick: finish }], cancel: 'Seguir con la clase', tint: wrap.dataset.tint });
+          if (!st.started) { actionSheet({ title: 'No has empezado el cronómetro', message: cap(kw.la) + ' no se marcará como dad' + kw.o + '.', actions: [{ label: 'Salir', onClick: () => popLayer(layer) }], cancel: 'Seguir con ' + kw.la, tint: wrap.dataset.tint }); break; }
+          actionSheet({ title: '¿Terminar ' + kw.la + '?', actions: [{ label: 'Terminar ' + kw.n, onClick: finish }], cancel: 'Seguir con ' + kw.la, tint: wrap.dataset.tint });
           break;
         case 'minus':
           st.extra[st.i] = Math.max(1 - baseMin(st.i), st.extra[st.i] - 1);
@@ -6265,7 +6341,8 @@
         '<h2>' + esc(s.title) + '</h2><p>' + esc(s.text) + '</p></section>').join('') +
       '</div></div>' +
       '<div class="onb-dots" role="tablist" aria-label="Pasos">' + slides.map((s, k) => '<button type="button" role="tab" data-dot="' + k + '" aria-label="Paso ' + (k + 1) + '"></button>').join('') + '</div>' +
-      '<button type="button" class="btn filled onb-next" data-onb="next"><span></span>' + ic('chevR') + '</button>' +
+      '<div class="onb-ctrls"><button type="button" class="btn tinted onb-back" data-onb="back" aria-label="Paso anterior" hidden>' + ic('chevL') + '</button>' +
+      '<button type="button" class="btn filled onb-next" data-onb="next"><span></span>' + ic('chevR') + '</button></div>' +
       '</div>';
     document.body.appendChild(wrap);
     const track = $('.onb-track', wrap);
@@ -6280,6 +6357,7 @@
       $('span', nextBtn).textContent = i === last ? 'Empezar' : 'Siguiente';
       nextBtn.classList.toggle('end', i === last);
       $('.onb-skip', wrap).style.visibility = i === last ? 'hidden' : '';
+      $('.onb-back', wrap).hidden = i === 0;
       const slide = $$('.onb-slide', wrap)[i];
       stopArt = tutAnimate(slide, slides[i].art);
       if (!quiet) haptic(4);
@@ -6303,6 +6381,7 @@
       if (d) { go(Number(d.dataset.dot)); return; }
       const b = e.target.closest('[data-onb]');
       if (!b) return;
+      if (b.dataset.onb === 'back') { go(i - 1); return; }
       if (b.dataset.onb === 'skip' || i === last) finish(); else go(i + 1);
     });
     wrap.addEventListener('keydown', (e) => {
@@ -6382,6 +6461,7 @@
           case 'open-shared': pickFile('import', startImport); return;
           case 'filters': openFilters(S.sport); return;
           case 'clear-filters': S.fx[S.sport] = null; S.sig = {}; renderEjercicios(); return;
+          case 'clear-search': $('#q-ejercicios').value = ''; S.q[S.sport] = ''; renderEjercicios(); return;
           default: break;
         }
       }
@@ -6477,7 +6557,7 @@
       renderAll();
     });
     renderAll();
-    setTimeout(() => { loadCatalog().then(() => { S.sig = {}; renderAll(); refreshScreens(); }).catch(() => {}); }, 400);
+    loadCatalog().then(() => { S.sig = {}; renderAll(); refreshScreens(); }).catch(() => {});
     if ('serviceWorker' in navigator && !framed) watchUpdates();
   }
 
