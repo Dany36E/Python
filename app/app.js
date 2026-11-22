@@ -1602,7 +1602,7 @@
     const last = Number(pref.get('last-backup')) || 0;
     const oldest = Math.min.apply(null, S.exercises.concat(S.classes, S.groups).filter((x) => !x.example).map((x) => Number(x.createdAt) || Date.now()));
     if (!last) return Date.now() - oldest > 7 * 864e5;
-    return Date.now() - last > 30 * 864e5;
+    return Date.now() - last > 7 * 864e5;
   }
   function fmtAgo(ts) {
     const d = Math.floor((Date.now() - ts) / 864e5);
@@ -1860,7 +1860,7 @@
     if (S.backend && !S.canWrite) return alertBox('Solo lectura', 'Estás viendo una biblioteca compartida. Solo su dueño puede agregar o cambiar ejercicios.');
     if (k === 'cloud') return alertBox('¿Dónde se guardan mis datos?', 'En tu cuenta de Claude. Los ves en el celular y en la computadora.');
     if (k === 'memory') return alertBox('No se está guardando', 'Este navegador no deja guardar datos (por ejemplo, en modo privado). Lo que agregues se perderá al cerrar.');
-    return alertBox('¿Dónde se guardan mis datos?', 'Solo en este iPad, no en internet. Si el iPad se pierde o se borra, solo los recuperas con un respaldo. Haz uno de vez en cuando.');
+    return alertBox('¿Dónde se guardan mis datos?', 'Solo en este iPad: nada se sube a internet, ni los nombres de los alumnos ni la asistencia. Si el iPad se pierde o se borra la app, solo los recuperas con un respaldo: haz uno cada semana y guárdalo en iCloud Drive. Los respaldos y los PDF de asistencia sí llevan los nombres, así que compártelos solo con quien deba verlos.');
   }
   function showInstallHelp() {
     alertBox('Instalar Cancha', 'En Safari toca «Compartir» (el cuadrito con la flecha) y elige «Agregar a pantalla de inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');

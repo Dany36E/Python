@@ -29,7 +29,18 @@ Marca cada punto. Si algo falla, anota qué hiciste y qué viste.
 - [ ] «Respaldo» → «Hacer respaldo completo» → «Guardar respaldo» → Archivos → iCloud Drive.
 - [ ] Pásalo por AirDrop a otro iPad, ábrelo con Cancha → «Respaldo» → «Importar archivo»: llegan ejercicios, clases, grupos y listas.
 
+## Formularios con opciones (versión de noviembre 2026)
+- [ ] Ejercicios → +: elige dos tipos, toca «15 min», dos edades, «21 a 30» alumnos, «En parejas» y «Balones». Guarda: la ficha muestra todo eso.
+- [ ] Filtros (botón junto a la búsqueda): elige «9 a 10» años y «Material que tienes: Conos». Solo salen ejercicios que se hacen con conos (o sin material).
+- [ ] Grupos → +: toca «Primaria», escribe «5.º A»: se marcan solas las edades. Toca «Lunes a viernes» y pon la hora con la ruedita.
+- [ ] Clases → +: toca un grupo, «Entrenamiento», «Lunes a viernes» y «2 semanas»: el botón dice «Guardar (10)». Guarda y agrega un ejercicio: el aviso ofrece «Copiar a los otros días».
+- [ ] Ajustes (engrane) → «¿Dónde se guardan mis datos?»: el texto se lee completo.
+
+## iPad viejo (si alguno de los empleados tiene uno con iPadOS 15)
+- [ ] Ajustes del iPad → General → Información: anota la versión. Cancha necesita iPadOS 15.4 o más nuevo.
+- [ ] Abre Cancha: los chips elegidos se ven de color (verde o naranja), no blancos. Si algo se ve raro, toma captura.
+
 ## Sin internet
 - [ ] Pon el iPad en modo avión, cierra Cancha por completo y ábrela: funciona igual (salvo las miniaturas de YouTube).
 
-Si todo sale bien, Cancha está lista para que la usen más profes. Recuérdales hacer respaldo: los datos viven solo en su iPad.
+Si todo sale bien, Cancha está lista para que la usen más profes. Recuérdales hacer respaldo cada semana: los datos viven solo en su iPad.

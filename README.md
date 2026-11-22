@@ -14,7 +14,7 @@ La primera vez que se abre, un **tutorial de 5 pasos** con dibujos animados expl
 - **Pausas y series**: agrega pausas al plan (hidratación, descanso, montar material) y divide un ejercicio en series de juego y descanso (por ejemplo 5 × 3′ con 1′ de descanso).
 - **Duplicar una clase** para otro grupo o fecha.
 - **Modo clase**: cronómetro por bloque con silbato (suena aunque el iPad esté en silencio), la jugada animada en pantalla, «−1» y «+1 min», series con silbato al cambiar de juego a descanso y «Saltar descanso», y la pantalla encendida. Si iOS cierra la app, al volver a abrirla ofrece seguir la clase donde iba.
-- **Ejercicios**: de fútbol y de básquetbol, con búsqueda (también en los Recomendados), filtros (objetivo, nivel, edad, duración, con video, para escuela), orden y favoritos. **Secciones** que tú creas (como carpetas), con tres de ejemplo: Calentamientos, Coordinación y velocidad, y Para primaria. Graba o sube un video o foto, pega un **link de YouTube**, o dibújalo en el **pizarrón** (jugadores, conos, balón y flechas de pase, conducción/dribleo o desplazamiento sin balón).
+- **Ejercicios**: de fútbol y de básquetbol, con búsqueda (también en los Recomendados), filtros (edad, alumnos, duración, material que tienes, nivel, organización, espacio, con video), orden y favoritos. **Secciones** que tú creas (como carpetas), con tres de ejemplo: Calentamientos, Coordinación y velocidad, y Para primaria. Graba o sube un video o foto, pega un **link de YouTube**, o dibújalo en el **pizarrón** (jugadores, conos, balón y flechas de pase, conducción/dribleo o desplazamiento sin balón).
 - **La jugada se mueve**: el pizarrón reproduce el ejercicio paso a paso (el balón viaja por los pases y los jugadores corren por sus flechas). En el modo clase se repite mientras corre el bloque.
 - **Recomendados**: 50 ejercicios (26 de fútbol y 24 de básquetbol, incluidos coordinación con escalera, vallas, aros y picas; velocidad y agilidad; y fuerza con peso corporal), basados en FIFA 11+ Kids, The FA, US Soccer, FIBA, Jr. NBA, NSCA y otras fuentes, y 6 clases completas para escuela y club. **12 traen video vertical** (tipo Short) en 3D, 2 por sección en cada deporte: jugadores que corren, conducen, botan y tiran siguiendo exactamente las flechas del pizarrón, con el título y las frases clave; se puede mandar por WhatsApp. Los demás muestran su pizarrón animado. Agrega a tus ejercicios solo los que te sirvan o usa una clase lista con un toque.
 - **Grupos**: lista de alumnos en el orden de tu lista oficial (con número), «Pasar lista hoy» (en iPad, en dos columnas), historial de clases y objetivos trabajados.
@@ -23,6 +23,18 @@ La primera vez que se abre, un **tutorial de 5 pasos** con dibujos animados expl
 - **Compartir una clase**: por WhatsApp, en PDF para imprimir, copiando el texto o como archivo para otro profe.
 - **Respaldo**: un toque guarda todo (ejercicios, clases, grupos, listas y videos) en un archivo .zip para guardarlo en Archivos / iCloud Drive. También puedes **mandar** ejercicios o clases a otro profe por AirDrop o WhatsApp y **abrir** los archivos que te manden: no se borra nada tuyo, y si los dos cambiaron el mismo ejemplo se guarda una copia.
 - **Funciona sin internet** una vez instalada.
+
+- **Formularios con opciones para tocar**: en ejercicios, grupos y clases casi todo se elige con botones (minutos, edad con el grado escolar, cuántos alumnos, organización, espacio, material, días, duración); casi todo admite varias opciones a la vez. La búsqueda y Recomendados filtran con esas mismas opciones, incluido «Material que tienes».
+- **Clases y entrenamientos de varios días**: al crear se elige «Clase» o «Entrenamiento» (para equipos extracurriculares o club) y uno o varios días (por ejemplo «Lunes a viernes», hasta 4 semanas). Se crea uno por día y el plan se copia a los demás con un toque.
+
+## Para usarla en una escuela o empresa con varios profes
+
+- Cada profe instala Cancha en su iPad o celular. **Cada aparato guarda solo sus datos**: no hay una cuenta compartida, así que el responsable no ve las clases ni las listas de los demás. Entre ellos se pasan ejercicios y clases por archivo (Respaldo → «Mandar a otro profe»).
+- **Respaldo cada semana**: no hay respaldo automático. La app lo recuerda si pasan 7 días; el archivo conviene guardarlo en iCloud Drive.
+- **Revisión de los ejercicios recomendados**: los 50 ejercicios están en una hoja para imprimir y marcar: https://dany36e.github.io/Python/docs/revision-ejercicios.html (se regenera con `node tools/catalogo/revision.js`).
+- **Prueba en un iPad real** antes de repartirla: [docs/prueba-en-ipad.md](docs/prueba-en-ipad.md). Necesita iPadOS 15.4 o más nuevo; para iPadOS 15 hay colores de respaldo (`python3 tools/css-viejo.py` los regenera después de cambiar `app/styles.css`).
+- **Privacidad**: los nombres de los alumnos y la asistencia no salen del aparato, pero los respaldos y los PDF sí los llevan. Hay un modelo de aviso de privacidad para las familias en [docs/aviso-de-privacidad.md](docs/aviso-de-privacidad.md).
+- **No borres ni le cambies el nombre a este repositorio** («Python»): la dirección de la app depende de él, y las apps ya instaladas dejarían de recibir actualizaciones.
 
 ## Cómo instalarla en tu celular
 
@@ -34,7 +46,7 @@ Es una app web instalable (PWA): no necesita App Store ni Google Play.
 
 ## Dónde se guardan tus datos
 
-- **App instalada**: todo se guarda en el propio dispositivo, en IndexedDB. No sale de tu teléfono o iPad. Si borras los datos del navegador, se pierden, así que conviene hacer un respaldo de vez en cuando (botón **Respaldo** → «Hacer respaldo completo»). La app te lo recuerda.
+- **App instalada**: todo se guarda en el propio dispositivo, en IndexedDB. No sale de tu teléfono o iPad. Si borras los datos del navegador, se pierden, así que conviene hacer un respaldo cada semana (botón **Respaldo** → «Hacer respaldo completo»). La app te lo recuerda.
 - **Abierta como Artifact en Claude**: se guarda en tu cuenta de Claude y la ves igual en el celular y en la computadora. Otros profes pueden ver y agregar ejercicios si los invitas como Editores desde el botón Compartir de Claude. Los videos de más de 20 MB se reducen automáticamente antes de subirse.
 
 ## Calidad

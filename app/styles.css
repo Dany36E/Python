@@ -54,6 +54,9 @@
 
   --tint: var(--futbol);
   --tint-on: var(--futbol-on);
+  /* Los mismos colores en R, G, B para iPads viejos sin color-mix (ver tools/css-viejo.py) */
+  --futbol-rgb: 11, 122, 59; --basquet-rgb: 184, 71, 8; --clases-rgb: 11, 122, 59; --tint-rgb: var(--futbol-rgb);
+  --water-rgb: 29, 111, 184; --ok-rgb: 21, 128, 61; --heart-rgb: 255, 45, 85; --danger-rgb: 229, 53, 43; --bg-rgb: 242, 242, 247;
 
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -101,6 +104,8 @@
     --ball-line: #000000;
     --arrow: #F2F2F7;
     --ok: #34D46E;
+    --futbol-rgb: 52, 212, 110; --basquet-rgb: 255, 149, 51; --clases-rgb: 52, 212, 110;
+    --water-rgb: 90, 176, 255; --ok-rgb: 52, 212, 110; --heart-rgb: 255, 55, 95; --danger-rgb: 255, 69, 58; --bg-rgb: 0, 0, 0;
     --knob: #FFFFFF;
     --on-ok: #03200D;
     --warn: #FFB340;
@@ -142,6 +147,8 @@
   --ball-line: #000000;
   --arrow: #F2F2F7;
   --ok: #34D46E;
+  --futbol-rgb: 52, 212, 110; --basquet-rgb: 255, 149, 51; --clases-rgb: 52, 212, 110;
+  --water-rgb: 90, 176, 255; --ok-rgb: 52, 212, 110; --heart-rgb: 255, 55, 95; --danger-rgb: 255, 69, 58; --bg-rgb: 0, 0, 0;
   --knob: #FFFFFF;
   --on-ok: #03200D;
   --warn: #FFB340;
@@ -149,9 +156,9 @@
   color-scheme: dark;
 }
 
-[data-tint="futbol"] { --tint: var(--futbol); --tint-on: var(--futbol-on); }
-[data-tint="basquet"] { --tint: var(--basquet); --tint-on: var(--basquet-on); }
-[data-tint="clases"] { --tint: var(--clases); --tint-on: var(--clases-on); }
+[data-tint="futbol"] { --tint: var(--futbol); --tint-on: var(--futbol-on); --tint-rgb: var(--futbol-rgb); }
+[data-tint="basquet"] { --tint: var(--basquet); --tint-on: var(--basquet-on); --tint-rgb: var(--basquet-rgb); }
+[data-tint="clases"] { --tint: var(--clases); --tint-on: var(--clases-on); --tint-rgb: var(--clases-rgb); }
 
 /* ---------- base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -2392,3 +2399,44 @@ a.as-btn { text-decoration: none; }
 .sheet-body > .seg:first-child { margin-bottom: 16px; }
 .c-serie { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 15px; color: var(--label-2); }
 .c-serie svg { color: var(--tint); font-size: 16px; }
+
+/* <respaldo-ipad-viejo> generado por tools/css-viejo.py: no editar a mano */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .empty-art.icon { background: rgba(var(--tint-rgb), 0.1); }
+  .btn.tinted { background: rgba(var(--tint-rgb), 0.14); }
+  .btn.icon[aria-pressed="true"] { background: rgba(var(--heart-rgb), 0.14); }
+  .fab { box-shadow: 0 12px 30px rgba(var(--tint-rgb), 0.4), 0 1px 3px var(--shadow-soft); }
+  .pick-tile .ico { background: rgba(var(--tint-rgb), 0.14); }
+  .icon-sq { background: rgba(var(--tint-rgb), 0.14); }
+  .group-chip { background: rgba(var(--tint-rgb), 0.13); }
+  .board-add .ico { background: rgba(var(--tint-rgb), 0.14); }
+  .bt[aria-pressed="true"] { background: rgba(var(--tint-rgb), 0.16); }
+  .rc.big { box-shadow: 0 12px 30px rgba(var(--tint-rgb), 0.35); }
+  .run-foot .tl-bar i.cur { background: rgba(var(--tint-rgb), 0.25); }
+  .avatar { background: rgba(var(--tint-rgb), 0.14); }
+  .file-ico { background: rgba(var(--tint-rgb), 0.14); }
+  .mini.pause-ico { background: rgba(var(--water-rgb), 0.15); }
+  .run-pause { background: rgba(var(--water-rgb), 0.13); }
+  .run-series i.cur { box-shadow: 0 0 0 4px rgba(var(--tint-rgb), 0.25); }
+  .mini-chip { background: rgba(var(--tint-rgb), 0.13); }
+  .note.warn { background: rgba(var(--danger-rgb), 0.11); }
+  .done-mark { background: rgba(var(--ok-rgb), 0.15); }
+  .date-tile { background: rgba(var(--tint-rgb), 0.1); }
+  .vars li { border-left: 3px solid rgba(var(--tint-rgb), 0.45); }
+  .chip.on-chip { background: rgba(var(--tint-rgb), 0.14); }
+  .sec-new .sec-mosaic { border: 1.5px dashed rgba(var(--tint-rgb), 0.45); }
+  .bf-btn { background: rgba(var(--tint-rgb), 0.14); }
+  .onb-wrap { background: radial-gradient(120% 70% at 50% 0%, rgba(var(--tint-rgb), 0.16), transparent 70%),
+    var(--bg); }
+  .onb-next { box-shadow: 0 10px 24px -10px rgba(var(--tint-rgb), 0.7); }
+  @media (min-width: 700px) and (min-height: 640px) { .onb-wrap { background: rgba(var(--bg-rgb), 0.55); } }
+  @media (min-width: 700px) and (min-height: 640px) { .onb { background: radial-gradient(120% 60% at 50% 0%, rgba(var(--tint-rgb), 0.14), transparent 70%),
+      var(--bg-elev); } }
+  .ts-dev { background: linear-gradient(160deg, rgba(var(--tint-rgb), 0.22), var(--bg-elev)); }
+  .sc-ico { background: rgba(var(--tint-rgb), 0.14); }
+  .pill { background: rgba(var(--tint-rgb), 0.13); }
+  .chip.add-chip { box-shadow: inset 0 0 0 1.5px rgba(var(--tint-rgb), 0.4); }
+  .chip.quick-chip { box-shadow: inset 0 0 0 1.5px rgba(var(--tint-rgb), 0.4); }
+  .chip.quick-chip[aria-pressed="true"] { background: rgba(var(--tint-rgb), 0.14); }
+}
+/* </respaldo-ipad-viejo> */

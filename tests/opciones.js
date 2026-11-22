@@ -228,6 +228,24 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   await q.locator('.sheet-wrap.open [data-fb="ages"]').screenshot({ path: OUT + 'opciones-iphone-edad.png' });
   await ph.close();
 
+  // --- iPad viejo (Safari sin color-mix): los colores de respaldo se aplican
+  const old = await b.newContext({ ...devices['iPad Pro 11'], deviceScaleFactor: 1, serviceWorkers: 'block' });
+  await old.addInitScript(() => { try { localStorage.setItem('cancha:onboarded', '1'); } catch (e) { /* */ } });
+  await old.route('**/app/styles.css', async (route) => {
+    const r = await route.fetch();
+    const css = (await r.text()).replace('@supports not (color: color-mix(in srgb, red 50%, blue))', '@supports (display: block)').replace(/color-mix\(/g, 'colour-mix(');
+    route.fulfill({ response: r, body: css });
+  });
+  const o = await old.newPage();
+  await o.goto(BASE + 'index.html'); await o.waitForSelector('#screen-clases.active'); await W(o, 1300);
+  await o.click('#tab-ejercicios'); await W(o);
+  await o.click('#screen-ejercicios [data-act="filters"]'); await W(o, 700);
+  await o.locator('.sheet-wrap.open [data-opts="ages"] [data-opt="9-10"]').click();
+  await o.locator('.sheet-wrap.open [data-sh="ok"]').click(); await W(o, 700);
+  const bg = await o.locator('#screen-ejercicios .chip.on-chip').first().evaluate((el) => getComputedStyle(el).backgroundColor);
+  ok(/rgba\(11, 122, 59, 0\.14\)/.test(bg), 'en un iPad sin color-mix el filtro activo sigue teniendo color (' + bg + ')');
+  await old.close();
+
   ok(errs.length === 0, 'sin errores: ' + errs.join(' / '));
   await b.close();
   console.log(fails ? fails + ' FALLAS' : 'TODO BIEN');
