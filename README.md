@@ -25,6 +25,7 @@ La primera vez que se abre, un **tutorial de 5 pasos** con dibujos animados expl
 - **Funciona sin internet** una vez instalada.
 
 - **Formularios con opciones para tocar**: en ejercicios, grupos y clases casi todo se elige con botones (minutos, edad con el grado escolar, cuántos alumnos, organización, espacio, material, días, duración); casi todo admite varias opciones a la vez. La búsqueda y Recomendados filtran con esas mismas opciones, incluido «Material que tienes».
+- **Clases guardadas**: planes listos (ejercicios, pausas, series, temas y duración) sin fecha ni grupo. Se guardan desde una clase («Guardar para reusar»), desde una recomendada o desde cero, y se usan con «Programar» o «Empezar desde» al crear una clase: solo eliges grupo y días. También se mandan a otros profes.
 - **Clases y entrenamientos de varios días**: al crear se elige «Clase» o «Entrenamiento» (para equipos extracurriculares o club) y uno o varios días (por ejemplo «Lunes a viernes», hasta 4 semanas). Se crea uno por día y el plan se copia a los demás con un toque.
 
 ## Para usarla en una escuela o empresa con varios profes
