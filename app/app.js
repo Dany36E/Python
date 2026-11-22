@@ -1596,6 +1596,12 @@
   // ---------------------------------------------------------------- pantallas raíz
   const isStandalone = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
   const isAppleMobile = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = () => /Android/i.test(navigator.userAgent);
+  // Chrome, Edge y Samsung Internet avisan cuando se puede instalar: se guarda para el botón «Instalar».
+  let installEvt = null;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; S.sig = {}; if (S.ready) renderAll(); });
+  window.addEventListener('appinstalled', () => { installEvt = null; S.sig = {}; if (S.ready) renderAll(); toast('Cancha quedó instalada', 'check'); });
+  const canInstall = () => !framed && !isStandalone() && (!!installEvt || isAppleMobile() || isAndroid());
   const hasOwnData = () => S.exercises.some((e) => !e.example) || S.classes.some((c) => !c.example) || S.groups.some((g) => !g.example);
   function needsBackup() {
     if (!S.backend || S.backend.kind !== 'local' || !S.canWrite || !hasOwnData()) return false;
@@ -1655,8 +1661,8 @@
     if (S.stale) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>Sin conexión.</b> Puede que lo que ves no esté al día.</span></div>');
     if (S.error) out.push('<div class="note">' + ic('warn') + '<span class="txt"><b>No se pudieron cargar tus datos.</b> Cierra Cancha y vuelve a abrirla.</span></div>');
     if (S.ready && !S.canWrite) out.push('<div class="note">' + ic('lock') + '<span class="txt"><b>Solo lectura.</b> Puedes ver esta biblioteca, pero solo su dueño puede editarla.</span></div>');
-    if (S.ready && tab === 'clases' && k === 'local' && !framed && isAppleMobile() && !isStandalone()) {
-      out.push('<div class="note">' + ic('device') + '<span class="txt"><b>Agrega Cancha</b> a tu pantalla de inicio para no perder tus datos.</span><button class="link" data-act="install-help">Ver cómo</button></div>');
+    if (S.ready && tab === 'clases' && k === 'local' && canInstall()) {
+      out.push('<div class="note">' + ic('device') + '<span class="txt"><b>Instala Cancha</b> en tu ' + devWord() + ' para tenerla como app y no perder tus datos.</span><button class="link" data-act="install-help">' + (installEvt ? 'Instalar' : 'Ver cómo') + '</button></div>');
     }
     if (S.ready && tab === 'clases' && needsBackup()) {
       const last = Number(pref.get('last-backup')) || 0;
@@ -1873,7 +1879,16 @@
     return alertBox('¿Dónde se guardan mis datos?', 'Solo en este iPad: nada se sube a internet, ni los nombres de los alumnos ni la asistencia. Si el iPad se pierde o se borra la app, solo los recuperas con un respaldo: haz uno cada semana y guárdalo en iCloud Drive. Los respaldos y los PDF de asistencia sí llevan los nombres, así que compártelos solo con quien deba verlos.');
   }
   function showInstallHelp() {
-    alertBox('Instalar Cancha', 'En Safari toca «Compartir» (el cuadrito con la flecha) y elige «Agregar a pantalla de inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');
+    if (installEvt) {
+      const ev = installEvt;
+      installEvt = null;
+      try { ev.prompt(); } catch (e) { /* el navegador ya no deja: se muestran los pasos */ }
+      Promise.resolve(ev.userChoice).then((c) => { if (c && c.outcome !== 'accepted') installEvt = ev; S.sig = {}; renderAll(); }).catch(() => {});
+      return;
+    }
+    if (isAppleMobile()) return alertBox('Instalar Cancha', 'En Safari toca «Compartir» (el cuadrito con la flecha) y elige «Agregar a pantalla de inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');
+    if (isAndroid()) return alertBox('Instalar Cancha', 'En Chrome toca los tres puntos (⋮) de arriba a la derecha y elige «Instalar app» o «Agregar a la pantalla principal». En Samsung Internet abre el menú (☰) y elige «Agregar página a» y luego «Pantalla de inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');
+    return alertBox('Instalar Cancha', 'En Chrome o Edge toca el ícono de instalar al final de la barra de direcciones (una pantallita con una flecha). En Safari de Mac usa «Archivo» y luego «Agregar al Dock».');
   }
 
   // ---------------------------------------------------------------- flujos: ejercicios
@@ -5189,6 +5204,7 @@
         '<button type="button" class="row row-act" data-st="backup">' + ic('box') + '<span>Respaldo</span>' + ic('chevR', 'chev') + '</button>' +
         '<button type="button" class="row row-act" data-st="where">' + ic('info') + '<span>¿Dónde se guardan mis datos?</span>' + ic('chevR', 'chev') + '</button>' +
         '<button type="button" class="row row-act" data-st="tutorial">' + ic('sparkle') + '<span>Ver el tutorial</span>' + ic('chevR', 'chev') + '</button>' +
+        (S.backend && S.backend.kind === 'local' && !framed && !isStandalone() ? '<button type="button" class="row row-act" data-st="install">' + ic('download') + '<span>Instalar Cancha en este ' + devWord() + '</span>' + ic('chevR', 'chev') + '</button>' : '') +
         '</div>',
     });
     bindSeg(sheet.body, 'theme', (v) => { pref.set('theme', v); applyTheme(v); });
@@ -5196,7 +5212,8 @@
       const b = e.target.closest('[data-st]');
       if (!b) return;
       sheet.dismiss();
-      setTimeout(() => (b.dataset.st === 'backup' ? openBackupSheet() : b.dataset.st === 'tutorial' ? showTutorial() : showStatus()), 320);
+      if (b.dataset.st === 'install' && installEvt) { showInstallHelp(); return; }
+      setTimeout(() => (b.dataset.st === 'backup' ? openBackupSheet() : b.dataset.st === 'tutorial' ? showTutorial() : b.dataset.st === 'install' ? showInstallHelp() : showStatus()), 320);
     });
   }
 
@@ -6386,7 +6403,7 @@
     { t: 'arrow', x: 46, y: 100, k: 'pase', x2: 80, y2: 134, s: 3 },
   ] };
   const devWord = () => (/iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'iPad'
-    : /iPhone|iPod|Android.*Mobile/.test(navigator.userAgent) ? 'celular' : 'computadora');
+    : /iPhone|iPod|Android.*Mobile/.test(navigator.userAgent) ? 'celular' : /Android/.test(navigator.userAgent) ? 'tableta' : 'computadora');
   const needsTutorial = () => !!S.canWrite && !pref.get('onboarded');
 
   function tutorialSlides() {
