@@ -1175,6 +1175,7 @@
         } else api.dismiss();
       },
       setTint(t) { wrap.dataset.tint = t; },
+      setTitle(t) { $('.sh-title', wrap).textContent = t; $('.sheet', wrap).setAttribute('aria-label', t); },
       setConfirm(enabled, label) {
         if (!okBtn) return;
         okBtn.disabled = !enabled;
@@ -1601,7 +1602,7 @@
     const last = Number(pref.get('last-backup')) || 0;
     const oldest = Math.min.apply(null, S.exercises.concat(S.classes, S.groups).filter((x) => !x.example).map((x) => Number(x.createdAt) || Date.now()));
     if (!last) return Date.now() - oldest > 7 * 864e5;
-    return Date.now() - last > 30 * 864e5;
+    return Date.now() - last > 7 * 864e5;
   }
   function fmtAgo(ts) {
     const d = Math.floor((Date.now() - ts) / 864e5);
@@ -1741,9 +1742,9 @@
     return '<div class="today" data-tint="' + sp + '">' +
       '<button class="today-main" data-open-class="' + esc(c.id) + '"><span class="today-band band-' + sp + '"><span class="today-when">' + (isToday ? 'Hoy' : esc(fmtDay(c.date))) + '</span>' + (n ? '<span class="today-min">' + fmtMin(classTotal(c)) + '′</span>' : '') + '</span>' +
       '<span class="today-body"><span class="today-name">' + esc(c.name || 'Clase sin nombre') + '</span>' +
-      '<span class="today-meta">' + (g ? '<span class="mini-chip">' + ic('people') + esc(g.name) + '</span>' : '') + '<span>' + plural(n, 'ejercicio', 'ejercicios') + '</span></span></span></button>' +
+      '<span class="today-meta">' + (kindOf(c) === 'entrenamiento' ? '<span class="mini-chip">Entrenamiento</span>' : '') + (g ? '<span class="mini-chip">' + ic('people') + esc(g.name) + '</span>' : '') + '<span>' + plural(n, 'ejercicio', 'ejercicios') + '</span></span></span></button>' +
       '<div class="today-actions">' +
-      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar clase</button>' : S.canWrite ? '<button class="btn filled" data-act="plan-class" data-id="' + esc(c.id) + '">' + ic('plus') + 'Agregar ejercicios</button>' : '') +
+      (n ? '<button class="btn filled" data-act="start-class" data-id="' + esc(c.id) + '">' + ic('play') + 'Iniciar ' + kindNoun(kindOf(c)) + '</button>' : S.canWrite ? '<button class="btn filled" data-act="plan-class" data-id="' + esc(c.id) + '">' + ic('plus') + 'Agregar ejercicios</button>' : '') +
       (canRoll ? '<button class="btn tinted" data-act="roll-class" data-id="' + esc(c.id) + '">' + ic('check') + 'Pasar lista</button>' : '') +
       '</div></div>';
   }
@@ -1792,7 +1793,7 @@
     const done = c.lastRunAt || c.attendanceAt;
     return '<button class="cell" data-open-class="' + esc(c.id) + '" data-tint="' + sport + '">' + dateTileHTML(c.date) +
       '<span class="txt"><span class="t1">' + esc(c.name || 'Clase sin nombre') + (c.date === todayStr() ? '<span class="pill">Hoy</span>' : '') + '</span>' +
-      '<span class="t2">' + (inGroup ? '' : esc(first) + ' · ') + plural(n, 'ejercicio', 'ejercicios') + ' · ' + fmtMin(classTotal(c)) + ' min</span></span>' +
+      '<span class="t2">' + (kindOf(c) === 'entrenamiento' ? 'Entrenamiento · ' : '') + (inGroup ? '' : esc(first) + ' · ') + plural(n, 'ejercicio', 'ejercicios') + ' · ' + fmtMin(classTotal(c)) + ' min</span></span>' +
       (done ? '<span class="done-mark" title="Dada" aria-label="Dada">' + ic('check') + '</span>' : '') + ic('chevR', 'chev') + '</button>';
   }
 
@@ -1859,7 +1860,7 @@
     if (S.backend && !S.canWrite) return alertBox('Solo lectura', 'Estás viendo una biblioteca compartida. Solo su dueño puede agregar o cambiar ejercicios.');
     if (k === 'cloud') return alertBox('¿Dónde se guardan mis datos?', 'En tu cuenta de Claude. Los ves en el celular y en la computadora.');
     if (k === 'memory') return alertBox('No se está guardando', 'Este navegador no deja guardar datos (por ejemplo, en modo privado). Lo que agregues se perderá al cerrar.');
-    return alertBox('¿Dónde se guardan mis datos?', 'Solo en este iPad, no en internet. Si el iPad se pierde o se borra, solo los recuperas con un respaldo. Haz uno de vez en cuando.');
+    return alertBox('¿Dónde se guardan mis datos?', 'Solo en este iPad: nada se sube a internet, ni los nombres de los alumnos ni la asistencia. Si el iPad se pierde o se borra la app, solo los recuperas con un respaldo: haz uno cada semana y guárdalo en iCloud Drive. Los respaldos y los PDF de asistencia sí llevan los nombres, así que compártelos solo con quien deba verlos.');
   }
   function showInstallHelp() {
     alertBox('Instalar Cancha', 'En Safari toca «Compartir» (el cuadrito con la flecha) y elige «Agregar a pantalla de inicio». Abre Cancha siempre desde ese ícono: ahí tus datos quedan guardados.');
@@ -2540,16 +2541,16 @@
     return [ds.length === 5 && ds.every((d) => d >= 1 && d <= 5) ? 'Lun a Vie' : listEs(ds.map((d) => WD[d])), t].filter(Boolean).join(' ');
   }
   // Próximos 7 días para elegir la fecha tocando; los días del grupo llevan un punto.
-  function dateChipsHTML(cur, gdays) {
+  function dateChipsHTML(cur, gdays, multi) {
     const out = [];
     const base = new Date();
     for (let i = 0; i < 7; i++) {
       const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
       const v = dayStr(d);
       const label = i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : WD[d.getDay()] + ' ' + d.getDate();
-      out.push('<button type="button" class="chip' + (gdays.indexOf(d.getDay()) >= 0 ? ' gday' : '') + '" data-opt="' + v + '" aria-pressed="' + (v === cur) + '"' + (gdays.indexOf(d.getDay()) >= 0 ? ' aria-description="Día del grupo"' : '') + '>' + label + '</button>');
+      out.push('<button type="button" class="chip' + (gdays.indexOf(d.getDay()) >= 0 ? ' gday' : '') + '" data-opt="' + v + '" aria-pressed="' + (cur.indexOf(v) >= 0) + '"' + (gdays.indexOf(d.getDay()) >= 0 ? ' aria-description="Día del grupo"' : '') + '>' + label + '</button>');
     }
-    return '<div class="chips wrap opts date-chips" data-opts="date" data-multi="false" data-required="true" role="group" aria-label="Fecha">' + out.join('') + '</div>';
+    return '<div class="chips wrap opts date-chips" data-opts="date" data-multi="' + !!multi + '" data-required="' + !multi + '" role="group" aria-label="' + (multi ? 'Días' : 'Fecha') + '">' + out.join('') + '</div>';
   }
   // Primer día de clase del grupo a partir de hoy (hoy si toca).
   function nextGroupDay(g) {
@@ -2558,6 +2559,37 @@
     const base = new Date();
     for (let i = 0; i < 7; i++) { const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i); if (days.indexOf(d.getDay()) >= 0) return dayStr(d); }
     return todayStr();
+  }
+
+  // Clase de Educación Física o entrenamiento (equipos extracurriculares, club).
+  const KINDS = [['clase', 'Clase'], ['entrenamiento', 'Entrenamiento']];
+  const TEAM_CATS = ['Equipo extracurricular', 'Club o selección'];
+  const kindOf = (c) => (c && c.kind === 'entrenamiento' ? 'entrenamiento' : 'clase');
+  const groupKind = (g) => (g && TEAM_CATS.indexOf(g.category) >= 0 ? 'entrenamiento' : 'clase');
+  const kindNoun = (k, many) => (k === 'entrenamiento' ? (many ? 'entrenamientos' : 'entrenamiento') : many ? 'clases' : 'clase');
+  // Días de la misma serie (la clase que se creó para varios días), en orden.
+  const serieOf = (c) => (c && c.serie ? S.classes.filter((x) => x.serie === c.serie).sort((a, b) => String(a.date).localeCompare(String(b.date))) : []);
+  const notGiven = (x) => !x.lastRunAt && !x.attendanceAt;
+  function copyPlanToSerie(id) {
+    const c = getClass(id);
+    const others = serieOf(c).filter((x) => x.id !== id && notGiven(x));
+    if (!c || !others.length) return;
+    const withPlan = others.filter((x) => (x.items || []).length).length;
+    const k = kindOf(c);
+    actionSheet({
+      title: 'Copiar el plan a ' + plural(others.length, 'día más', 'días más'),
+      message: others.map((x) => fmtDay(x.date)).join(', ') + '.' + (withPlan ? (withPlan === 1 ? ' Uno ya tiene plan y se reemplaza.' : ' ' + withPlan + ' ya tienen plan y se reemplaza.') : ''),
+      tint: SPORTS[c.sport] ? c.sport : 'futbol',
+      actions: [{ label: 'Copiar plan', icon: 'copy', onClick: async () => {
+        let n = 0;
+        for (const x of others) {
+          const ok = await mutateClass(x.id, (y) => { y.items = plain(c.items || []); y.focus = (c.focus || []).slice(); if (c.target) y.target = c.target; });
+          if (!ok) break;
+          n++;
+        }
+        if (n) { haptic(12); toast('Plan copiado a ' + plural(n, kindNoun(k), kindNoun(k, true))); }
+      } }],
+    });
   }
 
   function openClassEditor(opts) {
@@ -2570,37 +2602,59 @@
     if (!editing && opts.name) c.name = opts.name;
     if (!editing && firstGroup && firstGroup.classMin) c.target = firstGroup.classMin;
     if (!editing && S.backend && S.backend.me) c.authorId = S.backend.me;
+    let kind = editing ? kindOf(c) : opts.kind || groupKind(firstGroup);
+    let kindTouched = editing || !!opts.kind;
     let focus = (c.focus || []).slice();
     // El nombre se arma con los temas mientras el profe no escriba otro.
     const autoName = (tags) => cap(listEs(lowerRest(tags)));
     focus = focus.filter((t) => FRAME_TAGS.indexOf(t) < 0);
     let nameAuto = !c.name || c.name === autoName(focus);
-    let dateTouched = editing || !!opts.date;
+    // Días: una clase nueva puede ser de varios días (Lun a Vie) y repetirse varias semanas.
+    let dates = c.date ? [c.date] : [];
+    let datesTouched = editing || !!opts.date;
+    let weeks = 1;
     let dirty = false;
+    const multi = !editing;
+    const titleFor = () => (editing ? 'Editar ' : kind === 'entrenamiento' ? 'Nuevo ' : 'Nueva ') + kindNoun(kind);
     const body =
-      '<div class="group"><input class="field-lg" id="cl-name" placeholder="Nombre de la clase" aria-label="Nombre de la clase" maxlength="80" autocomplete="off" enterkeyhint="done" value="' + esc(c.name) + '"></div>' +
-      '<p class="group-label" id="lbl-group">Grupo</p><div class="group pad"><div class="chips wrap" data-ref="groups" role="group" aria-labelledby="lbl-group"></div></div>' +
-      '<p class="group-label" id="lbl-focus">¿Qué van a trabajar?<span class="gl-hint">Le pone nombre a la clase</span></p><div class="group pad"><div class="chips wrap" data-ref="focus" role="group" aria-labelledby="lbl-focus"></div></div>' +
-      '<div class="group fgroup"><div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + 'Fecha</span><span class="fb-val" data-ref="date-val"></span></div><div data-ref="dates"></div>' +
+      segHTML('kind', KINDS, kind, '¿Es clase o entrenamiento?') +
+      '<div class="group"><input class="field-lg" id="cl-name" placeholder="Nombre (opcional)" aria-label="Nombre" maxlength="80" autocomplete="off" enterkeyhint="done" value="' + esc(c.name) + '"></div>' +
+      '<p class="group-label" id="lbl-group">Grupo o equipo</p><div class="group pad"><div class="chips wrap" data-ref="groups" role="group" aria-labelledby="lbl-group"></div></div>' +
+      '<p class="group-label" id="lbl-focus">¿Qué van a trabajar?<span class="gl-hint">Le pone nombre</span></p><div class="group pad"><div class="chips wrap" data-ref="focus" role="group" aria-labelledby="lbl-focus"></div></div>' +
+      '<div class="group fgroup"><div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + (multi ? 'Días' : 'Fecha') + '</span><span class="fb-val" data-ref="date-val"></span></div><div data-ref="dates"></div>' +
+      (multi ? '<div class="quick-row" data-ref="quick"></div>' : '') +
       '<label class="row inline-row"><span class="k">Otra fecha</span><input id="cl-date" type="date" aria-label="Otra fecha" value="' + esc(c.date || '') + '"></label></div>' +
-      '<div class="fblock"><div class="fb-head"><span class="k">' + ic('clock') + 'Duración de la clase</span><span class="fb-val" data-ref="target-val"></span></div>' +
-      optChipsHTML('target', CLASS_MINS.map((m) => [String(m), m + ' min']), c.target ? [String(c.target)] : [], { multi: false, label: 'Duración de la clase' }) + '</div></div>' +
+      (multi ? '<div class="fblock"><div class="fb-head"><span class="k">' + ic('timer') + '¿Cuántas semanas?</span></div>' +
+        optChipsHTML('weeks', [['1', 'Solo una'], ['2', '2 semanas'], ['3', '3 semanas'], ['4', '4 semanas']], ['1'], { multi: false, label: '¿Cuántas semanas?' }) +
+        '<p class="fb-note" data-ref="dates-note" hidden></p></div>' : '') +
+      '<div class="fblock"><div class="fb-head"><span class="k">' + ic('clock') + 'Duración</span><span class="fb-val" data-ref="target-val"></span></div>' +
+      optChipsHTML('target', CLASS_MINS.map((m) => [String(m), m + ' min']), c.target ? [String(c.target)] : [], { multi: false, label: 'Duración' }) + '</div></div>' +
       '<div data-ref="sport-box"><p class="group-label">Deporte</p>' + segHTML('sport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], c.sport, 'Deporte') + '</div>' +
       '<p class="group-label" id="lbl-notes">Notas</p><div class="group"><textarea id="cl-notes" aria-labelledby="lbl-notes" placeholder="Objetivo del día, recordatorios…" maxlength="2000">' + esc(c.notes) + '</textarea></div>' +
       (opts.templateNote ? '<p class="muted" style="margin:0 16px">' + esc(opts.templateNote) + '</p>'
         : !editing && c.items.length && c.items[0].exId ? '<p class="muted" style="margin:0 16px">Se agregará «' + esc((getEx(c.items[0].exId) || {}).title || 'el ejercicio') + '».</p>' : '');
+    // Todas las fechas: los días elegidos, repetidos cada semana.
+    function allDates() {
+      const out = new Set();
+      for (let w = 0; w < (multi ? weeks : 1); w++) {
+        dates.forEach((d) => { const x = parseDay(d); if (x) { x.setDate(x.getDate() + 7 * w); out.add(dayStr(x)); } });
+      }
+      return Array.from(out).sort();
+    }
+    const defaultName = (date) => cap(kindNoun(kind)) + ' de ' + SPORTS[c.sport].noun + (date && parseDay(date) ? ' del ' + parseDay(date).getDate() + ' de ' + MONTHS_LONG[parseDay(date).getMonth()] : '');
     const sheet = openSheet({
-      title: editing ? 'Editar clase' : 'Nueva clase',
+      title: titleFor(),
       tint: c.sport,
       confirmLabel: 'Guardar',
       bodyHTML: body,
       isDirty: () => dirty,
       onConfirm: async () => {
         const root = sheet.body;
-        c.date = $('#cl-date', root).value || '';
-        c.name = $('#cl-name', root).value.trim() || ('Clase de ' + SPORTS[c.sport].noun + (c.date && parseDay(c.date) ? ' del ' + parseDay(c.date).getDate() + ' de ' + MONTHS_LONG[parseDay(c.date).getMonth()] : ''));
+        const list = allDates();
+        const typed = $('#cl-name', root).value.trim();
         c.notes = $('#cl-notes', root).value.trim();
         c.focus = focus.slice();
+        if (kind === 'entrenamiento') c.kind = 'entrenamiento'; else delete c.kind;
         if (!c.target) delete c.target;
         delete c.targetTouched;
         c.example = false;
@@ -2611,14 +2665,36 @@
           if (!items) { sheet.setBusy(false); return; }
           c.items = items;
         }
-        const ok = await commit('classes', plain(c), editing ? opts.cls : null);
+        // Una sola fecha (o editar): como siempre.
+        if (list.length <= 1) {
+          c.date = list[0] || '';
+          c.name = typed || defaultName(c.date);
+          const ok = await commit('classes', plain(c), editing ? opts.cls : null);
+          sheet.setBusy(false);
+          if (!ok) return;
+          dirty = false;
+          sheet.dismiss();
+          haptic(12);
+          toast(editing ? 'Cambios guardados' : cap(kindNoun(kind)) + (kind === 'entrenamiento' ? ' creado' : ' creada'));
+          if (!editing) setTimeout(() => { openClass(c.id); if (!c.items.length) setTimeout(() => openPicker(c.id), 480); }, 260);
+          return;
+        }
+        // Varios días: una clase por día, todas de la misma serie, con el mismo plan.
+        const serie = uid();
+        const made = [];
+        for (const d of list) {
+          const x = Object.assign(plain(c), { id: made.length ? uid() : c.id, date: d, serie, name: typed || defaultName(d), createdAt: Date.now(), updatedAt: Date.now() });
+          const ok = await commit('classes', x, null);
+          if (!ok) break;
+          made.push(x);
+        }
         sheet.setBusy(false);
-        if (!ok) return;
+        if (!made.length) return;
         dirty = false;
         sheet.dismiss();
         haptic(12);
-        toast(editing ? 'Cambios guardados' : 'Clase creada');
-        if (!editing) setTimeout(() => { openClass(c.id); if (!c.items.length) setTimeout(() => openPicker(c.id), 480); }, 260);
+        toast(plural(made.length, kindNoun(kind), kindNoun(kind, true)) + (kind === 'entrenamiento' ? ' creados' : ' creadas'));
+        setTimeout(() => { openClass(made[0].id); if (!c.items.length) setTimeout(() => openPicker(made[0].id), 480); }, 260);
       },
     });
     const root = sheet.body;
@@ -2626,10 +2702,41 @@
     function renderFocus() {
       $('[data-ref="focus"]', root).innerHTML = themeTags(c.sport).map((t) => '<button type="button" class="chip" data-focus="' + esc(t) + '" aria-pressed="' + (focus.indexOf(t) >= 0) + '">' + esc(t) + '</button>').join('');
     }
+    // Próximos 7 días que caen en estos días de la semana.
+    function windowDays(wdays) {
+      const out = [];
+      const base = new Date();
+      for (let i = 0; i < 7; i++) { const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i); if (wdays.indexOf(d.getDay()) >= 0) out.push(dayStr(d)); }
+      return out.sort();
+    }
     function renderDates() {
-      const v = $('#cl-date', root).value;
-      $('[data-ref="dates"]', root).innerHTML = dateChipsHTML(v, groupDays(getGroup(c.groupId)));
-      $('[data-ref="date-val"]', root).textContent = v ? longDate(v) : 'Sin fecha';
+      const g = getGroup(c.groupId);
+      const gdays = groupDays(g);
+      $('[data-ref="dates"]', root).innerHTML = dateChipsHTML(dates, gdays, multi);
+      if (multi) $('#cl-date', root).value = dates.length === 1 ? dates[0] : '';
+      const list = allDates();
+      const val = $('[data-ref="date-val"]', root);
+      val.textContent = !list.length ? 'Sin fecha' : list.length === 1 ? longDate(list[0]) : dates.length === 1 ? 'Cada ' + WD_LONG[parseDay(dates[0]).getDay()] : scheduleText(dates.map((d) => parseDay(d).getDay()), '');
+      val.classList.toggle('none', !list.length);
+      if (!multi) return;
+      const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+      const wk = windowDays([1, 2, 3, 4, 5]);
+      const gd = gdays.length ? windowDays(gdays) : [];
+      $('[data-ref="quick"]', root).innerHTML = '<button type="button" class="chip quick-chip" data-days="wk" aria-pressed="' + same(dates.slice().sort(), wk) + '">Lunes a viernes</button>' +
+        (gd.length && !same(gd, wk) ? '<button type="button" class="chip quick-chip" data-days="group" aria-pressed="' + same(dates.slice().sort(), gd) + '">Días de ' + esc(g.name) + ' (' + esc(scheduleText(gdays, '')) + ')</button>' : '');
+      const note = $('[data-ref="dates-note"]', root);
+      note.hidden = list.length < 2;
+      if (list.length > 1) note.innerHTML = 'Se crean <b>' + plural(list.length, kindNoun(kind), kindNoun(kind, true)) + '</b>, del ' + esc(fmtDay(list[0]).toLowerCase()) + ' al ' + esc(fmtDay(list[list.length - 1]).toLowerCase()) + ', con el mismo plan.';
+      sheet.setConfirm(true, list.length > 1 ? 'Guardar (' + list.length + ')' : 'Guardar');
+    }
+    function setSeg(name, v) {
+      const seg = $('[data-seg="' + name + '"]', root);
+      const btns = $$('button[data-val]', seg);
+      btns.forEach((x) => x.setAttribute('aria-checked', String(x.dataset.val === v)));
+      seg.style.setProperty('--i', Math.max(0, btns.findIndex((x) => x.dataset.val === v)));
+    }
+    function setKind(k) {
+      kind = k; setSeg('kind', k); sheet.setTitle(titleFor()); renderDates();
     }
     function renderGroups() {
       const list = S.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
@@ -2652,11 +2759,12 @@
       if (fixed && c.sport !== g.sport) { c.sport = g.sport; sheet.setTint(c.sport); focus = focus.filter((t) => SPORTS[c.sport].tags.indexOf(t) >= 0); renderFocus(); }
       renderDates();
     }
-    // Al elegir grupo: su próximo día de clase y su duración, si el profe no los cambió.
+    // Al elegir grupo: sus días, su duración y si es equipo (entrenamiento), si el profe no los cambió.
     function adoptGroup(g) {
       c.groupId = g ? g.id : null; dirty = true;
-      if (g && !dateTouched) $('#cl-date', root).value = nextGroupDay(g);
+      if (g && !datesTouched) { dates = [nextGroupDay(g)]; $('#cl-date', root).value = dates[0]; }
       if (g && g.classMin && !editing && !c.targetTouched) { c.target = g.classMin; $$('[data-opts="target"] [data-opt]', root).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.opt === String(c.target)))); paintTarget(); }
+      if (g && !kindTouched) setKind(groupKind(g));
       renderGroupVal();
     }
     renderFocus();
@@ -2666,8 +2774,16 @@
     root.addEventListener('input', (e) => {
       dirty = true;
       if (e.target.id === 'cl-name') nameAuto = !e.target.value.trim();
-      if (e.target.id === 'cl-date') { dateTouched = true; renderDates(); }
     });
+    // «Otra fecha»: sustituye la de inicio; si el profe ya eligió días, se suma a ellos.
+    root.addEventListener('change', (e) => {
+      if (e.target.id !== 'cl-date') return;
+      const v = e.target.value;
+      if (!v) return;
+      dates = !multi || !datesTouched ? [v] : dates.indexOf(v) >= 0 ? dates : dates.concat(v);
+      datesTouched = true; dirty = true; renderDates();
+    });
+    bindSeg(root, 'kind', (v) => { kindTouched = true; dirty = true; setKind(v); });
     bindSeg(root, 'sport', (v) => {
       c.sport = v; sheet.setTint(v); dirty = true;
       focus = focus.filter((t) => SPORTS[v].tags.indexOf(t) >= 0); renderFocus();
@@ -2683,10 +2799,21 @@
         if (nameAuto) $('#cl-name', root).value = autoName(focus);
         dirty = true; haptic(4); return;
       }
+      const qd = e.target.closest('[data-days]');
+      if (qd) {
+        const g = getGroup(c.groupId);
+        dates = windowDays(qd.dataset.days === 'wk' ? [1, 2, 3, 4, 5] : groupDays(g));
+        datesTouched = true; dirty = true; haptic(4); renderDates(); return;
+      }
       const op = e.target.closest('[data-opt]');
       if (op) {
         const k = op.closest('[data-opts]').dataset.opts;
-        if (k === 'date') { optToggle(op, []); $('#cl-date', root).value = op.dataset.opt; dateTouched = true; renderDates(); }
+        if (k === 'date') {
+          dates = optToggle(op, dates).sort();
+          if (dates.length === 1) $('#cl-date', root).value = dates[0];
+          datesTouched = true; renderDates();
+        }
+        if (k === 'weeks') { weeks = Number(optToggle(op, [String(weeks)])[0] || 1); renderDates(); }
         if (k === 'target') { const v = optToggle(op, c.target ? [String(c.target)] : []); c.target = v.length ? Number(v[0]) : 0; c.targetTouched = true; paintTarget(); }
         dirty = true; return;
       }
@@ -2750,11 +2877,16 @@
       at += m;
       return h;
     }).join('');
-    return '<div class="d-head"><p class="d-eyebrow">' + ic(sport) + esc(c.date ? longDate(c.date) : 'Sin fecha') + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1>' +
-      (g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') + '</div>' +
+    const serie = serieOf(c);
+    const si = serie.findIndex((x) => x.id === c.id);
+    const toCopy = serie.filter((x) => x.id !== c.id && notGiven(x)).length;
+    const kn = kindNoun(kindOf(c));
+    return '<div class="d-head"><p class="d-eyebrow">' + ic(sport) + (kindOf(c) === 'entrenamiento' ? 'Entrenamiento · ' : '') + esc(c.date ? longDate(c.date) : 'Sin fecha') + '</p><h1 class="d-title">' + esc(c.name || 'Clase sin nombre') + '</h1>' +
+      (g ? '<button class="group-chip" data-act="open-group" data-tint="' + groupTint(g) + '">' + ic('people') + esc(g.name) + ic('chevR') + '</button>' : '') +
+      (serie.length > 1 ? '<p class="c-serie">' + ic('calendar') + 'Día ' + (si + 1) + ' de ' + serie.length + ' · del ' + esc(fmtDay(serie[0].date).toLowerCase()) + ' al ' + esc(fmtDay(serie[serie.length - 1].date).toLowerCase()) + '</p>' : '') + '</div>' +
       '<div class="c-layout"><div class="c-sum"><div class="c-summary"><p class="c-line"><span class="c-total">' + fmtMin(total) + '<small> min</small></span><span class="c-sub">' + (c.target ? '<span class="c-target' + (total > c.target ? ' over' : '') + '">' + (total > c.target ? fmtMin(total - c.target) + ' min de más' : total < c.target ? 'faltan ' + fmtMin(c.target - total) + ' de ' + c.target + ' min' : 'justo ' + c.target + ' min') + '</span>' : '') + plural(nEx, 'ejercicio', 'ejercicios') + (nP ? ' y ' + plural(nP, 'pausa', 'pausas') : '') + '</span></p>' +
       (items.length ? '<div class="tl" aria-hidden="true">' + segs + '<b class="tl-end">' + fmtMin(total) + '′</b></div>' : '') +
-      (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar clase</button>' : '') +
+      (items.some((it) => it.exId && getEx(it.exId)) && !edit ? '<button class="btn filled start-btn" data-act="start">' + ic('play') + 'Iniciar ' + kn + '</button>' : '') +
       (c.lastRunAt ? '<p class="c-done">' + ic('check') + 'Ya la diste el ' + esc(fmtLong(c.lastRunAt)) + '</p>' : '') + '</div></div>' +
       '<div class="c-plan"><div class="section-head"><h2>Plan</h2>' + (S.canWrite && items.length ? '<button class="link" data-act="toggle-edit">' + (edit ? 'Listo' : 'Cambiar plan') + '</button>' : '') + '</div>' +
       '<div class="list">' + planRowsHTML(c, edit) +
@@ -2762,7 +2894,7 @@
       (!items.length && !S.canWrite ? '<p class="muted pad">Esta clase no tiene ejercicios.</p>' : '') + '</div></div>' +
       '<div class="c-rest">' + attendanceSectionHTML(c) +
       (c.notes ? '<section class="sec"><h2>Notas</h2><p>' + esc(c.notes) + '</p></section>' : '') +
-      (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar clase</button></div>' : '') + '</div></div>';
+      (S.canWrite ? '<div class="group" style="margin-top:28px">' + (toCopy && items.length ? '<button class="row row-act" data-act="copy-serie">' + ic('copy') + 'Copiar este plan a ' + plural(toCopy, 'día más', 'días más') + '</button>' : '') + '<button class="row row-act" data-act="duplicate">' + ic('copy') + 'Duplicar para otro grupo o fecha</button><button class="row danger" data-act="delete-class">' + ic('trash') + 'Eliminar clase</button></div>' : '') + '</div></div>';
   }
 
   function openClass(id) {
@@ -2803,6 +2935,7 @@
         case 'add-pause': addPauseFlow(id); break;
         case 'series': openSeriesSheet(id, i); break;
         case 'duplicate': openDuplicate(id); break;
+        case 'copy-serie': copyPlanToSerie(id); break;
         case 'rm': {
           const removed = plain(cc.items[i]);
           const before = JSON.stringify(cc.items);
@@ -2931,7 +3064,7 @@
       onConfirm: async () => {
         const nc = plain(c);
         Object.assign(nc, { id: uid(), date: $('#dp-date', sheet.body).value || '', groupId, example: false, createdAt: Date.now(), updatedAt: Date.now() });
-        delete nc.attendance; delete nc.attendanceAt; delete nc.lastRunAt;
+        delete nc.attendance; delete nc.attendanceAt; delete nc.lastRunAt; delete nc.serie;
         if (S.backend && S.backend.me) nc.authorId = S.backend.me;
         const ok = await commit('classes', nc, null);
         if (!ok) return;
@@ -3018,7 +3151,8 @@
         sel.length = 0;
         sheet.dismiss();
         haptic(12);
-        toast(ids.length === 1 ? 'Ejercicio agregado' : ids.length + ' ejercicios agregados');
+        const others = serieOf(getClass(classId)).filter((x) => x.id !== classId && notGiven(x));
+        toast(ids.length === 1 ? 'Ejercicio agregado' : ids.length + ' ejercicios agregados', 'check', others.length ? { label: 'Copiar a los otros días', onClick: () => copyPlanToSerie(classId) } : null);
       },
     });
     sheet.setConfirm(false);
@@ -3592,7 +3726,7 @@
       '<span class="g-facts">' + facts.join('') + '</span>' +
       (g.schedule ? '<span class="g-when">' + ic('clock') + esc(g.schedule) + '</span>' : '') + '</button>';
   }
-  const CATEGORIES = ['Preescolar', 'Primaria', 'Secundaria', 'Preparatoria', 'Club o selección'];
+  const CATEGORIES = ['Preescolar', 'Primaria', 'Secundaria', 'Preparatoria', 'Equipo extracurricular', 'Club o selección'];
   const PLACES = ['Patio', 'Cancha de usos múltiples', 'Cancha techada', 'Gimnasio', 'Salón (si llueve)'];
   function openGroupEditor(opts) {
     const editing = !!opts.group;
@@ -3624,15 +3758,16 @@
         '<div class="group"><input class="field-lg" id="gr-name" placeholder="Nombre (Ej. 5.º A, Sub-12)" aria-label="Nombre del grupo" maxlength="60" autocomplete="off" enterkeyhint="done" value="' + esc(g.name) + '"></div>' +
         '<p class="group-label">Deporte</p>' + segHTML('gsport', [['ambos', 'Ambos'], ['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], SPORTS[g.sport] ? g.sport : 'ambos', 'Deporte') +
         '<p class="group-label">¿Quiénes son?</p><div class="group fgroup">' +
-        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('doc') + 'Nivel escolar o club</span></div>' + optChipsHTML('cat', CATEGORIES.map((x) => [x, x]), [g.category], { multi: false, label: 'Nivel escolar o club' }) +
+        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('doc') + 'Nivel escolar o equipo</span></div>' + optChipsHTML('cat', CATEGORIES.map((x) => [x, x]), [g.category], { multi: false, label: 'Nivel escolar o equipo' }) +
         '<label class="row inline-row"><span class="k">' + ic('pencil') + 'Otra categoría</span><input id="gr-cat" placeholder="Ej. Sub-12" aria-label="Categoría" maxlength="60" value="' + esc(CATEGORIES.indexOf(g.category) >= 0 ? '' : g.category) + '"></label></div>' +
         facetBlockHTML('ages', 'age', 'Edad', st.ages, 'futbol', { sub: true }) +
         (nStudents ? '<div class="fblock"><div class="fb-head"><span class="k">' + ic('people') + 'Alumnos</span><span class="fb-val">' + plural(nStudents, 'alumno', 'alumnos') + ' en la lista</span></div></div>'
           : facetBlockHTML('sizes', 'people', '¿Cuántos son?', st.sizes, 'futbol', { multi: false })) + '</div>' +
         '<p class="group-label">¿Cuándo y dónde?</p><div class="group fgroup">' +
-        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + 'Días de clase</span><span class="fb-val" data-ref="sched-val"></span></div>' + optChipsHTML('days', dayOpts, st.days.map(String), { label: 'Días de clase' }) +
+        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + 'Días de clase o entrenamiento</span><span class="fb-val" data-ref="sched-val"></span></div>' + optChipsHTML('days', dayOpts, st.days.map(String), { label: 'Días de clase' }) +
+        '<div class="quick-row"><button type="button" class="chip quick-chip" data-act="weekdays">Lunes a viernes</button></div>' +
         '<label class="row inline-row"><span class="k">' + ic('clock') + 'Hora</span><input id="gr-time" type="time" aria-label="Hora" value="' + esc(st.time) + '"></label></div>' +
-        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('timer') + 'Duración de cada clase</span><span class="fb-val" data-ref="min-val"></span></div>' + optChipsHTML('classMin', CLASS_MINS.map((m) => [String(m), m + ' min']), st.classMin ? [String(st.classMin)] : [], { multi: false, label: 'Duración de cada clase' }) + '</div>' +
+        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('timer') + 'Duración de cada sesión</span><span class="fb-val" data-ref="min-val"></span></div>' + optChipsHTML('classMin', CLASS_MINS.map((m) => [String(m), m + ' min']), st.classMin ? [String(st.classMin)] : [], { multi: false, label: 'Duración de cada sesión' }) + '</div>' +
         '<div class="fblock"><div class="fb-head"><span class="k">' + ic('flag') + 'Lugar</span></div>' + optChipsHTML('place', places.map((x) => [x, x]), [g.place], { multi: false, label: 'Lugar' }) +
         '<label class="row inline-row"><span class="k">' + ic('pencil') + 'Otro lugar</span><input id="gr-place" placeholder="Ej. Cancha 2" aria-label="Lugar" maxlength="60" value="' + esc(places.indexOf(g.place) >= 0 ? '' : g.place) + '"></label></div>' +
         '</div>',
@@ -3695,6 +3830,11 @@
       paint();
     });
     root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-act="weekdays"]')) {
+        st.days = [1, 2, 3, 4, 5]; schedTouched = true; dirty = true; haptic(4);
+        $$('[data-opts="days"] [data-opt]', root).forEach((b) => b.setAttribute('aria-pressed', String(st.days.indexOf(Number(b.dataset.opt)) >= 0)));
+        paint(); return;
+      }
       const op = e.target.closest('[data-opt]');
       if (!op) return;
       const k = op.closest('[data-opts]').dataset.opts;
@@ -4630,6 +4770,7 @@
       name: txt(x.name, 120), sport: SPORTS[x.sport] ? x.sport : 'futbol', date: dayOk(x.date), groupId: isId(x.groupId) ? x.groupId : null,
       items: (Array.isArray(x.items) ? x.items : []).slice(0, 80).map(cleanItem).filter(Boolean), notes: txt(x.notes, 4000),
       focus: arrIn(x.focus, null, 6), target: x.target ? Math.round(numIn(x.target, 0, 300, 0)) || undefined : undefined,
+      kind: x.kind === 'entrenamiento' ? 'entrenamiento' : undefined, serie: isId(x.serie) ? x.serie : undefined,
     });
     if (x.attendance && typeof x.attendance === 'object') {
       const att = {};

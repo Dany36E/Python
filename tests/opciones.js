@@ -138,8 +138,8 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   await sheet().locator('[data-focus="Pase"]').click();
   await sheet().locator('[data-focus="Control"]').click();
   ok(await sheet().locator('#cl-name').inputValue() === 'Pase y control', 'los temas le ponen nombre: «Pase y control»');
-  await opt('date', '2026-11-26').click();
-  ok(await sheet().locator('#cl-date').inputValue() === '2026-11-26', 'el chip «Jue 26» cambia la fecha');
+  await opt('date', '2026-11-24').click(); await opt('date', '2026-11-26').click();
+  ok(await sheet().locator('#cl-date').inputValue() === '2026-11-26', 'quitar «Mar 24» y tocar «Jue 26» cambia la fecha');
   await sheet().screenshot({ path: OUT + 'opciones-clase.png' });
   await sheet().locator('[data-sh="ok"]').click(); await W(p, 1800);
   // El selector se abre solo, filtrado para el grupo y los temas
@@ -171,6 +171,42 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   await p.click('#tab-ejercicios'); await W(p, 500);
   ok(await p.locator('#screen-ejercicios [data-open-ex]', { hasText: recName }).count() === 1, 'y también quedó en tus ejercicios');
 
+  // --- Equipo extracurricular: entrenamiento de lunes a viernes por dos semanas
+  await p.click('#tab-grupos'); await W(p);
+  await p.click('#fab'); await W(p, 800);
+  await sheet().locator('#gr-name').fill('Selección de fútbol');
+  await sheet().locator('[data-seg="gsport"] [data-val="futbol"]').click();
+  await opt('cat', 'Equipo extracurricular').click();
+  await sheet().locator('[data-act="weekdays"]').click();
+  await sheet().locator('#gr-time').fill('17:00');
+  ok((await sheet().locator('[data-ref="sched-val"]').innerText()) === 'Lun a Vie 17:00', '«Lunes a viernes» marca los cinco días: Lun a Vie 17:00');
+  await sheet().locator('[data-sh="ok"]').click(); await W(p, 1000);
+  await scr().locator('[data-act="new-class"]').first().click(); await W(p, 900);
+  ok((await sheet().locator('.sh-title').innerText()) === 'Nuevo entrenamiento', 'con un equipo, la hoja dice «Nuevo entrenamiento»');
+  ok(await sheet().locator('[data-seg="kind"] [data-val="entrenamiento"]').getAttribute('aria-checked') === 'true', 'y viene marcado «Entrenamiento»');
+  await sheet().locator('[data-days="wk"]').click(); await W(p, 200);
+  ok(await sheet().locator('[data-opts="date"] [aria-pressed="true"]').count() === 5, '«Lunes a viernes» elige los cinco días');
+  await opt('weeks', '2').click(); await W(p, 200);
+  ok((await sheet().locator('[data-ref="dates-note"]').innerText()).includes('10 entrenamientos'), 'dos semanas: se crean 10 entrenamientos');
+  ok((await sheet().locator('[data-sh="ok"]').innerText()) === 'Guardar (10)', 'el botón dice «Guardar (10)»');
+  await sheet().locator('[data-focus="Tiro"]').click();
+  await sheet().screenshot({ path: OUT + 'opciones-entrenamiento.png' });
+  await sheet().locator('[data-sh="ok"]').click(); await W(p, 2500);
+  const serie = await p.evaluate(() => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const q = r.result.transaction('classes').objectStore('classes').getAll(); q.onsuccess = () => res(q.result.filter((c) => c.serie && c.kind === 'entrenamiento').map((c) => c.date).sort()); }; }));
+  ok(serie.length === 10 && serie[0] === '2026-11-23' && serie[9] === '2026-12-04' && !serie.includes('2026-11-28'), 'se crearon 10 entrenamientos de lunes a viernes: ' + serie.join(', '));
+  ok(await sheet().locator('.pk-sec').count() > 0, 'se abre el selector para el primer día');
+  await sheet().locator('[data-pick-ex]').first().click();
+  await sheet().locator('[data-sh="ok"]').click(); await W(p, 1200);
+  ok(await p.locator('#toast .toast-act', { hasText: 'Copiar a los otros días' }).count() === 1, 'al agregar ofrece copiar a los otros días');
+  await p.locator('#toast .toast-act').click(); await W(p, 700);
+  await p.locator('.as-wrap.open .as-btn', { hasText: 'Copiar plan' }).click(); await W(p, 2500);
+  const planes = await p.evaluate(() => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const q = r.result.transaction('classes').objectStore('classes').getAll(); q.onsuccess = () => res(q.result.filter((c) => c.serie && c.kind === 'entrenamiento').map((c) => (c.items || []).length)); }; }));
+  ok(planes.length === 10 && planes.every((n) => n === 1), 'los 10 días quedaron con el mismo plan');
+  const det2 = await scr().innerText();
+  ok(/Entrenamiento · lunes, 23 de noviembre/i.test(det2) && det2.includes('Día 1 de 10'), 'la ficha dice «Entrenamiento» y «Día 1 de 10»');
+  ok(det2.includes('Iniciar entrenamiento'), 'botón «Iniciar entrenamiento»');
+  await p.goBack(); await W(p, 500); await p.goBack(); await W(p, 500);
+
   // --- Grupo viejo: el horario escrito a mano se lee como días y hora
   await p.click('#tab-grupos'); await W(p);
   await p.locator('[data-open-group]', { hasText: '2.º B' }).click(); await W(p, 800);
@@ -191,6 +227,24 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   ok(over <= 0, 'en iPhone el formulario no se sale de lado (' + over + ' px)');
   await q.locator('.sheet-wrap.open [data-fb="ages"]').screenshot({ path: OUT + 'opciones-iphone-edad.png' });
   await ph.close();
+
+  // --- iPad viejo (Safari sin color-mix): los colores de respaldo se aplican
+  const old = await b.newContext({ ...devices['iPad Pro 11'], deviceScaleFactor: 1, serviceWorkers: 'block' });
+  await old.addInitScript(() => { try { localStorage.setItem('cancha:onboarded', '1'); } catch (e) { /* */ } });
+  await old.route('**/app/styles.css', async (route) => {
+    const r = await route.fetch();
+    const css = (await r.text()).replace('@supports not (color: color-mix(in srgb, red 50%, blue))', '@supports (display: block)').replace(/color-mix\(/g, 'colour-mix(');
+    route.fulfill({ response: r, body: css });
+  });
+  const o = await old.newPage();
+  await o.goto(BASE + 'index.html'); await o.waitForSelector('#screen-clases.active'); await W(o, 1300);
+  await o.click('#tab-ejercicios'); await W(o);
+  await o.click('#screen-ejercicios [data-act="filters"]'); await W(o, 700);
+  await o.locator('.sheet-wrap.open [data-opts="ages"] [data-opt="9-10"]').click();
+  await o.locator('.sheet-wrap.open [data-sh="ok"]').click(); await W(o, 700);
+  const bg = await o.locator('#screen-ejercicios .chip.on-chip').first().evaluate((el) => getComputedStyle(el).backgroundColor);
+  ok(/rgba\(11, 122, 59, 0\.14\)/.test(bg), 'en un iPad sin color-mix el filtro activo sigue teniendo color (' + bg + ')');
+  await old.close();
 
   ok(errs.length === 0, 'sin errores: ' + errs.join(' / '));
   await b.close();
