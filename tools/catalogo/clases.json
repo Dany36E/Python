@@ -1,0 +1,94 @@
+{
+  "nota": "Clases recomendadas: solo usan los 12 ejercicios que tienen video (2 por sección en cada deporte).",
+  "futbol": [
+    {
+      "name": "Primaria · Calentamiento, pase y velocidad",
+      "age": "Primaria (7 a 12 años)",
+      "notes": "Una clase completa con los 6 ejercicios de fútbol que traen video: activar el cuerpo, pasar raso con el interior, hidratarse a la mitad, mover los pies en la escalera, zigzag por series y cerrar con relevos. Para 20 a 35 alumnos en filas, parejas y equipos.",
+      "items": [
+        {
+          "exId": "cf-01",
+          "min": 7
+        },
+        {
+          "exId": "cf-02",
+          "min": 9
+        },
+        {
+          "exId": "cf-03",
+          "min": 9
+        },
+        {
+          "type": "pause",
+          "label": "Hidratación",
+          "min": 2
+        },
+        {
+          "exId": "cf-15",
+          "min": 7
+        },
+        {
+          "exId": "cf-21",
+          "min": 8,
+          "series": {
+            "n": 3,
+            "work": 2,
+            "rest": 1
+          }
+        },
+        {
+          "exId": "cf-23",
+          "min": 8
+        }
+      ]
+    }
+  ],
+  "basquet": [
+    {
+      "name": "Secundaria · Dribleo, entradas y velocidad",
+      "age": "Primaria alta y secundaria (9 a 15 años)",
+      "notes": "Una clase completa con los 6 ejercicios de básquetbol que traen video: calentar por filas, driblar jugando, cambiar de mano rumbo al aro, entrar en dos tiempos, pies rápidos con tiro cercano y relevos de velocidad.",
+      "items": [
+        {
+          "exId": "cb-01",
+          "min": 7
+        },
+        {
+          "exId": "cb-02",
+          "min": 6
+        },
+        {
+          "exId": "cb-04",
+          "min": 9
+        },
+        {
+          "type": "pause",
+          "label": "Hidratación",
+          "min": 2
+        },
+        {
+          "exId": "cb-09",
+          "min": 10,
+          "series": {
+            "n": 2,
+            "work": 4,
+            "rest": 2
+          }
+        },
+        {
+          "exId": "cb-15",
+          "min": 8
+        },
+        {
+          "exId": "cb-22",
+          "min": 8,
+          "series": {
+            "n": 3,
+            "work": 2,
+            "rest": 1
+          }
+        }
+      ]
+    }
+  ]
+}

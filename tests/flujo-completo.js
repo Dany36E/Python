@@ -33,7 +33,7 @@ async function shot(p, name) { await wait(p, 500); await p.screenshot({ path: OU
   const p = page;
 
   // --- Clases: tarjeta de la próxima clase
-  ok(await p.locator('.today .today-name').innerText() === 'Coordinación y velocidad', 'tarjeta de próxima clase muestra el ejemplo del entrenador');
+  ok(await p.locator('.today .today-name').innerText() === 'Calentamiento, pase y velocidad', 'tarjeta de próxima clase muestra el ejemplo del entrenador');
   ok((await p.locator('.today .today-meta').innerText()).includes('6 ejercicios') && (await p.locator('.today .today-min').innerText()).includes('50'), 'tarjeta: 6 ejercicios y 50′ (las pausas no cuentan como ejercicio)');
   await shot(p, 'e3_01_clases');
 
@@ -42,7 +42,7 @@ async function shot(p, name) { await wait(p, 500); await p.screenshot({ path: OU
   await wait(p, 700);
   const det = await screen(p).innerText();
   ok(det.includes('Hidratación'), 'el plan muestra la pausa de hidratación');
-  ok(/3 × 3′/.test(det), 'el plan muestra las series 3 × 3′');
+  ok(/3 × 2′/.test(det), 'el plan muestra las series 3 × 2′');
   await shot(p, 'e3_02_clase');
 
   // Añadir otra pausa
@@ -64,16 +64,16 @@ async function shot(p, name) { await wait(p, 500); await p.screenshot({ path: OU
   ok(await p.locator('.run-pause').count() === 1, 'la pausa se muestra como bloque de hidratación');
   ok((await p.locator('[data-ref="step"]').innerText()).toLowerCase().includes('pausa'), 'el encabezado dice Pausa');
   await shot(p, 'e3_04_run_pausa');
-  for (let i = 0; i < 3; i++) { await p.click('[data-run="next"]'); await wait(p, 300); }
+  for (let i = 0; i < 2; i++) { await p.click('[data-run="next"]'); await wait(p, 300); }
   ok(await p.locator('.run-series i').count() === 3, 'el bloque con series muestra 3 puntos');
   ok((await p.locator('[data-ref="sub"]').innerText()).includes('Serie 1 de 3'), 'muestra Serie 1 de 3');
-  await p.clock.fastForward('03:05');
+  await p.clock.fastForward('02:05');
   await wait(p, 400);
-  ok((await p.locator('[data-ref="sub"]').innerText()).includes('Descanso'), 'a los 3:05 está en descanso');
+  ok((await p.locator('[data-ref="sub"]').innerText()).includes('Descanso'), 'a los 2:05 está en descanso');
   await shot(p, 'e3_05_run_descanso');
   await p.clock.fastForward('01:00');
   await wait(p, 400);
-  ok((await p.locator('[data-ref="sub"]').innerText()).includes('Serie 2 de 3'), 'a los 4:05 empieza la serie 2');
+  ok((await p.locator('[data-ref="sub"]').innerText()).includes('Serie 2 de 3'), 'a los 3:05 empieza la serie 2');
   // Ir al final y terminar con confirmación
   for (let i = 0; i < 8 && !(await p.locator('.as-wrap.open').count()); i++) { await p.click('[data-run="next"]'); await wait(p, 250); }
   ok(await p.locator('.as-wrap.open').count() === 1, 'terminar pide confirmación');
@@ -234,7 +234,7 @@ async function shot(p, name) { await wait(p, 500); await p.screenshot({ path: OU
   ok(titles.includes('Porterías mías') && titles.includes('Pases por porterías de conos (copia)'), 'se conservan las dos versiones: ' + titles.join(', '));
   await q.click('#tab-clases'); await wait(q, 500);
   const clsText = await q.locator('#screen-clases').innerText();
-  ok(clsText.includes('Coordinación y velocidad'), 'la clase importada aparece');
+  ok(clsText.includes('Calentamiento, pase y velocidad'), 'la clase importada aparece');
   await q.click('#tab-grupos'); await wait(q, 500);
   await q.click('[data-open-group]'); await wait(q, 700);
   ok((await screen(q).innerText()).includes('Clase del'), 'el grupo trae la clase de hoy con su lista');

@@ -536,7 +536,8 @@
 
   // ---------------------------------------------------------------- ejemplos (solo modo local)
   // Versión 2: ejemplos revisados por un profe (sesión con inicio, pausa, series y cierre).
-  const SEED_VERSION = 4;
+  // Versión 5: Recomendados son solo los 12 ejercicios con video y vienen todos en «Ejercicios».
+  const SEED_VERSION = 5;
   function nextWeekday(days) {
     const d = new Date();
     for (let i = 1; i <= 7; i++) {
@@ -547,15 +548,12 @@
   }
   function seedFromCatalog(cat) {
     const t = Date.now() - 864e5 * 3;
-    // Clases de ejemplo: las de coordinación (con videos); la biblioteca también trae las de pase y dribleo.
-    const pick = (sport, re) => cat.sessions.find((x) => x.sport === sport && re.test(x.name)) || cat.sessions.find((x) => x.sport === sport);
-    const fut = pick('futbol', /coordinaci/i);
-    const bas = pick('basquet', /pies r|coordinaci/i);
+    // Clases de ejemplo: la clase recomendada de cada deporte. Los ejercicios con video vienen todos.
+    const fut = cat.sessions.find((x) => x.sport === 'futbol');
+    const bas = cat.sessions.find((x) => x.sport === 'basquet');
     if (!fut || !bas) return null;
-    const firsts = ['futbol', 'basquet'].map((sp) => cat.sessions.find((x) => x.sport === sp)).filter(Boolean);
-    const ids = new Set([fut, bas].concat(firsts).reduce((a, ses) => a.concat(ses.items.map((it) => it.exId).filter(Boolean)), []));
     let n = 0;
-    const exercises = cat.exercises.filter((x) => ids.has(x.id)).map((x) => Object.assign({}, x, {
+    const exercises = cat.exercises.map((x) => Object.assign({}, x, {
       id: 'ex3-' + x.id, catalogId: x.id, favorite: false, mediaType: null, mediaId: null, thumbId: null, mediaDuration: 0, mediaAspect: null,
       diagram: JSON.parse(JSON.stringify(x.diagram)), example: true, createdAt: t - (n += 1) * 60000, updatedAt: t - n * 60000,
     }));
@@ -5284,7 +5282,8 @@
       ? pics.map((x, i) => '<img class="ce-p' + i + '" alt="" loading="lazy" decoding="async" src="' + esc(x.thumbUrl) + '">').join('')
       : '<span class="ce-board">' + boardSVG(sport, sample ? sample.diagram : null) + '</span>';
     return '<button class="cat-entry" data-act="catalog" data-tint="' + sport + '"><span class="txt"><b>Recomendados</b>' +
-      '<span class="ce-sub">' + (n ? n + ' ejercicios de ' + SPORTS[sport].noun + (all.some((x) => x.videoUrl) ? ', ' + all.filter((x) => x.videoUrl).length + ' con video' : '') : 'Ejercicios listos para usar') + '</span><span class="ce-cta">Ver ejercicios' + ic('chevR') + '</span></span>' +
+      '<span class="ce-sub">' + (!n ? 'Ejercicios listos para usar' : all.every((x) => x.videoUrl) ? plural(n, 'ejercicio', 'ejercicios') + ' de ' + SPORTS[sport].noun + ' con video' + (catSessions(sport).length ? ' y ' + plural(catSessions(sport).length, 'clase lista', 'clases listas') : '')
+        : n + ' ejercicios de ' + SPORTS[sport].noun + (all.some((x) => x.videoUrl) ? ', ' + all.filter((x) => x.videoUrl).length + ' con video' : '')) + '</span><span class="ce-cta">Ver ejercicios' + ic('chevR') + '</span></span>' +
       '<span class="ce-art" aria-hidden="true">' + art + '</span></button>';
   }
   function templatesHTML() {
@@ -5315,7 +5314,7 @@
       const nf = activeFilterCount(sport) + f.tags.length;
       const sessions = catSessions(sport);
       scr.body.innerHTML =
-        '<div class="d-head"><h1 class="d-title">Recomendados</h1><p class="cat-lead">Ejercicios y clases armados con base en FIFA, FIBA y otras federaciones. Agrega los que te sirvan y cámbialos a tu gusto.</p></div>' +
+        '<div class="d-head"><h1 class="d-title">Recomendados</h1><p class="cat-lead">Ejercicios con video y clases listas, con base en FIFA, FIBA y otras federaciones. Ya vienen en tus ejercicios. Los demás los creas tú con tu propio video y se los mandas a tus profes.</p></div>' +
         segHTML('csport', [['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], sport, 'Deporte') +
         (sessions.length ? '<p class="group-label">Clases recomendadas</p><div class="list">' + sessions.map((t) => {
           const total = t.items.reduce((sum, it) => sum + itemMin(it), 0);
@@ -5326,7 +5325,9 @@
         '<button class="filter-btn' + (activeFilterCount(sport) ? ' on' : '') + '" data-act="cat-filters" aria-label="Filtros">' + ic('sliders') + '<b>' + (activeFilterCount(sport) || '') + '</b></button></div>' +
         '<div class="chips active-filters" aria-label="Filtros activos">' + activeFiltersHTML(sport) + '</div>' +
         (nf ? '<p class="result-count">' + plural(list.length, 'ejercicio', 'ejercicios') + '</p>' : '') +
-        (list.length ? groups.map((o) => '<p class="group-label">' + esc(o) + '</p><div class="grid">' + list.filter((x) => x.objective === o).map(catCardHTML).join('') + '</div>').join('')
+        // Con pocos ejercicios van en una sola cuadrícula (por tipo quedarían renglones casi vacíos).
+        (list.length ? (list.length <= 9 ? '<div class="grid">' + groups.reduce((acc, o) => acc.concat(list.filter((x) => x.objective === o)), []).map(catCardHTML).join('') + '</div>'
+          : groups.map((o) => '<p class="group-label">' + esc(o) + '</p><div class="grid">' + list.filter((x) => x.objective === o).map(catCardHTML).join('') + '</div>').join(''))
           : '<p class="no-results">No hay recomendados con estos filtros.<br><button class="link" data-act="cat-clear">Quitar filtros</button></p>');
       bindSeg(scr.body, 'csport', (v) => { sport = v; render(); scr.scroller.scrollTo({ top: 0 }); });
     }
@@ -6283,13 +6284,14 @@
   function shareCardHTML() {
     if (!S.canWrite) return '';
     return '<div class="share-card"><span class="sc-ico" aria-hidden="true">' + ic('people') + '</span>' +
-      '<span class="txt"><b>Entre profes</b><span>Manda tus ejercicios a otros entrenadores o abre los que te mandaron.</span></span>' +
+      '<span class="txt"><b>Entre profes</b><span>Graba el video de tus ejercicios y mándaselos a tus profes por WhatsApp o AirDrop. Ellos los abren en su Cancha con todo y video.</span></span>' +
       '<span class="sc-actions"><button class="btn filled" data-act="share-coaches">' + ic('share') + 'Compartir</button>' +
       '<button class="btn tinted" data-act="open-shared">' + ic('download') + 'Abrir los que me mandaron</button></span></div>';
   }
   function openShareCoaches(opts) {
     opts = opts || {};
-    const own = S.exercises.filter((e) => !e.example && !e.catalogId);
+    // Vienen elegidos los tuyos y los que tienen un video o foto que tú grabaste.
+    const own = S.exercises.filter((e) => (!e.example && !e.catalogId) || e.mediaId);
     const chosen = new Set((opts.exIds || own.map((e) => e.id)).filter((id) => getEx(id)));
     let sport = opts.exIds && opts.exIds.length && getEx(opts.exIds[0]) ? getEx(opts.exIds[0]).sport : S.sport;
     let q = '';
@@ -6393,7 +6395,7 @@
     const nv = CAT() ? CAT().exercises.filter((x) => x.videoUrl).length : 0;
     return [
       { art: 'board', title: 'Bienvenido a Cancha', text: 'Aquí preparas y das tus clases de fútbol y básquetbol.' },
-      { art: 'cards', title: 'Ejercicios listos', text: (n ? n + ' ejercicios' : 'Ejercicios') + ' para usar, ' + (nv ? 'algunos con video. ' : '') + 'Están en «Ejercicios» y también puedes crear los tuyos.' },
+      { art: 'cards', title: 'Ejercicios con video', text: (n ? n + ' ejercicios' : 'Ejercicios') + (nv === n && n ? ' con video' : '') + ' para empezar, en «Ejercicios». Crea los tuyos con tu propio video y mándaselos a tus profes.' },
       { art: 'timer', title: 'El cronómetro lleva el tiempo', text: 'Toca «Iniciar clase» y luego «Empezar». Al acabar el tiempo suena el silbato y tocas «Siguiente».' },
       { art: 'roll', title: 'Pasa lista', text: 'En tu grupo toca «Pasar lista hoy». Luego saca el reporte de asistencia en PDF.' },
       cloud
