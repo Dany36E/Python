@@ -129,7 +129,7 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   ok((await p.locator('.run-done').innerText()).includes('Estaba para el'), 'al terminar avisa que era de otro día');
   await p.click('[data-run="roll"]'); await W(p, 1200);
   const cls = await db(p, 'classes');
-  const moved = cls.find((c) => /Pies r/.test(c.name));
+  const moved = cls.find((c) => c.id === 'cl3-ej2');
   ok(moved && moved.date === '2026-11-23', 'al pasar lista la clase quedó con fecha de hoy (' + (moved && moved.date) + ')');
 
   // Reporte de asistencia: la hoja no brinca al cambiar de periodo

@@ -38,7 +38,7 @@ const dump = (p) => p.evaluate(() => new Promise((res) => { const r = indexedDB.
   ok(byId['ex3-cf-15'] && byId['ex3-cf-15'].videoUrl, 'llegan los ejemplos nuevos de coordinación con video');
   ok(byId['ex3-cf-01'] && byId['ex3-cf-01'].videoUrl, 'los ejemplos sin tocar ahora traen video');
   ok(d.cl.some((c) => c.id === 'myc1'), 'se conserva la clase propia');
-  ok(d.cl.some((c) => c.id === 'cl3-ej1' && c.name === 'Coordinación y velocidad'), 'la clase de ejemplo es la de coordinación');
+  ok(d.cl.some((c) => c.id === 'cl3-ej1' && c.name === 'Calentamiento, pase y velocidad'), 'la clase de ejemplo es la nueva, solo con ejercicios con video');
   ok(Array.isArray(d.sec) && d.sec.length === 3 && d.sec.every((x) => x.exIds.length > 0), 'tres secciones de ejemplo con ejercicios: ' + (d.sec || []).map((x) => x.name + ' ' + x.exIds.length).join(', '));
   ok(errors.length === 0, 'sin errores: ' + errors.join(' / '));
   await b.close(); srv.kill();

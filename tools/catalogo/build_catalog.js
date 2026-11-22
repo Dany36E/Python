@@ -1,4 +1,5 @@
 // Junta futbol.json y basquet.json (los escribieron los entrenadores) en app/catalog.js.
+// Solo entran los ejercicios que tienen video en app/videos/ y las clases de clases.json.
 // Uso: node tools/catalogo/build_catalog.js
 const fs = require('fs');
 const COACH = __dirname + '/';
@@ -9,6 +10,7 @@ const VIDEOS = require('path').join(__dirname, '..', '..', 'app', 'videos');
 // Opciones para filtrar (tipos, edad, alumnos, organización, espacio, material), revisadas a mano.
 // Para revisar lo que la app deduce del texto: node tools/catalogo/facetas.js
 const FACETAS = JSON.parse(fs.readFileSync(COACH + 'facetas.json', 'utf8'));
+const CLASES = fs.existsSync(COACH + 'clases.json') ? JSON.parse(fs.readFileSync(COACH + 'clases.json', 'utf8')) : null;
 for (const sport of ['futbol', 'basquet']) {
   const f = COACH + sport + '.json';
   if (!fs.existsSync(f)) { console.log('falta', f); continue; }
@@ -16,6 +18,10 @@ for (const sport of ['futbol', 'basquet']) {
   // Ejercicios agregados después (coordinación, velocidad…): futbol2.json, basquet2.json
   const more = COACH + sport + '2.json';
   if (fs.existsSync(more)) { const d2 = JSON.parse(fs.readFileSync(more, 'utf8')); data.exercises = data.exercises.concat(d2.exercises || []); data.sessions = data.sessions.concat(d2.sessions || []); }
+  // Recomendados: solo los ejercicios que tienen video (los demás se quedan en las fuentes para el futuro).
+  data.exercises = data.exercises.filter((x) => fs.existsSync(VIDEOS + '/' + x.id + '.mp4'));
+  // Clases recomendadas: las de clases.json (armadas solo con ejercicios que tienen video).
+  if (CLASES) data.sessions = CLASES[sport] || [];
   data.exercises.forEach((x) => {
     const o = {};
     FIELDS.forEach((k) => { if (x[k] !== undefined) o[k] = x[k]; });

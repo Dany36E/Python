@@ -52,20 +52,21 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   // Catálogo · agregar un ejercicio y usar una clase lista
   await p.click('#tab-ejercicios'); await W(p);
   await p.click('[data-act="catalog"]'); await W(p, 900);
-  ok(await scr(p).locator('[data-open-cat]').count() === 26, 'De entrenadores: 26 ejercicios de fútbol');
+  ok(await scr(p).locator('[data-open-cat]').count() === 6, 'Recomendados: solo los 6 ejercicios de fútbol con video');
+  ok(await scr(p).locator('[data-open-cat] .badge.vid').count() === 6, 'todos traen video');
+  ok(await scr(p).locator('[data-open-cat] .in-lib').count() === 6, 'y ya vienen en tus ejercicios');
+  ok(await scr(p).locator('[data-open-template]').count() === 1, 'una clase recomendada de fútbol');
   await scr(p).locator('[data-open-cat]', { hasText: 'Rondo 4 contra 1' }).click(); await W(p, 900);
-  await scr(p).locator('[data-act="adopt"]').click(); await W(p, 900);
-  ok(await scr(p).locator('[data-act="open-mine"]').count() === 1, 'el ejercicio queda en tus ejercicios');
+  ok(await scr(p).locator('[data-act="open-mine"]').count() === 1 && await scr(p).locator('[data-act="adopt"]').count() === 0, 'el recomendado dice «Ver en tus ejercicios»');
   await p.goBack(); await W(p, 500);
-  ok(await scr(p).locator('[data-open-cat]', { hasText: 'Rondo 4 contra 1' }).locator('.in-lib').count() === 1, 'la tarjeta dice «En tus ejercicios»');
   await scr(p).locator('[data-seg="csport"] [data-val="basquet"]').click(); await W(p, 500);
-  ok(await scr(p).locator('[data-open-cat]').count() === 24, 'De entrenadores: 24 ejercicios de básquetbol');
-  await scr(p).locator('[data-open-template]').nth(1).click(); await W(p, 800);
+  ok(await scr(p).locator('[data-open-cat]').count() === 6, 'Recomendados: solo los 6 ejercicios de básquetbol con video');
+  await scr(p).locator('[data-open-template]').first().click(); await W(p, 800);
   await scr(p).locator('[data-act="use"]').click(); await W(p, 800);
   await sheet(p).locator('[data-sh="ok"]').click(); await W(p, 1500);
-  ok((await scr(p).innerText()).includes('Contraataque'), 'se crea la clase desde la plantilla');
+  ok((await scr(p).innerText()).includes('Entradas en dos filas'), 'se crea la clase desde la plantilla');
   const exCount = await p.evaluate(() => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const q = r.result.transaction('exercises').objectStore('exercises').getAll(); q.onsuccess = () => res(q.result.filter((x) => x.catalogId && x.sport === 'basquet').length); }; }));
-  ok(exCount >= 10, 'sus ejercicios quedan en la biblioteca (' + exCount + ' de básquetbol)');
+  ok(exCount === 6, 'usa los ejercicios que ya tienes, sin repetirlos (' + exCount + ' de básquetbol)');
 
   // B04 · PDF de clase sin basura en series ni símbolos
   await scr(p).locator('[data-act="share"]').click(); await W(p);
@@ -133,7 +134,7 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
     await p.click('#screen-ejercicios [data-unfilter]'); await W(p, 500);
     ok(await p.locator('#screen-ejercicios .grid [data-open-ex]').count() === total, 'quitar el chip regresa todo');
     await p.fill('#q-ejercicios', 'rondo'); await W(p, 500);
-    ok(await p.locator('#screen-ejercicios [data-open-cat]').count() >= 1, 'buscar «rondo» muestra un ejercicio recomendado');
+    ok(await p.locator('#screen-ejercicios [data-open-ex]', { hasText: 'Rondo' }).count() === 1 && await p.locator('#screen-ejercicios [data-open-cat]').count() === 0, 'buscar «rondo» lo encuentra en tus ejercicios, sin repetirlo en recomendados');
     await p.fill('#q-ejercicios', ''); await W(p, 400);
     ok(await p.locator('#screen-ejercicios .badge.vid', { hasText: 'Video' }).count() > 0, 'los ejemplos traen video');
     // Modo clase: si la app se cierra, se puede seguir
