@@ -2383,3 +2383,12 @@ a.as-btn { text-decoration: none; }
 .fblock .date-chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .fblock .date-chips .chip { width: 100%; justify-content: center; padding: 0 6px; }
 @container (min-width: 520px) { .fblock .date-chips { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+/* Clase o entrenamiento de varios días */
+.quick-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
+.chip.quick-chip { height: 40px; padding: 0 14px; background: transparent; color: var(--tint); font-weight: 600; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tint) 40%, transparent); }
+.chip.quick-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--tint) 14%, transparent); box-shadow: inset 0 0 0 1.5px var(--tint); }
+.fb-note { margin: 12px 0 0; font-size: 15px; line-height: 1.35; color: var(--label-2); }
+.fb-note b { color: var(--tint); }
+.sheet-body > .seg:first-child { margin-bottom: 16px; }
+.c-serie { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 15px; color: var(--label-2); }
+.c-serie svg { color: var(--tint); font-size: 16px; }
