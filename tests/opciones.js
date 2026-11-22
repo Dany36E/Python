@@ -152,8 +152,18 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   await sheet().locator('[data-pick-ex="' + (await sheet().locator('[data-pick-ex]:not([data-pick-ex^="cat:"])').first().getAttribute('data-pick-ex')) + '"]').click();
   ok(/de 50 min · faltan \d+/.test(await sheet().locator('[data-ref="time"]').innerText()), 'la barra de abajo dice cuánto falta para los 50 min');
   await sheet().screenshot({ path: OUT + 'opciones-selector.png' });
+  await sheet().locator('[data-pchip="all"]').click(); await W(p, 300);
+  await sheet().locator('[data-pick-ex]', { hasText: 'Pases en cuadro con conos' }).click();
   await sheet().locator('[data-sh="ok"]').click(); await W(p, 1500);
   const ctext = await scr().innerText();
+  // Al compartir la clase salen las opciones aunque no se hayan escrito detalles
+  await scr().locator('[data-act="share"]').click(); await W(p, 600);
+  const wa = decodeURIComponent((await p.locator('.as-wrap.open a[href*="wa.me"]').getAttribute('href')).split('text=')[1]);
+  ok(wa.includes('Material: Balones y conos') && /en parejas o en filas/.test(wa), 'la clase por WhatsApp lleva material y organización elegidos');
+  const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 20000 }), p.locator('.as-wrap.open .as-btn', { hasText: 'Crear PDF' }).click()]);
+  await dl.saveAs(OUT + 'opciones-clase.pdf');
+  ok(require('fs').statSync(OUT + 'opciones-clase.pdf').size > 3000, 'PDF de la clase con ejercicios llenados con opciones');
+  await W(p, 600);
   ok(ctext.includes(recName), 'el recomendado quedó en la clase: ' + recName);
   ok(/faltan \d+ de 50 min|min de más|justo 50 min/.test(ctext), 'la clase compara su tiempo con los 50 min');
   await p.goBack(); await W(p, 500);

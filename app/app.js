@@ -2463,14 +2463,27 @@
     actionSheet({ title: 'Agregar a una clase de ' + SPORTS[ex.sport].noun, actions, tint: ex.sport });
   }
 
+  // Lo que se comparte de un ejercicio (WhatsApp, PDF): el texto libre o, si no hay, lo elegido.
+  function shareFacts(ex) {
+    const z = facetsOf(ex);
+    const sp = SPORTS[ex.sport] ? ex.sport : 'futbol';
+    const size = z.sizes.length && z.sizes.length < FACETS.SIZES.length ? sizesText(z.sizes) + ' alumnos' : '';
+    return {
+      tags: z.tags.join(', '),
+      levels: inOrder('levels', z.levels, sp).map(lvl).join(' o '),
+      players: ex.players || [size, facetText('forms', z.forms, sp).toLowerCase()].filter(Boolean).join(', '),
+      age: ex.age || agesText(z.ages),
+      space: ex.space || facetText('spaces', z.spaces, sp),
+      material: ex.material || facetText('gear', z.gear, sp),
+    };
+  }
   function exerciseText(ex) {
     const points = String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
-    const z = facetsOf(ex);
-    const lines = ['*' + ex.title + '*', [z.tags.join(', '), inOrder('levels', z.levels, ex.sport).map(lvl).join(' o '), (Number(ex.duration) || 0) + ' min'].filter(Boolean).join(' · ')];
-    const players = ex.players || [sizesText(z.sizes), facetText('forms', z.forms, ex.sport).toLowerCase()].filter(Boolean).join(', ');
-    const facts = [players ? 'Alumnos: ' + players : '', ex.age || z.ages.length ? 'Edad: ' + (ex.age || agesText(z.ages)) : '', ex.space || z.spaces.length ? 'Espacio: ' + (ex.space || facetText('spaces', z.spaces, ex.sport)) : ''].filter(Boolean).join(' · ');
+    const f = shareFacts(ex);
+    const lines = ['*' + ex.title + '*', [f.tags, f.levels, (Number(ex.duration) || 0) + ' min'].filter(Boolean).join(' · ')];
+    const facts = [f.players ? 'Alumnos: ' + f.players : '', f.age ? 'Edad: ' + f.age : '', f.space ? 'Espacio: ' + f.space : ''].filter(Boolean).join(' · ');
     if (facts) lines.push(facts);
-    if (ex.material || z.gear.length) lines.push('Material: ' + (ex.material || facetText('gear', z.gear, ex.sport)));
+    if (f.material) lines.push('Material: ' + f.material);
     if (ex.description) { lines.push(''); lines.push(ex.description); }
     if (points.length) { lines.push(''); points.forEach((p) => lines.push('• ' + p)); }
     return lines.join('\n');
@@ -2993,7 +3006,11 @@
         sheet.setBusy(true, 'Agregando…');
         const ids = [];
         for (const id of sel) {
-          if (id.indexOf('cat:') === 0) { const ex = await adoptCatalogEx(catEx(id.slice(4)), true); if (ex) ids.push(ex.id); } else ids.push(id);
+          if (id.indexOf('cat:') !== 0) { ids.push(id); continue; }
+          // Si un recomendado no se pudo guardar, se avisa (commit ya mostró el error) y no se agrega nada.
+          const ex = await adoptCatalogEx(catEx(id.slice(4)), true);
+          if (!ex) { sheet.setBusy(false); return; }
+          ids.push(ex.id);
         }
         const ok = await mutateClass(classId, (x) => { ids.forEach((id) => x.items.push({ exId: id, min: (getEx(id) || {}).duration || 10 })); });
         sheet.setBusy(false);
@@ -5632,9 +5649,10 @@
       t += r.min;
       const ex = r.ex;
       if (ex) {
-        const meta = [ex.objective, ex.players, ex.space].filter(Boolean).join(' · ');
+        const f = shareFacts(ex);
+        const meta = [f.tags, f.players, f.space].filter(Boolean).join(' · ');
         if (meta) lines.push(meta);
-        if (ex.material) lines.push('Material: ' + ex.material);
+        if (f.material) lines.push('Material: ' + f.material);
         String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean).slice(0, 4).forEach((p) => lines.push('• ' + p));
         if (ex.link) lines.push('Video: ' + ex.link);
       }
@@ -5823,11 +5841,12 @@
         const desc = ex.description ? doc.splitTextToSize(ex.description, TW) : [];
         const pts = String(ex.keyPoints || '').split('\n').map((x) => x.trim().replace(/^[-•·*]\s*/, '')).filter(Boolean);
         const ptLines = pts.map((p) => doc.splitTextToSize(p, TW - 12));
-        const meta = [ex.objective, fmtMin(r.min) + ' min', r.series ? seriesText(r.series) : '', ex.players ? 'Jugadores: ' + ex.players : '', ex.space ? 'Espacio: ' + ex.space : '', ex.age].filter(Boolean).join('  ·  ');
+        const f = r.ex ? shareFacts(ex) : {};
+        const meta = [f.tags || ex.objective, fmtMin(r.min) + ' min', r.series ? seriesText(r.series) : '', f.players ? 'Alumnos: ' + f.players : '', f.space ? 'Espacio: ' + f.space : '', f.age].filter(Boolean).join('  ·  ');
         const metaLines = doc.splitTextToSize(meta, TW);
         doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
         const tl = doc.splitTextToSize(ex.title, TW);
-        const textH = tl.length * 16 + metaLines.length * 12 + 4 + (desc.length ? desc.length * 13 + 6 : 0) + ptLines.reduce((s, l) => s + l.length * 13 + 3, 0) + (ex.material ? 15 : 0) + (ex.link ? 15 : 0);
+        const textH = tl.length * 16 + metaLines.length * 12 + 4 + (desc.length ? desc.length * 13 + 6 : 0) + ptLines.reduce((s, l) => s + l.length * 13 + 3, 0) + (f.material ? 15 : 0) + (ex.link ? 15 : 0);
         const blockH = Math.max(84, textH) + 22;
         if (y + blockH > H - M - 16) { doc.addPage(); y = M + 10; }
         doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...tint);
@@ -5842,7 +5861,7 @@
         doc.setFontSize(10); doc.setTextColor(...ink);
         if (desc.length) { doc.text(desc, TX, ty); ty += desc.length * 13 + 6; }
         ptLines.forEach((l) => { doc.setTextColor(...tint); doc.text('•', TX, ty); doc.setTextColor(...ink); doc.text(l, TX + 12, ty); ty += l.length * 13 + 3; });
-        if (ex.material) { doc.setFontSize(9.5); doc.setTextColor(...grey); doc.text('Material: ' + ex.material, TX, ty + 2, { maxWidth: TW }); ty += 15; }
+        if (f.material) { doc.setFontSize(9.5); doc.setTextColor(...grey); doc.text('Material: ' + f.material, TX, ty + 2, { maxWidth: TW }); ty += 15; }
         if (ex.link) { doc.setFontSize(9.5); doc.setTextColor(...tint); try { doc.textWithLink('Ver video de referencia', TX, ty + 2, { url: ex.link }); } catch (e) { doc.text('Video: ' + ex.link, TX, ty + 2, { maxWidth: TW }); } }
         t += r.min;
         y += blockH;
