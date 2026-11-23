@@ -116,6 +116,14 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   const edited = mine.find((c) => c.date === '2026-12-01');
   await q.evaluate((id) => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const tx = r.result.transaction('classes', 'readwrite'); const st = tx.objectStore('classes'); st.get(id).onsuccess = (e) => { const c = e.target.result; c.name = 'Mi clase cambiada'; c.updatedAt = Date.now() + 1000; st.put(c); }; tx.oncomplete = () => res(); }; }), edited.id);
 
+  // Los dos cambian la misma clase guardada
+  const setDoc = (pg, id, patch) => pg.evaluate(([cid, pt]) => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const tx = r.result.transaction('classes', 'readwrite'); const st = tx.objectStore('classes'); st.get(cid).onsuccess = (e) => { const c = Object.assign(e.target.result, pt, { updatedAt: Date.now() + 2000 }); st.put(c); }; tx.oncomplete = () => res(); }; }), [id, patch]);
+  const tplA = (await db(q, 'classes')).find((c) => c.template && /Primaria/.test(c.name));
+  await setDoc(q, tplA.id, { name: 'Mi versión de primaria' });
+  await setDoc(p, tplA.id, { notes: 'Nota nueva del jefe' });
+  await p.reload(); await W(p, 1800);
+  await p.locator('#screen-clases [data-open-plan]').first().click(); await W(p, 900);
+
   // ---------- Jefe: cambia el orden y reenvía
   await scr(p).locator('[data-act="pl-order"]').click(); await W(p, 400);
   await scr(p).locator('[data-pl-down="0"]').click(); await W(p, 900);
@@ -135,13 +143,41 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   ok(after.find((c) => c.id === edited.id).name === 'Mi clase cambiada', 'la clase que cambió el maestro se quedó como la dejó');
   const d24 = after.find((c) => c.date === '2026-11-24');
   ok(d24.name === mine.find((c) => c.date === '2026-11-26').name, 'las demás se actualizaron con el nuevo orden');
-  ok(!cls.some((c) => / \(copia\)$/.test(c.name || '')), 'no se hicieron copias de clases');
+  ok(!cls.some((c) => !c.template && / \(copia\)$/.test(c.name || '')), 'no se hicieron copias de clases del calendario');
+  const tpls2 = cls.filter((c) => c.template);
+  const copyA = tpls2.find((c) => c.name === tplA.name + ' (copia)');
+  ok(tpls2.find((c) => c.id === tplA.id).name === 'Mi versión de primaria' && copyA && copyA.notes === 'Nota nueva del jefe', 'si los dos cambiaron una clase guardada, el maestro conserva la suya y recibe la del jefe como copia');
+  const recP = (await meta(q, 'plans'))[0];
+  ok(recP.classIds.includes(copyA.id) && !recP.classIds.includes(tplA.id), 'su plan usa la versión nueva del jefe');
   ok((await meta(q, 'plans')).length === 1, 'sigue un solo plan');
 
   // Respaldo del jefe lleva el plan
   await p.goBack(); await W(p, 600);
   ok((await meta(p, 'plans'))[0].assigned.length === 1, 'el jefe guarda a quién se lo asignó');
-  ok(A.p.errs.length === 0 && q.errs.length === 0, 'sin errores: ' + A.p.errs.concat(q.errs).join(' / '));
+  // Sin clases con fecha también se puede crear un plan
+  const C = await open();
+  await C.p.evaluate(() => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const tx = r.result.transaction('classes', 'readwrite'); tx.objectStore('classes').clear(); tx.oncomplete = () => res(); }; }));
+  await C.p.reload(); await W(C.p, 1800);
+  ok(await C.p.locator('#screen-clases .empty').count() === 1 && await C.p.locator('#screen-clases [data-act="new-plan"]').count() >= 1, 'sin clases con fecha sigue «Arma el plan de un grado»');
+  // Respaldo con un plan cambiado en los dos aparatos: no se pierde ninguna versión
+  const planId = (await meta(p, 'plans'))[0].id;
+  for (let i = 0; i < 3 && await p.locator('.stack-screen.in').count(); i++) { await p.goBack(); await W(p, 500); }
+  await p.click('#screen-clases [data-act="backup"]'); await W(p, 700);
+  await sheet(p).locator('[data-bk="full"]').click(); await W(p, 2500);
+  const [bk] = await Promise.all([p.waitForEvent('download', { timeout: 20000 }).catch(() => null), sheet(p).locator('[data-file-share]').click()]);
+  await W(p, 600);
+  if (bk) {
+    const bf = OUT + 'planes-respaldo.zip'; await bk.saveAs(bf);
+    await p.evaluate((id) => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const tx = r.result.transaction('meta', 'readwrite'); const st = tx.objectStore('meta'); st.get('plans').onsuccess = (e) => { const l = e.target.result; const x = l.find((y) => y.id === id); x.name = 'Nombre cambiado aquí'; x.updatedAt = Date.now() + 5000; st.put(l, 'plans'); }; tx.oncomplete = () => res(); }; }), planId);
+    // el plan del respaldo también es más nuevo que la última vez que se sincronizó
+    await p.evaluate((id) => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const tx = r.result.transaction('meta', 'readwrite'); const st = tx.objectStore('meta'); st.get('plans').onsuccess = (e) => { const l = e.target.result; l.find((y) => y.id === id).syncedAt = 1; st.put(l, 'plans'); }; tx.oncomplete = () => res(); }; }), planId);
+    await p.reload(); await W(p, 1800);
+    await importFile(p, bf);
+    await sheet(p).locator('[data-sh="ok"]').click(); await W(p, 2500);
+    const pls = await meta(p, 'plans');
+    ok(pls.length === 2 && pls.some((x) => x.name === 'Nombre cambiado aquí') && pls.some((x) => / \(copia\)$/.test(x.name)), 'un plan cambiado en los dos aparatos se guarda como copia: ' + pls.map((x) => x.name).join(', '));
+  } else ok(false, 'no se pudo crear el respaldo');
+  ok(A.p.errs.length === 0 && q.errs.length === 0 && C.p.errs.length === 0, 'sin errores: ' + A.p.errs.concat(q.errs, C.p.errs).join(' / '));
   await b.close();
   console.log(fails ? fails + ' FALLAS' : 'TODO BIEN');
   process.exit(fails ? 1 : 0);
