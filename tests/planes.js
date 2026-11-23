@@ -86,11 +86,12 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   await importFile(q, zip1);
   ok((await sheet(q).locator('.sh-title').innerText()) === 'Tu plan: 5.º de primaria', 'el maestro ve «Tu plan: 5.º de primaria»');
   const itxt = await sheet(q).innerText();
-  ok(itxt.includes('Toño') && /\d+ clases/.test(itxt) && itxt.includes('12 ejercicios') && itxt.includes('Se quitan las clases y grupos de ejemplo'), 'dice quién lo manda, cuántas clases y ejercicios');
+  ok(itxt.includes('Toño') && /\d+ clases/.test(itxt) && itxt.includes('12 ejercicios') && itxt.includes('Se quitan los ejemplos'), 'dice quién lo manda, cuántas clases y ejercicios');
   await sheet(q).screenshot({ path: OUT + 'planes-abrir.png' });
   await sheet(q).locator('[data-sh="ok"]').click(); await W(q, 3500);
-  ok((await q.locator('.alert-wrap, .as-wrap.open, .alert').last().innerText()).includes('¡Listo, Profe Juan!'), 'le da la bienvenida con su primera clase');
-  await q.locator('.alert-wrap button, .alert button').last().click().catch(() => {}); await W(q, 700);
+  const welcome = await q.locator('.as-wrap.open').innerText();
+  ok(welcome.includes('¡Listo, Profe Juan!') && welcome.includes('Tu primera clase es') && welcome.includes('agrega a tus alumnos'), 'le da la bienvenida con su primera clase y le pide agregar alumnos');
+  await q.locator('.as-wrap.open .as-btn', { hasText: 'Después' }).click(); await W(q, 700);
   let cls = await db(q, 'classes');
   const mine = cls.filter((c) => c.planId && !c.template);
   ok(mine.length > 40 && mine.every((c) => c.date >= '2026-11-24' && [2, 4].includes(new Date(c.date + 'T12:00').getDay())), 'tiene sus ' + mine.length + ' clases del ciclo en martes y jueves');
@@ -109,7 +110,8 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   ok(txt.includes('Tu plan · de Toño') && txt.includes('Mandar mi avance a Toño'), 'la pantalla del plan del maestro tiene «Mandar mi avance»');
   await scr(q).screenshot({ path: OUT + 'planes-maestro-plan.png', fullPage: true });
   await scr(q).locator('[data-act="pl-progress"]').click(); await W(q, 700);
-  ok((await q.locator('.as-wrap.open').innerText()).includes('Clases dadas: 0 de 0'), 'el avance dice cuántas clases lleva');
+  const prog = await q.locator('.as-wrap.open').innerText();
+  ok(prog.includes('Hola Toño, soy Profe Juan (5.º A)') && prog.includes('Todavía no empiezo el plan') && /Me faltan \d+ clases; la siguiente es mañana/.test(prog), 'el avance suena como lo diría el profe: ' + prog.split('\n').slice(1, 4).join(' | '));
   await q.locator('.as-wrap.open .as-btn.bold').last().click(); await W(q, 500);
   await q.goBack(); await W(q, 600);
   // El maestro cambia una clase (le cambia el nombre)
@@ -118,7 +120,8 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
 
   // Los dos cambian la misma clase guardada
   const setDoc = (pg, id, patch) => pg.evaluate(([cid, pt]) => new Promise((res) => { const r = indexedDB.open('cancha'); r.onsuccess = () => { const tx = r.result.transaction('classes', 'readwrite'); const st = tx.objectStore('classes'); st.get(cid).onsuccess = (e) => { const c = Object.assign(e.target.result, pt, { updatedAt: Date.now() + 2000 }); st.put(c); }; tx.oncomplete = () => res(); }; }), [id, patch]);
-  const tplA = (await db(q, 'classes')).find((c) => c.template && /Primaria/.test(c.name));
+  const tplA = (await db(q, 'classes')).find((c) => c.template && c.sport === 'futbol');
+  ok(!/^(Primaria|Secundaria) · /.test(tplA.name), 'las clases guardadas de las recomendadas no traen «Primaria ·» en el nombre: ' + tplA.name);
   await setDoc(q, tplA.id, { name: 'Mi versión de primaria' });
   await setDoc(p, tplA.id, { notes: 'Nota nueva del jefe' });
   await p.reload(); await W(p, 1800);
@@ -127,7 +130,8 @@ const W = (p, ms) => p.waitForTimeout(ms || 450);
   // ---------- Jefe: cambia el orden y reenvía
   await scr(p).locator('[data-act="pl-order"]').click(); await W(p, 400);
   await scr(p).locator('[data-pl-down="0"]').click(); await W(p, 900);
-  await scr(p).locator('[data-pl-resend]').click(); await W(p, 800);
+  ok((await scr(p).locator('.pl-stale').innerText()).includes('Profe Juan todavía tiene la versión anterior'), 'el jefe ve que Profe Juan tiene la versión anterior');
+  await scr(p).locator('.pl-stale [data-pl-resend]').click(); await W(p, 800);
   ok((await sheet(p).locator('.sh-title').innerText()) === 'Reenviar a Profe Juan', 'reenviar abre la misma asignación');
   await sheet(p).locator('[data-sh="ok"]').click();
   const zip2 = await download(p, 'plan-juan-2.zip');
