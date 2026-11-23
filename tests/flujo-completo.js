@@ -15,7 +15,8 @@ async function setup(browser, dev, scheme) {
   page.errs = [];
   page.on('pageerror', (e) => page.errs.push('pageerror: ' + e.message));
   page.on('console', (m) => { if (m.type() === 'error') page.errs.push('console: ' + m.text()); });
-  await page.clock.install();
+  // Fecha fija (domingo): la próxima clase de ejemplo es la de fútbol del lunes.
+  await page.clock.install({ time: new Date('2026-11-22T10:00:00') });
   await page.goto(URL);
   await page.waitForSelector('#screen-clases.active');
   await page.waitForTimeout(900);

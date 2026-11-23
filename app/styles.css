@@ -2275,8 +2275,8 @@ a.as-btn { text-decoration: none; }
 .glass-btn.cap { background: var(--glass); border: 0.5px solid var(--glass-edge); }
 
 /* Modo oscuro: franjas de pasto y duela sin deslumbrar */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.band-basquet, .band-futbol) { filter: brightness(0.78) saturate(0.9); } }
-:root[data-theme="dark"] :is(.band-basquet, .band-futbol) { filter: brightness(0.78) saturate(0.9); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.band-basquet, .band-futbol, .band-ambos) { filter: brightness(0.78) saturate(0.9); } }
+:root[data-theme="dark"] :is(.band-basquet, .band-futbol, .band-ambos) { filter: brightness(0.78) saturate(0.9); }
 
 /* Sombras neutras en vez de resplandores de color */
 .fab, .onb-next, .rc.big { box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.12); }
@@ -2535,6 +2535,32 @@ body:has(.as-wrap) .toast.show, body:has(.alert-wrap) .toast.show { transform: t
 .tpl-new { border: 1.5px dashed rgba(var(--tint-rgb), 0.45); background: transparent; box-shadow: none; }
 .tpl-new .tpl-band { align-items: flex-start; justify-content: center; color: var(--tint); font-size: 30px; }
 @media (min-width: 760px) { .tpl-card { width: 236px; } }
+/* Planes por grado */
+.band-ambos { background: linear-gradient(105deg, #2F8C48 0 54%, #C9853F 54% 100%); color: #FFFFFF; }
+.band-ambos .tpl-kind, .band-ambos .tpl-min { text-shadow: 0 1px 1px rgba(0, 0, 0, 0.28); }
+.tpl-min small { margin-left: 4px; font: 700 13px/1 -apple-system, system-ui, sans-serif; letter-spacing: 0; }
+.acct-chip { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px 12px 12px; margin: 0 0 18px; border-radius: 18px; background: var(--bg-elev); box-shadow: var(--lift); text-align: left; transition: transform 0.15s var(--ease); }
+.acct-chip:active { transform: scale(0.985); }
+.acct-chip .avatar { width: 42px; height: 42px; font-weight: 700; font-size: 18px; color: var(--tint); }
+.acct-chip .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.acct-chip b { font-size: 16px; color: var(--label); }
+.acct-chip .txt span { font-size: 14px; color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acct-chip .chev { flex: none; color: var(--label-3); }
+.pl-facts { margin: 4px 0 18px; }
+.pl-hint { margin-top: -2px; }
+.pl-more { margin: 8px 0 18px; }
+.pl-sum { margin: 14px 16px 0; font-size: 14px; line-height: 1.4; }
+.imp-note { margin: 14px 16px 0; font-size: 14px; line-height: 1.4; }
+.section-head .sh-links { display: flex; align-items: center; gap: 18px; }
+.pl-row { cursor: default; }
+.pl-ord { flex: none; display: flex; gap: 6px; margin-left: auto; }
+.pl-btn { width: 38px; height: 38px; border-radius: 19px; display: grid; place-items: center; background: var(--fill); color: var(--label); font-size: 18px; transition: transform 0.15s, opacity 0.2s; }
+.pl-btn:active { transform: scale(0.92); }
+.pl-btn:disabled { opacity: 0.3; }
+.pl-btn.rm { color: var(--danger); }
+.pl-teacher .avatar { flex: none; }
+.pl-teacher .cap { flex: none; margin-left: auto; color: var(--tint); font-weight: 600; }
+.more-link { display: block; margin: 10px auto 22px; font-weight: 600; font-size: 16px; color: var(--tint); }
 /* «Empezar desde» en Nueva clase */
 .from-tpl .chips.wrap { padding: 14px 16px 6px; }
 .from-tpl .chip b { margin-left: 4px; font-weight: 600; color: var(--label-2); font-variant-numeric: tabular-nums; }
