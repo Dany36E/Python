@@ -741,8 +741,8 @@
     let chain = Promise.resolve();
     let pending = 0;
     async function reload() {
-      const r = await Promise.all([st.all('exercises'), st.all('classes'), st.all('groups'), st.get('meta', 'sections')]);
-      const snap = { exercises: r[0] || [], classes: r[1] || [], groups: r[2] || [], sections: Array.isArray(r[3]) ? r[3] : [], fromCache: false };
+      const r = await Promise.all([st.all('exercises'), st.all('classes'), st.all('groups'), st.get('meta', 'sections'), st.get('meta', 'plans')]);
+      const snap = { exercises: r[0] || [], classes: r[1] || [], groups: r[2] || [], sections: Array.isArray(r[3]) ? r[3] : [], plans: Array.isArray(r[4]) ? r[4] : [], fromCache: false };
       listeners.forEach((fn) => fn(snap));
     }
     // Las escrituras van en fila; la pantalla se recarga desde la base solo cuando ya no hay pendientes.
@@ -801,6 +801,16 @@
       deleteSection: (id) => write(async () => {
         const list = (await st.get('meta', 'sections')) || [];
         await st.put('meta', list.filter((x) => x.id !== id), 'sections');
+      }),
+      savePlan: (pl) => write(async () => {
+        const list = (await st.get('meta', 'plans')) || [];
+        const i = list.findIndex((x) => x.id === pl.id);
+        if (i >= 0) list[i] = plain(pl); else list.push(plain(pl));
+        await st.put('meta', list, 'plans');
+      }),
+      deletePlan: (id) => write(async () => {
+        const list = (await st.get('meta', 'plans')) || [];
+        await st.put('meta', list.filter((x) => x.id !== id), 'plans');
       }),
       me: null,
       profiles: async () => ({}),
@@ -879,8 +889,8 @@
         try { return (await user.profiles(ids)) || {}; } catch (e) { return {}; }
       },
       subscribe(fn, onError) {
-        let ex = null; let cl = null; let gr = null; let sc = []; let exC = true; let clC = true; let grC = true;
-        const emit = () => { if (ex && cl && gr) fn({ exercises: ex, classes: cl, groups: gr, sections: sc, fromCache: exC || clC || grC }); };
+        let ex = null; let cl = null; let gr = null; let sc = []; let pl = []; let exC = true; let clC = true; let grC = true;
+        const emit = () => { if (ex && cl && gr) fn({ exercises: ex, classes: cl, groups: gr, sections: sc, plans: pl, fromCache: exC || clC || grC }); };
         const u1 = db.collection('exercises').onSnapshot((s) => {
           ex = s.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); exC = s.metadata.fromCache; emit();
         }, (e) => onError && onError(e));
@@ -894,7 +904,11 @@
         try {
           u4 = db.collection('sections').onSnapshot((snp) => { sc = snp.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); emit(); }, () => {});
         } catch (e) { /* sin secciones */ }
-        return () => { u1(); u2(); u3(); u4(); };
+        let u5 = () => {};
+        try {
+          u5 = db.collection('plans').onSnapshot((snp) => { pl = snp.docs.map((d) => Object.assign({}, d.data(), { id: d.id })); emit(); }, () => {});
+        } catch (e) { /* sin planes */ }
+        return () => { u1(); u2(); u3(); u4(); u5(); };
       },
       saveExercise: (x) => queue('e:' + x.id, () => withRetry(() => db.collection('exercises').doc(x.id).set(body(x)))),
       deleteExercise: (id) => queue('e:' + id, () => withRetry(() => db.collection('exercises').doc(id).delete())),
@@ -904,6 +918,8 @@
       deleteGroup: (id) => queue('g:' + id, () => withRetry(() => db.collection('groups').doc(id).delete())),
       saveSection: (x) => queue('s:' + x.id, () => withRetry(() => db.collection('sections').doc(x.id).set(body(x)))),
       deleteSection: (id) => queue('s:' + id, () => withRetry(() => db.collection('sections').doc(id).delete())),
+      savePlan: (x) => queue('p:' + x.id, () => withRetry(() => db.collection('plans').doc(x.id).set(body(x)))),
+      deletePlan: (id) => queue('p:' + id, () => withRetry(() => db.collection('plans').doc(id).delete())),
       async putMedia(blob, type) {
         const r = await withRetry(() => assets.upload(blob, type ? { type } : undefined), 'store_unavailable');
         return r.id;
@@ -936,7 +952,7 @@
   // ---------------------------------------------------------------- estado
   const S = {
     backend: null, ready: false, canWrite: false, stale: false, error: null,
-    exercises: [], classes: [], groups: [], sections: [],
+    exercises: [], classes: [], groups: [], sections: [], plans: [],
     fx: {},
     names: {}, namesAsked: new Set(),
     tab: 'clases',
@@ -1769,7 +1785,7 @@
     let body;
     if (!S.ready) body = '<div class="list">' + [0, 1, 2].map(() => '<div class="cell"><span class="date-tile shimmer"></span><span class="txt"><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></span></div>').join('') + '</div>';
     else if (!list.length) {
-      body = (savedClasses().length ? savedStripHTML() : '') + '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('futbol') + '</span></div><h2>Arma tu primera clase</h2>' +
+      body = (savedClasses().length ? savedStripHTML() : '') + (S.plans.length ? plansStripHTML() : '') + '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('futbol') + '</span></div><h2>Arma tu primera clase</h2>' +
         '<p>Elige ejercicios, ordénalos y ajusta los minutos. Luego la das con el cronómetro.</p>' +
         (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' + (CAT() ? '<button class="btn tinted" data-act="catalog">Ver clases recomendadas</button>' : '') + '</div>' : '') + '</div>';
     } else {
@@ -1777,10 +1793,15 @@
       const up = rest.filter((c) => !c.date || c.date >= t);
       const past = rest.filter((c) => c.date && c.date < t);
       body = (next ? todayCardHTML(next) : '');
-      if (up.length) body += '<p class="group-label">Próximas</p><div class="list">' + up.map((c) => classCellHTML(c)).join('') + '</div>';
-      if (S.ready) body += savedStripHTML();
-      if (past.length) body += '<p class="group-label">Anteriores</p><div class="list">' + past.map((c) => classCellHTML(c)).join('') + '</div>';
+      // Con un plan del ciclo hay muchas clases: se ven las primeras y el resto con «Ver todas».
+      const LIM = 10;
+      if (up.length) body += '<p class="group-label">Próximas</p><div class="list">' + (S.allUp ? up : up.slice(0, LIM)).map((c) => classCellHTML(c)).join('') + '</div>' +
+        (up.length > LIM && !S.allUp ? '<button class="link more-link" data-act="all-up">Ver las ' + up.length + ' próximas</button>' : '');
+      if (S.ready) body += savedStripHTML() + plansStripHTML();
+      if (past.length) body += '<p class="group-label">Anteriores</p><div class="list">' + (S.allPast ? past : past.slice(0, LIM)).map((c) => classCellHTML(c)).join('') + '</div>' +
+        (past.length > LIM && !S.allPast ? '<button class="link more-link" data-act="all-past">Ver las ' + past.length + ' anteriores</button>' : '');
     }
+    if (S.ready) body = accountChipHTML() + body;
     if (S.ready && S.canWrite) body += templatesHTML();
     body += examplesNoteHTML();
     const sig = ['cl', S.ready, S.canWrite, body, noteHTML('clases')].join('|');
@@ -1930,7 +1951,7 @@
   function autoGrow(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(88, ta.scrollHeight) + 'px'; }
 
   // Guarda primero y, si falla, regresa la pantalla a como estaba.
-  const SAVE = { exercises: 'saveExercise', classes: 'saveClass', groups: 'saveGroup', sections: 'saveSection' };
+  const SAVE = { exercises: 'saveExercise', classes: 'saveClass', groups: 'saveGroup', sections: 'saveSection', plans: 'savePlan' };
   async function commit(kind, obj, prev) {
     replaceLocal(kind, obj);
     renderAll(); refreshScreens();
@@ -2664,6 +2685,651 @@
       '</div>';
   }
 
+  // ---------------------------------------------------------------- planes por grado
+  // El jefe arma el plan de un grado: sus clases guardadas en orden, los días y el ciclo escolar.
+  // Se lo asigna a cada maestro con un archivo; al abrirlo, la Cancha del maestro queda a su nombre
+  // con su grupo, todas las clases del ciclo ya programadas y los ejercicios con sus videos.
+  const getPlan = (id) => S.plans.find((x) => x.id === id) || null;
+  const myPlans = () => S.plans.filter((x) => !x.received).sort((a, b) => (a.order || 0) - (b.order || 0));
+  const gotPlans = () => S.plans.filter((x) => x.received).sort((a, b) => (b.received.at || 0) - (a.received.at || 0));
+  const planTint = (x) => (x && SPORTS[x.sport] ? x.sport : 'clases');
+  const planBand = (x) => (x && SPORTS[x.sport] ? x.sport : 'ambos');
+  const planClasses = (x) => (x && Array.isArray(x.classIds) ? x.classIds.map(getClass).filter((c) => c && c.template) : []);
+  const planCalendar = (x) => realClasses().filter((c) => c.planId === x.id).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const initialOf = (name) => (String(name || '').replace(/^(profe|maestr[oa]|coach|entrenador[a]?)\s+/i, '').trim().charAt(0) || '?').toUpperCase();
+  function cycleRange() { const tr = trimesters(); return [tr[0][2], tr[2][3]]; }
+  function dShort(s) { const d = parseDay(s); if (!d) return ''; try { return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' }).format(d).replace(/\./g, ''); } catch (e) { return s; } }
+  const spanText = (a, b) => (a && b ? 'del ' + dShort(a) + ' al ' + dShort(b) : '');
+  // Vacaciones y días festivos aproximados del calendario de la SEP (cada escuela puede variar un poco):
+  // invierno del 22 de diciembre al 6 de enero, Semana Santa y de Pascua, y los festivos oficiales.
+  function easterOf(y) {
+    const a = y % 19; const b = Math.floor(y / 100); const c = y % 100; const d = Math.floor(b / 4); const e = b % 4;
+    const f = Math.floor((b + 8) / 25); const g = Math.floor((b - f + 1) / 3); const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4); const k = c % 4; const l = (32 + 2 * e + 2 * i - h - k) % 7; const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const n = h + l - 7 * m + 114;
+    return new Date(y, Math.floor(n / 31) - 1, (n % 31) + 1);
+  }
+  const nthMonday = (y, mo, n) => { const w = new Date(y, mo, 1).getDay(); return new Date(y, mo, 1 + ((8 - w) % 7) + (n - 1) * 7).getDate(); };
+  function sepOff(ds) {
+    const d = parseDay(ds);
+    if (!d) return false;
+    const y = d.getFullYear(); const mo = d.getMonth(); const day = d.getDate();
+    if ((mo === 11 && day >= 22) || (mo === 0 && day <= 6)) return true;
+    const e = easterOf(y);
+    const from = new Date(y, e.getMonth(), e.getDate() - 6); const to = new Date(y, e.getMonth(), e.getDate() + 5);
+    if (d >= from && d <= to) return true;
+    const md = (mo + 1) + '-' + day;
+    if (['9-16', '11-2', '5-1', '5-5', '5-15'].indexOf(md) >= 0) return true;
+    return (mo === 1 && day === nthMonday(y, 1, 1)) || (mo === 2 && day === nthMonday(y, 2, 3)) || (mo === 10 && day === nthMonday(y, 10, 3));
+  }
+  // Días de clase entre dos fechas (incluidas) en los días de la semana elegidos.
+  function planDates(days, start, end, skip) {
+    const a = parseDay(start); const b = parseDay(end);
+    const out = [];
+    if (!a || !b || !days || !days.length) return out;
+    for (let i = 0; i < 800 && out.length < 400; i++) {
+      const d = new Date(a.getFullYear(), a.getMonth(), a.getDate() + i);
+      if (d > b) break;
+      if (days.indexOf(d.getDay()) >= 0 && !(skip && sepOff(dayStr(d)))) out.push(dayStr(d));
+    }
+    return out;
+  }
+  function mutatePlan(id, fn) {
+    const cur = getPlan(id);
+    if (!cur) return Promise.resolve(false);
+    const x = plain(cur);
+    fn(x);
+    x.updatedAt = Date.now();
+    return commit('plans', x, cur);
+  }
+
+  // Tarjetas en la pestaña Clases.
+  function planCardHTML(x) {
+    const n = planClasses(x).length;
+    const meta = x.received
+      ? [x.received.group, x.received.from ? 'de ' + x.received.from : ''].filter(Boolean).join(' · ')
+      : [scheduleText(x.days || [], ''), (x.assigned || []).length ? plural(x.assigned.length, 'maestro', 'maestros') : 'sin asignar'].filter(Boolean).join(' · ');
+    return '<button class="tpl-card plan-card" role="listitem" data-open-plan="' + esc(x.id) + '" data-tint="' + planTint(x) + '">' +
+      '<span class="tpl-band band-' + planBand(x) + '"><span class="tpl-kind">' + ic('calendar') + (x.received ? 'Tu plan' : 'Plan') + '</span><span class="tpl-min">' + n + '<small>' + (n === 1 ? 'clase' : 'clases') + '</small></span></span>' +
+      '<span class="tpl-body"><span class="tpl-name">' + esc(x.name) + '</span><span class="tpl-meta">' + esc(meta) + '</span></span></button>';
+  }
+  function plansStripHTML() {
+    if (!S.canWrite) return '';
+    const list = gotPlans().concat(myPlans());
+    return '<div class="section-head"><h2>Planes por grado</h2><button class="link" data-act="new-plan">' + ic('plus') + 'Nuevo</button></div>' +
+      '<div class="tpl-strip" role="list">' + list.map(planCardHTML).join('') +
+      (!list.length ? '<button class="tpl-card tpl-new" data-act="new-plan"><span class="tpl-band">' + ic('plus') + '</span><span class="tpl-body"><span class="tpl-name">Arma el plan de un grado</span><span class="tpl-meta">Tus clases guardadas, los días y el ciclo. Luego se lo asignas a cada maestro.</span></span></button>' : '') +
+      '</div>';
+  }
+  // El maestro ve arriba a nombre de quién está su Cancha y su plan.
+  function accountChipHTML() {
+    const got = gotPlans();
+    if (!got.length) return '';
+    const x = got[0];
+    const r = x.received;
+    return '<button class="acct-chip" data-open-plan="' + esc(x.id) + '" data-tint="' + planTint(x) + '"><span class="avatar" aria-hidden="true">' + esc(initialOf(r.teacher)) + '</span>' +
+      '<span class="txt"><b>' + esc(r.teacher) + '</b><span>' + esc('Plan ' + x.name + (got.length > 1 ? ' y ' + plural(got.length - 1, 'plan más', 'planes más') : '') + (r.from ? ' · de ' + r.from : '')) + '</span></span>' + ic('chevR', 'chev') + '</button>';
+  }
+
+  function openPlanEditor(opts) {
+    opts = opts || {};
+    const editing = !!opts.plan;
+    const cyc = cycleRange();
+    const t0 = todayStr();
+    const x = editing ? plain(opts.plan) : {
+      id: uid(), name: '', sport: 'ambos', category: '', classIds: [], days: [], time: '', classMin: 50, skip: true,
+      start: t0 > cyc[0] && t0 < cyc[1] ? t0 : cyc[0], end: cyc[1], notes: '', assigned: [], order: Date.now(), createdAt: Date.now(),
+    };
+    if (!editing && S.backend && S.backend.me) x.authorId = S.backend.me;
+    let dirty = false;
+    const tri = trimesters();
+    const ranges = [['ciclo', 'Ciclo ' + tri[0][4].split(' ').pop(), cyc[0], cyc[1]], ['resto', 'De hoy al fin del ciclo', t0, cyc[1]]]
+      .concat(tri.filter((q) => q[3] >= t0).map((q) => ['t' + q[0], q[1] + ' trimestre', q[2] > t0 ? q[2] : t0, q[3]]));
+    const rangeKey = () => { const r = ranges.find((q) => q[2] === x.start && q[3] === x.end); return r ? r[0] : ''; };
+    const dayOpts = [1, 2, 3, 4, 5, 6, 0].map((d) => [String(d), WD[d]]);
+    const sheet = openSheet({
+      title: editing ? 'Editar plan' : 'Nuevo plan por grado',
+      tint: planTint(x),
+      confirmLabel: editing ? 'Guardar' : 'Crear plan',
+      isDirty: () => dirty,
+      bodyHTML:
+        '<div class="group"><input class="field-lg" id="pl-name" placeholder="Nombre (Ej. 5.º de primaria, Sub-12)" aria-label="Nombre del plan" maxlength="60" autocomplete="off" enterkeyhint="done" value="' + esc(x.name) + '"></div>' +
+        '<p class="hint">Un plan por grado o equipo: sus clases, los días y el ciclo. Luego se lo asignas a cada maestro.</p>' +
+        '<p class="group-label">Deporte</p>' + segHTML('plsport', [['ambos', 'Ambos'], ['futbol', 'Fútbol'], ['basquet', 'Básquetbol']], SPORTS[x.sport] ? x.sport : 'ambos', 'Deporte') +
+        '<p class="group-label">¿Para quiénes?</p><div class="group fgroup"><div class="fblock"><div class="fb-head"><span class="k">' + ic('doc') + 'Nivel escolar o equipo</span></div>' +
+        optChipsHTML('cat', CATEGORIES.map((c) => [c, c]), [x.category], { multi: false, label: 'Nivel escolar o equipo' }) + '</div></div>' +
+        '<p class="group-label">¿Cuándo?</p><div class="group fgroup">' +
+        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + 'Días de clase</span><span class="fb-val" data-ref="days-val"></span></div>' + optChipsHTML('days', dayOpts, x.days.map(String), { label: 'Días de clase' }) +
+        '<div class="quick-row"><button type="button" class="chip quick-chip" data-act="weekdays" aria-pressed="false">Lunes a viernes</button></div>' +
+        '<label class="row inline-row"><span class="k">' + ic('clock') + 'Hora</span><input id="pl-time" type="time" aria-label="Hora" value="' + esc(x.time || '') + '"></label></div>' +
+        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('timer') + 'Duración de cada clase</span></div>' + optChipsHTML('classMin', CLASS_MINS.map((m) => [String(m), m + ' min']), x.classMin ? [String(x.classMin)] : [], { multi: false, label: 'Duración de cada clase' }) + '</div>' +
+        '<div class="fblock"><div class="fb-head"><span class="k">' + ic('flag') + 'Ciclo</span><span class="fb-val" data-ref="range-val"></span></div>' + optChipsHTML('range', ranges.map((r) => [r[0], r[1]]), [rangeKey()], { multi: false, label: 'Ciclo' }) +
+        '<label class="row inline-row"><span class="k">' + ic('calendar') + 'Desde</span><input id="pl-start" type="date" aria-label="Desde" value="' + esc(x.start) + '"></label>' +
+        '<label class="row inline-row"><span class="k">' + ic('calendar') + 'Hasta</span><input id="pl-end" type="date" aria-label="Hasta" value="' + esc(x.end) + '"></label></div>' +
+        '</div><div class="group">' + switchRow('pl-skip', ic('calendar'), 'Sin clases en vacaciones y días festivos', 'Diciembre, Semana Santa y festivos de la SEP (aprox.)', x.skip !== false, false) + '</div>' +
+        '<p class="muted pl-sum" data-ref="sum"></p>',
+      onConfirm: async () => {
+        const root = sheet.body;
+        const nameEl = $('#pl-name', root);
+        const name = nameEl.value.replace(/\s+/g, ' ').trim();
+        if (!name) { shake(nameEl); nameEl.focus(); toast('Ponle nombre al plan', 'pencil'); return; }
+        x.time = $('#pl-time', root).value || '';
+        x.start = $('#pl-start', root).value; x.end = $('#pl-end', root).value;
+        if (!x.days.length) { toast('Elige los días de clase', 'calendar'); return; }
+        if (!x.start || !x.end || x.end < x.start) { shake($('#pl-end', root)); toast('Revisa las fechas del ciclo', 'calendar'); return; }
+        x.name = name; x.updatedAt = Date.now();
+        x.skip = $('#pl-skip', root).checked;
+        sheet.setBusy(true, 'Guardando…');
+        const ok = await commit('plans', plain(x), editing ? opts.plan : null);
+        sheet.setBusy(false);
+        if (!ok) return;
+        dirty = false;
+        sheet.dismiss();
+        haptic(12);
+        if (editing) { toast('Cambios guardados'); return; }
+        setTimeout(() => { openPlan(x.id); setTimeout(() => openPlanClassPicker(x.id), 520); }, 280);
+      },
+    });
+    const root = sheet.body;
+    function paint() {
+      const st = $('#pl-start', root).value; const en = $('#pl-end', root).value;
+      const dv = $('[data-ref="days-val"]', root);
+      const dt = scheduleText(x.days, $('#pl-time', root).value);
+      dv.textContent = dt || 'Sin elegir'; dv.classList.toggle('none', !dt);
+      const wkb = $('[data-act="weekdays"]', root);
+      wkb.setAttribute('aria-pressed', String(x.days.length === 5 && [1, 2, 3, 4, 5].every((d) => x.days.indexOf(d) >= 0)));
+      const rv = $('[data-ref="range-val"]', root);
+      rv.textContent = spanText(st, en) || 'Sin elegir'; rv.classList.toggle('none', !st || !en);
+      const skip = $('#pl-skip', root).checked;
+      const n = planDates(x.days, st, en, skip).length;
+      $('[data-ref="sum"]', root).textContent = !x.days.length ? 'Elige los días de clase para ver cuántas clases son.' : st && en && en >= st ? 'Son ' + plural(n, 'día de clase', 'días de clase') + ' ' + spanText(st, en) + (skip ? ', sin vacaciones ni festivos.' : '.') : 'Revisa las fechas.';
+    }
+    paint();
+    root.addEventListener('change', (e) => { if (e.target.id === 'pl-skip') { dirty = true; paint(); } });
+    root.addEventListener('input', (e) => {
+      dirty = true;
+      if (e.target.id === 'pl-start' || e.target.id === 'pl-end') {
+        x.start = $('#pl-start', root).value; x.end = $('#pl-end', root).value;
+        const k = rangeKey();
+        $$('[data-opts="range"] [data-opt]', root).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.opt === k)));
+      }
+      paint();
+    });
+    root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-act="weekdays"]')) {
+        const isWk = x.days.length === 5 && [1, 2, 3, 4, 5].every((d) => x.days.indexOf(d) >= 0);
+        x.days = isWk ? [] : [1, 2, 3, 4, 5]; dirty = true; haptic(4);
+        $$('[data-opts="days"] [data-opt]', root).forEach((b) => b.setAttribute('aria-pressed', String(x.days.indexOf(Number(b.dataset.opt)) >= 0)));
+        paint(); return;
+      }
+      const op = e.target.closest('[data-opt]');
+      if (!op) return;
+      const k = op.closest('[data-opts]').dataset.opts;
+      if (k === 'cat') x.category = optToggle(op, [x.category])[0] || '';
+      else if (k === 'days') x.days = optToggle(op, x.days.map(String)).map(Number);
+      else if (k === 'classMin') { const v = optToggle(op, x.classMin ? [String(x.classMin)] : []); x.classMin = v.length ? Number(v[0]) : undefined; }
+      else if (k === 'range') {
+        const v = optToggle(op, [rangeKey()])[0];
+        const r = ranges.find((q) => q[0] === v);
+        if (r) { x.start = r[2]; x.end = r[3]; $('#pl-start', root).value = r[2]; $('#pl-end', root).value = r[3]; }
+      }
+      dirty = true; paint();
+    });
+    bindSeg(root, 'plsport', (v) => { x.sport = v; sheet.setTint(planTint(x)); dirty = true; });
+  }
+
+  function planRowHTML(c, i, ordering, n) {
+    const sp = SPORTS[c.sport] ? c.sport : 'futbol';
+    const meta = [planSummary(c), fmtMin(classTotal(c)) + ' min'].join(' · ');
+    const inner = '<span class="group-badge band-' + sp + '" aria-hidden="true">' + (i + 1) + '</span><span class="txt"><span class="t1">' + esc(c.name || 'Sin nombre') + '</span><span class="t2">' + esc(meta) + '</span></span>';
+    if (ordering) {
+      return '<div class="cell pl-row">' + inner + '<span class="pl-ord">' +
+        '<button type="button" class="pl-btn" data-pl-up="' + i + '" aria-label="Subir «' + esc(c.name) + '»"' + (i === 0 ? ' disabled' : '') + '>' + ic('up') + '</button>' +
+        '<button type="button" class="pl-btn" data-pl-down="' + i + '" aria-label="Bajar «' + esc(c.name) + '»"' + (i === n - 1 ? ' disabled' : '') + '>' + ic('down') + '</button>' +
+        '<button type="button" class="pl-btn rm" data-pl-rm="' + i + '" aria-label="Quitar «' + esc(c.name) + '» del plan">' + ic('minus') + '</button></span></div>';
+    }
+    return '<button class="cell" data-open-class="' + esc(c.id) + '">' + inner + ic('chevR', 'chev') + '</button>';
+  }
+
+  function openPlan(id) {
+    const x0 = getPlan(id);
+    if (!x0) return;
+    if (backToScreen('plan:' + id)) return;
+    haptic(4);
+    let ordering = false;
+    const got = !!x0.received;
+    const scr = pushScreen({ key: 'plan:' + id, tint: planTint(x0), rightHTML: S.canWrite && !got ? '<button class="glass-btn cap" data-act="pl-edit">Editar</button>' : '' });
+    function render() {
+      const x = getPlan(id);
+      if (!x) { popLayer(scr); return; }
+      scr.el.dataset.tint = planTint(x);
+      scr.setTitle(x.name);
+      const tpls = planClasses(x);
+      const exIds = new Set();
+      tpls.forEach((c) => (c.items || []).forEach((it) => { if (it.exId && getEx(it.exId)) exIds.add(it.exId); }));
+      const nVid = Array.from(exIds).filter((k) => { const e = getEx(k); return e && (e.mediaType === 'video' || e.videoUrl); }).length;
+      const r = x.received;
+      const t = todayStr();
+      let h = '<div class="d-head"><p class="d-eyebrow">' + ic('calendar') + esc(got ? 'Tu plan' + (r.from ? ' · de ' + r.from : '') : 'Plan por grado' + (x.category ? ' · ' + x.category : '')) + '</p>' +
+        '<h1 class="d-title">' + esc(x.name) + '</h1>' +
+        '<p class="sec-sub">' + esc([got ? r.group : '', scheduleText(got ? r.days : x.days || [], got ? r.time : x.time), x.classMin ? x.classMin + ' min' : ''].filter(Boolean).join(' · ')) + '</p></div>';
+      if (got) {
+        const cal = planCalendar(x);
+        const due = cal.filter((c) => c.date <= t);
+        const given = due.filter((c) => !notGiven(c));
+        const next = cal.find((c) => c.date >= t);
+        h += '<div class="att-card imp-card pl-facts">' +
+          '<div class="imp-line"><b>' + plural(cal.length, 'clase', 'clases') + ' en tu calendario</b><span>' + esc(spanText(cal.length ? cal[0].date : r.start, cal.length ? cal[cal.length - 1].date : r.end)) + '</span></div>' +
+          (due.length ? '<div class="imp-line"><b>Llevas ' + given.length + ' de ' + due.length + '</b><span>clases dadas hasta hoy</span></div>' : '') +
+          (next ? '<div class="imp-line"><b>Próxima: ' + esc(fmtDay(next.date)) + '</b><span>' + esc(next.name || '') + '</span></div>' : '') + '</div>' +
+          '<div class="d-actions"><button class="btn filled grow" data-act="pl-progress">' + ic('share') + 'Mandar mi avance' + esc(r.from ? ' a ' + r.from : '') + '</button>' +
+          (getGroup(r.groupId) ? '<button class="btn tinted" data-act="pl-group">' + ic('people') + 'Mi grupo</button>' : '') + '</div>';
+      } else {
+        const dates = planDates(x.days || [], x.start, x.end, x.skip !== false);
+        h += '<div class="att-card imp-card pl-facts">' +
+          '<div class="imp-line"><b>' + plural(dates.length, 'día de clase', 'días de clase') + '</b><span>' + esc(spanText(x.start, x.end)) + '</span></div>' +
+          '<div class="imp-line"><b>' + plural(tpls.length, 'clase que se turna', 'clases que se turnan') + '</b><span>' + (tpls.length && dates.length ? 'cada una se da unas ' + Math.max(1, Math.round(dates.length / tpls.length)) + ' veces' : 'agrega las clases del plan') + '</span></div>' +
+          '<div class="imp-line"><b>' + plural(exIds.size, 'ejercicio', 'ejercicios') + '</b><span>' + (nVid ? nVid + ' con video' : exIds.size ? 'sin video todavía' : '—') + '</span></div></div>' +
+          (S.canWrite ? '<div class="d-actions"><button class="btn filled grow" data-act="pl-assign"' + (tpls.length ? '' : ' aria-disabled="true"') + '>' + ic('people') + 'Asignar a un maestro</button></div>' : '');
+      }
+      h += '<div class="section-head"><h2>Clases del plan</h2>' + (S.canWrite && !got ? '<span class="sh-links">' + (tpls.length > 1 ? '<button class="link" data-act="pl-order">' + (ordering ? 'Listo' : 'Ordenar') + '</button>' : '') + '<button class="link" data-act="pl-add">' + ic('plus') + 'Agregar</button></span>' : '') + '</div>';
+      if (tpls.length) {
+        h += '<p class="hint pl-hint">Se turnan en este orden: la 1 el primer día de clase, la 2 el siguiente y así. Al terminar vuelve a empezar.</p>' +
+          '<div class="list">' + tpls.map((c, i) => planRowHTML(c, i, ordering && !got, tpls.length)).join('') + '</div>';
+      } else if (S.canWrite && !got) {
+        h += '<div class="list"><button class="cell add-row" data-act="pl-add">' + ic('plus') + '<span>Agregar clases al plan</span></button></div>' +
+          '<p class="hint">Elige tus clases guardadas o una recomendada. Si todavía no tienes, crea una nueva desde aquí.</p>';
+      }
+      if (got) {
+        h += '<p class="hint pl-hint">Puedes cambiar tus clases cuando quieras. Si ' + esc(r.from || 'tu jefe') + ' te manda una versión nueva del plan, solo se actualizan las clases que no has dado ni cambiado.</p>' +
+          (S.canWrite ? '<div class="group" style="margin-top:28px"><button class="row danger" data-act="pl-remove">' + ic('trash') + 'Quitar este plan</button></div>' : '');
+      } else {
+        const dates = planDates(x.days || [], x.start, x.end, x.skip !== false);
+        const prev = dates.map((d, i) => [d, i]).filter((q) => q[0] >= t).slice(0, 4);
+        if (tpls.length && prev.length) {
+          const more = dates.filter((d) => d >= t).length - prev.length;
+          h += '<p class="group-label">Así empieza el calendario</p><div class="list">' + prev.map((q) => {
+            const c = tpls[q[1] % tpls.length];
+            return '<div class="cell">' + dateTileHTML(q[0]) + '<span class="txt"><span class="t1">' + esc(c.name || 'Clase') + '</span><span class="t2">' + esc(fmtDay(q[0]) + ' · clase ' + (q[1] % tpls.length + 1) + ' del plan') + '</span></span></div>';
+          }).join('') + '</div>' + (more > 0 ? '<p class="muted small center pl-more">y ' + plural(more, 'día más', 'días más') + '</p>' : '');
+        }
+        const as = (x.assigned || []).slice().sort((a, b) => (b.sentAt || 0) - (a.sentAt || 0));
+        h += '<div class="section-head"><h2>Maestros</h2></div>' + (as.length
+          ? '<div class="list">' + as.map((a) => '<div class="cell pl-teacher"><span class="avatar" aria-hidden="true">' + esc(initialOf(a.teacher)) + '</span><span class="txt"><span class="t1">' + esc(a.teacher) + '</span><span class="t2">' + esc([a.group, scheduleText(a.days || [], a.time), a.sentAt ? 'enviado el ' + fmtLong(a.sentAt) : ''].filter(Boolean).join(' · ')) + '</span></span>' +
+            (S.canWrite ? '<button type="button" class="cap" data-pl-resend="' + esc(a.id) + '">Reenviar</button>' : '') + '</div>').join('') + '</div>' +
+            '<p class="hint pl-hint">Si cambias el plan, toca «Reenviar»: al maestro solo se le actualizan las clases que no ha dado ni cambiado.</p>'
+          : '<p class="muted pad">Todavía no lo asignas. Toca «Asignar a un maestro» y mándale el archivo por WhatsApp o AirDrop.</p>');
+        if (S.canWrite) h += '<div class="group" style="margin-top:28px"><button class="row danger" data-act="pl-delete">' + ic('trash') + 'Eliminar plan</button></div>';
+      }
+      scr.body.innerHTML = h;
+    }
+    render();
+    scr.refresh = render;
+    scr.el.addEventListener('click', (e) => {
+      const mv = e.target.closest('[data-pl-up],[data-pl-down],[data-pl-rm]');
+      if (mv) {
+        const ids = planClasses(getPlan(id)).map((c) => c.id);
+        const i = Number(mv.dataset.plUp || mv.dataset.plDown || mv.dataset.plRm);
+        if (mv.dataset.plUp != null && i > 0) ids.splice(i - 1, 0, ids.splice(i, 1)[0]);
+        else if (mv.dataset.plDown != null && i < ids.length - 1) ids.splice(i + 1, 0, ids.splice(i, 1)[0]);
+        else if (mv.dataset.plRm != null) ids.splice(i, 1);
+        haptic(4);
+        mutatePlan(id, (p) => { p.classIds = ids; }).then(() => { if (ids.length < 2) { ordering = false; render(); } });
+        return;
+      }
+      const rs = e.target.closest('[data-pl-resend]');
+      if (rs) { const a = ((getPlan(id) || {}).assigned || []).find((y) => y.id === rs.dataset.plResend); if (a) openAssignPlan(id, a); return; }
+      const oc = e.target.closest('[data-open-class]');
+      if (oc) { openClass(oc.dataset.openClass); return; }
+      const a = e.target.closest('[data-act]');
+      if (!a) return;
+      const x = getPlan(id);
+      if (!x) return;
+      switch (a.dataset.act) {
+        case 'pl-edit': openPlanEditor({ plan: x }); break;
+        case 'pl-add': openPlanClassPicker(id); break;
+        case 'pl-order': ordering = !ordering; haptic(4); render(); break;
+        case 'pl-assign': openAssignPlan(id); break;
+        case 'pl-delete': deletePlan(id); break;
+        case 'pl-remove': removeGotPlan(id); break;
+        case 'pl-progress': sendPlanProgress(id); break;
+        case 'pl-group': if (x.received && getGroup(x.received.groupId)) openGroup(x.received.groupId); break;
+        default: break;
+      }
+    });
+  }
+
+  // Una clase recomendada se guarda en «Clases guardadas» (sus ejercicios quedan en Ejercicios).
+  async function savedFromSession(t) {
+    const items = [];
+    for (const it of t.items) {
+      if (isPause(it)) { items.push({ type: 'pause', label: it.label, min: it.min }); continue; }
+      const cx = catEx(it.exId);
+      if (!cx) continue;
+      const ex = await adoptCatalogEx(cx, true);
+      if (!ex) return null;
+      const o = { exId: ex.id, min: it.min };
+      if (it.series) o.series = Object.assign({}, it.series);
+      items.push(o);
+    }
+    const c = { id: uid(), template: true, name: t.name, sport: t.sport, items, focus: [], notes: t.notes || '', groupId: null, date: '', target: t.items.reduce((s2, it) => s2 + itemMin(it), 0), createdAt: Date.now(), updatedAt: Date.now() };
+    if (S.backend && S.backend.me) c.authorId = S.backend.me;
+    return (await commit('classes', c, null)) ? c : null;
+  }
+
+  function openPlanClassPicker(id) {
+    const x = getPlan(id);
+    if (!x) return;
+    let chosen = planClasses(x).map((c) => c.id);
+    const fits = (sp) => !SPORTS[x.sport] || sp === x.sport;
+    let busy = false;
+    const sheet = openSheet({
+      title: 'Clases del plan',
+      tint: planTint(x),
+      confirmLabel: 'Listo',
+      bodyHTML: '<p class="hint">Tócalas en el orden en que se van a dar. Durante el ciclo se turnan en ese orden.</p><div data-ref="list"></div>',
+      onConfirm: async () => {
+        if (busy) return;
+        const ok = await mutatePlan(id, (p) => { p.classIds = chosen.slice(); });
+        if (ok) { sheet.dismiss(); haptic(10); }
+      },
+    });
+    const root = sheet.body;
+    function paint() {
+      const saved = savedClasses().filter((c) => fits(c.sport));
+      const recs = catSessions().filter((t) => fits(t.sport) && !savedClasses().some((c) => c.name === t.name));
+      const row = (c) => {
+        const k = chosen.indexOf(c.id);
+        return '<button type="button" class="cell" role="checkbox" aria-checked="' + (k >= 0) + '" data-pk-cls="' + esc(c.id) + '"><span class="txt"><span class="t1">' + esc(c.name || 'Sin nombre') + '</span>' +
+          '<span class="t2">' + esc([k >= 0 ? 'Clase ' + (k + 1) + ' del plan' : '', SPORTS[c.sport] ? SPORTS[c.sport].name : '', planSummary(c), fmtMin(classTotal(c)) + ' min'].filter(Boolean).join(' · ')) + '</span></span><span class="check">' + ic('check') + '</span></button>';
+      };
+      $('[data-ref="list"]', root).innerHTML =
+        '<p class="group-label">Tus clases guardadas</p><div class="list pick-list">' +
+        (S.canWrite ? '<button type="button" class="cell add-row" data-act="pk-new">' + ic('plus') + '<span>Nueva clase guardada</span></button>' : '') + saved.map(row).join('') + '</div>' +
+        (!saved.length ? '<p class="muted pad">Aún no tienes clases guardadas. Crea una o elige una recomendada.</p>' : '') +
+        (recs.length ? '<p class="group-label">Clases recomendadas<span class="gl-hint">Se guardan en tus clases al elegirlas</span></p><div class="list pick-list">' + recs.map((t) => '<button type="button" class="cell" role="checkbox" aria-checked="false" data-pk-rec="' + esc(t.id) + '">' +
+          '<span class="txt"><span class="t1">' + esc(t.name) + '</span><span class="t2">' + esc(SPORTS[t.sport].name + ' · ' + plural(t.items.filter((it) => !isPause(it)).length, 'ejercicio', 'ejercicios') + ' · ' + t.items.reduce((s2, it) => s2 + itemMin(it), 0) + ' min') + '</span></span><span class="check">' + ic('check') + '</span></button>').join('') + '</div>' : '');
+    }
+    paint();
+    root.addEventListener('click', async (e) => {
+      const c = e.target.closest('[data-pk-cls]');
+      if (c) { const v = c.dataset.pkCls; chosen = chosen.indexOf(v) >= 0 ? chosen.filter((y) => y !== v) : chosen.concat(v); haptic(4); paint(); return; }
+      const r = e.target.closest('[data-pk-rec]');
+      if (r) {
+        if (busy) return;
+        const t = catSessions().find((y) => y.id === r.dataset.pkRec);
+        if (!t) return;
+        busy = true; r.setAttribute('aria-checked', 'true');
+        const made = await savedFromSession(t).catch(() => null);
+        busy = false;
+        if (made) { chosen = chosen.concat(made.id); haptic(8); toast('«' + made.name + '» quedó en tus clases guardadas', 'check'); }
+        paint(); return;
+      }
+      if (e.target.closest('[data-act="pk-new"]')) {
+        const ids = chosen.slice();
+        await mutatePlan(id, (p) => { p.classIds = ids; });
+        sheet.dismiss();
+        setTimeout(() => openClassEditor({ asTemplate: true, sport: SPORTS[x.sport] ? x.sport : S.sport, onSaved: (nc) => mutatePlan(id, (p) => { if (p.classIds.indexOf(nc.id) < 0) p.classIds.push(nc.id); }) }), 320);
+      }
+    });
+  }
+
+  function deletePlan(id) {
+    const prev = getPlan(id);
+    if (!prev) return;
+    actionSheet({
+      title: '¿Eliminar el plan «' + prev.name + '»?',
+      message: 'Tus clases guardadas se quedan, y los maestros conservan lo que ya les mandaste.',
+      tint: planTint(prev),
+      actions: [{ label: 'Eliminar plan', danger: true, onClick: () => {
+        S.plans = S.plans.filter((x) => x.id !== id);
+        renderAll(); refreshScreens();
+        S.backend.deletePlan(id).then(() => {
+          toast('Plan eliminado', 'trash', { label: 'Deshacer', onClick: () => commit('plans', prev, null) });
+        }).catch((err) => { replaceLocal('plans', prev); renderAll(); refreshScreens(); showError(err, 'No se pudo eliminar'); });
+      } }],
+    });
+  }
+  // El maestro quita un plan: se van las clases próximas que no tocó; lo que ya dio, su grupo y los ejercicios se quedan.
+  const untouched = (c) => c.syncedAt == null || Number(c.syncedAt) === Number(c.updatedAt);
+  function removeGotPlan(id) {
+    const prev = getPlan(id);
+    if (!prev) return;
+    const t = todayStr();
+    const drop = planCalendar(prev).filter((c) => c.date >= t && notGiven(c) && untouched(c));
+    actionSheet({
+      title: '¿Quitar el plan «' + prev.name + '»?',
+      message: (drop.length ? 'Se quitan ' + plural(drop.length, 'clase próxima', 'clases próximas') + ' que no has cambiado. ' : '') + 'Las clases que ya diste, tu grupo y los ejercicios se quedan.',
+      tint: planTint(prev),
+      actions: [{ label: 'Quitar plan', danger: true, onClick: async () => {
+        S.plans = S.plans.filter((x) => x.id !== id);
+        S.classes = S.classes.filter((c) => drop.indexOf(c) < 0);
+        renderAll(); refreshScreens();
+        try {
+          for (const c of drop) await S.backend.deleteClass(c.id);
+          await S.backend.deletePlan(id);
+          toast('Plan quitado', 'trash');
+        } catch (e) { showError(e, 'No se pudo quitar'); }
+      } }],
+    });
+  }
+
+  // Avance para el jefe: clases dadas, asistencia y lo que falta (por WhatsApp o el PDF de asistencia).
+  function sendPlanProgress(id) {
+    const x = getPlan(id);
+    if (!x || !x.received) return;
+    const r = x.received;
+    const cal = planCalendar(x);
+    const t = todayStr();
+    const due = cal.filter((c) => c.date <= t);
+    const given = due.filter((c) => !notGiven(c));
+    let marks = 0; let here = 0;
+    given.forEach((c) => Object.keys(c.attendance || {}).forEach((k) => { marks++; if (c.attendance[k] !== 'f') here++; }));
+    const g = getGroup(r.groupId);
+    const lines = ['Avance de ' + r.teacher + ' · ' + (g ? g.name : r.group || x.name) + ' (plan ' + x.name + ')', 'Clases dadas: ' + given.length + ' de ' + due.length + ' hasta hoy.'];
+    if (marks) lines.push('Asistencia: ' + Math.round(here / marks * 100) + '%.');
+    const left = cal.length - due.length;
+    if (left > 0) lines.push('Faltan ' + plural(left, 'clase', 'clases') + ' del plan.');
+    const text = lines.join('\n');
+    actionSheet({
+      title: 'Mandar tu avance' + (r.from ? ' a ' + r.from : ''),
+      message: text,
+      tint: planTint(x),
+      actions: [{ label: 'Mandar por WhatsApp', icon: 'chat', href: 'https://wa.me/?text=' + encodeURIComponent(text) }]
+        .concat(g && studentsOf(g).length ? [{ label: 'Reporte de asistencia en PDF', icon: 'doc', onClick: () => openAttendanceReport(g.id) }] : [])
+        .concat([{ label: 'Copiar texto', icon: 'copy', onClick: () => copyText(text) }]),
+    });
+  }
+
+  // ---- asignar a un maestro: un archivo con su grupo, sus clases del ciclo, las clases guardadas y los ejercicios
+  function planPackage(x, a) {
+    const tpls = planClasses(x);
+    const now = Date.now();
+    const recId = 'pr-' + a.id;
+    const gid = 'pg-' + a.id;
+    const group = {
+      id: gid, name: a.group || x.name, sport: SPORTS[x.sport] ? x.sport : 'ambos', category: x.category || '', place: '', students: [],
+      days: a.days.slice(), schedule: scheduleText(a.days, a.time), planId: recId, createdAt: a.createdAt || now, updatedAt: now,
+    };
+    if (a.time) group.time = a.time;
+    if (x.classMin) group.classMin = x.classMin;
+    const t = todayStr();
+    const classes = [];
+    // Se turnan desde el primer día del maestro, aunque el archivo se mande (o se reenvíe) a medio ciclo.
+    planDates(a.days, a.start, a.end, x.skip !== false).forEach((d, i) => {
+      if (d < t || !tpls.length) return;
+      const tp = tpls[i % tpls.length];
+      const c = {
+        id: 'pc-' + a.id + '-' + d.replace(/-/g, ''), name: tp.name || 'Clase', sport: SPORTS[tp.sport] ? tp.sport : 'futbol', date: d, groupId: gid,
+        items: plain(tp.items || []), focus: (tp.focus || []).slice(), notes: tp.notes || '', fromTemplate: tp.id, planId: recId, createdAt: now, updatedAt: now,
+      };
+      if (tp.target || x.classMin) c.target = tp.target || x.classMin;
+      if (tp.kind === 'entrenamiento') c.kind = 'entrenamiento';
+      classes.push(c);
+    });
+    const exIds = new Set();
+    tpls.forEach((tp) => (tp.items || []).forEach((it) => { if (it.exId && getEx(it.exId)) exIds.add(it.exId); }));
+    const section = { id: 'ps-' + x.id, name: cutText('Plan ' + x.name, 40), exIds: Array.from(exIds), order: now, createdAt: now, updatedAt: now };
+    const rec = {
+      id: recId, name: x.name, sport: x.sport, category: x.category || '', classIds: tpls.map((c) => c.id), days: x.days || [], time: x.time || '', start: x.start, end: x.end, notes: x.notes || '', order: now, skip: x.skip !== false,
+      received: { from: coachName(), teacher: a.teacher, group: group.name, groupId: gid, assignId: a.id, at: now, days: a.days.slice(), time: a.time || '', start: a.start, end: a.end },
+      createdAt: now, updatedAt: now,
+    };
+    if (x.classMin) rec.classMin = x.classMin;
+    return { tpls, group, classes, exIds, section, rec };
+  }
+  function openAssignPlan(id, prev) {
+    const x = getPlan(id);
+    if (!x) return;
+    if (!planClasses(x).length) { alertBox('Primero agrega clases', 'Elige las clases guardadas que van en este plan. Luego se lo asignas a cada maestro.'); return; }
+    const t0 = todayStr();
+    const a = prev ? plain(prev) : { id: uid(), teacher: '', group: '', days: (x.days || []).slice(), time: x.time || '', start: x.start > t0 ? x.start : t0, end: x.end, createdAt: Date.now() };
+    let dirty = false;
+    const me = coachName();
+    const dayOpts = [1, 2, 3, 4, 5, 6, 0].map((d) => [String(d), WD[d]]);
+    const sheet = openSheet({
+      title: prev ? 'Reenviar a ' + a.teacher : 'Asignar «' + x.name + '»',
+      tint: planTint(x),
+      confirmLabel: 'Crear archivo',
+      isDirty: () => dirty,
+      bodyHTML:
+        (me ? '' : '<p class="group-label">Tu nombre</p><div class="group"><input class="field-lg" id="as-me" placeholder="Ej. Toño" aria-label="Tu nombre" maxlength="40" autocomplete="name" enterkeyhint="next"></div><p class="hint">Así sabrán quién les manda el plan.</p>') +
+        '<p class="group-label">Maestro</p><div class="group"><input class="field-lg" id="as-teacher" placeholder="Nombre (Ej. Profe Juan)" aria-label="Nombre del maestro" maxlength="60" autocomplete="off" enterkeyhint="next" value="' + esc(a.teacher) + '"></div>' +
+        '<p class="group-label">Grupo</p><div class="group"><input class="field-lg" id="as-group" placeholder="Ej. 5.º A" aria-label="Grupo" maxlength="60" autocomplete="off" enterkeyhint="done" value="' + esc(a.group) + '"></div>' +
+        '<p class="group-label">¿Cuándo le toca?</p><div class="group fgroup"><div class="fblock"><div class="fb-head"><span class="k">' + ic('calendar') + 'Días de clase</span><span class="fb-val" data-ref="days-val"></span></div>' +
+        optChipsHTML('days', dayOpts, a.days.map(String), { label: 'Días de clase' }) +
+        '<label class="row inline-row"><span class="k">' + ic('clock') + 'Hora</span><input id="as-time" type="time" aria-label="Hora" value="' + esc(a.time || '') + '"></label>' +
+        '<label class="row inline-row"><span class="k">' + ic('calendar') + 'Desde</span><input id="as-start" type="date" aria-label="Desde" value="' + esc(a.start) + '"></label>' +
+        '<label class="row inline-row"><span class="k">' + ic('calendar') + 'Hasta</span><input id="as-end" type="date" aria-label="Hasta" value="' + esc(a.end) + '"></label></div></div>' +
+        '<div class="group">' + switchRow('as-media', ic('video'), 'Con videos y fotos', 'Los tuyos van dentro del archivo', true, false) + '</div>' +
+        '<p class="muted pl-sum" data-ref="sum"></p>',
+      onConfirm: async () => {
+        const root = sheet.body;
+        const meEl = $('#as-me', root);
+        const meName = meEl ? meEl.value.replace(/\s+/g, ' ').trim() : me;
+        if (meEl && !meName) { shake(meEl); meEl.focus(); toast('Escribe tu nombre', 'pencil'); return; }
+        const tEl = $('#as-teacher', root);
+        a.teacher = tEl.value.replace(/\s+/g, ' ').trim();
+        if (!a.teacher) { shake(tEl); tEl.focus(); toast('Escribe el nombre del maestro', 'pencil'); return; }
+        a.group = $('#as-group', root).value.replace(/\s+/g, ' ').trim();
+        a.time = $('#as-time', root).value || '';
+        a.start = $('#as-start', root).value; a.end = $('#as-end', root).value;
+        if (!a.days.length) { toast('Elige los días de clase', 'calendar'); return; }
+        if (!a.start || !a.end || a.end < a.start) { shake($('#as-end', root)); toast('Revisa las fechas', 'calendar'); return; }
+        if (!planDates(a.days, a.start, a.end, x.skip !== false).some((d) => d >= todayStr())) { shake($('#as-end', root)); toast('No quedan días de clase en esas fechas', 'calendar'); return; }
+        if (meEl) pref.set('coach-name', meName);
+        a.sentAt = Date.now();
+        const withMedia = $('#as-media', root).checked;
+        sheet.setBusy(true, 'Guardando…');
+        const ok = await mutatePlan(id, (p) => { p.assigned = (p.assigned || []).filter((y) => y.id !== a.id).concat([plain(a)]); });
+        sheet.setBusy(false);
+        if (!ok) return;
+        dirty = false;
+        sheet.dismiss();
+        setTimeout(() => exportPlanFor(getPlan(id), a, withMedia), 320);
+      },
+    });
+    const root = sheet.body;
+    function paint() {
+      const dv = $('[data-ref="days-val"]', root);
+      const dt = scheduleText(a.days, $('#as-time', root).value);
+      dv.textContent = dt || 'Sin elegir'; dv.classList.toggle('none', !dt);
+      const st = $('#as-start', root).value; const en = $('#as-end', root).value;
+      const all = planDates(a.days, st, en, x.skip !== false);
+      const t = todayStr();
+      const n = all.filter((d) => d >= t).length;
+      const first = all.find((d) => d >= t);
+      $('[data-ref="sum"]', root).textContent = !a.days.length ? 'Elige los días de clase.' : !n ? 'No quedan días de clase en esas fechas.'
+        : 'Se le programan ' + plural(n, 'clase', 'clases') + ' ' + spanText(first, all[all.length - 1]) + ', turnando las ' + plural(planClasses(x).length, 'clase', 'clases') + ' del plan.';
+    }
+    paint();
+    root.addEventListener('input', () => { dirty = true; paint(); });
+    root.addEventListener('click', (e) => {
+      const op = e.target.closest('[data-opts="days"] [data-opt]');
+      if (!op) return;
+      a.days = optToggle(op, a.days.map(String)).map(Number);
+      dirty = true; paint();
+    });
+  }
+  function exportPlanFor(x, a, withMedia) {
+    if (!x) return;
+    const pk = planPackage(x, a);
+    runExport({
+      exIds: pk.exIds, classIds: new Set(pk.tpls.map((c) => c.id)), groupIds: new Set(), withMedia, kind: 'plan',
+      title: 'Plan ' + x.name + ' para ' + a.teacher, from: coachName(), teacher: a.teacher,
+      addClasses: pk.classes, addGroups: [pk.group], addSections: [pk.section], addPlans: [pk.rec],
+    }, 'Plan ' + x.name + ' para ' + a.teacher + ' · ' + plural(pk.classes.length, 'clase', 'clases'));
+  }
+
+  // ---- el maestro abre su plan
+  async function dropExampleClasses() {
+    const cls = S.classes.filter((c) => c.example);
+    const usedGr = new Set(S.classes.filter((c) => !c.example && c.groupId).map((c) => c.groupId));
+    const grs = S.groups.filter((g) => g.example && !usedGr.has(g.id));
+    S.classes = S.classes.filter((c) => !c.example);
+    S.groups = S.groups.filter((g) => grs.indexOf(g) < 0);
+    for (const c of cls) await S.backend.deleteClass(c.id);
+    for (const g of grs) await S.backend.deleteGroup(g.id);
+  }
+  function startPlanImport(m, zip, plan) {
+    const rec = cleanPlan((Array.isArray(m.plans) ? m.plans : [])[0]);
+    if (!rec || !rec.received) { alertBox('El archivo está incompleto', 'Pide que te lo vuelvan a mandar.'); return; }
+    const r = rec.received;
+    const cur = getPlan(rec.id);
+    const t = todayStr();
+    // Lo que el maestro ya dio o cambió se queda como está (no se hacen copias de clases ni del grupo).
+    const touched = (c) => !!c && (!untouched(c) || !notGiven(c) || (!!c.date && c.date < t));
+    plan.cl.actualiza = plan.cl.actualiza.filter((x) => x.template || !touched(getClass(x.id)));
+    plan.cl.copias = plan.cl.copias.filter((x) => x.template);
+    plan.gr.actualiza = plan.gr.actualiza.filter((x) => { const g = getGroup(x.id); return !g || untouched(g); });
+    plan.gr.copias = [];
+    plan.sc.actualiza = plan.sc.actualiza.filter((x) => { const sc = getSection(x.id); return !sc || untouched(sc); });
+    plan.sc.copias = [];
+    // Las clases que ya no vienen (el jefe cambió días o fechas) y que el maestro no tocó, se quitan.
+    const incoming = new Set((m.classes || []).map((c) => c && c.id));
+    const stale = cur ? realClasses().filter((c) => c.planId === rec.id && c.date >= t && !incoming.has(c.id) && !touched(c)) : [];
+    const cls = (m.classes || []).filter((c) => c && !c.template && typeof c.date === 'string' && c.date >= t).sort((a, b) => a.date.localeCompare(b.date));
+    const nTpl = (m.classes || []).filter((c) => c && c.template).length;
+    const exs = Array.isArray(m.exercises) ? m.exercises : [];
+    const nVid = exs.filter((e) => e && (e.mediaType === 'video' || e.videoUrl)).length;
+    const examples = !cur && (S.classes.some((c) => c.example) || S.groups.some((g) => g.example));
+    const sheet = openSheet({
+      title: cur ? 'Plan actualizado' : 'Tu plan: ' + rec.name,
+      tint: planTint(rec),
+      confirmLabel: cur ? 'Actualizar' : 'Abrir mi plan',
+      bodyHTML:
+        '<p class="att-head">' + (r.from ? '<b>' + esc(r.from) + '</b> te ' + (cur ? 'mandó una versión nueva del' : 'asignó el') + ' plan' : cur ? 'Versión nueva del plan' : 'Plan') + ' <b>' + esc(rec.name) + '</b>' + (r.group ? ' para <b>' + esc(r.group) + '</b>' : '') + '.</p>' +
+        '<div class="att-card imp-card">' +
+        '<div class="imp-line"><b>' + plural(cls.length, 'clase', 'clases') + '</b><span>' + esc([scheduleText(r.days, r.time), spanText(cls.length ? cls[0].date : r.start, cls.length ? cls[cls.length - 1].date : r.end)].filter(Boolean).join(' · ')) + '</span></div>' +
+        (exs.length ? '<div class="imp-line"><b>' + plural(exs.length, 'ejercicio', 'ejercicios') + '</b><span>' + (nVid ? nVid + ' con video' : 'con su pizarrón') + '</span></div>' : '') +
+        (nTpl ? '<div class="imp-line"><b>' + plural(nTpl, 'clase guardada', 'clases guardadas') + '</b><span>para reusar</span></div>' : '') + '</div>' +
+        '<p class="muted imp-note">' + (cur
+          ? 'Se actualizan las clases que no has dado ni cambiado. Lo que tú agregaste o cambiaste se queda.' + (stale.length ? ' Se quitan ' + plural(stale.length, 'clase que ya no va', 'clases que ya no van') + '.' : '')
+          : 'Todo queda a tu nombre, <b>' + esc(r.teacher) + '</b>. Puedes ajustar tus clases cuando quieras.' + (examples ? ' Se quitan las clases y grupos de ejemplo.' : '')) + '</p>',
+      onConfirm: async () => {
+        sheet.setBusy(true, cur ? 'Actualizando…' : 'Abriendo tu plan…');
+        try {
+          if (examples) await dropExampleClasses();
+          await applyImport(m, zip, plan, (p, label) => sheet.progress(p, label));
+          for (const c of stale) { S.classes = S.classes.filter((y) => y.id !== c.id); await S.backend.deleteClass(c.id); }
+          if (!coachName()) pref.set('coach-name', r.teacher);
+          sheet.setBusy(false);
+          sheet.dismiss();
+          haptic(14);
+          renderAll(); refreshScreens();
+          setTab('clases');
+          const first = realClasses().filter((c) => c.planId === rec.id && c.date >= todayStr()).sort((a, b) => a.date.localeCompare(b.date))[0];
+          if (cur) toast('Plan actualizado', 'check', { label: 'Ver', onClick: () => openPlan(rec.id) });
+          else setTimeout(() => alertBox('¡Listo, ' + r.teacher + '!', 'Tu plan de ' + rec.name + ' ya está en Cancha.' + (first ? ' Tu primera clase es ' + (first.date === todayStr() ? 'hoy' : 'el ' + longDate(first.date).toLowerCase()) + ': «' + first.name + '».' : ''), 'Empezar'), 380);
+        } catch (e) {
+          sheet.setBusy(false);
+          renderAll(); refreshScreens();
+          showError(e, 'No se pudo abrir el plan');
+        }
+      },
+    });
+  }
+
   // «de hoy al vie 27», «de mañana al lun 30», «del lun 23 al vie 27»
   function rangeText(a, b) {
     const one = (d, first) => { const f = fmtDay(d); return f === 'Hoy' ? (first ? 'de hoy' : 'a hoy') : f === 'Mañana' ? (first ? 'de mañana' : 'a mañana') : (first ? 'del ' : 'al ') + f.toLowerCase(); };
@@ -2784,6 +3450,7 @@
           sheet.dismiss();
           haptic(12);
           toast(editing ? 'Cambios guardados' : 'Guardada en «Clases guardadas»');
+          if (!editing && opts.onSaved) opts.onSaved(c);
           if (!editing) setTimeout(() => { openClass(c.id); if (!c.items.length) setTimeout(() => openPicker(c.id), 480); }, 260);
           return;
         }
@@ -4762,6 +5429,8 @@
       return x;
     });
     const groups = S.groups.filter((g) => opt.groupIds.has(g.id)).map((g) => plain(g));
+    (opt.addClasses || []).forEach((c) => classes.push(plain(c)));
+    (opt.addGroups || []).forEach((g) => groups.push(plain(g)));
     const want = [];
     exercises.forEach((e) => { if (e.thumbId) want.push(e.thumbId); if (opt.withMedia && e.mediaId) want.push(e.mediaId); });
     const media = {}; const files = [];
@@ -4777,8 +5446,9 @@
       media[want[i]] = { path, type, size: blob.size };
       files.push({ name: path, data: blob });
     }
-    const sections = opt.kind === 'respaldo' ? S.sections.filter((x) => !x.example).map((x) => plain(x)) : [];
-    const manifest = { format: 'cancha', version: 3, app: APP_NAME, kind: opt.kind, title: opt.title, from: opt.from || undefined, exportedAt: Date.now(), exercises, classes, groups, sections, media };
+    const sections = opt.kind === 'respaldo' ? S.sections.filter((x) => !x.example).map((x) => plain(x)) : (opt.addSections || []).map((x) => plain(x));
+    const plans = opt.kind === 'respaldo' ? S.plans.map((x) => plain(x)) : (opt.addPlans || []).map((x) => plain(x));
+    const manifest = { format: 'cancha', version: 3, app: APP_NAME, kind: opt.kind, title: opt.title, from: opt.from || undefined, exportedAt: Date.now(), exercises, classes, groups, sections, plans, media };
     files.unshift({ name: 'cancha.json', data: JSON.stringify(manifest) });
     const zip = await buildZip(files, (p) => onProgress && onProgress(0.5 + p * 0.5, 'Armando el archivo · ' + Math.round(p * 100) + '%'));
     return new File([zip], APP_NAME + ' - ' + safeName(opt.title) + ' - ' + shortDate() + '.zip', { type: 'application/zip' });
@@ -4789,7 +5459,9 @@
   // Comparte el archivo ya creado: en Claude se descarga; en iPad abre el menú de compartir (AirDrop, WhatsApp, Archivos).
   async function deliverFile(file, what, isBackup, opt) {
     const shared = !!(opt && opt.kind === 'compartido');
-    const msg = shared ? 'Te mando ' + what + ' de Cancha. Guarda el archivo, abre Cancha y toca Ejercicios → «Abrir los que me mandaron».' + (appLink() ? ' Si no tienes Cancha: ' + appLink() : '') : '';
+    const planF = !!(opt && opt.kind === 'plan');
+    const msg = shared ? 'Te mando ' + what + ' de Cancha. Guarda el archivo, abre Cancha y toca Ejercicios → «Abrir los que me mandaron».' + (appLink() ? ' Si no tienes Cancha: ' + appLink() : '')
+      : planF ? 'Te mando tu plan de Cancha. Guarda el archivo, abre Cancha y toca «Respaldo» → «Abrir archivo de Cancha».' + (appLink() ? ' Si no tienes Cancha: ' + appLink() : '') : '';
     const cl = window.claude;
     if (framed && cl && typeof cl.use === 'function') { if (await saveFile(file, file.name, 'Archivo') && isBackup) markBackup(); return; }
     const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch (e) { return false; } })();
@@ -4802,7 +5474,8 @@
         '<div class="help">' + (isBackup
           ? (canShare ? '<p>Elige <b>AirDrop</b> o <b>Guardar en Archivos</b> → <b>iCloud Drive</b>. Así lo recuperas si cambias de iPad.</p>' : '<p>Descarga el archivo y guárdalo en un lugar seguro (por ejemplo, tu nube).</p>')
           : (canShare ? '<p>Elige <b>WhatsApp</b> (puede ser el grupo de profes) o <b>AirDrop</b>.</p>' : '<p>Descarga el archivo y mándalo por WhatsApp, AirDrop o correo.</p>')) +
-        (shared ? '<p>Quien lo reciba guarda el archivo, abre Cancha y toca <b>Ejercicios → Abrir los que me mandaron</b>.</p>' : '<p>Para abrirlo en otro iPad: guarda el archivo, abre Cancha y toca <b>Respaldo → Abrir archivo de Cancha</b>.</p>') + '</div>',
+        (planF ? '<p>Al abrirlo en su Cancha (<b>Respaldo → Abrir archivo de Cancha</b>), a ' + esc(opt.teacher || 'tu maestro') + ' le aparecen su grupo, todas sus clases del ciclo y los ejercicios con video.</p>'
+          : shared ? '<p>Quien lo reciba guarda el archivo, abre Cancha y toca <b>Ejercicios → Abrir los que me mandaron</b>.</p>' : '<p>Para abrirlo en otro iPad: guarda el archivo, abre Cancha y toca <b>Respaldo → Abrir archivo de Cancha</b>.</p>') + '</div>',
     });
     sheet.body.addEventListener('click', async (e) => {
       if (!e.target.closest('[data-file-share]')) return;
@@ -4847,7 +5520,7 @@
     const groupIds = new Set(S.groups.filter((g) => !g.example).map((g) => g.id));
     S.classes.forEach((c) => { if (classIds.has(c.id)) (c.items || []).forEach((it) => { if (it.exId && getEx(it.exId)) exIds.add(it.exId); }); if (classIds.has(c.id) && c.groupId && getGroup(c.groupId)) groupIds.add(c.groupId); });
     S.sections.filter((x) => !x.example).forEach((x) => (x.exIds || []).forEach((id) => { if (getEx(id)) exIds.add(id); }));
-    if (!exIds.size && !classIds.size && !groupIds.size) { alertBox('Nada que respaldar', 'Todavía no tienes ejercicios, clases ni grupos propios.'); return; }
+    if (!exIds.size && !classIds.size && !groupIds.size && !S.plans.length) { alertBox('Nada que respaldar', 'Todavía no tienes ejercicios, clases ni grupos propios.'); return; }
     runExport({ exIds, classIds, groupIds, withMedia: withMedia !== false, kind: 'respaldo', title: 'Respaldo' },
       [exIds.size ? plural(exIds.size, 'ejercicio', 'ejercicios') : '', classIds.size ? plural(classIds.size, 'clase', 'clases') : '', groupIds.size ? plural(groupIds.size, 'grupo', 'grupos') : ''].filter(Boolean).join(', '));
   }
@@ -4990,6 +5663,7 @@
       focus: arrIn(x.focus, null, 6), target: x.target ? Math.round(numIn(x.target, 0, 300, 0)) || undefined : undefined,
       kind: x.kind === 'entrenamiento' ? 'entrenamiento' : undefined, serie: isId(x.serie) ? x.serie : undefined,
       template: x.template === true ? true : undefined, fromTemplate: isId(x.fromTemplate) ? x.fromTemplate : undefined,
+      planId: isId(x.planId) ? x.planId : undefined,
     });
     if (x.attendance && typeof x.attendance === 'object') {
       const att = {};
@@ -5011,7 +5685,27 @@
       ages: arrIn(x.ages, keysOf(FACETS.AGES)), sizes: arrIn(x.sizes, keysOf(FACETS.SIZES), 1), days: Array.isArray(x.days) ? x.days.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6).slice(0, 7) : undefined,
       time: typeof x.time === 'string' && /^\d{2}:\d{2}$/.test(x.time) ? x.time : undefined, classMin: x.classMin ? Math.round(numIn(x.classMin, 0, 300, 0)) || undefined : undefined,
       students: (Array.isArray(x.students) ? x.students : []).slice(0, 300).filter((s) => s && isId(s.id) && !seen.has(s.id) && seen.add(s.id)).map((s) => ({ id: s.id, name: txt(s.name, 80).trim() || 'Alumno' })),
+      planId: isId(x.planId) ? x.planId : undefined,
     });
+  }
+  const daysIn = (v) => (Array.isArray(v) ? Array.from(new Set(v.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))).slice(0, 7) : []);
+  const timeIn = (v) => (typeof v === 'string' && /^\d{2}:\d{2}$/.test(v) ? v : '');
+  function cleanPlan(x) {
+    if (!x || typeof x !== 'object' || !isId(x.id)) return null;
+    const o = cleanBase(x, {
+      name: txt(x.name, 60).trim() || 'Plan', sport: SPORTS[x.sport] ? x.sport : 'ambos', category: txt(x.category, 60),
+      classIds: (Array.isArray(x.classIds) ? x.classIds : []).filter(isId).slice(0, 60), days: daysIn(x.days), time: timeIn(x.time),
+      classMin: x.classMin ? Math.round(numIn(x.classMin, 0, 300, 0)) || undefined : undefined, start: dayOk(x.start), end: dayOk(x.end), notes: txt(x.notes, 2000), order: numIn(x.order, 0, 9e15, 0), skip: x.skip !== false,
+      assigned: (Array.isArray(x.assigned) ? x.assigned : []).slice(0, 200).filter((a) => a && isId(a.id)).map((a) => ({
+        id: a.id, teacher: txt(a.teacher, 60).trim() || 'Maestro', group: txt(a.group, 60).trim(), days: daysIn(a.days), time: timeIn(a.time),
+        start: dayOk(a.start), end: dayOk(a.end), sentAt: numIn(a.sentAt, 0, 9e15, 0), createdAt: numIn(a.createdAt, 0, 9e15, 0),
+      })),
+    });
+    const r = x.received;
+    if (r && typeof r === 'object' && isId(r.assignId)) {
+      o.received = { from: txt(r.from, 40).trim(), teacher: txt(r.teacher, 60).trim() || 'Maestro', group: txt(r.group, 60).trim(), groupId: isId(r.groupId) ? r.groupId : '', assignId: r.assignId, at: numIn(r.at, 0, 9e15, 0), days: daysIn(r.days), time: timeIn(r.time), start: dayOk(r.start), end: dayOk(r.end) };
+    }
+    return o;
   }
   const IGNORE = { createdAt: 1, updatedAt: 1, example: 1, authorId: 1, syncedAt: 1 };
   const sameContent = (a, b) => JSON.stringify(a, (k, v) => (IGNORE[k] ? undefined : v)) === JSON.stringify(b, (k, v) => (IGNORE[k] ? undefined : v));
@@ -5042,10 +5736,11 @@
     const cl = bucket(m.classes, cleanClass, getClass);
     const gr = bucket(m.groups, cleanGroup, getGroup);
     const sc = bucket(m.sections, cleanSection, getSection);
+    const pl = bucket(m.plans, cleanPlan, getPlan);
     const media = new Set();
     const mediaOk = (k) => k && m.media && m.media[k] && typeof m.media[k].path === 'string';
     ex.nuevos.concat(ex.actualiza, ex.copias).forEach((x) => { [x.mediaId, x.thumbId].forEach((k) => { if (mediaOk(k)) media.add(k); }); });
-    return { ex, cl, gr, sc, media: Array.from(media) };
+    return { ex, cl, gr, sc, pl, media: Array.from(media) };
   }
   function importLine(b, one, many, fem) {
     const n = b.nuevos.length + b.actualiza.length + b.iguales.length + b.copias.length;
@@ -5067,7 +5762,8 @@
     const mediaSize = plan.media.reduce((s, k) => s + (Number(m.media[k].size) || 0), 0);
     const mainMedia = plan.ex.nuevos.concat(plan.ex.actualiza, plan.ex.copias).filter((x) => x.mediaId && plan.media.indexOf(x.mediaId) >= 0).length;
     const changes = (b) => b.nuevos.length + b.actualiza.length + b.copias.length;
-    const nothing = !changes(plan.ex) && !changes(plan.cl) && !changes(plan.gr) && !changes(plan.sc);
+    if (m.kind === 'plan') { startPlanImport(m, zip, plan); return; }
+    const nothing = !changes(plan.ex) && !changes(plan.cl) && !changes(plan.gr) && !changes(plan.sc) && !changes(plan.pl);
     const copies = plan.ex.copias.length + plan.cl.copias.length + plan.gr.copias.length;
     let when = '';
     try { when = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(m.exportedAt)); } catch (e) { /* */ }
@@ -5082,7 +5778,7 @@
             (incoming.length ? '<ul class="imp-names">' + incoming.slice(0, 6).map((x) => '<li>' + esc(x.title) + '</li>').join('') + (incoming.length > 6 ? '<li class="muted">y ' + (incoming.length - 6) + ' más</li>' : '') + '</ul>' : '')
           : '<p class="att-head"><b>' + esc(txt(m.title, 80) || 'Archivo de Cancha') + '</b>' + (when ? ' · del ' + esc(when) : '') + '</p>') +
         '<div class="att-card imp-card">' +
-        importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') + importLine(plan.sc, 'sección', 'secciones', true) +
+        importLine(plan.ex, 'ejercicio', 'ejercicios') + importLine(plan.cl, 'clase', 'clases', true) + importLine(plan.gr, 'grupo', 'grupos') + importLine(plan.sc, 'sección', 'secciones', true) + importLine(plan.pl, 'plan', 'planes') +
         (mainMedia ? '<div class="imp-line"><b>' + plural(mainMedia, 'video o foto', 'videos y fotos') + '</b><span>' + fmtMB(mediaSize) + '</span></div>' : '') +
         '</div>' +
         '<p class="muted" style="margin:14px 16px 0;font-size:14px">' + (nothing ? (from ? 'Ya tienes estos ejercicios. Se juntan en la sección «De ' + esc(from) + '».' : 'Ya tienes todo lo que trae este archivo.') : 'Lo que venga más nuevo en el archivo se actualiza aquí.' + (copies ? ' Si tú también lo cambiaste, se agrega como copia y no pierdes tu versión.' : '')) + '</p>',
@@ -5093,7 +5789,7 @@
           sheet.setBusy(false);
           sheet.dismiss();
           haptic(14);
-          const parts = [r.ex ? plural(r.ex, 'ejercicio', 'ejercicios') : '', r.cl ? plural(r.cl, 'clase', 'clases') : '', r.gr ? plural(r.gr, 'grupo', 'grupos') : ''].filter(Boolean);
+          const parts = [r.ex ? plural(r.ex, 'ejercicio', 'ejercicios') : '', r.cl ? plural(r.cl, 'clase', 'clases') : '', r.gr ? plural(r.gr, 'grupo', 'grupos') : '', r.pl ? plural(r.pl, 'plan', 'planes') : ''].filter(Boolean);
           const firstN = r.ex || r.cl || r.gr;
           const secId = from ? await fileIntoSharedSection(from, r.exIds).catch(() => null) : null;
           if (secId) toast((r.ex === 1 ? 'Se agregó ' : 'Se agregaron ') + plural(r.ex, 'ejercicio', 'ejercicios') + ' de ' + from, 'check', { label: 'Ver', onClick: () => openSection(secId) });
@@ -5175,9 +5871,15 @@
       replaceLocal('sections', sec);
       await S.backend.saveSection(sec);
     }
+    for (const x of plan.pl.nuevos.concat(plan.pl.actualiza)) {
+      const pl = plain(x);
+      pl.syncedAt = pl.updatedAt;
+      replaceLocal('plans', pl);
+      await S.backend.savePlan(pl);
+    }
     if (m.from) (m.exercises || []).forEach((x) => { if (x && isId(x.id) && exIds.indexOf(exRe[x.id] || x.id) < 0 && getEx(exRe[x.id] || x.id)) exIds.push(exRe[x.id] || x.id); });
     renderAll(); refreshScreens();
-    return { ex: nEx, cl: nCl, gr: nGr, exIds };
+    return { ex: nEx, cl: nCl, gr: nGr, pl: plan.pl.nuevos.length + plan.pl.actualiza.length, exIds };
   }
 
   // --- Apariencia: «Automático» sigue al iPad (modo oscuro de noche si así está); «Claro» y «Oscuro» la fijan.
@@ -6621,6 +7323,8 @@
     $('#main').addEventListener('click', (e) => {
       const card = e.target.closest('[data-open-ex]');
       if (card) { openExercise(card.dataset.openEx); return; }
+      const pc = e.target.closest('[data-open-plan]');
+      if (pc) { openPlan(pc.dataset.openPlan); return; }
       const a = e.target.closest('[data-act]');
       if (a) {
         switch (a.dataset.act) {
@@ -6632,6 +7336,9 @@
           case 'new-ex': openExerciseEditor({ sport: S.sport }); return;
           case 'new-class': openClassEditor({}); return;
           case 'new-saved': openClassEditor({ asTemplate: true }); return;
+          case 'new-plan': openPlanEditor({}); return;
+          case 'all-up': S.allUp = true; renderClases(); return;
+          case 'all-past': S.allPast = true; renderClases(); return;
           case 'new-group': openGroupEditor({}); return;
           case 'start-class': runClass(a.dataset.id); return;
           case 'roll-class': openAttendance(a.dataset.id); return;
@@ -6720,6 +7427,7 @@
       S.classes = data.classes.slice();
       S.groups = (data.groups || []).slice();
       S.sections = (data.sections || []).slice();
+      S.plans = (data.plans || []).slice();
       S.ready = true;
       if (!data.fromCache) { S.definitive = true; S.stale = false; clearTimeout(timer); }
       // Una vez al abrir: borra videos que ya no usa ningún ejercicio (antes de que empieces a editar).
