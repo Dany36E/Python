@@ -2570,6 +2570,52 @@ body:has(.as-wrap) .toast.show, body:has(.alert-wrap) .toast.show { transform: t
 .tp-actions { display: flex; gap: 10px; margin-top: 16px; }
 .tp-actions .btn { flex: 1; }
 
+
+
+/* ---- Revisión de UX ---- */
+/* Abrir un plan que te mandaron */
+.tpl-open .tpl-band { font-size: 26px; }
+/* Profes con la versión anterior del plan */
+.pl-stale { margin: 2px 0 14px; padding: 14px 16px; border-radius: 18px; background: color-mix(in srgb, #E8A100 16%, var(--bg-elev)); display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.pl-stale p { flex: 1 1 240px; margin: 0; display: flex; gap: 8px; align-items: flex-start; font-weight: 600; font-size: 15px; line-height: 1.35; color: var(--label); }
+.pl-stale p svg { flex: none; margin-top: 2px; color: #B87500; }
+.pl-stale .btn { flex: none; }
+.pl-old, .pl-ok { display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 13px; font-weight: 600; }
+.pl-old { color: #A86A00; }
+.pl-ok { color: var(--label-3); font-weight: 500; }
+.pl-old svg, .pl-ok svg { font-size: 14px; flex: none; }
+.pl-teacher .cap.filled { color: var(--tint-on); }
+/* Selector de clases del plan: el número de orden en el círculo */
+.pk-ord b { font: 800 15px/1 var(--font-score); color: var(--tint-on); }
+.pk-warn { color: #A86A00; font-weight: 600; }
+/* Ejercicios: Recomendados y Entre profes debajo de la biblioteca */
+.ex-more { margin-top: 26px; }
+.ex-more .share-card { margin-top: 14px; }
+/* Más aire entre los botones principales y lo que sigue */
+.d-actions { margin-bottom: 24px; }
+/* Zonas de toque de 44 px sin cambiar cómo se ven */
+.section-head .link, .more-link, .sh-links .link, .sheet-head .cap, .sh-right .cap, .sh-left .cap, .pl-teacher .cap { position: relative; }
+.section-head .link::after, .more-link::after, .sh-right .cap::after, .sh-left .cap::after, .pl-teacher .cap::after { content: ""; position: absolute; inset: -6px -6px; }
+.chip { position: relative; }
+.chip::after { content: ""; position: absolute; inset: -3px 0; }
+.pl-btn { width: 44px; height: 44px; border-radius: 22px; }
+/* iPhone: los nombres largos de «Empezar desde» no se salen de la tarjeta */
+.from-tpl .chips.wrap .chip { max-width: 100%; height: auto; min-height: 38px; padding-top: 8px; padding-bottom: 8px; white-space: normal; text-align: left; line-height: 1.25; }
+.pl-row .t1 { white-space: normal; }
+/* Modo clase en celular: el video no se encoge a una tira y «Descanso · luego serie 2» no pisa el anillo */
+.run-media { flex-shrink: 0; }
+.rr-sub { max-width: 70%; text-align: center; line-height: 1.2; }
+/* Botones verdes claros: texto más oscuro para leerse al sol */
+:root:not([data-theme="dark"]) .btn.tinted { color: var(--tint); color: color-mix(in srgb, var(--tint) 78%, #000); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.tinted { color: var(--tint); } }
+/* En iPad el «+» dice qué crea */
+.fab-label { display: none; }
+@media (min-width: 700px) {
+  .fab { width: auto; padding: 0 24px 0 20px; border-radius: 32px; display: inline-flex; align-items: center; gap: 8px; }
+  .fab-label { display: inline; font-size: 17px; font-weight: 650; letter-spacing: 0; }
+  .fab svg { font-size: 24px; }
+}
+
 /* <respaldo-ipad-viejo> generado por tools/css-viejo.py: no editar a mano */
 @supports not (color: color-mix(in srgb, red 50%, blue)) {
   .empty-art.icon { background: rgba(var(--tint-rgb), 0.1); }

@@ -1,7 +1,7 @@
 /* Cancha — service worker: la app funciona sin conexión.
    Cada versión usa su propia caché: al publicar cambios, sube VERSION para que todos reciban
    la app completa de una sola vez (sin mezclar archivos viejos y nuevos). */
-const VERSION = 'v19';
+const VERSION = 'v20';
 const CACHE = 'cancha-' + VERSION;
 // Videos y portadas de los ejercicios de entrenador: caché aparte que no se borra al actualizar la app.
 const MEDIA = 'cancha-media-3';
@@ -45,7 +45,9 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.indexOf('/app/videos/') >= 0) { event.respondWith(mediaResponse(req, url)); return; }
   event.respondWith(
     caches.open(CACHE).then(async (cache) => {
-      const key = req.mode === 'navigate' ? './index.html' : req;
+      // Solo la app en sí sale de index.html; otras páginas (como docs/) se piden normal.
+      const appNav = req.mode === 'navigate' && /\/(index\.html)?$/.test(url.pathname);
+      const key = appNav ? './index.html' : req;
       const cached = await cache.match(key, { ignoreSearch: true });
       if (cached) return cached;
       try {
@@ -58,6 +60,25 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// La app pide guardar los videos de los recomendados (ya instalada, con internet) para usarlos sin conexión.
+self.addEventListener('message', (event) => {
+  const d = event.data || {};
+  if (d.type === 'cache-media' && Array.isArray(d.urls)) event.waitUntil(cacheMedia(d.urls.slice(0, 80)));
+});
+async function cacheMedia(urls) {
+  const cache = await caches.open(MEDIA);
+  for (const u of urls) {
+    try {
+      const url = new URL(u, self.location.href);
+      if (url.origin !== self.location.origin || url.pathname.indexOf('/app/videos/') < 0) continue;
+      const key = url.origin + url.pathname;
+      if (await cache.match(key)) continue;
+      const res = await fetch(key);
+      if (res.ok && res.status === 200) await cache.put(key, res);
+    } catch (e) { /* sin red: se intenta otro día */ }
+  }
+}
 
 // Safari pide los videos por partes (Range). Se guarda el archivo completo y se responde la parte pedida.
 async function mediaResponse(req, url) {
