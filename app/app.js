@@ -1785,7 +1785,7 @@
     let body;
     if (!S.ready) body = '<div class="list">' + [0, 1, 2].map(() => '<div class="cell"><span class="date-tile shimmer"></span><span class="txt"><span class="sk-line w60 shimmer"></span><span class="sk-line w40 shimmer"></span></span></div>').join('') + '</div>';
     else if (!list.length) {
-      body = (savedClasses().length ? savedStripHTML() : '') + (S.plans.length ? plansStripHTML() : '') + '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('futbol') + '</span></div><h2>Arma tu primera clase</h2>' +
+      body = (savedClasses().length ? savedStripHTML() : '') + plansStripHTML() + '<div class="empty"><div class="empty-art"><span class="art">' + fieldArt('futbol') + '</span></div><h2>Arma tu primera clase</h2>' +
         '<p>Elige ejercicios, ordénalos y ajusta los minutos. Luego la das con el cronómetro.</p>' +
         (S.canWrite ? '<div class="actions"><button class="btn filled" data-act="new-class">' + ic('plus') + 'Nueva clase</button>' + (CAT() ? '<button class="btn tinted" data-act="catalog">Ver clases recomendadas</button>' : '') + '</div>' : '') + '</div>';
     } else {
@@ -3285,6 +3285,8 @@
     plan.gr.copias = [];
     plan.sc.actualiza = plan.sc.actualiza.filter((x) => { const sc = getSection(x.id); return !sc || untouched(sc); });
     plan.sc.copias = [];
+    plan.pl.actualiza = plan.pl.actualiza.concat(plan.pl.copias);
+    plan.pl.copias = [];
     // Las clases que ya no vienen (el jefe cambió días o fechas) y que el maestro no tocó, se quitan.
     const incoming = new Set((m.classes || []).map((c) => c && c.id));
     const stale = cur ? realClasses().filter((c) => c.planId === rec.id && c.date >= t && !incoming.has(c.id) && !touched(c)) : [];
@@ -5871,15 +5873,17 @@
       replaceLocal('sections', sec);
       await S.backend.saveSection(sec);
     }
-    for (const x of plan.pl.nuevos.concat(plan.pl.actualiza)) {
+    for (const x of plan.pl.nuevos.concat(plan.pl.actualiza, plan.pl.copias)) {
       const pl = plain(x);
-      pl.syncedAt = pl.updatedAt;
+      // Las clases guardadas que llegaron como copia (los dos las cambiaron) son las que usa el plan que llega.
+      pl.classIds = (pl.classIds || []).map((y) => clRe[y] || y);
+      if (plan.pl.copias.indexOf(x) >= 0) { pl.id = uid(); pl.name = pl.name + ' (copia)'; delete pl.received; pl.updatedAt = now; } else pl.syncedAt = pl.updatedAt;
       replaceLocal('plans', pl);
       await S.backend.savePlan(pl);
     }
     if (m.from) (m.exercises || []).forEach((x) => { if (x && isId(x.id) && exIds.indexOf(exRe[x.id] || x.id) < 0 && getEx(exRe[x.id] || x.id)) exIds.push(exRe[x.id] || x.id); });
     renderAll(); refreshScreens();
-    return { ex: nEx, cl: nCl, gr: nGr, pl: plan.pl.nuevos.length + plan.pl.actualiza.length, exIds };
+    return { ex: nEx, cl: nCl, gr: nGr, pl: plan.pl.nuevos.length + plan.pl.actualiza.length + plan.pl.copias.length, exIds };
   }
 
   // --- Apariencia: «Automático» sigue al iPad (modo oscuro de noche si así está); «Claro» y «Oscuro» la fijan.
