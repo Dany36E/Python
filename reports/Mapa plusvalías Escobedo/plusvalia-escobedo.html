@@ -1,0 +1,1249 @@
+<title>Plusvalía en Escobedo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Leaflet 1.9.4 */
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url(images/marker-icon.png);
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+
+/* Diseño: encabezado compacto → franja de cifras municipales → mapa + panel de macrozonas (2 columnas; 1 en teléfono) → notas y fuentes */
+:root {
+  --bg: #f6f8f7;
+  --surface: #ffffff;
+  --map-bg: #eef1f0;
+  --fg: #14201e;
+  --muted: #56645f;
+  --line: #d5dddb;
+  --accent: #0f6b60;
+  --accent-ink: #ffffff;
+  --road: #9aa6a3;
+  --road-major: #5f6d6a;
+  --river: #3a86c8;
+  --boundary: #14201e;
+  --neighbor: #e2e7e5;
+  --neighbor-line: #c3ccc9;
+  --lv1: #72b9a7; --lv2: #4b9e89; --lv3: #2e806e; --lv4: #1b6155; --lv5: #0b423e;
+  --mg1: #d4a066; --mg2: #bd8147; --mg3: #a1632d; --mg4: #7f481b; --mg5: #58300c;
+  --ind: #3f4c86;
+  --svc: #0f6b60;
+  --proj: #b5541c;
+  --risk: #dc3c3d;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1413; --surface: #161d1c; --map-bg: #131918; --fg: #e5edeb; --muted: #9aa8a5; --line: #2a3533;
+    --accent: #5fc2ad; --accent-ink: #0b1a17; --road: #4d5b58; --road-major: #7f8e8b; --river: #5aa6e6;
+    --boundary: #e5edeb; --neighbor: #1a2221; --neighbor-line: #2c3735;
+    --lv1: #2a6159; --lv2: #3a8274; --lv3: #52a491; --lv4: #78c4b0; --lv5: #b0e8d9;
+    --mg1: #6e4a22; --mg2: #94652d; --mg3: #bb853d; --mg4: #dca85c; --mg5: #f4d29b;
+    --ind: #9ba7e3; --svc: #5fc2ad; --proj: #f0955a; --risk: #ff6b6b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1413; --surface: #161d1c; --map-bg: #131918; --fg: #e5edeb; --muted: #9aa8a5; --line: #2a3533;
+  --accent: #5fc2ad; --accent-ink: #0b1a17; --road: #4d5b58; --road-major: #7f8e8b; --river: #5aa6e6;
+  --boundary: #e5edeb; --neighbor: #1a2221; --neighbor-line: #2c3735;
+  --lv1: #2a6159; --lv2: #3a8274; --lv3: #52a491; --lv4: #78c4b0; --lv5: #b0e8d9;
+  --mg1: #6e4a22; --mg2: #94652d; --mg3: #bb853d; --mg4: #dca85c; --mg5: #f4d29b;
+  --ind: #9ba7e3; --svc: #5fc2ad; --proj: #f0955a; --risk: #ff6b6b;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1360px; margin: 0 auto; display: grid; gap: 18px; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: grid; gap: 4px; }
+.eyebrow { font: 500 12px/1.2 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 clamp(26px, 3.4vw, 38px)/1.08 var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.lede { margin: 4px 0 0; color: var(--muted); max-width: 72ch; }
+
+.figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.fig { background: var(--surface); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.fig b { font: 500 clamp(18px, 2vw, 22px)/1.15 var(--font-data); font-variant-numeric: tabular-nums; }
+.fig span { font-size: 13px; color: var(--muted); }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 16px; align-items: start; }
+.mapcol { display: grid; gap: 10px; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { font: 500 13px/1 var(--font-body); color: var(--fg); background: transparent; border: 0; padding: 9px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.layers { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+.layers label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 4px; }
+.layers input { accent-color: var(--accent); margin: 0; }
+.key { width: 11px; height: 11px; display: inline-block; flex: none; }
+.key.ind { background: var(--ind); border-radius: 2px; }
+.key.svc { background: var(--svc); border-radius: 50%; }
+.key.proj { background: var(--proj); transform: rotate(45deg) scale(.85); }
+.key.risk { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 11px solid var(--risk); }
+.key.via { height: 3px; width: 14px; background: var(--road-major); }
+.search { display: flex; gap: 6px; align-items: center; margin-left: auto; min-width: 0; }
+.search input { font: 14px var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 230px; max-width: 100%; }
+
+.mapbox { position: relative; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--map-bg); }
+#map { height: clamp(440px, 74vh, 820px); width: 100%; background: var(--map-bg); }
+.legend { position: absolute; left: 10px; bottom: 26px; z-index: 800; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; display: grid; gap: 4px; max-width: calc(100% - 20px); }
+.legend .ttl { font-weight: 600; }
+.legend .row { display: flex; gap: 3px; }
+.legend .row span { flex: 1; min-width: 34px; height: 10px; }
+.legend .ticks { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-family: var(--font-data); font-size: 11px; }
+.maperr { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--muted); }
+
+aside.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(clamp(440px, 74vh, 820px) + 52px); min-width: 0; }
+.panel-head { padding: 14px 16px 10px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+.panel-head h2 { font: 700 18px/1.2 var(--font-display); margin: 0; }
+.panel-head p { margin: 0; font-size: 13px; color: var(--muted); }
+.zones { overflow-y: auto; padding: 6px 0; }
+.zone { border-bottom: 1px solid var(--line); }
+.zone:last-child { border-bottom: 0; }
+.zone > button { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 16px; }
+.zone > button:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.zone > button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.zone.on > button { background: color-mix(in srgb, var(--accent) 11%, transparent); }
+.badge { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; font: 600 13px/1 var(--font-data); }
+.badge.ind { background: transparent; border: 2px dashed var(--ind); color: var(--fg); }
+.zname { font-weight: 600; font-size: 14px; line-height: 1.3; }
+.zmeta { font-size: 12.5px; color: var(--muted); margin-top: 2px; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.lvl { font: 500 11px/1 var(--font-data); color: var(--muted); white-space: nowrap; padding-top: 3px; }
+.zdetail { padding: 0 16px 14px 60px; font-size: 13.5px; display: grid; gap: 8px; }
+.zdetail[hidden] { display: none !important; }
+.zdetail h3 { font: 600 11px/1.2 var(--font-data); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 4px 0 2px; }
+.zdetail p { margin: 0; }
+.zdetail ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+.pill { display: inline-block; font: 500 11.5px/1 var(--font-data); border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; color: var(--muted); }
+
+section.notes { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px; padding-top: 6px; }
+section.notes h2 { font: 700 18px/1.2 var(--font-display); margin: 0 0 8px; }
+section.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; max-width: 70ch; }
+section.notes .src { font-size: 13px; color: var(--muted); }
+footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+
+/* Leaflet: tokens del tema */
+.leaflet-container { font: 13px/1.4 var(--font-body); background: var(--map-bg); color: var(--fg); }
+.leaflet-bar a, .leaflet-bar a:hover { background: var(--surface); color: var(--fg); border-bottom-color: var(--line); }
+.leaflet-bar { border: 1px solid var(--line) !important; box-shadow: none !important; }
+.leaflet-control-attribution { background: color-mix(in srgb, var(--surface) 85%, transparent) !important; color: var(--muted) !important; font-size: 10.5px; }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--fg); box-shadow: 0 4px 18px rgba(0,0,0,.18); border: 1px solid var(--line); }
+.leaflet-popup-content { margin: 12px 14px; font-size: 13px; line-height: 1.45; min-width: 210px; }
+.leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+.leaflet-tooltip { background: var(--surface); color: var(--fg); border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(0,0,0,.15); font-size: 12px; }
+.leaflet-tooltip-top:before { border-top-color: var(--line); }
+.pop h4 { font: 600 14px/1.25 var(--font-body); margin: 0 0 6px; }
+.pop dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; margin: 0; }
+.pop dt { color: var(--muted); }
+.pop dd { margin: 0; font-variant-numeric: tabular-nums; }
+.pop p { margin: 6px 0 0; }
+.pop .aprox { color: var(--muted); font-size: 12px; }
+.pop button { margin-top: 8px; font: 500 12.5px var(--font-body); color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+
+.pt { display: grid; place-items: center; }
+.pt i { display: block; width: 12px; height: 12px; box-shadow: 0 0 0 2px var(--surface); }
+.pt.ind i { background: var(--ind); border-radius: 2px; }
+.pt.svc i { background: var(--svc); border-radius: 50%; }
+.pt.proj i { background: var(--proj); transform: rotate(45deg); width: 11px; height: 11px; }
+.pt.risk i { width: 0; height: 0; box-shadow: none; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 14px solid var(--risk); filter: drop-shadow(0 0 1.5px var(--surface)); }
+.pt.aprox i:not(.r) { outline: 1.5px dashed var(--fg); outline-offset: 3px; }
+.zb { display: grid; place-items: center; width: 30px; height: 22px; border-radius: 6px; font: 600 12px/1 var(--font-data); color: var(--fg); background: var(--surface); border: 1.5px solid var(--fg); cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+.zb.ind { border-style: dashed; border-color: var(--ind); }
+.nb { font: 500 11px/1.1 var(--font-data); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; text-align: center; pointer-events: none; }
+.rl { font: 500 10.5px/1.1 var(--font-body); color: var(--road-major); white-space: nowrap; pointer-events: none; text-shadow: 0 0 3px var(--map-bg), 0 0 3px var(--map-bg); }
+
+@media (max-width: 960px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  aside.panel { max-height: none; }
+  .zones { overflow: visible; }
+  #map { height: clamp(380px, 62vh, 640px); }
+  .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  section.notes { grid-template-columns: minmax(0, 1fr); }
+  .search { margin-left: 0; width: 100%; }
+  .search input { flex: 1; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">General Escobedo, Nuevo León · corte al 27 nov 2026</div>
+    <h1>Plusvalía por zonas en Escobedo</h1>
+    <p class="lede">Las 302 colonias del municipio, agrupadas en siete macrozonas habitacionales y un corredor industrial. El color indica el nivel relativo de plusvalía (de 1 a 5) del reporte de investigación. Toca una zona o una colonia para ver precios, motores y riesgos.</p>
+  </header>
+
+  <div class="figures" role="list">
+    <div class="fig" role="listitem"><b>$19–24 mil/m²</b><span>Casas en Escobedo, precio de oferta 2026</span></div>
+    <div class="fig" role="listitem"><b>$3.5–4 mil/m²</b><span>Terreno habitacional, oferta 2026</span></div>
+    <div class="fig" role="listitem"><b>+9.4% · +7.5–8.3%</b><span>Índice SHF, ZM Monterrey, 2025 y 2026</span></div>
+    <div class="fig" role="listitem"><b>≈5–9% anual</b><span>Plusvalía estimada para Escobedo (sin índice oficial)</span></div>
+  </div>
+
+  <div class="layout">
+    <div class="mapcol">
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Color de las colonias">
+          <button type="button" id="modo-plus" aria-pressed="true">Nivel de plusvalía</button>
+          <button type="button" id="modo-mg" aria-pressed="false">Marginación 2020</button>
+        </div>
+        <div class="layers" role="group" aria-label="Capas">
+          <label><input type="checkbox" id="capa-ind" checked><span class="key ind"></span>Industria</label>
+          <label><input type="checkbox" id="capa-svc" checked><span class="key svc"></span>Servicios y transporte</label>
+          <label><input type="checkbox" id="capa-proj" checked><span class="key proj"></span>Proyectos</label>
+          <label><input type="checkbox" id="capa-risk" checked><span class="key risk"></span>Riesgos</label>
+          <label><input type="checkbox" id="capa-vias" checked><span class="key via"></span>Vialidades</label>
+        </div>
+        <div class="search">
+          <input id="buscar" type="search" list="lista-colonias" placeholder="Buscar colonia…" aria-label="Buscar colonia" autocomplete="off">
+          <datalist id="lista-colonias"></datalist>
+        </div>
+      </div>
+      <div class="mapbox">
+        <div id="map" role="region" aria-label="Mapa de General Escobedo"></div>
+        <div class="legend" id="leyenda"></div>
+      </div>
+    </div>
+
+    <aside class="panel" aria-label="Macrozonas">
+      <div class="panel-head">
+        <h2>Macrozonas</h2>
+        <p>Ordenadas de sur a norte. Todos los precios son de oferta (portales), no de cierre.</p>
+      </div>
+      <div class="zones" id="zonas"></div>
+    </aside>
+  </div>
+
+  <section class="notes">
+    <div>
+      <h2>Cómo leer el mapa</h2>
+      <ul>
+        <li>El <strong>nivel relativo (1–5)</strong> es una síntesis propia de precio, tendencia y riesgo; no es un índice oficial. Escobedo no aparece en los índices municipales de la SHF, así que la referencia oficial es la zona metropolitana.</li>
+        <li>Los <strong>precios son de oferta</strong> en portales inmobiliarios. “s/f” indica que la fuente no muestra fecha. No hay precios de cierre públicos por colonia.</li>
+        <li>Las colonias vienen de la capa CONAPO 2020: las privadas construidas después de 2020 no aparecen. Cada colonia se asignó a una macrozona por su ubicación (Libramiento, Río Pesquería, Carretera a Colombia y Av. De las Industrias) y por su nombre; algunas colonias de borde pueden caer en la zona vecina.</li>
+        <li>Los marcadores con <strong>contorno punteado</strong> tienen ubicación aproximada (±1–2 km). El trazo del Río Pesquería también es aproximado.</li>
+        <li>La línea naranja punteada sobre la <strong>Av. Las Torres</strong> marca el eje de los proyectos anunciados: estación del Tren del Norte y ampliación de la Línea 2 del Metro (2027–2029, sin presupuesto confirmado para la L2).</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Fuentes principales</h2>
+      <ul class="src">
+        <li>Índice SHF de Precios de la Vivienda (boletines 2024–2026) y reportes de <a href="https://inmobiliare.com/cuanto-subieron-los-inmuebles-por-estado-al-1s26-segun-el-indice-de-la-sociedad-hipotecaria-federal/" target="_blank" rel="noopener">Inmobiliare</a>.</li>
+        <li>Precios por colonia: <a href="https://propiedades.com/valores/general-escobedo/casas-venta" target="_blank" rel="noopener">propiedades.com</a>, <a href="https://mudafy.com.mx/d/valor-metro-cuadrado-monterrey" target="_blank" rel="noopener">Mudafy</a>, Lamudi, Espacio54, Mitula, Inmuebles24.</li>
+        <li>Mercado industrial: <a href="https://www.solili.mx/reporte-de-mercado/industrial/monterrey/escobedo/" target="_blank" rel="noopener">Solili</a>, Newmark, CBRE (vía <a href="https://t21.com.mx/crece-construccion-industrial-en-monterrey-en-el-3t26-manufactura-impulsa-demanda-cbre/" target="_blank" rel="noopener">T21</a>), <a href="https://investnuevoleon.com/en/industrial-parks/general-escobedo/" target="_blank" rel="noopener">Invest Nuevo León</a>.</li>
+        <li>Infraestructura y riesgos: El Financiero, ABC Noticias, Info7, Milenio, MVS Noticias, Telediario, Gobierno de Nuevo León.</li>
+        <li>Geografía: INEGI Marco Geoestadístico 2025, INEGI Red Nacional de Caminos 2023 y CONAPO, índice de marginación por colonia 2020.</li>
+      </ul>
+    </div>
+  </section>
+  <footer>Investigación con fuentes públicas consultadas hasta el 27 de noviembre de 2026. Es una guía de orientación, no un avalúo: antes de comprar, verifica precios de cierre con un valuador o notario.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const ZONAS = [
+  { id: "1", nivel: 5, nombre: "Sur-Oriente: Anáhuac–Canadá–Sendero", segmento: "Medio a medio-residencial en privadas",
+    precio: "$16,300–25,800/m²", plus: "≈7% anual",
+    precioNota: "Mediana de $16,300/m² construido en Cerradas de Anáhuac Premier (≈oct-2026); anuncios de $25,000–25,800/m² en Puerta de Anáhuac (2026). Casas de $2.6–5.2 M.",
+    plusNota: "Estimación de portal para Cerradas de Anáhuac (2026), en línea con la SHF de la ZM Monterrey (+7.5–9.4%).",
+    motores: ["Metro Sendero (Línea 2) y Transmetro", "Costco (abrió en may-2026) y Canadá City Center", "Carretera a Laredo × Concordia ampliada a 4 carriles", "Cercanía al empleo industrial de Apodaca"],
+    riesgos: ["Congestión y choques en Carretera a Laredo", "Punto inundable en Laredo / Concordia / Juárez", "Renta baja frente al precio (≈3.7–4.5% bruto)"],
+    colonias: "Cerradas, Privadas, Puerta, Quintas y Paraje de Anáhuac; Valle del Canadá; La Encomienda; Anáhuac San Patricio",
+    confianza: "Media", centro: [25.779, -100.279] },
+  { id: "2a", nivel: 4, nombre: "Sur-Centro: Raúl Salinas–Barragán (privadas)", segmento: "Económico-medio a medio",
+    precio: "$10,600–23,500/m²", plus: "≈5–7% (inferida)",
+    precioNota: "Aviana $19,201/m² construido y $28,526/m² de terreno (s/f); Nexxus Dorado $10,603/m² (s/f); Residencial Escobedo $23,526/m² (nov-2026, Mudafy).",
+    plusNota: "Sin serie por zona. Las fuentes de precio discrepan mucho; Residencial Escobedo marcó −6.5% en un mes.",
+    motores: ["Av. Raúl Salinas rehabilitada (≈190 MDP, 2025–2026)", "Acceso a Sendero y al parque Nexxus XXI", "Obra pluvial del Arroyo Potrerillos (2025)"],
+    riesgos: ["Inundación en Raúl Salinas y el Potrerillos (mitigada)", "Cruce ferroviario Raúl Salinas × Vía a Torreón"],
+    colonias: "Nexxus Residencial, Aviana, Residencial Escobedo, Los Girasoles, Jolla y Colinas de Anáhuac",
+    confianza: "Media-baja", centro: [25.783, -100.312] },
+  { id: "2b", nivel: 2, nombre: "Sur-Poniente: Infonavit y Fomerrey", segmento: "Interés social y popular",
+    precio: "≈$8,200/m²", plus: "Baja-media (inferida)",
+    precioNota: "Provileón: $8,200/m² construido (s/f, propiedades.com).",
+    plusNota: "Sin serie; poca oferta publicada en portales.",
+    motores: ["Cercanía a Sendero, Raúl Salinas y Acueducto", "Rutas de Transmetro"],
+    riesgos: ["Laderas del Topo Chico: deslaves y corrientes", "Vivienda antigua"],
+    colonias: "Provileón, Fomerrey 9 y 36, San Genaro, Felipe Carrillo Puerto, Hacienda del Topo",
+    confianza: "Baja", centro: [25.777, -100.331] },
+  { id: "3", nivel: 3, nombre: "Centro: cabecera–Las Torres", segmento: "Mixto: interés social con privadas aisladas",
+    precio: "Terreno $1,961/m²", plus: "+5.9% terreno 2025",
+    precioNota: "Terreno en el Centro: $1,961/m² (dic-2025, Lamudi). Casas en el Centro: precio medio de $2.46 M (s/f). Monterreal I: $5,800/m² (dato dudoso).",
+    plusNota: "Alza del terreno de enero a diciembre de 2025 (oferta). Subiría más si se construyen el Tren del Norte y la L2 en Las Torres (2027–2029).",
+    motores: ["Unidad de Medicina Familiar del IMSS (calle Abasolo)", "Tren del Norte y ampliación de la L2 en Av. Las Torres (anunciados)", "Parque Industrial Escobedo"],
+    riesgos: ["Inundación en el centro y en Raúl Salinas", "Deslaves en Las Torres", "Homicidio en Paseo Real (oct-2026)"],
+    colonias: "Centro, Monterreal, Monte Real, Santa Luz, Mirasur, Paseo Real, Miravista, Las Encinas, Privadas de San José",
+    confianza: "Media-baja", centro: [25.802, -100.327] },
+  { id: "4", nivel: 2, nombre: "Oriente: Carretera a Laredo–Río Pesquería", segmento: "Popular y económico",
+    precio: "≈$3,500/m² terreno (ref.)", plus: "Media-baja (inferida)",
+    precioNota: "Sin precio por colonia. Referencia municipal de terreno: $3,503/m² (feb-2026, Lamudi).",
+    plusNota: "Sin dato por zona.",
+    motores: ["Carretera a Laredo ampliada", "Cercanía a Apodaca y al Aeropuerto del Norte", "Distribuidor Triángulo Norte, si se termina"],
+    riesgos: ["Falla de los Tanques Nueva Castilla (jul-2026)", "Choques en Carretera a Laredo", "Ribera del Río Pesquería", "Triángulo Norte frenado desde abr-2026"],
+    colonias: "Nueva Castilla, Arboledas, Balcones del Norte, Los Altos, Fernando Amilpa, Las Malvinas",
+    confianza: "Baja", centro: [25.807, -100.276] },
+  { id: "5", nivel: 1, nombre: "Poniente popular: Topo Chico–San Marcos", segmento: "Popular e interés social",
+    precio: "$5,800–9,000/m²", plus: "Baja (inferida)",
+    precioNota: "Los Vergeles $5,800/m² (s/f); Villas de San Martín 2da Etapa $9,000/m² (s/f).",
+    plusNota: "Sin serie.",
+    motores: ["Areya Industrial Park (8–10 mil empleos previstos)", "Libramiento Noroeste", "Eventual estación del Tren del Norte en Las Torres"],
+    riesgos: ["Marginación media y alta", "Ribera del Pesquería y laderas del Topo Chico", "Inseguridad"],
+    colonias: "Pedregal y Laderas del Topo Chico, Nuevo Escobedo, Fomerrey 35, Ciudad San Marcos, La Unidad",
+    confianza: "Baja", centro: [25.801, -100.392] },
+  { id: "6", nivel: 1, nombre: "Norponiente: San Francisco–San Miguel–Alianza", segmento: "Interés social y económico de expansión",
+    precio: "≈$8,000/m²", plus: "Baja o estancada",
+    precioNota: "Vivienda del IVNL: ≈$800 mil por ≈100 m² (jul-2025). Villas de San Francisco: desde $690,000; también $1.5–1.6 M (s/f).",
+    plusNota: "Potencial de largo plazo, condicionado a que se ejecuten los proyectos públicos.",
+    motores: ["Hospital y Unidad Académica UANL (terreno de 75,458 m²)", "Empleo en Areya, VYNMSA y FINSA", "Ampliación del Libramiento (oct-2026)"],
+    riesgos: ["2,500–3,000 casas abandonadas", "Homicidios en Praderas de San Francisco", "Pedreras: polvo, detonaciones y casas agrietadas", "Cortes de agua; ≈31 mil viviendas nuevas planeadas al 2040"],
+    colonias: "Villas y Praderas de San Francisco, San Miguel Residencial, Alianza Real, Laderas de San Miguel",
+    confianza: "Baja", centro: [25.838, -100.393] },
+  { id: "7", nivel: 4, ind: true, nombre: "Corredor industrial: Libramiento–Periférico", segmento: "Suelo industrial y logístico",
+    precio: "$1,700–6,000/m² suelo", plus: "Suelo al alza · renta −4.9%",
+    precioNota: "Macrolotes en el Libramiento: $1,700–1,800/m² (rango $1,500–5,000). Lotes urbanizados en el Parque Industrial Escobedo: $4,800–6,000/m². Renta: US$7.01–7.03/m²/mes (ago-sep 2026).",
+    plusNota: "Catastro: +20% en 2023 y +20% en 2025. La renta industrial bajó desde US$7.90 (1T-2025) y se está estabilizando. El nivel 4 se refiere al suelo, no a la vivienda.",
+    motores: ["Nearshoring y naves a la medida", "18 parques en obra a la vez (2025)", "29% de la superficie industrial comercializada de la ZM (3T-2026)"],
+    riesgos: ["Revisión del T-MEC y aranceles", "Vacancia metropolitana de 6.1% (≈1% en 2023)", "Triángulo Norte frenado; presión sobre el agua"],
+    colonias: "Areya (Mercado Libre, Panasonic), VYNMSA I y II, Smart Park FINSA, planta International/Navistar, Stiva Jaral",
+    confianza: "Media (rentas) / baja (suelo)", centro: [25.829, -100.336] }
+];
+const NIVEL_TXT = { 1: "Baja o incierta", 2: "Baja-media", 3: "Media", 4: "Media-alta", 5: "Alta y sólida" };
+const MG = ["Muy bajo", "Bajo", "Medio", "Alto", "Muy alto"];
+
+// tipo: ind | svc | proj | risk ; aprox: ubicación con baja precisión
+const PUNTOS = [
+  { t: "ind", n: "Areya Escobedo Industrial Park", ll: [25.8106, -100.391], aprox: false, d: "≈65 ha y ≈340,000 m² rentables. Primera nave (≈70,000 m²) para Mercado Libre, entregada en jul-2026; la segunda para Panasonic." },
+  { t: "ind", n: "Parque Industrial Escobedo", ll: [25.805, -100.3508], d: "Av. De las Industrias. Lotes urbanizados ofertados en $4,800–6,000/m²." },
+  { t: "ind", n: "Parque Industrial Nexxus XXI", ll: [25.7691, -100.3075], d: "Parque consolidado junto a Av. Sendero." },
+  { t: "ind", n: "Parque Industrial Nexxus CPA", ll: [25.7818, -100.283], d: "Parque consolidado en el corredor Anáhuac." },
+  { t: "ind", n: "Parque industrial Del Norte", ll: [25.8256, -100.2658], d: "Oriente del municipio, cerca de Carretera a Laredo." },
+  { t: "ind", n: "Planta International / Navistar", ll: [25.845, -100.324], aprox: false, d: "Más de 110 ha, ≈6,200 empleos directos. Inversión de 120 mdd en pintura (2023–2026)." },
+  { t: "ind", n: "Smart Park FINSA Escobedo", ll: [25.8335, -100.3096], aprox: true, d: "15 ha en Anillo Periférico × Carretera a Monclova (anunciado en oct-2024)." },
+  { t: "ind", n: "VYNMSA Escobedo Park I", ll: [25.822, -100.3193], aprox: true, d: "Libramiento Noroeste 4001 (ubicación aproximada)." },
+  { t: "ind", n: "VYNMSA Escobedo Park II", ll: [25.8289, -100.3287], aprox: true, d: "Anillo Periférico 200 (ubicación aproximada)." },
+  { t: "ind", n: "Stiva Jaral Industrial Park", ll: [25.8513, -100.3194], aprox: true, d: "Av. El Jaral / Carretera a Monclova (ubicación aproximada)." },
+  { t: "svc", n: "Metro Sendero", ll: [25.7688, -100.2929], d: "Terminal norte de la Línea 2 y nodo de Transmetro. Es la única estación de Metro en Escobedo; las Líneas 4 y 6 no llegan al municipio." },
+  { t: "svc", n: "Costco Escobedo", ll: [25.768, -100.2905], aprox: true, d: "Av. Sendero Divisorio 751. Abrió el 14-may-2026: más de 100 mdd y ≈2,000 empleos." },
+  { t: "svc", n: "Canadá City Center", ll: [25.7705, -100.2975], aprox: true, d: "Centro comercial en obra junto a Sendero: ≈70% de avance en ene-2026." },
+  { t: "svc", n: "Centro de Escobedo (Palacio Municipal)", ll: [25.808, -100.3226], d: "Cabecera municipal. El IMSS aprobó una nueva Unidad de Medicina Familiar en la calle Abasolo." },
+  { t: "proj", n: "Hospital Universitario y Unidad Académica UANL", ll: [25.8337, -100.3671], aprox: true, d: "Concesión de 75,458 m² en Villas de San Francisco (sep-2026). El proyecto ejecutivo apenas inicia y la inversión no está definida." },
+  { t: "proj", n: "Distribuidor vial Triángulo Norte", ll: [25.8313, -100.2576], d: "Carretera a Laredo × Libramiento. Obra estatal de 300 MDP frenada desde abr-2026; faltan ≈243 MDP." },
+  { t: "risk", n: "Paso Cucharas: inundación", ll: [25.8125, -100.3591], aprox: true, d: "Protección Civil lo señala como zona inundable sobre el Río Pesquería." },
+  { t: "risk", n: "Carretera a Laredo × Concordia: inundación y tráfico", ll: [25.7857, -100.2839], d: "Punto inundable (con Av. Benito Juárez) y tramo con choques frecuentes." },
+  { t: "risk", n: "Arroyo Potrerillos", ll: [25.7923, -100.3184], aprox: true, d: "Zona inundable de Monterreal, Los Girasoles y Aviana. La obra pluvial de 2025 protege a ≈50 mil vecinos." },
+  { t: "risk", n: "Laderas del Topo Chico: deslaves", ll: [25.7985, -100.371], aprox: true, d: "Riesgo de deslaves y corrientes rápidas en temporada de lluvias." },
+  { t: "risk", n: "Pedreras de San Miguel", ll: [25.8439, -100.4164], aprox: true, d: "Polvo, detonaciones y casas agrietadas. Una pedrera fue clausurada en oct-2025." },
+  { t: "risk", n: "Vivienda abandonada: Praderas y Villas de San Francisco", ll: [25.8193, -100.4129], aprox: true, d: "Se estiman 2,500–3,000 casas abandonadas en Escobedo, concentradas aquí y en San Miguel." },
+  { t: "risk", n: "Tanques Nueva Castilla: cortes de agua", ll: [25.8162, -100.2727], aprox: true, d: "Una falla eléctrica en jul-2026 dejó sin agua a 192 colonias de cinco municipios." }
+];
+const TIPO_TXT = { ind: "Industria", svc: "Servicios y transporte", proj: "Proyecto", risk: "Riesgo" };
+
+const byId = Object.fromEntries(ZONAS.map(z => [z.id, z]));
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = n => n == null ? "—" : n.toLocaleString("es-MX");
+let mode = "plus";
+let selected = null;
+let api = null; // funciones del mapa, si Leaflet cargó
+
+/* ---------- Panel de macrozonas ---------- */
+function renderPanel() {
+  const box = document.getElementById("zonas");
+  box.innerHTML = ZONAS.map(z => `
+    <div class="zone" data-z="${z.id}">
+      <button type="button" aria-expanded="false" aria-controls="zd-${z.id}">
+        <span class="badge ${z.ind ? "ind" : ""}" data-lv="${z.nivel}">${z.id}</span>
+        <span><span class="zname">${esc(z.nombre)}</span>
+          <span class="zmeta" style="display:block">${esc(z.precio)} · ${esc(z.plus)}</span></span>
+        <span class="lvl">nivel ${z.nivel}/5</span>
+      </button>
+      <div class="zdetail" id="zd-${z.id}" hidden>
+        <div><span class="pill">${esc(z.segmento)}</span> <span class="pill">Confianza: ${esc(z.confianza)}</span></div>
+        <div><h3>Precio de referencia</h3><p>${esc(z.precioNota)}</p></div>
+        <div><h3>Plusvalía</h3><p><strong>${esc(z.plus)}</strong>. ${esc(z.plusNota)}</p></div>
+        <div><h3>Motores</h3><ul>${z.motores.map(m => `<li>${esc(m)}</li>`).join("")}</ul></div>
+        <div><h3>Riesgos</h3><ul>${z.riesgos.map(m => `<li>${esc(m)}</li>`).join("")}</ul></div>
+        <div><h3>${z.ind ? "Parques y anclas" : "Colonias representativas"}</h3><p>${esc(z.colonias)}</p></div>
+      </div>
+    </div>`).join("");
+  box.querySelectorAll(".zone > button").forEach(b => b.addEventListener("click", () => {
+    const id = b.parentElement.dataset.z;
+    selectZone(selected === id ? null : id, true);
+  }));
+  paintBadges();
+}
+function paintBadges() {
+  document.querySelectorAll(".badge[data-lv]").forEach(el => {
+    if (el.classList.contains("ind")) return;
+    const lv = +el.dataset.lv;
+    el.style.background = css("--lv" + lv);
+    const darkTheme = getComputedStyle(document.documentElement).colorScheme.includes("dark");
+    el.style.color = darkTheme ? (lv >= 3 ? "#0b1a17" : "#e5edeb") : (lv >= 3 ? "#ffffff" : "#0b1f1c");
+  });
+}
+function selectZone(id, fly) {
+  selected = id;
+  document.querySelectorAll(".zone").forEach(el => {
+    const on = el.dataset.z === id;
+    el.classList.toggle("on", on);
+    el.querySelector("button").setAttribute("aria-expanded", on ? "true" : "false");
+    el.querySelector(".zdetail").hidden = !on;
+  });
+  if (id) {
+    const el = document.querySelector(`.zone[data-z="${id}"]`);
+    if (el && window.matchMedia("(min-width: 961px)").matches) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+  if (api) api.onSelect(id, fly);
+}
+
+/* ---------- Leyenda ---------- */
+function renderLegend() {
+  const el = document.getElementById("leyenda");
+  if (mode === "plus") {
+    el.innerHTML = `<div class="ttl">Nivel relativo de plusvalía</div>
+      <div class="row">${[1, 2, 3, 4, 5].map(i => `<span style="background:${css("--lv" + i)}" title="${i}: ${NIVEL_TXT[i]}"></span>`).join("")}</div>
+      <div class="ticks"><span>1 baja</span><span>3 media</span><span>5 alta</span></div>`;
+  } else {
+    el.innerHTML = `<div class="ttl">Grado de marginación 2020 (CONAPO)</div>
+      <div class="row">${MG.map((m, i) => `<span style="background:${css("--mg" + (i + 1))}" title="${m}"></span>`).join("")}</div>
+      <div class="ticks"><span>Muy bajo</span><span>Medio</span><span>Muy alto</span></div>`;
+  }
+}
+
+/* ---------- Mapa ---------- */
+async function initMap() {
+  if (!window.L) throw new Error("Leaflet no cargó");
+  const res = await fetch("capas.json");
+  if (!res.ok) throw new Error("No se pudieron leer las capas");
+  const data = await res.json();
+
+  const map = L.map("map", { zoomSnap: 0.25, zoomDelta: 0.5, minZoom: 11, maxZoom: 17, attributionControl: true });
+  map.attributionControl.setPrefix(false);
+  map.attributionControl.addAttribution("INEGI 2025 · CONAPO 2020 · INEGI RNC 2023");
+  [["vecinos", 300], ["colonias", 400], ["corredor", 410], ["vias", 420], ["limite", 430], ["etiquetas", 450], ["zbadges", 640]]
+    .forEach(([n, z]) => { map.createPane(n).style.zIndex = z; });
+  map.getPane("etiquetas").style.pointerEvents = "none";
+
+  // Municipios vecinos
+  const vecinos = L.geoJSON(data.vecinos.map(v => ({ type: "Feature", properties: { n: v.n }, geometry: v.g })),
+    { pane: "vecinos", interactive: false, style: () => ({ color: css("--neighbor-line"), weight: 1, fillColor: css("--neighbor"), fillOpacity: 1 }) }).addTo(map);
+  data.vecinos.forEach(v => L.marker(v.c, { pane: "etiquetas", interactive: false, keyboard: false,
+    icon: L.divIcon({ className: "nb", html: esc(v.n), iconSize: [160, 14], iconAnchor: [80, 7] }) }).addTo(map));
+
+  // Colonias
+  const fillFor = p => mode === "plus" ? css("--lv" + byId[p.z].nivel) : (MG.indexOf(p.mg) >= 0 ? css("--mg" + (MG.indexOf(p.mg) + 1)) : css("--neighbor"));
+  const colStyle = f => {
+    const dim = selected && (selected === "7" || f.properties.z !== selected);
+    return { color: css("--map-bg"), weight: 0.7, fillColor: fillFor(f.properties), fillOpacity: dim ? 0.22 : 0.92 };
+  };
+  const colIndex = new Map();
+  const colonias = L.geoJSON({ type: "FeatureCollection", features: data.colonias }, {
+    pane: "colonias", style: colStyle,
+    onEachFeature: (f, layer) => {
+      const p = f.properties, z = byId[p.z];
+      const key = p.n.toLowerCase();
+      if (!colIndex.has(key)) colIndex.set(key, []);
+      colIndex.get(key).push(layer);
+      layer.bindTooltip(`${esc(p.n)} · zona ${z.id}`, { sticky: true, direction: "top", offset: [0, -6] });
+      layer.bindPopup(() => `<div class="pop"><h4>${esc(p.n)}</h4><dl>
+        <dt>Macrozona</dt><dd>${z.id} · ${esc(z.nombre)}</dd>
+        <dt>Nivel</dt><dd>${z.nivel}/5 · ${NIVEL_TXT[z.nivel]}</dd>
+        <dt>Precio ref.</dt><dd>${esc(z.precio)}</dd>
+        <dt>Población 2020</dt><dd>${fmt(p.pob)}</dd>
+        <dt>Marginación</dt><dd>${esc(p.mg || "—")}</dd>
+        <dt>C.P.</dt><dd>${esc(p.cp || "—")}</dd></dl>
+        <button type="button" data-zone="${z.id}">Ver zona ${z.id}</button></div>`);
+      layer.on("mouseover", () => { layer.setStyle({ color: css("--fg"), weight: 2 }); layer.bringToFront(); });
+      layer.on("mouseout", () => colonias.resetStyle(layer));
+    }
+  }).addTo(map);
+
+  // Corredor industrial (zona 7)
+  const corredor = L.geoJSON(data.corredor, { pane: "corredor",
+    style: () => ({ color: css("--ind"), weight: 2, dashArray: "6 5", fillColor: css("--ind"), fillOpacity: selected === "7" ? 0.22 : 0.06 }) })
+    .bindTooltip("Zona 7 · Corredor industrial Libramiento–Periférico", { sticky: true })
+    .on("click", () => selectZone("7", false)).addTo(map);
+
+  // Vialidades y río
+  const vias = L.layerGroup().addTo(map);
+  const roadStyle = f => {
+    const n = f.properties.n, t = f.properties.t;
+    if (t === "rio") return { color: css("--river"), weight: 2, dashArray: "3 5", opacity: 0.9 };
+    if (/Las Torres/.test(n)) return { color: css("--proj"), weight: 3.2, dashArray: "8 6", opacity: 1 };
+    if (t === "carretera") return { color: css("--road-major"), weight: 2.6, opacity: 0.95 };
+    return { color: css("--road"), weight: 1.5, opacity: 0.95 };
+  };
+  const viasGeo = L.geoJSON({ type: "FeatureCollection", features: data.vialidades }, {
+    pane: "vias", style: roadStyle,
+    onEachFeature: (f, layer) => {
+      const n = f.properties.n;
+      const tip = /Las Torres/.test(n) ? "Av. Las Torres: eje de proyectos anunciados (estación del Tren del Norte y ampliación de la L2)" : n;
+      layer.bindTooltip(esc(tip), { sticky: true });
+    }
+  }).addTo(vias);
+  const RL = { "Libramiento Noroeste": [25.8195, -100.336], "Anillo Periférico del AMM": [25.8395, -100.272], "Carretera a Laredo (Fed. 85)": [25.795, -100.271], "Carretera a Colombia (NL-1)": [25.84, -100.2965], "Av. Las Torres": [25.8015, -100.3625] };
+  const RLTXT = { "Libramiento Noroeste": "Libramiento Noroeste", "Anillo Periférico del AMM": "Anillo Periférico", "Carretera a Laredo (Fed. 85)": "Carr. a Laredo", "Carretera a Colombia (NL-1)": "Carr. a Colombia", "Av. Las Torres": "Av. Las Torres" };
+  Object.entries(RL).forEach(([k, ll]) => L.marker(ll, { pane: "etiquetas", interactive: false, keyboard: false,
+    icon: L.divIcon({ className: "rl", html: RLTXT[k], iconSize: [120, 14], iconAnchor: [0, 7] }) }).addTo(vias));
+
+  // Límite municipal
+  const limite = L.geoJSON(data.limite, { pane: "limite", interactive: false,
+    style: () => ({ color: css("--boundary"), weight: 2.2, fill: false }) }).addTo(map);
+
+  // Puntos
+  const grupos = { ind: L.layerGroup(), svc: L.layerGroup(), proj: L.layerGroup(), risk: L.layerGroup() };
+  PUNTOS.forEach(p => {
+    const icon = L.divIcon({ className: `pt ${p.t}${p.aprox ? " aprox" : ""}`, html: "<i></i>", iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -8] });
+    L.marker(p.ll, { icon, title: p.n, alt: p.n, riseOnHover: true })
+      .bindPopup(`<div class="pop"><h4>${esc(p.n)}</h4><p>${esc(p.d)}</p>
+        <p class="aprox">${TIPO_TXT[p.t]}${p.aprox ? " · ubicación aproximada (±1–2 km)" : ""}</p></div>`)
+      .addTo(grupos[p.t]);
+  });
+  Object.values(grupos).forEach(g => g.addTo(map));
+
+  // Etiquetas de macrozona
+  ZONAS.forEach(z => {
+    L.marker(z.centro, { pane: "zbadges", title: `Zona ${z.id}: ${z.nombre}`, keyboard: true,
+      icon: L.divIcon({ className: "", html: `<span class="zb ${z.ind ? "ind" : ""}">${z.id}</span>`, iconSize: [30, 22], iconAnchor: [15, 11] }) })
+      .on("click", () => selectZone(selected === z.id ? null : z.id, false)).addTo(map);
+  });
+
+  const home = limite.getBounds();
+  map.fitBounds(home, { padding: [14, 14] });
+  map.setMaxBounds(home.pad(0.7));
+
+  // Buscador
+  const names = [...new Set(data.colonias.map(f => f.properties.n))].sort((a, b) => a.localeCompare(b, "es"));
+  document.getElementById("lista-colonias").innerHTML = names.map(n => `<option value="${esc(n)}"></option>`).join("");
+  const buscar = document.getElementById("buscar");
+  const go = () => {
+    const layers = colIndex.get(buscar.value.trim().toLowerCase());
+    if (!layers) return;
+    const b = L.featureGroup(layers).getBounds();
+    map.fitBounds(b, { maxZoom: 15.5, padding: [40, 40] });
+    layers[0].openPopup(b.getCenter());
+  };
+  buscar.addEventListener("change", go);
+  buscar.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+
+  // Capas
+  const toggle = (id, layer) => document.getElementById(id).addEventListener("change", e => e.target.checked ? layer.addTo(map) : layer.remove());
+  toggle("capa-ind", grupos.ind); toggle("capa-svc", grupos.svc); toggle("capa-proj", grupos.proj); toggle("capa-risk", grupos.risk); toggle("capa-vias", vias);
+
+  map.on("popupopen", e => {
+    const btn = e.popup.getElement().querySelector("[data-zone]");
+    if (btn) btn.addEventListener("click", () => { map.closePopup(); selectZone(btn.dataset.zone, true); });
+  });
+
+  const restyle = () => {
+    colonias.setStyle(colStyle); corredor.setStyle(corredor.options.style()); viasGeo.setStyle(roadStyle);
+    limite.setStyle(limite.options.style()); vecinos.setStyle(vecinos.options.style());
+  };
+  api = {
+    restyle,
+    onSelect(id, fly) {
+      restyle();
+      if (!fly) return;
+      if (!id) { map.flyToBounds(home, { padding: [14, 14], duration: 0.6 }); return; }
+      const b = id === "7" ? corredor.getBounds() : L.featureGroup(colonias.getLayers().filter(l => l.feature.properties.z === id)).getBounds();
+      map.flyToBounds(b, { padding: [30, 30], maxZoom: 15, duration: 0.6 });
+    }
+  };
+  restyle();
+}
+
+/* ---------- Arranque ---------- */
+function setMode(m) {
+  mode = m;
+  document.getElementById("modo-plus").setAttribute("aria-pressed", m === "plus");
+  document.getElementById("modo-mg").setAttribute("aria-pressed", m === "mg");
+  renderLegend();
+  if (api) api.restyle();
+}
+document.getElementById("modo-plus").addEventListener("click", () => setMode("plus"));
+document.getElementById("modo-mg").addEventListener("click", () => setMode("mg"));
+
+renderPanel();
+renderLegend();
+// Estado inicial: todas las zonas coloreadas y la ficha de la zona 1 abierta
+(() => { const el = document.querySelector('.zone[data-z="1"]'); el.querySelector("button").setAttribute("aria-expanded", "true"); el.querySelector(".zdetail").hidden = false; })();
+initMap().catch(err => {
+  const box = document.querySelector(".mapbox");
+  box.insertAdjacentHTML("beforeend", `<div class="maperr">No se pudo dibujar el mapa (${esc(err.message)}). La información de cada macrozona sigue disponible en el panel.</div>`);
+});
+
+const onTheme = () => { paintBadges(); renderLegend(); if (api) api.restyle(); };
+try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onTheme); } catch (e) {}
+new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
