@@ -1,0 +1,2700 @@
+[
+ {
+  "name": "Centro de Escobedo / Palacio Municipal (punto INEGI de la cabecera)",
+  "type": "landmark",
+  "lat": 25.80799,
+  "lng": -100.32264,
+  "confidence": "media",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "INEGI ubica la localidad 190210001 (Cd. General Escobedo, 454,967 hab.) en este punto, normalmente la plaza principal/palacio. Domicilio exacto del Palacio no verificado; el Registro Civil de la cabecera está en Benito Juárez 110, CP 66050.",
+  "sector_inferido": "Centro"
+ },
+ {
+  "name": "Centro de Gral. Escobedo (colonia)",
+  "type": "residencial",
+  "lat": 25.80874,
+  "lng": -100.32638,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Centro de Gral Escobedo"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 5839,
+  "area_ha": 125.8,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro",
+  "nota": null
+ },
+ {
+  "name": "Privadas de Anáhuac (5 sectores)",
+  "type": "residencial",
+  "lat": 25.77854,
+  "lng": -100.27804,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 5 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Privadas de Anahuac Sector Español",
+   "Privadas de Anahuac, Sector Frances",
+   "Privadas de Anahuac, Sector Ingles",
+   "Privadas de Anahuac, Sector Irlandes",
+   "Privadas de Anahuac, Sector Mediterraneo"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 4081,
+  "area_ha": 69.0,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Puerta de Anáhuac (4 privadas)",
+  "type": "residencial",
+  "lat": 25.79366,
+  "lng": -100.28322,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 4 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Puerta de Anahuac, Privada del  Abeto",
+   "Puerta de Anahuac, Privada del Cipres",
+   "Puerta de Anahuac, Privada del Nogal",
+   "Puerta de Anahuac, Privada del Roble"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 477,
+  "area_ha": 33.1,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Anáhuac San Patricio",
+  "type": "residencial",
+  "lat": 25.78812,
+  "lng": -100.29567,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Anahuac San Patricio",
+   "Anahuac San Patricio Sector San Marcos"
+  ],
+  "cp": [
+   "66058"
+  ],
+  "pob_2020": 668,
+  "area_ha": 19.4,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Villas de Anáhuac",
+  "type": "residencial",
+  "lat": 25.77051,
+  "lng": -100.28481,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Villas de Anahuac",
+   "Villas de Anahuac Sector Alpes"
+  ],
+  "cp": [
+   "66059"
+  ],
+  "pob_2020": 711,
+  "area_ha": 13.9,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Colinas de Anáhuac (3 sectores)",
+  "type": "residencial",
+  "lat": 25.773,
+  "lng": -100.32468,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 3 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Colinas de Anahuac 1Er Sector",
+   "Colinas de Anahuac 2Do Sector",
+   "Colinas de Anahuac 3Er Sector"
+  ],
+  "cp": [
+   "66056"
+  ],
+  "pob_2020": 5051,
+  "area_ha": 64.0,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Jolla de Anáhuac (sectores Florencia, Nápoles, Venecia)",
+  "type": "residencial",
+  "lat": 25.777,
+  "lng": -100.31336,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 3 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Jolla de Anahuac Sector Florencia",
+   "Jolla de Anahuac Sector Napoles",
+   "Jolla de Anahuac Sector Venecia"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 4241,
+  "area_ha": 35.8,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": "CONAPO escribe \"Jolla\". Distinto de \"Joyas de Anáhuac\" (CP 66054, junto a Av. Sendero/Carretera Laredo, donde está el Costco); ver nota."
+ },
+ {
+  "name": "Cerradas de Anáhuac",
+  "type": "residencial",
+  "lat": 25.77393,
+  "lng": -100.27215,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Cerradas de Anahuac",
+   "Cerradas de Anahuac Sector Contemporaneo"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 4800,
+  "area_ha": 52.2,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Misión Anáhuac (3 sectores)",
+  "type": "residencial",
+  "lat": 25.78178,
+  "lng": -100.27081,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 3 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Mision  Anahuac 3Er Sector",
+   "Mision Anahuac 1Er Sector",
+   "Mision Anahuac 2Do Sector"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2593,
+  "area_ha": 29.6,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Anáhuac La Pérgola / Madeira / Campoamor / Premier",
+  "type": "residencial",
+  "lat": 25.78743,
+  "lng": -100.27955,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 4 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Anahuac Campoamor",
+   "Anahuac La Pergola",
+   "Anahuac Madeira",
+   "Anahuac Premier"
+  ],
+  "cp": [
+   "66050",
+   "66054",
+   "66059"
+  ],
+  "pob_2020": 4301,
+  "area_ha": 70.5,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Calzada de Anáhuac",
+  "type": "residencial",
+  "lat": 25.79005,
+  "lng": -100.27586,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Calzada de Anahuac"
+  ],
+  "cp": [
+   "66059"
+  ],
+  "pob_2020": 1476,
+  "area_ha": 18.3,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Paraje Anáhuac",
+  "type": "residencial",
+  "lat": 25.78714,
+  "lng": -100.27125,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Paraje Anahuac"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2175,
+  "area_ha": 20.8,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Quintas de Anáhuac",
+  "type": "residencial",
+  "lat": 25.78171,
+  "lng": -100.27416,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Quintas de Anahuac"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 1157,
+  "area_ha": 13.4,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Balcones de Anáhuac (I-III)",
+  "type": "residencial",
+  "lat": 25.76566,
+  "lng": -100.3238,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 3 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Balcones de Anahuac Ii",
+   "Balcones de Anahuac Iii",
+   "Balcones de Anahuac"
+  ],
+  "cp": [
+   "66056",
+   "66422"
+  ],
+  "pob_2020": 5564,
+  "area_ha": 30.4,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur (límite San Nicolás)",
+  "nota": "Un polígono tiene CP 66422 (San Nicolás) y área ~0; posible artefacto de la capa."
+ },
+ {
+  "name": "La Encomienda (9 sectores)",
+  "type": "residencial",
+  "lat": 25.77399,
+  "lng": -100.28105,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 9 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "La Encomienda Sector Cañaverales",
+   "La Encomienda Sector Corona de Castilla",
+   "La Encomienda Sector de Las Misiones",
+   "La Encomienda Sector La Labranza",
+   "La Encomienda Sector La Vendimia",
+   "La Encomienda Sector Molino del Rey",
+   "La Encomienda Sector Nuevo Mundo",
+   "La Encomienda Sector Palacio Real",
+   "La Encomienda Sector Paseo de Los Encomendados"
+  ],
+  "cp": [
+   "66050",
+   "66054"
+  ],
+  "pob_2020": 2820,
+  "area_ha": 55.6,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Hacienda Los Cantú",
+  "type": "residencial",
+  "lat": 25.775,
+  "lng": -100.26828,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Hacienda Los Cantu 1Er Sector",
+   "Hacienda Los Cantu 2Do Sector"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 1743,
+  "area_ha": 17.5,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Valle de las Palmas",
+  "type": "residencial",
+  "lat": 25.78281,
+  "lng": -100.2682,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 3 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Valle de Las Palmas 1Er Sector",
+   "Valle de Las Palmas 2Do Palmas",
+   "Valles de Las Palmas 4To Sector"
+  ],
+  "cp": [
+   "66612",
+   "66635"
+  ],
+  "pob_2020": 4980,
+  "area_ha": 0.2,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Oriente",
+  "nota": "Polígonos con CP de Apodaca (6661x/6663x) y área ~0 en la capa; verificar."
+ },
+ {
+  "name": "Hacienda El Canadá (Ex-Hacienda)",
+  "type": "residencial",
+  "lat": 25.78195,
+  "lng": -100.28988,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Hacienda El Canada (Ex - Hacienda El Canada)",
+   "Infonavit Ex - Hacienda El Canada"
+  ],
+  "cp": [
+   "66054"
+  ],
+  "pob_2020": 1209,
+  "area_ha": 43.4,
+  "grado_marginacion_2020": [
+   "Medio",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur (corredor Sendero/Canadá)",
+  "nota": null
+ },
+ {
+  "name": "Valle del Canadá",
+  "type": "residencial",
+  "lat": 25.7735,
+  "lng": -100.28718,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Valle del Canada"
+  ],
+  "cp": [
+   "66059"
+  ],
+  "pob_2020": 2437,
+  "area_ha": 48.8,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Desarrollo Urbano El Canadá (reserva / sitio Canadá City Center)",
+  "type": "residencial",
+  "lat": 25.77342,
+  "lng": -100.29904,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Desarrollo Urbano El Canada"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2251,
+  "area_ha": 180.6,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur (corredor Sendero/Canadá)",
+  "nota": null
+ },
+ {
+  "name": "Privadas del Canadá (Montreal, Toronto, Ontario, Quebec, Vancouver)",
+  "type": "residencial",
+  "lat": 25.79142,
+  "lng": -100.27186,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 5 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Privadas del Canada, Sector Estancias Montreal",
+   "Privadas del Canada, Sector Estancias Toronto",
+   "Privadas del Canada, Sector Ontario",
+   "Privadas del Canada, Sector Quebec",
+   "Privadas del Canada, Sector Vancouver"
+  ],
+  "cp": [
+   "66059"
+  ],
+  "pob_2020": 753,
+  "area_ha": 29.5,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente (Anáhuac)",
+  "nota": null
+ },
+ {
+  "name": "Jardines del Canadá",
+  "type": "residencial",
+  "lat": 25.79902,
+  "lng": -100.30662,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Jardines del Canada"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 3071,
+  "area_ha": 31.3,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Sur",
+  "nota": null
+ },
+ {
+  "name": "Nexxus Residencial (7 sectores)",
+  "type": "residencial",
+  "lat": 25.77278,
+  "lng": -100.31059,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 7 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Nexxus Residencial Sector Cristal",
+   "Nexxus Residencial Sector Diamante",
+   "Nexxus Residencial Sector Dorado",
+   "Nexxus Residencial Sector Esmeralda",
+   "Nexxus Residencial Sector Platino",
+   "Nexxus Residencial Sector Rubi",
+   "Nexxus Residencial Sector Zafiro"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2219,
+  "area_ha": 46.4,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur",
+  "nota": null
+ },
+ {
+  "name": "Puerta del Norte",
+  "type": "residencial",
+  "lat": 25.7752,
+  "lng": -100.29049,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Puerta del Norte"
+  ],
+  "cp": [
+   "66054"
+  ],
+  "pob_2020": 1933,
+  "area_ha": 43.7,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur (corredor Sendero/Canadá)",
+  "nota": null
+ },
+ {
+  "name": "Las Hadas",
+  "type": "residencial",
+  "lat": 25.78506,
+  "lng": -100.29524,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Las Hadas"
+  ],
+  "cp": [
+   "66058"
+  ],
+  "pob_2020": 1678,
+  "area_ha": 21.3,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Sur",
+  "nota": null
+ },
+ {
+  "name": "Hacienda de Escobedo",
+  "type": "residencial",
+  "lat": 25.7835,
+  "lng": -100.30527,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Hacienda de Escobedo"
+  ],
+  "cp": [
+   "66057"
+  ],
+  "pob_2020": 3189,
+  "area_ha": 48.1,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Sur",
+  "nota": null
+ },
+ {
+  "name": "Privada Residencial Aviana / Cerradas Aviana",
+  "type": "residencial",
+  "lat": 25.79357,
+  "lng": -100.31264,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Cerradas Aviana Sector Alondra",
+   "Privada Residencial Aviana"
+  ],
+  "cp": [
+   "66056",
+   "66057"
+  ],
+  "pob_2020": 3999,
+  "area_ha": 46.7,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Sur",
+  "nota": null
+ },
+ {
+  "name": "Residencial Escobedo",
+  "type": "residencial",
+  "lat": 25.78827,
+  "lng": -100.30863,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Residencial Escobedo"
+  ],
+  "cp": [
+   "66057"
+  ],
+  "pob_2020": 3000,
+  "area_ha": 21.6,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Sur",
+  "nota": null
+ },
+ {
+  "name": "Los Girasoles (4 sectores) y Rivera/Valle/Praderas de Girasoles",
+  "type": "residencial",
+  "lat": 25.78619,
+  "lng": -100.32375,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 8 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Los Girasoles 1Er Sector",
+   "Los Girasoles 2Do Sector",
+   "Los Girasoles 3Er Sector",
+   "Los Girasoles 4To Sector",
+   "Praderas de Girasoles",
+   "Rivera de Los Girasoles 1Er Sector",
+   "Rivera de Los Girasoles 2Do Sector",
+   "Valle de Los Girasoles"
+  ],
+  "cp": [
+   "66050",
+   "66056"
+  ],
+  "pob_2020": 10463,
+  "area_ha": 105.0,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Sur",
+  "nota": null
+ },
+ {
+  "name": "Topo Grande",
+  "type": "residencial",
+  "lat": 25.78278,
+  "lng": -100.314,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Topo Grande",
+   "Topo Grande"
+  ],
+  "cp": [
+   "66056"
+  ],
+  "pob_2020": 4643,
+  "area_ha": 30.1,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Sur",
+  "nota": null
+ },
+ {
+  "name": "Felipe Carrillo Puerto (Infonavit)",
+  "type": "residencial",
+  "lat": 25.78135,
+  "lng": -100.3217,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Felipe Carrillo Puerto Infonavit"
+  ],
+  "cp": [
+   "66055"
+  ],
+  "pob_2020": 8667,
+  "area_ha": 51.3,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Celestino Gasca",
+  "type": "residencial",
+  "lat": 25.77273,
+  "lng": -100.31851,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Celestino Gasca"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 5579,
+  "area_ha": 66.8,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Lomas de San Genaro / Infonavit San Genaro",
+  "type": "residencial",
+  "lat": 25.77881,
+  "lng": -100.33534,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 5 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Infonavit San Genaro (La Cima)",
+   "Lomas de San Genaro (San Genaro 3Er Sector)",
+   "Lomas de San Genaro 1Er Sector",
+   "Lomas de San Genaro 2Do Sector",
+   "Lomas de San Genaro 3Er Sector"
+  ],
+  "cp": [
+   "66050",
+   "66073"
+  ],
+  "pob_2020": 11495,
+  "area_ha": 77.7,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Provileón (Alfonso Martínez Domínguez)",
+  "type": "residencial",
+  "lat": 25.78657,
+  "lng": -100.33602,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Provileon (Alfonso Martinez Dominguez)"
+  ],
+  "cp": [
+   "66073"
+  ],
+  "pob_2020": 7276,
+  "area_ha": 69.1,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Hacienda del Topo",
+  "type": "residencial",
+  "lat": 25.78798,
+  "lng": -100.33048,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Hacienda del Topo"
+  ],
+  "cp": [
+   "66072"
+  ],
+  "pob_2020": 4250,
+  "area_ha": 27.7,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Monte Real",
+  "type": "residencial",
+  "lat": 25.79946,
+  "lng": -100.32172,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Monte Real"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 1652,
+  "area_ha": 11.6,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Centro",
+  "nota": null
+ },
+ {
+  "name": "Monterreal (Infonavit)",
+  "type": "residencial",
+  "lat": 25.79663,
+  "lng": -100.31784,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Monterreal (Infonavit)"
+  ],
+  "cp": [
+   "66056"
+  ],
+  "pob_2020": 7177,
+  "area_ha": 50.1,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Centro",
+  "nota": null
+ },
+ {
+  "name": "Santa Luz",
+  "type": "residencial",
+  "lat": 25.79889,
+  "lng": -100.34447,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Santa Luz 1Er Sector"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 4478,
+  "area_ha": 38.8,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Mirasur / Villas de Mirasur",
+  "type": "residencial",
+  "lat": 25.79689,
+  "lng": -100.34173,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Mirasur",
+   "Villas de Mirasur"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 6821,
+  "area_ha": 68.6,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Paseo Real",
+  "type": "residencial",
+  "lat": 25.79794,
+  "lng": -100.33519,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Paseo Real"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 3428,
+  "area_ha": 32.2,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Brianzzas Residencial",
+  "type": "residencial",
+  "lat": 25.80408,
+  "lng": -100.33854,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Brianzzas Residencial",
+   "Brianzzas Residencial 2Do Sector"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2295,
+  "area_ha": 32.9,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Bosques de Escobedo",
+  "type": "residencial",
+  "lat": 25.803,
+  "lng": -100.33702,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Bosques de Escobedo",
+   "Bosques de Escobedo 2Do Sector"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 1923,
+  "area_ha": 18.2,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Pedregal de San Agustín",
+  "type": "residencial",
+  "lat": 25.7933,
+  "lng": -100.34989,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Pedregal de San Agustin"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 3357,
+  "area_ha": 26.8,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Las Encinas / Rincón de las Encinas",
+  "type": "residencial",
+  "lat": 25.80377,
+  "lng": -100.31002,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Las Encinas",
+   "Rincon de  Las Encinas"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 7495,
+  "area_ha": 91.5,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro",
+  "nota": null
+ },
+ {
+  "name": "Jardines de Escobedo (sectores 1-2)",
+  "type": "residencial",
+  "lat": 25.79964,
+  "lng": -100.31826,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Jardines de Escobedo 1Er Sector",
+   "Jardines de Escobedo 2Do Sector"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 3799,
+  "area_ha": 25.8,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro",
+  "nota": null
+ },
+ {
+  "name": "Miravista (3 sectores)",
+  "type": "residencial",
+  "lat": 25.80531,
+  "lng": -100.31417,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 4 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Miravista 1Er Sector",
+   "Miravista 2Do Sector",
+   "Miravista 3Er Sector",
+   "Rincon de Miravista"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2774,
+  "area_ha": 27.7,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro",
+  "nota": null
+ },
+ {
+  "name": "Privadas del Sauce",
+  "type": "residencial",
+  "lat": 25.81672,
+  "lng": -100.30962,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Privadas del Sauce",
+   "Privadas del Sauce 2Do Sector"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2620,
+  "area_ha": 84.3,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Norte",
+  "nota": null
+ },
+ {
+  "name": "Los Altos (polígono principal, 117 ha)",
+  "type": "residencial",
+  "lat": 25.79777,
+  "lng": -100.28643,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 3 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Los Altos",
+   "Los Altos",
+   "Los Altos"
+  ],
+  "cp": [
+   "66050",
+   "66614"
+  ],
+  "pob_2020": 2208,
+  "area_ha": 118.7,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Medio"
+  ],
+  "sector_inferido": "Oriente (Río Pesquería)",
+  "nota": "La capa tiene 3 polígonos \"Los Altos\"; el grande (CP 66050) está en 25.7977,-100.2866; dos pequeños (CP 66614) junto al límite con Apodaca (~25.803,-100.262)."
+ },
+ {
+  "name": "Fernando Amilpa / Río Pesquería (Fernando Amilpa)",
+  "type": "residencial",
+  "lat": 25.80151,
+  "lng": -100.27213,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Fernando Amilpa",
+   "Rio Pesqueria (Fernando Amilpa)"
+  ],
+  "cp": [
+   "66050",
+   "66052"
+  ],
+  "pob_2020": 11826,
+  "area_ha": 174.2,
+  "grado_marginacion_2020": [
+   "Medio",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Oriente (Río Pesquería)",
+  "nota": null
+ },
+ {
+  "name": "Las Malvinas",
+  "type": "residencial",
+  "lat": 25.79668,
+  "lng": -100.29537,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Las Malvinas"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 1899,
+  "area_ha": 26.3,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Oriente (Río Pesquería)",
+  "nota": null
+ },
+ {
+  "name": "Lázaro Cárdenas",
+  "type": "residencial",
+  "lat": 25.78905,
+  "lng": -100.2988,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Lazaro Cardenas",
+   "Lazaro Cardenas"
+  ],
+  "cp": [
+   "66050",
+   "66058"
+  ],
+  "pob_2020": 4334,
+  "area_ha": 86.8,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Oriente",
+  "nota": null
+ },
+ {
+  "name": "Nueva Castilla",
+  "type": "residencial",
+  "lat": 25.81735,
+  "lng": -100.27293,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Nueva Castilla"
+  ],
+  "cp": [
+   "66052"
+  ],
+  "pob_2020": 188,
+  "area_ha": 135.5,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Norte-Oriente (Carretera Laredo)",
+  "nota": null
+ },
+ {
+  "name": "Arboledas de Escobedo",
+  "type": "residencial",
+  "lat": 25.81397,
+  "lng": -100.26679,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Arboledas de Escobedo"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 3062,
+  "area_ha": 50.9,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Norte-Oriente (Carretera Laredo)",
+  "nota": null
+ },
+ {
+  "name": "Balcones del Norte",
+  "type": "residencial",
+  "lat": 25.8092,
+  "lng": -100.26334,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Balcones del Norte",
+   "Balcones del Norte"
+  ],
+  "cp": [
+   "66050",
+   "66613"
+  ],
+  "pob_2020": 4061,
+  "area_ha": 22.3,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Muy bajo"
+  ],
+  "sector_inferido": "Oriente",
+  "nota": null
+ },
+ {
+  "name": "Agropecuaria Emiliano Zapata (Col. Nueva Esperanza, oriente)",
+  "type": "residencial",
+  "lat": 25.81521,
+  "lng": -100.28549,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Agropecuaria Emiliano Zapata (Col Nueva Esperanza)"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 5397,
+  "area_ha": 429.4,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Norte-Oriente (Carretera Colombia)",
+  "nota": null
+ },
+ {
+  "name": "Raúl Caballero (Unión de Agrop. Lázaro Cárdenas)",
+  "type": "residencial",
+  "lat": 25.81527,
+  "lng": -100.30003,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Raul Caballero (Union de Agrop Lazaro Cardenas)"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2202,
+  "area_ha": 244.5,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Norte (Carretera Colombia)",
+  "nota": null
+ },
+ {
+  "name": "U de A y S Andrés Caballero Moreno",
+  "type": "residencial",
+  "lat": 25.83791,
+  "lng": -100.30036,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "U de A Y S Andres Caballero Moreno"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 931,
+  "area_ha": 311.8,
+  "grado_marginacion_2020": [
+   "Alto"
+  ],
+  "sector_inferido": "Norte (Carretera Colombia)",
+  "nota": null
+ },
+ {
+  "name": "Unión de Colonos Benito Juárez",
+  "type": "residencial",
+  "lat": 25.82013,
+  "lng": -100.33885,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Union de Colonos Benito Juarez"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 8105,
+  "area_ha": 847.6,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Centro-Norte (entre Las Torres y Libramiento)",
+  "nota": null
+ },
+ {
+  "name": "Pedregal del Topo Chico",
+  "type": "residencial",
+  "lat": 25.80019,
+  "lng": -100.36216,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Pedregal del Topo Chico",
+   "Pedregal del Topo Chico"
+  ],
+  "cp": [
+   "66061"
+  ],
+  "pob_2020": 10949,
+  "area_ha": 195.4,
+  "grado_marginacion_2020": [
+   "Alto",
+   "Medio"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "Nuevo Escobedo",
+  "type": "residencial",
+  "lat": 25.79904,
+  "lng": -100.37785,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Nuevo Escobedo",
+   "Nuevo Escobedo"
+  ],
+  "cp": [
+   "66063",
+   "66064"
+  ],
+  "pob_2020": 4900,
+  "area_ha": 35.4,
+  "grado_marginacion_2020": [
+   "Medio",
+   "Muy alto"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "Fomerrey 35 (Tierra Propia)",
+  "type": "residencial",
+  "lat": 25.79487,
+  "lng": -100.37858,
+  "confidence": "media",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Fomerrey 35 (Tierra Propia)"
+  ],
+  "cp": [
+   "64229"
+  ],
+  "pob_2020": 7184,
+  "area_ha": 0.1,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": "Polígono de área ~0 y CP 64229 en la capa: centroide aproximado."
+ },
+ {
+  "name": "Fomerrey 36",
+  "type": "residencial",
+  "lat": 25.77534,
+  "lng": -100.33035,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Fomerrey 36"
+  ],
+  "cp": [
+   "66075"
+  ],
+  "pob_2020": 4169,
+  "area_ha": 27.4,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Fomerrey 9 (Solidaridad Social)",
+  "type": "residencial",
+  "lat": 25.78462,
+  "lng": -100.32839,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Fomerrey 9 (Solidaridad Social)"
+  ],
+  "cp": [
+   "66073"
+  ],
+  "pob_2020": 4292,
+  "area_ha": 34.3,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Sur-Poniente",
+  "nota": null
+ },
+ {
+  "name": "Fomerrey 129 (Mirador San Nicolás)",
+  "type": "residencial",
+  "lat": 25.7642,
+  "lng": -100.31965,
+  "confidence": "media",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Fomerrey 129 (Mirador San Nicolas)"
+  ],
+  "cp": [
+   "66079"
+  ],
+  "pob_2020": 3591,
+  "area_ha": 0.0,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Sur (límite San Nicolás)",
+  "nota": "Polígono de área ~0 en la capa."
+ },
+ {
+  "name": "CROC",
+  "type": "residencial",
+  "lat": 25.79353,
+  "lng": -100.37377,
+  "confidence": "media",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "Monterrey",
+  "dist_limite_escobedo_m": 1,
+  "colonias_conapo": [
+   "Croc"
+  ],
+  "cp": [
+   "64200"
+  ],
+  "pob_2020": 16320,
+  "area_ha": 0.0,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": "Polígono de área ~0 (CP 64200) en la capa."
+ },
+ {
+  "name": "Colinas / Laderas del Topo Chico",
+  "type": "residencial",
+  "lat": 25.79655,
+  "lng": -100.37265,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 4 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Colinas del Topo Chico",
+   "Colinas del Topo Chico",
+   "Laderas del Topo Chico",
+   "Laderas del Topo Chico"
+  ],
+  "cp": [
+   "66065"
+  ],
+  "pob_2020": 3538,
+  "area_ha": 46.8,
+  "grado_marginacion_2020": [
+   "Alto",
+   "Medio"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "Serranías",
+  "type": "residencial",
+  "lat": 25.80166,
+  "lng": -100.36759,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Serranias",
+   "Serranias 3Er Sector"
+  ],
+  "cp": [
+   "66061"
+  ],
+  "pob_2020": 2728,
+  "area_ha": 21.6,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "Gloria Mendiola",
+  "type": "residencial",
+  "lat": 25.80909,
+  "lng": -100.37881,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Gloria Mendiola"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 3344,
+  "area_ha": 181.7,
+  "grado_marginacion_2020": [
+   "Alto"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "San Martín (Rancho) / Jardines de San Martín",
+  "type": "residencial",
+  "lat": 25.80716,
+  "lng": -100.37024,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Jardines de San Martin",
+   "San Martin (Rancho)"
+  ],
+  "cp": [
+   "66050",
+   "66061"
+  ],
+  "pob_2020": 1855,
+  "area_ha": 61.9,
+  "grado_marginacion_2020": [
+   "Medio",
+   "Muy alto"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "Eulalio Villarreal / Santa Lucía / San Isidro Labrador",
+  "type": "residencial",
+  "lat": 25.80264,
+  "lng": -100.37133,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 4 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Eulalio Villarreal",
+   "Eulalio Villarreal",
+   "San Isidro Labrador",
+   "Santa Lucia"
+  ],
+  "cp": [
+   "66050",
+   "66063"
+  ],
+  "pob_2020": 5423,
+  "area_ha": 41.4,
+  "grado_marginacion_2020": [
+   "Alto",
+   "Medio"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "Santa Martha / Nueva Esperanza (poniente) / La Concordia",
+  "type": "residencial",
+  "lat": 25.80046,
+  "lng": -100.39049,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 3 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "La Concordia",
+   "Nueva Esperanza",
+   "Santa Martha"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 13367,
+  "area_ha": 91.8,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Medio"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "Valle de San Francisco",
+  "type": "residencial",
+  "lat": 25.80686,
+  "lng": -100.39501,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Valle de San Francisco"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 4971,
+  "area_ha": 44.0,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Poniente",
+  "nota": null
+ },
+ {
+  "name": "Ciudad San Marcos / San Marcos III-IV",
+  "type": "residencial",
+  "lat": 25.80201,
+  "lng": -100.40839,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 5 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Anahuac San Patricio Sector San Marcos",
+   "Ciudad de San Marcos, Sector Pioneros",
+   "Ciudad San Marcos 2Do Sector",
+   "San Marcos Iii",
+   "San Marcos Iv del Parque 2Do Sector"
+  ],
+  "cp": [
+   "66050",
+   "66058",
+   "66064"
+  ],
+  "pob_2020": 7443,
+  "area_ha": 61.5,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Poniente (límite García)",
+  "nota": null
+ },
+ {
+  "name": "La Unidad",
+  "type": "residencial",
+  "lat": 25.79502,
+  "lng": -100.41559,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "La Unidad"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 9683,
+  "area_ha": 67.6,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Poniente (límite García)",
+  "nota": null
+ },
+ {
+  "name": "Portal del Fraile",
+  "type": "residencial",
+  "lat": 25.79936,
+  "lng": -100.41193,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Portal del Fraile"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2745,
+  "area_ha": 20.1,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Poniente (límite García)",
+  "nota": null
+ },
+ {
+  "name": "Villa de San Martín",
+  "type": "residencial",
+  "lat": 25.79367,
+  "lng": -100.41918,
+  "confidence": "media",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Villa de San Martin",
+   "Villa de San Martin"
+  ],
+  "cp": [
+   "66000",
+   "66050"
+  ],
+  "pob_2020": 2695,
+  "area_ha": 6.2,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Poniente (límite García)",
+  "nota": null
+ },
+ {
+  "name": "Rivera de los Naranjos / Riveras del Río (Río Pesquería poniente)",
+  "type": "residencial",
+  "lat": 25.79315,
+  "lng": -100.39412,
+  "confidence": "media",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Rivera de Los Naranjos",
+   "Riveras del Rio"
+  ],
+  "cp": [
+   "64000",
+   "66050"
+  ],
+  "pob_2020": 10981,
+  "area_ha": 29.8,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Poniente (límite García)",
+  "nota": "Posible equivalente a \"Riberas\" solicitado; \"Riveras del Río\" tiene área ~0 en la capa."
+ },
+ {
+  "name": "Privadas de Camino Real (I)",
+  "type": "residencial",
+  "lat": 25.80844,
+  "lng": -100.39113,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Privadas de Camino Real"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 1694,
+  "area_ha": 16.3,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Poniente (Libramiento)",
+  "nota": null
+ },
+ {
+  "name": "Praderas de San Francisco",
+  "type": "residencial",
+  "lat": 25.81936,
+  "lng": -100.41209,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Praderas de San Francisco"
+  ],
+  "cp": [
+   "66085"
+  ],
+  "pob_2020": 15426,
+  "area_ha": 119.6,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Norponiente (Libramiento/Periférico)",
+  "nota": null
+ },
+ {
+  "name": "Villas de San Francisco (1er y 2do sector)",
+  "type": "residencial",
+  "lat": 25.83474,
+  "lng": -100.3671,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Villas de San Francisco",
+   "Villas de San Francisco 2Do Sector"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 15607,
+  "area_ha": 123.1,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Norte (entre Libramiento y Periférico)",
+  "nota": null
+ },
+ {
+  "name": "San Miguel Residencial",
+  "type": "residencial",
+  "lat": 25.83535,
+  "lng": -100.37171,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "San Miguel Residencial"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 12393,
+  "area_ha": 136.1,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Norte (Periférico)",
+  "nota": null
+ },
+ {
+  "name": "Alianza Real (Nuevo León Estado de Progreso)",
+  "type": "residencial",
+  "lat": 25.84634,
+  "lng": -100.39161,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Nuevo Leon Estado de Progreso (Alianza Real)",
+   "Nuevo Leon Estado de Progreso (Alianza Real)"
+  ],
+  "cp": [
+   "66050",
+   "66084"
+  ],
+  "pob_2020": 29330,
+  "area_ha": 167.3,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Norponiente (Distrito Norponiente / La Alianza)",
+  "nota": null
+ },
+ {
+  "name": "Laderas de San Miguel",
+  "type": "residencial",
+  "lat": 25.84403,
+  "lng": -100.40599,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Laderas de San Miguel"
+  ],
+  "cp": [
+   "66084"
+  ],
+  "pob_2020": 6206,
+  "area_ha": 60.2,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Norponiente",
+  "nota": null
+ },
+ {
+  "name": "Hacienda San Miguel, Sector Palmiras",
+  "type": "residencial",
+  "lat": 25.84323,
+  "lng": -100.42538,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Hacienda San Miguel, Sector Palmiras"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 2810,
+  "area_ha": 25.1,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Norponiente",
+  "nota": null
+ },
+ {
+  "name": "Portal de San Francisco (3 sectores)",
+  "type": "residencial",
+  "lat": 25.84196,
+  "lng": -100.41099,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 3 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Portal de San Francisco Sector 20 de Noviembre",
+   "Portal de San Francisco Sector Constitucion",
+   "Portal de San Francisco Sector San Miguel"
+  ],
+  "cp": [
+   "66084"
+  ],
+  "pob_2020": 2469,
+  "area_ha": 22.5,
+  "grado_marginacion_2020": [
+   "Bajo",
+   "Medio"
+  ],
+  "sector_inferido": "Norponiente",
+  "nota": null
+ },
+ {
+  "name": "Privadas de Camino Real II",
+  "type": "residencial",
+  "lat": 25.8415,
+  "lng": -100.40057,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Privadas de Camino Real Ii"
+  ],
+  "cp": [
+   "66084"
+  ],
+  "pob_2020": 5681,
+  "area_ha": 29.7,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Norponiente",
+  "nota": null
+ },
+ {
+  "name": "Hacienda La Providencia",
+  "type": "residencial",
+  "lat": 25.84207,
+  "lng": -100.3768,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Hacienda La Providencia"
+  ],
+  "cp": [
+   "66062"
+  ],
+  "pob_2020": 2151,
+  "area_ha": 26.4,
+  "grado_marginacion_2020": [
+   "Bajo"
+  ],
+  "sector_inferido": "Norte",
+  "nota": null
+ },
+ {
+  "name": "Puerta del Sol (Alianza)",
+  "type": "residencial",
+  "lat": 25.84482,
+  "lng": -100.40355,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Puerta del Sol"
+  ],
+  "cp": [
+   "66084"
+  ],
+  "pob_2020": 1749,
+  "area_ha": 9.2,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Norponiente",
+  "nota": null
+ },
+ {
+  "name": "Privadas Querétaro",
+  "type": "residencial",
+  "lat": 25.85054,
+  "lng": -100.38665,
+  "confidence": "media",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Privadas Queretaro"
+  ],
+  "cp": [
+   "66084"
+  ],
+  "pob_2020": 381,
+  "area_ha": 0.2,
+  "grado_marginacion_2020": [
+   "Medio"
+  ],
+  "sector_inferido": "Norponiente",
+  "nota": null
+ },
+ {
+  "name": "Paso de Cucharas (Progreso)",
+  "type": "residencial",
+  "lat": 25.81366,
+  "lng": -100.3568,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Paso de Cucharas (Progreso)"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 611,
+  "area_ha": 96.8,
+  "grado_marginacion_2020": [
+   "Alto"
+  ],
+  "sector_inferido": "Centro-Norte",
+  "nota": null
+ },
+ {
+  "name": "Parque Industrial Escobedo (Escobedo I y II, Av. De las Industrias)",
+  "type": "industrial",
+  "lat": 25.80504,
+  "lng": -100.35083,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 2 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Escobedo I",
+   "Escobedo Ii"
+  ],
+  "cp": [
+   "66062"
+  ],
+  "pob_2020": 1327,
+  "area_ha": 230.1,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Centro-Poniente (industrial)",
+  "nota": "Clasificado \"Parque industrial\" por CONAPO; calles Industria del Latón/Cobre/Aluminio/Vidrio en INEGI RNC confirman."
+ },
+ {
+  "name": "Parque Industrial Nexxus XXI",
+  "type": "industrial",
+  "lat": 25.7691,
+  "lng": -100.30754,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Nexxus Xxi"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 1704,
+  "area_ha": 38.2,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur",
+  "nota": null
+ },
+ {
+  "name": "Parque Industrial Nexxus CPA",
+  "type": "industrial",
+  "lat": 25.78178,
+  "lng": -100.28298,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Nexxus Cpa"
+  ],
+  "cp": [
+   "66050"
+  ],
+  "pob_2020": 209,
+  "area_ha": 18.1,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Sur-Oriente",
+  "nota": null
+ },
+ {
+  "name": "Parque industrial \"Del Norte\" (CONAPO)",
+  "type": "industrial",
+  "lat": 25.82559,
+  "lng": -100.2658,
+  "confidence": "alta",
+  "source": "CONAPO, Índice de marginación por colonia 2020 (capa colonias_escobedo) vía GitHub Raul-QU/Marginacion_colonias_Monterrey — centroide del polígono (unión de 1 polígono/s)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "colonias_conapo": [
+   "Del Norte"
+  ],
+  "cp": [
+   "66615"
+  ],
+  "pob_2020": 552,
+  "area_ha": 12.5,
+  "grado_marginacion_2020": [
+   "Muy bajo"
+  ],
+  "sector_inferido": "Norte-Oriente (Carretera Laredo)",
+  "nota": "Nombre en capa: \"Del Norte\", clase Parque industrial, CP 66615."
+ },
+ {
+  "name": "Planta Navistar Escobedo (localidad INEGI \"Navistar\")",
+  "type": "industrial",
+  "lat": 25.84503,
+  "lng": -100.32398,
+  "confidence": "media",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "Localidad INEGI 190210158 \"Navistar\" (0 hab.). Planta de ensamble con >110 ha según Navistar/medios.",
+  "sector_inferido": "Norte (Carretera Monclova/Periférico)"
+ },
+ {
+  "name": "Stiva Jaral Industrial Park (aprox., Av. El Jaral / Carretera a Monclova)",
+  "type": "industrial",
+  "lat": 25.85134,
+  "lng": -100.31938,
+  "confidence": "baja",
+  "source": "Ubicación de \"Avenida El Jaral\" en INEGI RNC 2023; ProMéxico Industry describe Stiva Jaral sobre Carretera a Monclova (88 ha). El punto cae en El Carmen, junto al límite norte de Escobedo.",
+  "municipio_segun_poligono_inegi": "El Carmen",
+  "dist_limite_escobedo_m": 277,
+  "sector_inferido": "Norte (límite El Carmen)"
+ },
+ {
+  "name": "Metro Sendero / nodo Sendero–Carretera a Colombia–Carretera a Laredo",
+  "type": "infraestructura",
+  "lat": 25.76881,
+  "lng": -100.29287,
+  "confidence": "alta",
+  "source": "OpenStreetMap nodo de estación (export Overpass en GitHub alvaropg5/proyecto_IA, paradas.json)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "Terminal norte de Línea 2."
+ },
+ {
+  "name": "Canadá City Center (proyecto; Av. Sendero entre Carretera Colombia y Nueva Escocia)",
+  "type": "comercial",
+  "lat": 25.769,
+  "lng": -100.296,
+  "confidence": "media",
+  "source": "Ubicación descrita por Posta/Publimetro (Av. Sendero entre Carretera Colombia y Nueva Escocia); calle Nueva Escocia localizada en INEGI RNC 2023 (25.7673–25.7726, -100.2986/-100.2926).",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "Proyecto de centro comercial (~70% de avance en ene-2026 según Publimetro)."
+ },
+ {
+  "name": "Costco Sendero Escobedo (Av. Sendero Divisorio 751, Joyas de Anáhuac, CP 66054)",
+  "type": "comercial",
+  "lat": 25.768,
+  "lng": -100.2905,
+  "confidence": "baja",
+  "source": "Domicilio según Players of Life (may-2026); polígono SEPOMEX del CP 66054 (open-mexico/mexico-geojson) solo toca Av. Sendero entre -100.2939 y -100.2910.",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "Posición estimada ±300 m."
+ },
+ {
+  "name": "Plaza Sendero Escobedo (aprox., corredor Av. Sendero junto a Metro Sendero)",
+  "type": "comercial",
+  "lat": 25.77,
+  "lng": -100.2915,
+  "confidence": "baja",
+  "source": "Wikipedia (lista de Plaza Sendero) confirma sucursal en Escobedo; listados inmobiliarios la ubican cerca de Costco Escobedo. Domicilio exacto no verificado.",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "Posición estimada ±500 m; verificar."
+ },
+ {
+  "name": "Metro Santiago Tapia (Línea 2)",
+  "type": "infraestructura",
+  "lat": 25.75937,
+  "lng": -100.29565,
+  "confidence": "alta",
+  "source": "OpenStreetMap nodo de estación (export Overpass en GitHub alvaropg5/proyecto_IA, paradas.json)",
+  "municipio_segun_poligono_inegi": "San Nicolás de los Garza",
+  "dist_limite_escobedo_m": 813
+ },
+ {
+  "name": "Metro San Nicolás (Línea 2)",
+  "type": "infraestructura",
+  "lat": 25.75267,
+  "lng": -100.29804,
+  "confidence": "alta",
+  "source": "OpenStreetMap nodo de estación (export Overpass en GitHub alvaropg5/proyecto_IA, paradas.json)",
+  "municipio_segun_poligono_inegi": "San Nicolás de los Garza",
+  "dist_limite_escobedo_m": 1476
+ },
+ {
+  "name": "Metro Anáhuac (Línea 2)",
+  "type": "infraestructura",
+  "lat": 25.73985,
+  "lng": -100.30263,
+  "confidence": "alta",
+  "source": "OpenStreetMap nodo de estación (export Overpass en GitHub alvaropg5/proyecto_IA, paradas.json)",
+  "municipio_segun_poligono_inegi": "San Nicolás de los Garza",
+  "dist_limite_escobedo_m": 2743
+ },
+ {
+  "name": "Metro Universidad (Línea 2)",
+  "type": "infraestructura",
+  "lat": 25.72438,
+  "lng": -100.30821,
+  "confidence": "alta",
+  "source": "OpenStreetMap nodo de estación (export Overpass en GitHub alvaropg5/proyecto_IA, paradas.json)",
+  "municipio_segun_poligono_inegi": "San Nicolás de los Garza",
+  "dist_limite_escobedo_m": 4285
+ },
+ {
+  "name": "Metro Talleres (Línea 1 (terminal norte))",
+  "type": "infraestructura",
+  "lat": 25.75922,
+  "lng": -100.36844,
+  "confidence": "alta",
+  "source": "OpenStreetMap nodo de estación (export Overpass en GitHub alvaropg5/proyecto_IA, paradas.json)",
+  "municipio_segun_poligono_inegi": "Monterrey",
+  "dist_limite_escobedo_m": 2623
+ },
+ {
+  "name": "Metro San Bernabé (Línea 1)",
+  "type": "infraestructura",
+  "lat": 25.74841,
+  "lng": -100.36168,
+  "confidence": "alta",
+  "source": "OpenStreetMap nodo de estación (export Overpass en GitHub alvaropg5/proyecto_IA, paradas.json)",
+  "municipio_segun_poligono_inegi": "Monterrey",
+  "dist_limite_escobedo_m": 2655
+ },
+ {
+  "name": "Cerro del Topo Chico (cima)",
+  "type": "landmark",
+  "lat": 25.77333,
+  "lng": -100.34972,
+  "confidence": "media",
+  "source": "Wikipedia (en) / DBpedia: 25°46′24″N 100°20′59″W, 1,178 m",
+  "municipio_segun_poligono_inegi": "Monterrey",
+  "dist_limite_escobedo_m": 181,
+  "nota": "Mountain-forecast redondea a 25.77,-100.35."
+ },
+ {
+  "name": "Aeropuerto Internacional del Norte (NTR/MMAN)",
+  "type": "infraestructura",
+  "lat": 25.86556,
+  "lng": -100.23806,
+  "confidence": "media",
+  "source": "Wikipedia (en, vía espejo): 25°51′56″N 100°14′17″W; Helis: 25°51′56.16″N 100°14′13.2″W",
+  "municipio_segun_poligono_inegi": "General Zuazua",
+  "dist_limite_escobedo_m": 3998,
+  "nota": "Fuera del polígono INEGI de Escobedo (en Apodaca), al oriente de Carretera a Laredo."
+ },
+ {
+  "name": "Localidad INEGI: San Miguel de los Garza (397 hab.)",
+  "type": "landmark",
+  "lat": 25.83041,
+  "lng": -100.41551,
+  "confidence": "alta",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "ambito": "RURAL"
+ },
+ {
+  "name": "Localidad INEGI: Unión Agropecuarios Lázaro Cárdenas del Norte (1,397 hab.)",
+  "type": "landmark",
+  "lat": 25.83222,
+  "lng": -100.38437,
+  "confidence": "alta",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "ambito": "RURAL"
+ },
+ {
+  "name": "Localidad INEGI: Monclova Primer Sector (1,682 hab.)",
+  "type": "landmark",
+  "lat": 25.81449,
+  "lng": -100.40207,
+  "confidence": "alta",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "ambito": "RURAL"
+ },
+ {
+  "name": "Localidad INEGI: Monclova Segundo Sector (1,226 hab.)",
+  "type": "landmark",
+  "lat": 25.81559,
+  "lng": -100.39644,
+  "confidence": "alta",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "ambito": "RURAL"
+ },
+ {
+  "name": "Localidad INEGI: Unión de Colonos Santana (91 hab.)",
+  "type": "landmark",
+  "lat": 25.83794,
+  "lng": -100.42437,
+  "confidence": "alta",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "ambito": "RURAL"
+ },
+ {
+  "name": "Localidad INEGI: Palmiras (4,076 hab.)",
+  "type": "residencial",
+  "lat": 25.84444,
+  "lng": -100.42403,
+  "confidence": "alta",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "ambito": "URBANO"
+ },
+ {
+  "name": "Localidad INEGI: Praderas de San Francisco (17,284 hab.)",
+  "type": "residencial",
+  "lat": 25.81854,
+  "lng": -100.40247,
+  "confidence": "alta",
+  "source": "INEGI Marco Geoestadístico 2025, localidades (AGLOC 19021) — coordenada oficial de la localidad",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "ambito": "URBANO"
+ },
+ {
+  "name": "Cruce Libramiento Noroeste × Carretera a Colombia",
+  "type": "infraestructura",
+  "lat": 25.82561,
+  "lng": -100.29566,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Anillo Periférico × Carretera a Colombia",
+  "type": "infraestructura",
+  "lat": 25.83446,
+  "lng": -100.2955,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Libramiento Noroeste × Av. Raúl Salinas Lozano",
+  "type": "infraestructura",
+  "lat": 25.81762,
+  "lng": -100.34748,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Entronque Carretera a Laredo × Carretera a Monclova",
+  "type": "infraestructura",
+  "lat": 25.80291,
+  "lng": -100.27618,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Anillo Periférico × Carretera a Monclova",
+  "type": "infraestructura",
+  "lat": 25.83352,
+  "lng": -100.30963,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Anillo Periférico × Libramiento Norte (poniente)",
+  "type": "infraestructura",
+  "lat": 25.81765,
+  "lng": -100.39601,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Av. Sendero × Av. Raúl Salinas Lozano",
+  "type": "infraestructura",
+  "lat": 25.76478,
+  "lng": -100.31545,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Av. Sendero × Av. Manuel L. Barragán",
+  "type": "infraestructura",
+  "lat": 25.766,
+  "lng": -100.30548,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Av. Las Torres × Av. Raúl Caballero Escamilla",
+  "type": "infraestructura",
+  "lat": 25.79268,
+  "lng": -100.32299,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Av. Las Torres × Av. Raúl Salinas Lozano",
+  "type": "infraestructura",
+  "lat": 25.80609,
+  "lng": -100.34204,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Av. La Concordia × Carretera a Colombia",
+  "type": "infraestructura",
+  "lat": 25.78655,
+  "lng": -100.29273,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "Cruce Av. Benito Juárez × Carretera a Colombia",
+  "type": "infraestructura",
+  "lat": 25.78154,
+  "lng": -100.29233,
+  "confidence": "alta",
+  "source": "Cruce calculado con ejes de INEGI Red Nacional de Caminos 2023 (CentroGeo/RedNacionalCaminos_2019_2023)",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0
+ },
+ {
+  "name": "AREYA Escobedo Industrial Park (acceso: Libramiento × Camino a Santa Engracia)",
+  "type": "industrial",
+  "lat": 25.81059,
+  "lng": -100.391,
+  "confidence": "media",
+  "source": "Cruce calculado en INEGI RNC 2023 (calle \"Santa Engracia\" × Libramiento Noroeste); ubicación textual \"Libramiento Noreste y Camino a Santa Engracia\" según notas de mercado industrial/Clúster Industrial; Mexico Business News confirma \"intersection of Libramiento Noreste and Camino Real\" (sic).",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "Parque de ~65 ha; el punto es el acceso/cruce, no el centroide del predio. \"Libramiento Noreste\" en prensa = \"Libramiento Noroeste de Monterrey\" (código 40) en INEGI.",
+  "sector_inferido": "Norte (corredor Libramiento/Periférico)"
+ },
+ {
+  "name": "Smart Park FINSA Escobedo (aprox.: Anillo Periférico × Carretera a Monclova)",
+  "type": "industrial",
+  "lat": 25.83352,
+  "lng": -100.30963,
+  "confidence": "baja",
+  "source": "Dirección \"Anillo Periférico, lotes 031 y 206\" (FINSA/Mexico Industry); cruce Periférico × Carretera a Monclova calculado con INEGI RNC 2023.",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "Ubicación sobre el Periférico no verificada con mapa; ±1–2 km.",
+  "sector_inferido": "Norte (corredor Libramiento/Periférico)"
+ },
+ {
+  "name": "VYNMSA Escobedo Park II (aprox.: Anillo Periférico 200, CP 66083)",
+  "type": "industrial",
+  "lat": 25.82895,
+  "lng": -100.32875,
+  "confidence": "baja",
+  "source": "Domicilio \"Anillo Periférico 200, C.P. 66083\" (listado citado en notas de mercado industrial); punto = tramo del Periférico (INEGI RNC) dentro del polígono SEPOMEX CP 66083 (open-mexico/mexico-geojson).",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "VYNMSA/ProMéxico también da \"Libramiento Norte 3707 Km 28+500\" para Park II: direcciones en conflicto. ±2 km.",
+  "sector_inferido": "Norte (corredor Libramiento/Periférico)"
+ },
+ {
+  "name": "VYNMSA Escobedo Park I (aprox.: \"Lib. Noreste 4001\", CP 66053)",
+  "type": "industrial",
+  "lat": 25.82196,
+  "lng": -100.31934,
+  "confidence": "baja",
+  "source": "Domicilio \"Lib. Noreste 4001, Cd. General Escobedo, 66053\" (ProMéxico Industry vía búsqueda); punto = tramo del Libramiento Noroeste (INEGI RNC) dentro del polígono SEPOMEX CP 66053.",
+  "municipio_segun_poligono_inegi": "General Escobedo",
+  "dist_limite_escobedo_m": 0,
+  "nota": "±2 km; el CP 66053 cubre ~4 km del Libramiento.",
+  "sector_inferido": "Norte (corredor Libramiento/Periférico)"
+ }
+]
